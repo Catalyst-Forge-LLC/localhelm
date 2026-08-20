@@ -1,0 +1,234 @@
+{
+  "project": {
+    "name": "LocalHelm",
+    "created": "2026-08-20",
+    "description": "Status for the products you ship. A named fleet board for git, npm, dependents, and the public shelf.",
+    "archetype": "product",
+    "status": "active"
+  },
+  "currentPhase": "1-architecture",
+  "agentContext": {
+    "primaryAgent": "cursor-agent",
+    "supportsSubagents": true,
+    "supportsPlanMode": true
+  },
+  "phases": {
+    "1-architecture": {
+      "status": "in_progress",
+      "startedAt": "2026-08-20T17:15:00Z",
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "Tech choices confirmed",
+        "Folder structure confirmed",
+        "Data model shape confirmed",
+        "First feature batch defined",
+        "Claude's understanding verified by user",
+        "PHASE_1_BRIEF.md created, complete, and locked (docs/)",
+        "Major decisions recorded in workflow_tracking.json decisions[]"
+      ],
+      "notes": [
+        {
+          "timestamp": "2026-08-20T17:15:00Z",
+          "text": "Kickoff with existing docs/GENESIS.md. Ingested into draft PHASE_1_BRIEF.md. Brief not locked. package.json is localhelm@0.0.0 (publish pending). GitHub origin pointed at Catalyst-Forge-LLC/localhelm (empty private repo)."
+        }
+      ]
+    },
+    "2-scaffolding": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "App runs with pnpm dev",
+        "Real data visible on screen",
+        "Core CRUD works",
+        "Hero flow functions end to end",
+        "CONTEXT_PROMPT.md created and populated by merging PHASE_1_BRIEF.md (then template lessons as needed)",
+        "README.md created (from ForgeTrail template)",
+        "TODO.md created (from ForgeTrail template, seeded from PHASE_1_BRIEF §11)",
+        "IDEAS.md created (from ForgeTrail template)",
+        "Phase 2 doc scope only per WORKFLOW §1a (no premature extra templates)"
+      ],
+      "notes": []
+    },
+    "3-stabilization": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "Environment variables resolve correctly",
+        "APIs return real data",
+        "Core workflow completes without infrastructure errors",
+        "Error messages are human-readable (not just status codes)"
+      ],
+      "notes": []
+    },
+    "4-feature-iteration": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "Core value proposition delivered",
+        "Hero flow works with real data including edge cases",
+        "Features tested beyond happy path"
+      ],
+      "notes": [],
+      "iterations": []
+    },
+    "5-refactoring": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "No file exceeds ~500 lines without justification",
+        "Shared utilities extracted",
+        "No duplicated patterns",
+        "Build passes after each refactor"
+      ],
+      "notes": []
+    },
+    "6-strategic-review": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "BRAND_AND_PRODUCT.md created (from ForgeTrail template)",
+        "TODO reorganized by brand value pillars",
+        "Features mapped to brand pillars",
+        "Gap between brand promise and product identified",
+        "IDEAS.md processed into TODO",
+        "Build order decided"
+      ],
+      "notes": []
+    },
+    "7-hardening": {
+      "status": "not_started",
+      "startedAt": null,
+      "completedAt": null,
+      "exitCriteriaMet": [],
+      "exitCriteriaRemaining": [
+        "CODE_QUALITY.md produced (from ForgeTrail template) and critical findings fixed",
+        "BLACK_HAT_REPORT.md produced (via ForgeTrail security audit) and critical/high findings fixed",
+        "All findings triaged into TODO.md with P0/P1/P2 priority",
+        "All LLM outputs checked against field size limits",
+        "No silent failures in core workflows (grep for empty catch blocks)",
+        "All API routes return errors in consistent format",
+        "All user input validated (centralized Zod schemas recommended)",
+        "No unvalidated as-any casts on critical paths",
+        "DEPLOYMENT.md created (from ForgeTrail template)",
+        "BUSINESS_PLAN.md created if pursuing paid users (from ForgeTrail template)",
+        "TEST_PLAN.md complete or extended (from ForgeTrail template)",
+        "TECHNICAL_REFERENCE.md complete and current",
+        "Auth flow works end to end (if applicable)",
+        "Payment flow works end to end (if applicable)",
+        "Docs alignment audit passed (via ForgeTrail docs-alignment audit)",
+        "All documentation consolidated and cross-referenced"
+      ],
+      "notes": []
+    }
+  },
+  "decisions": [
+    {
+      "id": "d1",
+      "timestamp": "2026-08-20T17:15:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "Product archetype: public local operator CLI + optional loopback dashboard; FilePress explainer site later.",
+      "rationale": "Others will install localhelm. Not an internal-only tool and not a one-shot.",
+      "alternatives_considered": ["internal-tool", "one-shot"],
+      "status": "active"
+    },
+    {
+      "id": "d2",
+      "timestamp": "2026-08-20T17:15:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "House stack: TypeScript, ESM, pnpm, Node 22+, no accounts, no telemetry.",
+      "rationale": "Genesis house defaults. Matches LocalBerth / IngotVault. Local-only product.",
+      "alternatives_considered": ["CommonJS", "npm/yarn", "hosted accounts"],
+      "status": "active"
+    },
+    {
+      "id": "d3",
+      "timestamp": "2026-08-20T17:15:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "License Apache-2.0 (proposed).",
+      "rationale": "Matches IngotVault, LocalBerth, ForgeTrail. Genesis §9 still lists MIT as the FilePress/aiBreze alternative.",
+      "alternatives_considered": ["MIT"],
+      "status": "revisit"
+    },
+    {
+      "id": "d4",
+      "timestamp": "2026-08-20T17:15:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "The tool never publishes and never force-pushes. Eligible badge only. Fetch/pull in v1; push is not a v1 action.",
+      "rationale": "House npm rule and Exec Foundry no-auto-apply line. Wrong pin across fifteen sites is worse than a missing convenience button.",
+      "alternatives_considered": ["Publish button", "Push in v1"],
+      "status": "active"
+    },
+    {
+      "id": "d5",
+      "timestamp": "2026-08-20T17:15:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "CLI name localhelm. Never helm. Public name LocalHelm.",
+      "rationale": "Kubernetes Helm / TaskHelm / iamgp/helm collisions. package.json is localhelm@0.0.0; public publish still pending.",
+      "alternatives_considered": ["getlocalhelm", "@catalyst-forge/localhelm"],
+      "status": "active"
+    },
+    {
+      "id": "d6",
+      "timestamp": "2026-08-20T17:15:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "Compose with IngotVault, LocalBerth, and FilePress siblings. Do not reimplement spare remotes, port leases, or _headers merge.",
+      "rationale": "Those tools already own those guarantees. LocalHelm is the fleet board.",
+      "alternatives_considered": ["Absorb FilePress siblings in v1", "Reimplement port leases"],
+      "status": "active"
+    },
+    {
+      "id": "d7",
+      "timestamp": "2026-08-20T17:15:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "State persistence is local files only: fleet manifest + gitignored job state. No PocketBase, no auth.",
+      "rationale": "Single-operator machine tool. Intake §7 A-local. Dashboard binds 127.0.0.1.",
+      "alternatives_considered": ["PocketBase + accounts", "Cloud fleet sync"],
+      "status": "active"
+    },
+    {
+      "id": "d8",
+      "timestamp": "2026-08-20T17:15:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "No LLM-produced product content. Inventory is read from disk, git, npm, and the catalog file.",
+      "rationale": "Genesis non-goal: no LLM choosing versions, commit messages, or which dependents to skip.",
+      "alternatives_considered": ["Runtime LLM API", "Build-time seed", "BYO-LLM paste"],
+      "status": "active"
+    }
+  ],
+  "gotchas": [],
+  "sessions": [
+    {
+      "session": 1,
+      "date": "2026-08-20",
+      "phasesWorked": ["1-architecture"],
+      "accomplished": [
+        "Reviewed README and docs/GENESIS.md",
+        "ForgeTrail kickoff files written",
+        "Draft PHASE_1_BRIEF.md from genesis",
+        "origin set to git@github.com:Catalyst-Forge-LLC/localhelm.git",
+        "package.json set to localhelm@0.0.0; public npm publish left for the operator"
+      ],
+      "leftOff": "Brief is draft. Confirm genesis proposals (especially license and remaining §9 questions) then lock PHASE_1_BRIEF before any app spine.",
+      "contextLimitHit": false
+    }
+  ]
+}

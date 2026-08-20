@@ -1,0 +1,36 @@
+{
+  "name": "localhelm",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "description": "Status for the products you ship. A named fleet of local repos: git, npm, dependents, and the public shelf.",
+  "license": "Apache-2.0",
+  "author": "Catalyst Forge, LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Catalyst-Forge-LLC/localhelm.git"
+  },
+  "homepage": "https://github.com/Catalyst-Forge-LLC/localhelm",
+  "bugs": {
+    "url": "https://github.com/Catalyst-Forge-LLC/localhelm/issues"
+  },
+  "keywords": [
+    "fleet",
+    "npm",
+    "git",
+    "local",
+    "cli",
+    "workspace"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

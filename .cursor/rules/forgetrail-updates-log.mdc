@@ -1,0 +1,30 @@
+---
+description: Keep FORGETRAIL_LITE_UPDATES.md current with protocol gaps discovered in this repo
+alwaysApply: true
+---
+
+# ForgeTrail Lite feedback log (FORGETRAIL_LITE_UPDATES.md)
+
+This repo may carry **`FORGETRAIL_LITE.md`** (upstream protocol) plus **`FORGETRAIL_LITE_UPDATES.md`** (candidate patches) under **`.forgetrail/`** (gitignored when the repo is published).
+
+## When to update `FORGETRAIL_LITE_UPDATES.md`
+
+After substantive work, if you find something that **should be fixed or clarified in ForgeTrail Lite itself** — not just this app — add or extend an entry:
+
+- Missing steps (e.g. `.env` loading, pnpm native builds, Vite monorepo `loadEnv` paths).
+- Anti-patterns Lite doesn't warn about yet.
+- Errors in the Lite defaults for **pnpm + TypeScript + monorepos** or **Cursor/agent** workflows.
+- Doc structure suggestions (which § to patch).
+
+**Do not** log routine bug fixes or product-only notes; use `.forgetrail/workflow_tracking.json → gotchas[]` for session-local incidents. **Do** log items a **future agent bootstrapping any ForgeTrail Lite project** would benefit from if the upstream file were updated.
+
+## How to write an entry
+
+1. Prefer **adding a numbered section** (or bullet under an existing section) with: what went wrong, suggested Lite change (§ reference if possible), optional project pointer.
+2. Update the **summary table** at the bottom if the topic is new.
+3. Keep tone aimed at **FORGETRAIL_LITE.md maintainers**, not end users.
+4. If the same issue is already covered, **tighten or cross-link** instead of duplicating.
+
+## This rule
+
+The feedback loop is documented in **`.forgetrail/FORGETRAIL_LITE.md` §1.6** when Lite is present — so humans know why the file stays locally.
