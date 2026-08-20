@@ -30,7 +30,7 @@
       "notes": [
         {
           "timestamp": "2026-08-20T17:15:00Z",
-          "text": "Kickoff with existing docs/GENESIS.md. Ingested into draft PHASE_1_BRIEF.md. Brief not locked. package.json is localhelm@0.0.0 (publish pending). GitHub origin pointed at Catalyst-Forge-LLC/localhelm (empty private repo)."
+          "text": "Kickoff with existing docs/GENESIS.md. Ingested into draft PHASE_1_BRIEF.md. Brief not locked. Operator always publishes to npm (D4 confirmed). package.json is localhelm@0.0.0 for the operator to publish. GitHub origin pointed at Catalyst-Forge-LLC/localhelm (empty private repo)."
         }
       ]
     },
@@ -168,8 +168,8 @@
       "timestamp": "2026-08-20T17:15:00Z",
       "phase": "1-architecture",
       "session": 1,
-      "decision": "The tool never publishes and never force-pushes. Eligible badge only. Fetch/pull in v1; push is not a v1 action.",
-      "rationale": "House npm rule and Exec Foundry no-auto-apply line. Wrong pin across fifteen sites is worse than a missing convenience button.",
+      "decision": "The operator always publishes to npm. LocalHelm never publishes (eligible badge only). Agents never run npm/pnpm publish. Never force-push; git push is not a v1 action.",
+      "rationale": "Confirmed 2026-08-20. House npm rule. Wrong pin across fifteen sites is worse than a missing convenience button.",
       "alternatives_considered": ["Publish button", "Push in v1"],
       "status": "active"
     },
@@ -225,7 +225,7 @@
         "ForgeTrail kickoff files written",
         "Draft PHASE_1_BRIEF.md from genesis",
         "origin set to git@github.com:Catalyst-Forge-LLC/localhelm.git",
-        "package.json set to localhelm@0.0.0; public npm publish left for the operator"
+        "package.json set to localhelm@0.0.0; operator always publishes (D4 confirmed)"
       ],
       "leftOff": "Brief is draft. Confirm genesis proposals (especially license and remaining §9 questions) then lock PHASE_1_BRIEF before any app spine.",
       "contextLimitHit": false

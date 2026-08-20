@@ -18,6 +18,7 @@ This repository uses **ForgeTrail Lite**. Full protocol: `.forgetrail/FORGETRAIL
 - **Lists:** numbered = order; bullets = parallel; letters = pick-one.
 - **No interactive CLIs** without every flag.
 - **Never** `npm publish` / `pnpm publish` from LocalHelm itself. **Never** `git push --force`.
+- **The operator always publishes to npm.** Agents do not run `npm publish` / `pnpm publish` in this repo (including the 0.0.0 name reservation). Prepare `package.json` and say when it is ready.
 
 ## Conventions
 

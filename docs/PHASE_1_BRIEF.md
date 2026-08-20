@@ -51,7 +51,7 @@ Enroll a named fleet → `status` shows who is dirty / unpublished-ahead / catal
 _Hard requirements the stack and design must respect._
 
 - **Technical:** Windows / macOS / Linux; kickoff machine is Windows (`Z:\` and Git-Bash). TypeScript, ESM, pnpm, Node 22+. Bind dashboard to `127.0.0.1` by default. Status without `--fetch` is a local walk plus one npm request per distinct package name. Comfortable at ~80 enrolled rows.
-- **Business / timeline:** Public CLI `localhelm` (`package.json` at 0.0.0 pending publish). Site later as FilePress explainer (`localhelm.dev` is an open question).
+- **Business / timeline:** Public CLI `localhelm` (`package.json` at 0.0.0; operator publishes). Site later as FilePress explainer (`localhelm.dev` is an open question).
 - **Explicit non-goals for v1:** see §10.
 
 ---
@@ -67,7 +67,7 @@ _Confirmed choices only after user sign-off. Mirror the same choices into `CONTE
 | State persistence | Local files only (manifest + gitignored job state) | proposed | A-local. No PocketBase, no accounts. |
 | Auth / storage | None / on-disk | proposed | Loopback dashboard; no telemetry. |
 | Styling | Deferred until dashboard | proposed | CLI is the spine. |
-| Deploy / CI | npm package; optional FilePress site later | proposed | Human publishes. |
+| Deploy / CI | npm package; optional FilePress site later | confirmed | Operator always publishes. Tool and agents never run publish. |
 | Package manager | pnpm | proposed | House default. |
 | License | Apache-2.0 | proposed | Matches LocalBerth / IngotVault; MIT still listed in genesis §9. |
 
@@ -138,7 +138,7 @@ Skipped. Inventory and plans are read from disk, git, npm, and the catalog file.
 
 **D3.** Apache-2.0 (proposed). WHY: sibling pairing with LocalBerth / IngotVault. Still confirm vs MIT.
 
-**D4.** Never publish; never force-push; no push in v1. WHY: human publishes; safety over convenience.
+**D4.** The operator always publishes to npm. LocalHelm never has a publish button (eligible badge only). Agents never run `npm publish` / `pnpm publish`. Never force-push; no git push in v1. WHY: confirmed 2026-08-20 — house rule.
 
 **D5.** CLI `localhelm`, never `helm`. `package.json` is `0.0.0` so the name can be reserved.
 
@@ -157,14 +157,15 @@ Skipped. Inventory and plans are read from disk, git, npm, and the catalog file.
 | 1 | Domain: `localhelm.dev` vs `.com` vs hold until first usable CLI | User — before site work |
 | 2 | License: Apache-2.0 (proposal) vs MIT | User — before 0.1.0 |
 | 3 | Commit on apply: optional commit, default on for cascade/catalog | User — before M2 writes |
-| 4 | Push: not in v1 (proposal) | User — confirm |
-| 5 | FilePress siblings stay separate until after M3 (proposal) | User — confirm |
-| 6 | Cascade range: `^V` (proposal) | User — confirm |
-| 7 | Manifest: committed workspace `localhelm.fleet.json`; `workspaceRoot` is `"."` or omitted | User — confirm |
-| 8 | xFacts: six repos, one catalog card, group `xfacts` | User — confirm |
-| 9 | MCP in M4; JSON in M1 | User — confirm |
-| 10 | Dashboard stack: CLI-first; small static/Svelte page vs SvelteKit | User — before M2 dashboard |
-| 11 | Name collision fallback if `localhelm` is taken: `getlocalhelm` or `@catalyst-forge/localhelm`. Name was free on 2026-08-20; `package.json` is `0.0.0` pending publish | Operator — run `npm publish --access public` |
+| 4 | Git push from LocalHelm: not in v1 (proposal) | User — confirm |
+| 5 | Publish button in LocalHelm: **never**. Operator always publishes. | Closed 2026-08-20 |
+| 6 | FilePress siblings stay separate until after M3 (proposal) | User — confirm |
+| 7 | Cascade range: `^V` (proposal) | User — confirm |
+| 8 | Manifest: committed workspace `localhelm.fleet.json`; `workspaceRoot` is `"."` or omitted | User — confirm |
+| 9 | xFacts: six repos, one catalog card, group `xfacts` | User — confirm |
+| 10 | MCP in M4; JSON in M1 | User — confirm |
+| 11 | Dashboard stack: CLI-first; small static/Svelte page vs SvelteKit | User — before M2 dashboard |
+| 12 | Name reservation: `package.json` is `localhelm@0.0.0`. Operator publishes. | Operator |
 
 ---
 
