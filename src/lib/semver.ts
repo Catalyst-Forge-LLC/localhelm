@@ -1,5 +1,7 @@
 export type Triple = { major: number; minor: number; patch: number };
 
+export type BumpKind = 'patch' | 'minor' | 'major';
+
 export function parseTriple(raw: string): Triple | null {
 	const cleaned = raw.trim().replace(/^v/i, '');
 	const m = /^(\d+)\.(\d+)\.(\d+)/.exec(cleaned);
@@ -47,4 +49,12 @@ export function rangeCovers(spec: string, version: string): boolean {
 	}
 	const cmp = compareSemver(s, version);
 	return cmp === 0;
+}
+
+export function bumpTriple(version: string, kind: BumpKind): string {
+	const t = parseTriple(version);
+	if (!t) throw new Error(`not a semver x.y.z: ${version}`);
+	if (kind === 'major') return `${t.major + 1}.0.0`;
+	if (kind === 'minor') return `${t.major}.${t.minor + 1}.0`;
+	return `${t.major}.${t.minor}.${t.patch + 1}`;
 }

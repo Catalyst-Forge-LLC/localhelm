@@ -1,7 +1,13 @@
+import { applyBump, planBump } from '../lib/bump.js';
 import { fleetDeps } from '../lib/deps.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
+import { applyExport, planExport } from '../lib/export.js';
+import { applyFetch, applyPull, planFetch, planPull, type GitJobRow } from '../lib/git.js';
+import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
+import { serveDashboard } from '../lib/serve.js';
+import type { BumpKind } from '../lib/semver.js';
 import { fleetStatus } from '../lib/status.js';
 import type { EnrollPlan, FleetInventory, ScanCandidate } from '../lib/types.js';
 
@@ -14,8 +20,13 @@ Usage:
   localhelm unenroll <id>... [--apply]
   localhelm status [--json] [--fetch]
   localhelm deps [id] [--json]
+  localhelm bump <id> patch|minor|major [--apply]
+  localhelm fetch
+  localhelm pull [--apply]
+  localhelm export [file] [--apply]
+  localhelm serve [--host ADDR] [--port N]
 
-scan never writes. enroll/unenroll print a plan; pass --apply to write the manifest.
+scan never writes. Mutating commands print a plan; pass --apply to write.
 Scan also reads .localhelmignore (and ~/.localhelm/ignore).
 `;
 }
@@ -74,6 +85,12 @@ function formatPlan(plan: EnrollPlan, kind: 'enroll' | 'unenroll'): string {
 	} else {
 		lines.push('', `Wrote ${plan.manifestPath}`);
 	}
+	return `${lines.join('\n')}\n`;
+}
+
+function formatGitRows(rows: GitJobRow[]): string {
+	if (rows.length === 0) return 'No enrolled projects.\n';
+	const lines = ['id\taction\treason', ...rows.map((row) => [row.id, row.action, row.reason ?? ''].join('\t'))];
 	return `${lines.join('\n')}\n`;
 }
 
@@ -162,8 +179,14 @@ async function main(): Promise<void> {
 		const existing = await findManifest();
 		const plan = await planEnroll({ paths: argv, npm, group }, existing);
 		if (apply) {
-			await applyEnroll(plan, existing);
-			plan.writes = true;
+			const root = existing?.workspaceRoot ?? plan.manifestPath.replace(/[/\\][^/\\]+$/, '');
+			const lock = await acquireJobLock(root);
+			try {
+				await applyEnroll(plan, existing);
+				plan.writes = true;
+			} finally {
+				await lock.release();
+			}
 		}
 		if (json) printJson(plan);
 		else process.stdout.write(formatPlan(plan, 'enroll'));
@@ -179,8 +202,13 @@ async function main(): Promise<void> {
 		const loaded = await requireManifest();
 		const plan = await planUnenroll(argv, loaded);
 		if (apply) {
-			await applyUnenroll(plan, loaded);
-			plan.writes = true;
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				await applyUnenroll(plan, loaded);
+				plan.writes = true;
+			} finally {
+				await lock.release();
+			}
 		}
 		if (json) printJson(plan);
 		else process.stdout.write(formatPlan(plan, 'unenroll'));
@@ -219,6 +247,112 @@ async function main(): Promise<void> {
 			}
 			process.stdout.write(`${lines.join('\n')}\n`);
 		}
+		return;
+	}
+
+	if (cmd === 'bump') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		const id = argv[0];
+		const kind = argv[1];
+		if (!id || (kind !== 'patch' && kind !== 'minor' && kind !== 'major') || argv.length !== 2) {
+			fail('usage: localhelm bump <id> patch|minor|major [--apply]');
+		}
+		const loaded = await requireManifest();
+		const plan = await planBump(loaded, id, kind as BumpKind);
+		if (apply) {
+			if (plan.action !== 'bump') fail(plan.reason ?? `cannot bump ${id}`);
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				await applyBump(plan);
+			} finally {
+				await lock.release();
+			}
+		}
+		if (json) printJson({ ...plan, writes: apply && plan.action === 'bump' });
+		else {
+			const line = plan.action === 'bump' ? `${plan.id}\t${plan.from} → ${plan.to}\t${plan.file}` : `${plan.id}\tskip\t${plan.reason ?? ''}`;
+			const footer = apply && plan.action === 'bump' ? 'Wrote package.json' : apply ? '' : 'Nothing written. Re-run with --apply to write.';
+			process.stdout.write(`${line}${footer ? `\n${footer}` : ''}\n`);
+		}
+		return;
+	}
+
+	if (cmd === 'fetch') {
+		const json = takeFlag(argv, '--json');
+		if (argv.length) fail('usage: localhelm fetch');
+		const loaded = await requireManifest();
+		const planned = await planFetch(loaded);
+		const lock = await acquireJobLock(loaded.workspaceRoot);
+		let rows: GitJobRow[];
+		try {
+			rows = planned.map((row) => applyFetch(loaded.workspaceRoot, row));
+		} finally {
+			await lock.release();
+		}
+		if (json) printJson({ rows });
+		else process.stdout.write(formatGitRows(rows));
+		return;
+	}
+
+	if (cmd === 'pull') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		if (argv.length) fail('usage: localhelm pull [--apply]');
+		const loaded = await requireManifest();
+		const planned = await planPull(loaded);
+		let rows = planned;
+		if (apply) {
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				rows = planned.map((row) => applyPull(loaded.workspaceRoot, row));
+			} finally {
+				await lock.release();
+			}
+		}
+		if (json) printJson({ rows, writes: apply });
+		else {
+			process.stdout.write(formatGitRows(rows));
+			if (!apply) process.stdout.write('Nothing written. Re-run with --apply to pull --ff-only.\n');
+		}
+		return;
+	}
+
+	if (cmd === 'export') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		if (argv.length > 1) fail('usage: localhelm export [file] [--apply]');
+		const loaded = await requireManifest();
+		const plan = planExport(loaded.workspaceRoot, argv[0]);
+		if (apply) {
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				await applyExport(loaded, plan);
+			} finally {
+				await lock.release();
+			}
+		}
+		if (json) printJson({ ...plan, writes: apply });
+		else {
+			const footer = apply ? `Wrote ${plan.file}` : 'Nothing written. Re-run with --apply to write.';
+			process.stdout.write(`${plan.action}\t${plan.file}\n${footer}\n`);
+		}
+		return;
+	}
+
+	if (cmd === 'serve') {
+		const host = takeOpt(argv, '--host');
+		const portRaw = takeOpt(argv, '--port');
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		if (argv.length) fail('usage: localhelm serve [--host ADDR] [--port N]');
+		const port = portRaw ? Number(portRaw) : undefined;
+		if (portRaw && (!Number.isFinite(port) || (port as number) <= 0)) fail('--port must be a positive number');
+		await serveDashboard({ host, port });
 		return;
 	}
 

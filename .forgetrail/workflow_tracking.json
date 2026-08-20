@@ -51,18 +51,20 @@
         "README.md created (from ForgeTrail template)",
         "TODO.md created (from ForgeTrail template, seeded from PHASE_1_BRIEF §11)",
         "IDEAS.md created (from ForgeTrail template)",
-        "Phase 2 doc scope only per WORKFLOW §1a (no premature extra templates)"
+        "Phase 2 doc scope only per WORKFLOW §1a (no premature extra templates)",
+        "M2 dashboard and safe writes: bump, fetch, pull, export, localhelm serve"
       ],
-      "exitCriteriaRemaining": [
-        "SvelteKit dashboard (app/) is M2 — not part of this CLI spine"
-      ],
+      "exitCriteriaRemaining": [],
       "notes": [
         {
           "timestamp": "2026-08-20T18:29:00Z",
           "text": "M1 CLI spine: scan, enroll/unenroll --apply, status, deps, JSON. Tests and tsc pass."
+        },
+        {
+          "timestamp": "2026-08-20T19:30:00Z",
+          "text": "M2: bump, fetch, pull --ff-only, export write, job.lock, SvelteKit app/ + localhelm serve on 127.0.0.1:54322."
         }
-      ],
-      "notes": []
+      ]
     },
     "3-stabilization": {
       "status": "not_started",
@@ -322,7 +324,19 @@
         "PHASE_1_BRIEF locked with remaining §9 answers",
         "M1 CLI: scan, enroll/unenroll --apply, status, deps, JSON"
       ],
-      "leftOff": "M1 CLI scaffolded. Operator can scan a workspace, enroll with --apply, then status --json.",
+      "leftOff": "M2 landed. Operator can localhelm serve and bump/fetch/pull/export with --apply.",
+      "contextLimitHit": false
+    },
+    {
+      "session": 2,
+      "date": "2026-08-20",
+      "phasesWorked": ["2-scaffolding"],
+      "accomplished": [
+        "M2 library: bump, fetch, pull ff-only, export file, job lock",
+        "CLI commands bump/fetch/pull/export/serve",
+        "SvelteKit app/ dashboard calling the same library"
+      ],
+      "leftOff": "M2 complete. Next is M3 cascade when the operator says go.",
       "contextLimitHit": false
     }
   ]

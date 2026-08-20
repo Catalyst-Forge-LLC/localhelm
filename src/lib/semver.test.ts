@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { compareSemver, rangeCovers } from './semver.js';
+import { bumpTriple, compareSemver, rangeCovers } from './semver.js';
 
 describe('semver', () => {
 	it('orders patch correctly', () => {
@@ -13,5 +13,11 @@ describe('semver', () => {
 		assert.equal(rangeCovers('^0.1.8', '0.2.0'), false);
 		assert.equal(rangeCovers('^1.2.0', '1.9.0'), true);
 		assert.equal(rangeCovers('^1.2.0', '2.0.0'), false);
+	});
+
+	it('bumps patch minor major', () => {
+		assert.equal(bumpTriple('0.1.8', 'patch'), '0.1.9');
+		assert.equal(bumpTriple('0.1.8', 'minor'), '0.2.0');
+		assert.equal(bumpTriple('0.1.8', 'major'), '1.0.0');
 	});
 });

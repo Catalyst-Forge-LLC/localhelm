@@ -45,6 +45,7 @@
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/cli/main.ts",
     "cli": "tsx src/cli/main.ts",
+    "serve": "tsx src/cli/main.ts serve",
     "test": "tsx --test src/lib/*.test.ts",
     "prepublishOnly": "tsc -p tsconfig.json"
   },

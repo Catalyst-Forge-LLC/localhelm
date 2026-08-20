@@ -1,7 +1,10 @@
 import { spawnSync } from 'node:child_process';
+import type { LoadedManifest } from './manifest.js';
+import { joinRoot } from './paths.js';
+import { pathExists } from './pkg.js';
 import type { GitCell } from './types.js';
 
-function git(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr: string } {
+export function runGit(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr: string } {
 	const result = spawnSync('git', ['-C', cwd, ...args], {
 		encoding: 'utf8',
 		windowsHide: true,
@@ -29,7 +32,7 @@ function parseAheadBehind(header: string): { ahead: number | null; behind: numbe
 
 export function readGit(projectRoot: string, fetch = false): GitCell {
 	if (fetch) {
-		const fetched = git(projectRoot, ['fetch', '--quiet', 'origin']);
+		const fetched = runGit(projectRoot, ['fetch', '--quiet', 'origin']);
 		if (!fetched.ok && !/no such remote|does not exist/i.test(fetched.stderr)) {
 			return {
 				repo: true,
@@ -44,7 +47,7 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 		}
 	}
 
-	const status = git(projectRoot, ['status', '--porcelain=v1', '-b']);
+	const status = runGit(projectRoot, ['status', '--porcelain=v1', '-b']);
 	if (!status.ok) {
 		if (/not a git repository/i.test(status.stderr)) {
 			return { repo: false, dirty: false, staged: 0, unstaged: 0, untracked: 0, ahead: null, behind: null };
@@ -78,7 +81,7 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 		if (y !== ' ' && y !== '?') unstaged += 1;
 	}
 
-	const remotes = git(projectRoot, ['remote', '-v']);
+	const remotes = runGit(projectRoot, ['remote', '-v']);
 	let origin: string | undefined;
 	let backup: string | undefined;
 	if (remotes.ok) {
@@ -94,10 +97,6 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 	const branchMatch = /^## ([^.[\s]+)/.exec(header);
 	const { ahead, behind } = parseAheadBehind(header);
 	let busy: string | undefined;
-	const rebase = git(projectRoot, ['rev-parse', '--git-path', 'rebase-merge']);
-	if (rebase.ok && rebase.stdout.trim() && rebase.stdout.trim() !== 'rebase-merge') {
-		/* path exists check via another status token */
-	}
 	if (header.includes('revert')) busy = 'revert';
 	if (/rebasing|rebase/i.test(header)) busy = 'rebase';
 	if (/merging|merge/i.test(header)) busy = 'merge';
@@ -115,5 +114,97 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 		backup,
 		detached,
 		busy,
+	};
+}
+
+export type GitJobRow = {
+	id: string;
+	path: string;
+	action: 'fetch' | 'pull' | 'skip';
+	reason?: string;
+	stdout?: string;
+	stderr?: string;
+};
+
+export async function planFetch(loaded: LoadedManifest): Promise<GitJobRow[]> {
+	const rows: GitJobRow[] = [];
+	for (const project of loaded.manifest.projects) {
+		const abs = joinRoot(loaded.workspaceRoot, project.path);
+		if (!(await pathExists(abs))) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'missing' });
+			continue;
+		}
+		const git = readGit(abs);
+		if (!git.repo) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'no git' });
+			continue;
+		}
+		if (!git.origin) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'no origin' });
+			continue;
+		}
+		rows.push({ id: project.id, path: project.path, action: 'fetch' });
+	}
+	return rows;
+}
+
+export function applyFetch(workspaceRoot: string, row: GitJobRow): GitJobRow {
+	if (row.action !== 'fetch') return row;
+	const abs = joinRoot(workspaceRoot, row.path);
+	const result = runGit(abs, ['fetch', 'origin']);
+	return { ...row, stdout: result.stdout.trim(), stderr: result.stderr, reason: result.ok ? 'fetched' : result.stderr };
+}
+
+export async function planPull(loaded: LoadedManifest): Promise<GitJobRow[]> {
+	const rows: GitJobRow[] = [];
+	for (const project of loaded.manifest.projects) {
+		const abs = joinRoot(loaded.workspaceRoot, project.path);
+		if (!(await pathExists(abs))) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'missing' });
+			continue;
+		}
+		const git = readGit(abs);
+		if (!git.repo) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'no git' });
+			continue;
+		}
+		if (git.dirty) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'dirty' });
+			continue;
+		}
+		if (git.busy) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: git.busy });
+			continue;
+		}
+		if (!git.origin) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'no origin' });
+			continue;
+		}
+		if (git.behind == null) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'no upstream' });
+			continue;
+		}
+		if (git.behind === 0) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'not behind' });
+			continue;
+		}
+		if ((git.ahead ?? 0) > 0) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'diverged' });
+			continue;
+		}
+		rows.push({ id: project.id, path: project.path, action: 'pull' });
+	}
+	return rows;
+}
+
+export function applyPull(workspaceRoot: string, row: GitJobRow): GitJobRow {
+	if (row.action !== 'pull') return row;
+	const abs = joinRoot(workspaceRoot, row.path);
+	const result = runGit(abs, ['pull', '--ff-only']);
+	return {
+		...row,
+		stdout: result.stdout.trim(),
+		stderr: result.stderr,
+		reason: result.ok ? 'pulled ff-only' : result.stderr,
 	};
 }

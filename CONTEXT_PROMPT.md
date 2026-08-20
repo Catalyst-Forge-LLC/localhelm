@@ -4,10 +4,10 @@ _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking
 
 ## Tech Stack
 
-- **App:** TypeScript ESM CLI (`src/`) + later SvelteKit dashboard (`app/`) + later FilePress site (`site/` + `/docs`)
+- **App:** TypeScript ESM CLI (`src/`) + SvelteKit dashboard (`app/`) + later FilePress site (`site/` + `/docs`)
 - **Language:** TypeScript strict, Node 22+
 - **Package manager:** pnpm
-- **Storage:** `localhelm.fleet.json` (`workspaceRoot: "."`) + `.localhelmignore` (scan) + gitignored job state later. No PocketBase, no accounts, no telemetry.
+- **Storage:** `localhelm.fleet.json` (`workspaceRoot: "."`) + `.localhelmignore` (scan) + `.localhelm/job.lock`. No PocketBase, no accounts, no telemetry.
 - **AI/LLM:** none
 - **Deploy:** npm `localhelm` (operator publishes). Site later at localhelm.dev
 - **Key dependencies:** Node built-ins + TypeScript. No catalog adapter.
@@ -15,10 +15,10 @@ _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking
 ## Project Structure
 
 ```
-src/lib/     fleet, scan, git, npm, pins, status, deps
+src/lib/     fleet, scan, git, npm, pins, status, deps, bump, export, lock
 src/cli/     localhelm commands
 bin/         localhelm.mjs → dist
-app/         (M2) SvelteKit dashboard
+app/         SvelteKit dashboard (checkout only; localhelm serve)
 site/        (later) FilePress + /docs
 ```
 
@@ -73,14 +73,14 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Complete
 
 - M1 CLI: `scan`, `enroll`, `unenroll`, `status`, `deps` (+ `--json`)
+- M2: `bump`, `fetch`, `pull`, `export`, job lock, SvelteKit `app/` + `localhelm serve`
 
 ### In Progress
 
-- Phase 2 spine just landed; operator should try scan/enroll on a real workspace
+- Operator can try the dashboard against the real workspace fleet
 
 ### Not Started
 
-- M2 dashboard / bump / fetch-pull
 - M3 cascade
 - M4 MCP
 
@@ -90,3 +90,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - Genesis → locked brief. D9 no CF shelf. D10 localhelm.dev. Operator publishes.
 - Phase 2: M1 CLI scaffolded.
+
+### Session 2 — 2026-08-20
+
+- M2 safe writes + loopback dashboard. Default port 54322. No publish, no force-push.
