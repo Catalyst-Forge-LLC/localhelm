@@ -134,6 +134,7 @@ function formatStatus(inv: FleetInventory): string {
 		const notes = [
 			row.missing ? 'missing' : '',
 			row.unpublishedAhead ? 'unpublished-ahead' : '',
+			row.git.fetchError ? 'remote-unreadable' : '',
 			row.error ?? '',
 		]
 			.filter(Boolean)

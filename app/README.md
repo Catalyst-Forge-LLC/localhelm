@@ -8,4 +8,9 @@ pnpm cli serve
 # default http://127.0.0.1:54322  (or localberth get localhelm)
 ```
 
-The page calls the same TypeScript library as the CLI. Writes still go through a plan; `--apply` is a checkbox/button, not an implicit confirm.
+The page calls the same TypeScript library as the CLI.
+
+- **Read** buttons (refresh, fetch) change no files.
+- **Write** buttons stay disabled until you have run the matching **Plan**, and they re-lock on every refresh.
+- The "needs you" column is the point of the screen: unpublished versions, dirt, pins behind, unreadable remotes.
+- A remote that cannot be read is a side note, never a replacement for local status.

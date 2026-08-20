@@ -47,6 +47,7 @@ export type GitCell = {
 	backup?: string;
 	detached?: boolean;
 	busy?: string;
+	fetchError?: string;
 	error?: string;
 };
 

@@ -1,22 +1,37 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	type Pin = { name: string; kind: string; onLatest?: boolean };
+	type BumpKind = 'patch' | 'minor' | 'major';
+	type Pin = {
+		name: string;
+		spec: string;
+		kind: string;
+		fromFile: 'root' | 'site';
+		onLatest?: boolean;
+		note?: string;
+	};
 	type Project = {
 		id: string;
 		path: string;
 		localVersion: string | null;
+		private: boolean;
 		missing: boolean;
 		unpublishedAhead: boolean;
+		cascadeBehind: number;
 		error?: string;
-		npm: { status: string; latest?: string; error?: string };
+		npm: { name?: string; status: string; latest?: string; error?: string };
 		git: {
 			repo: boolean;
 			dirty: boolean;
 			branch?: string;
+			staged: number;
+			unstaged: number;
+			untracked: number;
 			ahead: number | null;
 			behind: number | null;
 			origin?: string;
+			busy?: string;
+			fetchError?: string;
 			error?: string;
 		};
 		pins: Pin[];
@@ -42,19 +57,55 @@
 		git: boolean;
 		private?: boolean;
 	};
+	type GitRow = { id: string; action: string; reason?: string };
+	type BumpPlan = { id: string; from: string | null; to: string | null; action: string; reason?: string };
+	type LogEntry = { time: string; title: string; body: string };
 
 	let inventory = $state<Inventory | null>(null);
-	let scanRoot = $state('..');
 	let cwd = $state('');
+	let port = $state<string | null>(null);
+	let portSource = $state<string | null>(null);
+	let fetchedAt = $state<string | null>(null);
+
+	let scanRoot = $state('..');
 	let candidates = $state<Candidate[]>([]);
 	let selectedScan = $state<Record<string, boolean>>({});
 	let selectedIds = $state<Record<string, boolean>>({});
-	let bumpKind = $state<Record<string, 'patch' | 'minor' | 'major'>>({});
-	let log = $state('');
+	let bumpKind = $state<Record<string, BumpKind>>({});
+
+	// A plan must be seen before its apply button unlocks. Any refresh clears them.
+	let plannedPull = $state<number | null>(null);
+	let plannedExport = $state<string | null>(null);
+	let plannedEnroll = $state<string | null>(null);
+	let plannedUnenroll = $state<string | null>(null);
+	let plannedBump = $state<Record<string, string>>({});
+
+	let entries = $state<LogEntry[]>([]);
 	let busy = $state('');
 	let error = $state('');
 
-	const enrolled = $derived(new Set((inventory?.projects ?? []).map((p) => p.id)));
+	const enrolledIds = $derived(new Set((inventory?.projects ?? []).map((p) => p.id)));
+	const checkedScan = $derived(
+		Object.entries(selectedScan)
+			.filter(([, on]) => on)
+			.map(([p]) => p),
+	);
+	const checkedIds = $derived(
+		Object.entries(selectedIds)
+			.filter(([, on]) => on)
+			.map(([id]) => id),
+	);
+	const staleRemotes = $derived(
+		(inventory?.projects ?? []).some((p) => p.git.repo && Boolean(p.git.fetchError)),
+	);
+
+	function clearPlans(): void {
+		plannedPull = null;
+		plannedExport = null;
+		plannedBump = {};
+		plannedUnenroll = null;
+		plannedEnroll = null;
+	}
 
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
 		const res = await fetch(url, {
@@ -67,7 +118,8 @@
 	}
 
 	function note(title: string, data: unknown): void {
-		log = `${title}\n${JSON.stringify(data, null, 2)}\n\n${log}`.trim();
+		const time = new Date().toLocaleTimeString();
+		entries = [{ time, title, body: JSON.stringify(data, null, 2) }, ...entries].slice(0, 40);
 	}
 
 	async function run(label: string, fn: () => Promise<void>): Promise<void> {
@@ -83,124 +135,227 @@
 	}
 
 	async function refresh(fetchRemotes = false): Promise<void> {
-		await run('status', async () => {
+		await run(fetchRemotes ? 'fetching remotes, then reading status' : 'reading status', async () => {
 			const data = (await call(`/api/status${fetchRemotes ? '?fetch=1' : ''}`)) as {
 				inventory: Inventory | null;
 				scanRoot: string;
 				cwd: string;
+				port: string | null;
+				portSource: string | null;
 			};
 			inventory = data.inventory;
 			cwd = data.cwd;
+			port = data.port;
+			portSource = data.portSource;
+			if (fetchRemotes) fetchedAt = new Date().toLocaleTimeString();
 			if (!candidates.length) scanRoot = data.scanRoot;
 			const kinds = { ...bumpKind };
-			for (const row of data.inventory?.projects ?? []) {
-				if (!kinds[row.id]) kinds[row.id] = 'patch';
-			}
+			for (const row of data.inventory?.projects ?? []) kinds[row.id] ??= 'patch';
 			bumpKind = kinds;
+			clearPlans();
 		});
 	}
 
 	async function scan(): Promise<void> {
-		await run('scan', async () => {
+		await run(`scanning ${scanRoot}`, async () => {
 			const data = (await call('/api/scan', {
 				method: 'POST',
 				body: JSON.stringify({ roots: [scanRoot] }),
 			})) as { candidates: Candidate[] };
 			candidates = data.candidates;
-			const next: Record<string, boolean> = {};
-			for (const row of data.candidates) {
-				if (selectedScan[row.absPath] && !enrolled.has(row.id)) next[row.absPath] = true;
-			}
-			selectedScan = next;
-			note('scan', data);
+			selectedScan = {};
+			plannedEnroll = null;
+			note(`scan ${scanRoot} — ${data.candidates.length} candidate(s), nothing written`, data);
 		});
 	}
 
 	async function enroll(apply: boolean): Promise<void> {
-		const paths = Object.entries(selectedScan)
-			.filter(([, on]) => on)
-			.map(([p]) => p);
-		if (!paths.length) {
-			error = 'check at least one scan row';
+		if (!checkedScan.length) {
+			error = 'Check at least one scanned folder first.';
 			return;
 		}
-		await run(apply ? 'enroll apply' : 'enroll plan', async () => {
-			const plan = await call('/api/enroll', { method: 'POST', body: JSON.stringify({ paths, apply }) });
-			note(apply ? 'enroll apply' : 'enroll plan', plan);
+		const signature = [...checkedScan].sort().join('|');
+		await run(apply ? 'enrolling' : 'planning enroll', async () => {
+			const plan = await call('/api/enroll', {
+				method: 'POST',
+				body: JSON.stringify({ paths: checkedScan, apply }),
+			});
+			note(apply ? `enrolled ${checkedScan.length} project(s)` : `enroll plan — ${checkedScan.length} project(s), nothing written`, plan);
 			if (apply) {
 				selectedScan = {};
 				await refresh();
+			} else {
+				plannedEnroll = signature;
 			}
 		});
 	}
 
 	async function unenroll(apply: boolean): Promise<void> {
-		const ids = Object.entries(selectedIds)
-			.filter(([, on]) => on)
-			.map(([id]) => id);
-		if (!ids.length) {
-			error = 'check at least one enrolled row';
+		if (!checkedIds.length) {
+			error = 'Check at least one fleet row first.';
 			return;
 		}
-		await run(apply ? 'unenroll apply' : 'unenroll plan', async () => {
-			const plan = await call('/api/unenroll', { method: 'POST', body: JSON.stringify({ ids, apply }) });
-			note(apply ? 'unenroll apply' : 'unenroll plan', plan);
+		const signature = [...checkedIds].sort().join('|');
+		await run(apply ? 'removing from fleet' : 'planning unenroll', async () => {
+			const plan = await call('/api/unenroll', {
+				method: 'POST',
+				body: JSON.stringify({ ids: checkedIds, apply }),
+			});
+			note(apply ? `removed ${checkedIds.length} project(s) from the fleet` : `unenroll plan — ${checkedIds.length} row(s), nothing written`, plan);
 			if (apply) {
 				selectedIds = {};
 				await refresh();
+			} else {
+				plannedUnenroll = signature;
 			}
 		});
 	}
 
 	async function bump(id: string, apply: boolean): Promise<void> {
-		await run(apply ? `bump ${id}` : `bump plan ${id}`, async () => {
-			const plan = await call('/api/bump', {
+		const kind = bumpKind[id] ?? 'patch';
+		await run(apply ? `bumping ${id}` : `planning ${kind} bump for ${id}`, async () => {
+			const plan = (await call('/api/bump', {
 				method: 'POST',
-				body: JSON.stringify({ id, kind: bumpKind[id] ?? 'patch', apply }),
-			});
-			note(apply ? `bump ${id}` : `bump plan ${id}`, plan);
-			if (apply) await refresh();
+				body: JSON.stringify({ id, kind, apply }),
+			})) as BumpPlan;
+			if (apply) {
+				note(`bumped ${id} to ${plan.to}`, plan);
+				await refresh();
+				return;
+			}
+			if (plan.action !== 'bump') {
+				error = `${id}: ${plan.reason ?? 'cannot bump'}`;
+				note(`bump plan ${id} — skipped`, plan);
+				return;
+			}
+			plannedBump = { ...plannedBump, [id]: `${kind}:${plan.to}` };
+			note(`bump plan ${id} ${plan.from} → ${plan.to}, nothing written`, plan);
 		});
 	}
 
 	async function fetchOrigins(): Promise<void> {
-		await run('fetch', async () => {
-			note('fetch', await call('/api/fetch', { method: 'POST' }));
+		await run('git fetch origin in every repo', async () => {
+			const data = (await call('/api/fetch', { method: 'POST' })) as { rows: GitRow[] };
+			const failed = data.rows.filter((r) => r.action === 'fetch' && r.reason !== 'fetched');
+			note(`fetch — ${data.rows.filter((r) => r.reason === 'fetched').length} fetched, ${failed.length} failed`, data);
 			await refresh();
 		});
 	}
 
 	async function pull(apply: boolean): Promise<void> {
-		await run(apply ? 'pull apply' : 'pull plan', async () => {
-			note(apply ? 'pull apply' : 'pull plan', await call('/api/pull', { method: 'POST', body: JSON.stringify({ apply }) }));
-			if (apply) await refresh();
+		await run(apply ? 'pulling (fast-forward only)' : 'planning pull', async () => {
+			const data = (await call('/api/pull', { method: 'POST', body: JSON.stringify({ apply }) })) as {
+				rows: GitRow[];
+			};
+			const eligible = data.rows.filter((r) => r.action === 'pull');
+			if (apply) {
+				note(`pull --apply — ${eligible.length} repo(s) fast-forwarded`, data);
+				await refresh();
+				return;
+			}
+			plannedPull = eligible.length;
+			note(`pull plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
 		});
 	}
 
 	async function exportFile(apply: boolean): Promise<void> {
-		await run(apply ? 'export apply' : 'export plan', async () => {
-			note(apply ? 'export apply' : 'export plan', await call('/api/export', { method: 'POST', body: JSON.stringify({ apply }) }));
+		await run(apply ? 'writing the JSON export' : 'planning export', async () => {
+			const data = (await call('/api/export', { method: 'POST', body: JSON.stringify({ apply }) })) as {
+				file: string;
+			};
+			if (apply) {
+				note(`export --apply — wrote ${data.file}`, data);
+				return;
+			}
+			plannedExport = data.file;
+			note(`export plan — would write ${data.file}, nothing written`, data);
 		});
 	}
 
-	function gitLabel(row: Project): string {
-		if (!row.git.repo) return 'no-git';
-		if (row.git.error) return `error:${row.git.error}`;
-		return [
-			row.git.dirty ? 'dirty' : 'clean',
-			row.git.branch,
-			row.git.ahead != null ? `ahead ${row.git.ahead}` : '',
-			row.git.behind != null ? `behind ${row.git.behind}` : '',
-			row.git.origin ? '' : 'no-origin',
-		]
-			.filter(Boolean)
-			.join(' ');
+	// The write button only unlocks for the exact kind that was planned.
+	function plannedTarget(id: string): string | null {
+		const entry = plannedBump[id];
+		if (!entry) return null;
+		const [kind, to] = entry.split(':');
+		return kind === (bumpKind[id] ?? 'patch') ? to : null;
+	}
+
+	function plainGitError(raw: string): string {
+		if (/permission denied \(publickey\)/i.test(raw)) return 'origin rejected the SSH key';
+		if (/authentication failed|could not read username/i.test(raw)) return 'origin needs credentials';
+		if (/timed out|operation timed out/i.test(raw)) return 'origin timed out';
+		if (/could not resolve host/i.test(raw)) return 'origin host not found';
+		if (/could not read from remote/i.test(raw)) return 'origin unreachable';
+		return raw.split('\n')[0].slice(0, 90);
+	}
+
+	function gitSummary(row: Project): string {
+		if (row.missing) return 'folder missing';
+		if (!row.git.repo) return 'not a git repo';
+		if (row.git.error) return plainGitError(row.git.error);
+		const parts = [row.git.branch ?? 'detached', row.git.dirty ? 'dirty' : 'clean'];
+		if (row.git.ahead) parts.push(`${row.git.ahead} to push`);
+		if (row.git.behind) parts.push(`${row.git.behind} to pull`);
+		if (!row.git.ahead && !row.git.behind && row.git.origin) parts.push('in sync');
+		if (!row.git.origin) parts.push('no origin');
+		return parts.join(' · ');
+	}
+
+	function dirtDetail(row: Project): string {
+		const bits = [
+			row.git.staged ? `${row.git.staged} staged` : '',
+			row.git.unstaged ? `${row.git.unstaged} changed` : '',
+			row.git.untracked ? `${row.git.untracked} untracked` : '',
+		].filter(Boolean);
+		return bits.join(', ');
 	}
 
 	function npmLabel(row: Project): string {
-		if (row.npm.status === 'ok') return row.npm.latest ?? 'ok';
-		if (row.npm.status === 'error') return `error:${row.npm.error ?? ''}`;
+		if (row.private) return 'private';
+		if (row.npm.status === 'ok') return row.npm.latest ?? '—';
+		if (row.npm.status === 'none') return 'not published';
+		if (row.npm.status === 'error') return 'lookup failed';
 		return row.npm.status;
+	}
+
+	type Badge = { text: string; tone: 'ship' | 'warn' | 'bad' | 'info'; title?: string };
+
+	function badges(row: Project): Badge[] {
+		const out: Badge[] = [];
+		if (row.missing) out.push({ text: 'folder missing', tone: 'bad' });
+		if (row.unpublishedAhead) {
+			out.push({
+				text: row.npm.latest ? `unpublished ${row.localVersion} (npm ${row.npm.latest})` : `never published ${row.localVersion}`,
+				tone: 'ship',
+				title: 'Local version is ahead of npm. You publish it — LocalHelm never does.',
+			});
+		}
+		if (row.git.dirty) out.push({ text: `dirty${dirtDetail(row) ? ` — ${dirtDetail(row)}` : ''}`, tone: 'warn' });
+		if (row.git.busy) out.push({ text: `mid-${row.git.busy}`, tone: 'bad' });
+		if (row.cascadeBehind) {
+			out.push({ text: `${row.cascadeBehind} pin(s) behind`, tone: 'warn', title: 'A dependency pin trails the published version. Cascade is M3.' });
+		}
+		if (row.git.fetchError) {
+			out.push({
+				text: `remote not read — ${plainGitError(row.git.fetchError)}`,
+				tone: 'info',
+				title: `Ahead/behind may be stale.\n\n${row.git.fetchError}`,
+			});
+		}
+		if (row.npm.status === 'error') out.push({ text: 'npm lookup failed', tone: 'bad', title: row.npm.error });
+		if (row.error) out.push({ text: 'package.json unreadable', tone: 'bad', title: row.error });
+		if (out.length === 0) out.push({ text: 'nothing to do', tone: 'info' });
+		return out;
+	}
+
+	function pinLabel(pin: Pin): string {
+		if (pin.kind === 'link' || pin.kind === 'file') return `${pin.name} ${pin.kind}:`;
+		return `${pin.name} ${pin.spec}`;
+	}
+
+	function pinTone(pin: Pin): string {
+		if (pin.kind === 'link' || pin.kind === 'file') return 'pin-local';
+		return pin.onLatest === false ? 'pin-behind' : 'pin-ok';
 	}
 
 	onMount(() => {
@@ -212,176 +367,693 @@
 	<title>LocalHelm</title>
 </svelte:head>
 
-<div class="min-h-screen bg-zinc-950 text-zinc-100">
-	<header class="border-b border-zinc-800 px-6 py-4">
-		<div class="flex flex-wrap items-end justify-between gap-4">
+<div class="shell">
+	<header>
+		<div class="head-row">
 			<div>
-				<p class="text-xs tracking-[0.2em] text-zinc-500 uppercase">LocalHelm</p>
-				<h1 class="text-2xl font-semibold">Status for the products you ship</h1>
-				<p class="mt-1 text-sm text-zinc-400">
-					{inventory ? inventory.manifestPath : 'No fleet enrolled yet.'}
-					{#if cwd}
-						<span class="text-zinc-600"> · cwd {cwd}</span>
+				<p class="eyebrow">LocalHelm</p>
+				<h1>Status for the products you ship</h1>
+				<p class="sub">
+					{#if inventory}
+						Fleet <code>{inventory.manifestPath}</code>
+					{:else}
+						No fleet yet — scan a folder on the right, then enroll.
+					{/if}
+					{#if port}
+						<span class="dim">
+							· serving 127.0.0.1:{port}{portSource === 'localberth'
+								? ' (port leased from LocalBerth)'
+								: portSource === 'flag'
+									? ' (--port)'
+									: ''}
+						</span>
 					{/if}
 				</p>
 			</div>
-			<div class="flex flex-wrap gap-2 text-sm">
-				<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()}>Refresh</button>
-				<button class="btn" disabled={Boolean(busy)} onclick={() => refresh(true)}>Status --fetch</button>
-				<button class="btn" disabled={Boolean(busy)} onclick={() => fetchOrigins()}>Fetch</button>
-				<button class="btn" disabled={Boolean(busy)} onclick={() => pull(false)}>Pull plan</button>
-				<button class="btn-apply" disabled={Boolean(busy)} onclick={() => pull(true)}>Pull --apply</button>
-				<button class="btn" disabled={Boolean(busy)} onclick={() => exportFile(false)}>Export plan</button>
-				<button class="btn-apply" disabled={Boolean(busy)} onclick={() => exportFile(true)}>Export --apply</button>
-			</div>
-		</div>
-		{#if inventory}
-			<dl class="mt-4 flex flex-wrap gap-3 text-xs text-zinc-400">
-				<div class="chip">projects {inventory.digest.projects}</div>
-				<div class="chip">dirty {inventory.digest.dirty}</div>
-				<div class="chip">unpublished-ahead {inventory.digest.unpublishedAhead}</div>
-				<div class="chip">cascade-behind {inventory.digest.cascadeBehind}</div>
-				<div class="chip">missing {inventory.digest.missing}</div>
-				<div class="chip">npm-errors {inventory.digest.npmErrors}</div>
-			</dl>
-		{/if}
-		{#if busy}<p class="mt-3 text-sm text-amber-300">{busy}…</p>{/if}
-		{#if error}<p class="mt-3 text-sm text-red-400">{error}</p>{/if}
-	</header>
 
-	<main class="grid gap-8 px-6 py-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
-		<section>
-			<div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-				<h2 class="text-lg font-medium">Fleet</h2>
-				<div class="flex gap-2">
-					<button class="btn" disabled={Boolean(busy)} onclick={() => unenroll(false)}>Unenroll plan</button>
-					<button class="btn-apply" disabled={Boolean(busy)} onclick={() => unenroll(true)}>Unenroll --apply</button>
+			<div class="actions">
+				<div class="group">
+					<span class="group-label">Read — changes nothing</span>
+					<div class="group-buttons">
+						<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()} title="Re-read package.json, git, and npm. No network writes.">
+							Refresh status
+						</button>
+						<button
+							class="btn"
+							disabled={Boolean(busy)}
+							onclick={() => refresh(true)}
+							title="git fetch origin in each repo, then re-read. Updates the to push / to pull counts."
+						>
+							Refresh + fetch remotes
+						</button>
+						<button class="btn" disabled={Boolean(busy)} onclick={() => fetchOrigins()} title="git fetch origin only, with a per-repo result log.">
+							Fetch only
+						</button>
+					</div>
+				</div>
+
+				<div class="group group-write">
+					<span class="group-label">Write — plan, then apply</span>
+					<div class="group-buttons">
+						<button class="btn" disabled={Boolean(busy)} onclick={() => pull(false)} title="List repos that are clean and behind. Writes nothing.">
+							Plan pull
+						</button>
+						<button
+							class="btn btn-write"
+							disabled={Boolean(busy) || plannedPull === null || plannedPull === 0}
+							onclick={() => pull(true)}
+							title={plannedPull === null
+								? 'Run Plan pull first.'
+								: plannedPull === 0
+									? 'Nothing is eligible: repos must be clean and behind.'
+									: 'git pull --ff-only on the eligible repos.'}
+						>
+							{plannedPull === null ? 'Pull' : `Pull ${plannedPull} repo${plannedPull === 1 ? '' : 's'}`}
+						</button>
+						<button class="btn" disabled={Boolean(busy)} onclick={() => exportFile(false)} title="Show where the JSON inventory would be written.">
+							Plan export
+						</button>
+						<button
+							class="btn btn-write"
+							disabled={Boolean(busy) || !plannedExport}
+							onclick={() => exportFile(true)}
+							title={plannedExport ? `Write ${plannedExport}` : 'Run Plan export first.'}
+						>
+							Write JSON
+						</button>
+					</div>
 				</div>
 			</div>
-			<div class="overflow-x-auto rounded-lg border border-zinc-800">
-				<table class="min-w-full text-left text-sm">
-					<thead class="bg-zinc-900 text-zinc-400">
+		</div>
+
+		{#if inventory}
+			<div class="chips">
+				<span class="chip">{inventory.digest.projects} enrolled</span>
+				<span class="chip" class:hot={inventory.digest.unpublishedAhead > 0}>{inventory.digest.unpublishedAhead} unpublished</span>
+				<span class="chip" class:warm={inventory.digest.dirty > 0}>{inventory.digest.dirty} dirty</span>
+				<span class="chip" class:warm={inventory.digest.cascadeBehind > 0}>{inventory.digest.cascadeBehind} pins behind</span>
+				<span class="chip" class:bad={inventory.digest.missing > 0}>{inventory.digest.missing} missing</span>
+				<span class="chip" class:bad={inventory.digest.npmErrors > 0}>{inventory.digest.npmErrors} npm errors</span>
+				<span class="chip quiet">
+					{fetchedAt ? `remotes fetched ${fetchedAt}` : 'remotes not fetched this session'}
+				</span>
+			</div>
+		{/if}
+
+		{#if busy}<p class="line busy">Working: {busy}…</p>{/if}
+		{#if error}<p class="line err">{error}</p>{/if}
+		{#if !busy && !error && staleRemotes}
+			<p class="line info">Some remotes could not be read, so “to push / to pull” may be stale. Local state below is accurate.</p>
+		{/if}
+	</header>
+
+	<main>
+		<section>
+			<div class="section-head">
+				<div>
+					<h2>Fleet</h2>
+					<p class="hint">Check rows to remove them from the fleet. Removing never deletes a folder.</p>
+				</div>
+				<div class="group-buttons">
+					<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => unenroll(false)}>
+						Plan remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
+					</button>
+					<button
+						class="btn btn-write"
+						disabled={Boolean(busy) || !plannedUnenroll || plannedUnenroll !== [...checkedIds].sort().join('|')}
+						onclick={() => unenroll(true)}
+						title={plannedUnenroll ? 'Rewrite localhelm.fleet.json without these rows.' : 'Run Plan remove first.'}
+					>
+						Remove from fleet
+					</button>
+				</div>
+			</div>
+
+			<div class="table-wrap">
+				<table>
+					<thead>
 						<tr>
-							<th class="px-3 py-2 font-normal"></th>
-							<th class="px-3 py-2 font-normal">id</th>
-							<th class="px-3 py-2 font-normal">local</th>
-							<th class="px-3 py-2 font-normal">npm</th>
-							<th class="px-3 py-2 font-normal">git</th>
-							<th class="px-3 py-2 font-normal">pins</th>
-							<th class="px-3 py-2 font-normal">bump</th>
+							<th class="tick"></th>
+							<th>project</th>
+							<th>local</th>
+							<th>on npm</th>
+							<th>git</th>
+							<th>fleet pins</th>
+							<th>needs you</th>
+							<th>version bump</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each inventory?.projects ?? [] as row (row.id)}
-							<tr class="border-t border-zinc-800">
-								<td class="px-3 py-2">
-									<input type="checkbox" bind:checked={selectedIds[row.id]} />
+							<tr>
+								<td class="tick"><input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedIds[row.id]} /></td>
+								<td>
+									<div class="id">{row.id}</div>
+									<div class="dim small">{row.npm.name ?? row.path}</div>
 								</td>
-								<td class="px-3 py-2 font-medium">{row.id}</td>
-								<td class="px-3 py-2">{row.localVersion ?? 'n/a'}</td>
-								<td class="px-3 py-2">{npmLabel(row)}</td>
-								<td class="px-3 py-2 text-zinc-300">{gitLabel(row)}</td>
-								<td class="px-3 py-2 text-zinc-400">
-									{row.pins
-										.map((pin) =>
-											pin.kind === 'link' || pin.kind === 'file'
-												? `${pin.name}:${pin.kind}`
-												: pin.onLatest === false
-													? `${pin.name}:behind`
-													: `${pin.name}:ok`,
-										)
-										.join(', ') || '—'}
+								<td class="mono">{row.localVersion ?? '—'}</td>
+								<td class="mono" class:ahead={row.unpublishedAhead}>{npmLabel(row)}</td>
+								<td class="small">{gitSummary(row)}</td>
+								<td>
+									{#if row.pins.length}
+										<div class="pins">
+											{#each row.pins as pin (pin.fromFile + pin.name)}
+												<span class={`pin ${pinTone(pin)}`} title={`${pin.fromFile} package.json · ${pin.spec}${pin.note ? ` · ${pin.note}` : ''}`}>
+													{pinLabel(pin)}
+												</span>
+											{/each}
+										</div>
+									{:else}
+										<span class="dim">—</span>
+									{/if}
 								</td>
-								<td class="px-3 py-2">
-									<div class="flex flex-wrap items-center gap-1">
-										<select class="bg-zinc-900 text-xs" bind:value={bumpKind[row.id]}>
+								<td>
+									<div class="badges">
+										{#each badges(row) as badge (badge.text)}
+											<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
+										{/each}
+									</div>
+								</td>
+								<td>
+									<div class="bump">
+										<select aria-label={`bump kind for ${row.id}`} bind:value={bumpKind[row.id]}>
 											<option value="patch">patch</option>
 											<option value="minor">minor</option>
 											<option value="major">major</option>
 										</select>
-										<button class="btn-xs" disabled={Boolean(busy)} onclick={() => bump(row.id, false)}>plan</button>
-										<button class="btn-xs-apply" disabled={Boolean(busy)} onclick={() => bump(row.id, true)}>apply</button>
+										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => bump(row.id, false)} title="Show the next version. Writes nothing.">
+											Plan
+										</button>
+										<button
+											class="btn btn-sm btn-write"
+											disabled={Boolean(busy) || !plannedTarget(row.id)}
+											onclick={() => bump(row.id, true)}
+											title={plannedTarget(row.id)
+												? `Write version ${plannedTarget(row.id)} to package.json. No tag, no publish.`
+												: 'Run Plan first for this bump size.'}
+										>
+											{plannedTarget(row.id) ? `Write ${plannedTarget(row.id)}` : 'Write'}
+										</button>
 									</div>
 								</td>
 							</tr>
 						{/each}
 						{#if !inventory?.projects.length}
-							<tr>
-								<td class="px-3 py-6 text-zinc-500" colspan="7">Scan a folder, check rows, then enroll --apply.</td>
-							</tr>
+							<tr><td class="empty" colspan="8">Nothing enrolled yet. Scan a folder, tick the projects you ship, then enroll.</td></tr>
 						{/if}
 					</tbody>
 				</table>
 			</div>
+
+			<p class="legend">
+				<strong>Plan</strong> buttons only print what would happen. <strong>Write</strong> buttons change files on disk, one job at a time.
+				LocalHelm never runs <code>npm publish</code> and never pushes to git.
+			</p>
 		</section>
 
-		<aside class="space-y-6">
-			<section>
-				<h2 class="mb-3 text-lg font-medium">Scan / enroll</h2>
-				<label class="block text-xs text-zinc-500" for="scan-root">Folder</label>
-				<div class="mt-1 flex gap-2">
-					<input id="scan-root" class="min-w-0 flex-1 rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm" bind:value={scanRoot} />
+		<aside>
+			<section class="panel">
+				<h2>Add projects</h2>
+				<p class="hint">Scanning proposes folders. Nothing joins the fleet until you tick it and write.</p>
+				<label for="scan-root">Folder to scan</label>
+				<div class="row">
+					<input id="scan-root" bind:value={scanRoot} spellcheck="false" />
 					<button class="btn" disabled={Boolean(busy)} onclick={() => scan()}>Scan</button>
 				</div>
-				<p class="mt-2 text-xs text-zinc-500">Nothing is written until you check rows and apply.</p>
-				<ul class="mt-3 max-h-80 space-y-1 overflow-auto text-sm">
-					{#each candidates as row (row.absPath)}
-						<li class="flex items-start gap-2 rounded border border-zinc-800 px-2 py-1">
-							<input
-								class="mt-1"
-								type="checkbox"
-								disabled={enrolled.has(row.id)}
-								bind:checked={selectedScan[row.absPath]}
-							/>
-							<div>
-								<div class="font-medium">{row.id}</div>
-								<div class="text-xs text-zinc-400">
-									{row.npmName ?? '—'} {row.version ?? ''} {row.git ? 'git' : ''}
-									{enrolled.has(row.id) ? ' · enrolled' : ''}
+
+				{#if candidates.length}
+					<p class="hint">
+						{candidates.filter((c) => !enrolledIds.has(c.id)).length} new ·
+						{candidates.filter((c) => enrolledIds.has(c.id)).length} already enrolled
+					</p>
+					<ul class="candidates">
+						{#each candidates as row (row.absPath)}
+							{@const already = enrolledIds.has(row.id)}
+							<li class:already>
+								<input
+									type="checkbox"
+									aria-label={`enroll ${row.id}`}
+									disabled={already}
+									bind:checked={selectedScan[row.absPath]}
+									onchange={() => (plannedEnroll = null)}
+								/>
+								<div>
+									<div class="id">{row.id}</div>
+									<div class="dim small">
+										{row.npmName ?? 'no package name'}{row.version ? ` ${row.version}` : ''}{row.git ? ' · git' : ' · no git'}{already
+											? ' · enrolled'
+											: ''}
+									</div>
 								</div>
-							</div>
-						</li>
-					{/each}
-				</ul>
-				<div class="mt-3 flex gap-2">
-					<button class="btn" disabled={Boolean(busy)} onclick={() => enroll(false)}>Enroll plan</button>
-					<button class="btn-apply" disabled={Boolean(busy)} onclick={() => enroll(true)}>Enroll --apply</button>
-				</div>
+							</li>
+						{/each}
+					</ul>
+					<div class="group-buttons">
+						<button class="btn" disabled={Boolean(busy) || !checkedScan.length} onclick={() => enroll(false)}>
+							Plan enroll{checkedScan.length ? ` (${checkedScan.length})` : ''}
+						</button>
+						<button
+							class="btn btn-write"
+							disabled={Boolean(busy) || !plannedEnroll || plannedEnroll !== [...checkedScan].sort().join('|')}
+							onclick={() => enroll(true)}
+							title={plannedEnroll ? 'Write these rows into localhelm.fleet.json.' : 'Run Plan enroll first.'}
+						>
+							Add to fleet
+						</button>
+					</div>
+				{/if}
 			</section>
 
-			<section>
-				<h2 class="mb-3 text-lg font-medium">Plan log</h2>
-				<pre class="max-h-96 overflow-auto rounded border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-300 whitespace-pre-wrap">{log || 'Plans and apply results land here.'}</pre>
+			<section class="panel">
+				<div class="section-head">
+					<h2>Activity</h2>
+					{#if entries.length}
+						<button class="btn btn-sm" onclick={() => (entries = [])}>Clear</button>
+					{/if}
+				</div>
+				<p class="hint">Every plan and write, newest first — the same output the CLI prints.</p>
+				{#if entries.length === 0}
+					<p class="dim small">Nothing yet.</p>
+				{:else}
+					<ul class="log">
+						{#each entries as entry (entry.time + entry.title)}
+							<li>
+								<details>
+									<summary><span class="dim small">{entry.time}</span> {entry.title}</summary>
+									<pre>{entry.body}</pre>
+								</details>
+							</li>
+						{/each}
+					</ul>
+				{/if}
 			</section>
 		</aside>
 	</main>
 </div>
 
 <style>
-	:global(.btn),
-	:global(.btn-apply),
-	:global(.btn-xs),
-	:global(.btn-xs-apply) {
-		border-radius: 0.375rem;
-		border: 1px solid rgb(63 63 70);
-		background: rgb(24 24 27);
-		padding: 0.25rem 0.6rem;
+	.shell {
+		min-height: 100vh;
+		background: #09090b;
+		color: #e4e4e7;
+		font-family:
+			ui-sans-serif,
+			system-ui,
+			sans-serif;
+	}
+
+	header {
+		border-bottom: 1px solid #27272a;
+		padding: 1.1rem 1.5rem;
+	}
+
+	.head-row {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1.25rem;
+	}
+
+	.eyebrow {
+		font-size: 0.68rem;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		color: #71717a;
+	}
+
+	h1 {
+		font-size: 1.45rem;
+		font-weight: 600;
+		margin: 0.15rem 0;
+	}
+
+	h2 {
+		font-size: 1.02rem;
+		font-weight: 600;
+		margin: 0;
+	}
+
+	.sub {
+		font-size: 0.82rem;
+		color: #a1a1aa;
+	}
+
+	.hint {
+		font-size: 0.75rem;
+		color: #8b8b93;
+		margin: 0.2rem 0 0.5rem;
+	}
+
+	.dim {
+		color: #71717a;
+	}
+
+	.small {
+		font-size: 0.75rem;
+	}
+
+	.mono,
+	code,
+	pre {
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+	}
+
+	.group {
+		border: 1px solid #27272a;
+		border-radius: 0.6rem;
+		padding: 0.45rem 0.6rem 0.55rem;
+	}
+
+	.group-write {
+		border-color: #52400f;
+		background: #1a1509;
+	}
+
+	.group-label {
+		display: block;
+		font-size: 0.66rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: #8b8b93;
+		margin-bottom: 0.35rem;
+	}
+
+	.group-buttons {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		align-items: center;
+	}
+
+	.btn {
+		border: 1px solid #3f3f46;
+		background: #18181b;
+		color: #e4e4e7;
+		border-radius: 0.4rem;
+		padding: 0.28rem 0.62rem;
+		font-size: 0.8rem;
+		cursor: pointer;
+	}
+
+	.btn:hover:not(:disabled) {
+		border-color: #6b6b75;
+	}
+
+	.btn-write {
+		border-color: #a16207;
+		background: #2a1f05;
+		color: #fde68a;
+	}
+
+	.btn-sm {
+		padding: 0.18rem 0.45rem;
+		font-size: 0.72rem;
+	}
+
+	.btn:disabled {
+		opacity: 0.42;
+		cursor: not-allowed;
+	}
+
+	.chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin-top: 0.9rem;
+	}
+
+	.chip {
+		border: 1px solid #27272a;
+		border-radius: 999px;
+		padding: 0.12rem 0.6rem;
+		font-size: 0.72rem;
+		color: #a1a1aa;
+	}
+
+	.chip.hot {
+		border-color: #a16207;
+		color: #fcd34d;
+	}
+
+	.chip.warm {
+		border-color: #4d4d16;
+		color: #d9d97a;
+	}
+
+	.chip.bad {
+		border-color: #7f1d1d;
+		color: #fca5a5;
+	}
+
+	.chip.quiet {
+		border-style: dashed;
+	}
+
+	.line {
+		margin-top: 0.7rem;
 		font-size: 0.8rem;
 	}
-	:global(.btn-apply),
-	:global(.btn-xs-apply) {
-		border-color: rgb(180 83 9);
-		color: rgb(253 230 138);
+
+	.busy {
+		color: #fcd34d;
 	}
-	:global(.btn:disabled),
-	:global(.btn-apply:disabled),
-	:global(.btn-xs:disabled),
-	:global(.btn-xs-apply:disabled) {
-		opacity: 0.5;
+
+	.err {
+		color: #f87171;
 	}
-	:global(.chip) {
-		border-radius: 999px;
-		border: 1px solid rgb(63 63 70);
-		padding: 0.15rem 0.6rem;
+
+	.info {
+		color: #93c5fd;
+	}
+
+	main {
+		display: grid;
+		gap: 1.75rem;
+		padding: 1.25rem 1.5rem 2.5rem;
+	}
+
+	@media (min-width: 1280px) {
+		main {
+			grid-template-columns: minmax(0, 1fr) 23rem;
+		}
+	}
+
+	.section-head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 0.6rem;
+		margin-bottom: 0.6rem;
+	}
+
+	.table-wrap {
+		overflow-x: auto;
+		border: 1px solid #27272a;
+		border-radius: 0.6rem;
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.84rem;
+	}
+
+	thead {
+		background: #131316;
+		color: #8b8b93;
+	}
+
+	th {
+		text-align: left;
+		font-weight: 400;
+		font-size: 0.72rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		padding: 0.5rem 0.7rem;
+	}
+
+	td {
+		padding: 0.55rem 0.7rem;
+		border-top: 1px solid #232326;
+		vertical-align: top;
+	}
+
+	.tick {
+		width: 1.8rem;
+	}
+
+	.id {
+		font-weight: 600;
+	}
+
+	.ahead {
+		color: #fcd34d;
+	}
+
+	.empty {
+		color: #71717a;
+		padding: 1.4rem 0.7rem;
+	}
+
+	.badges,
+	.pins {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		max-width: 20rem;
+	}
+
+	.badge,
+	.pin {
+		border: 1px solid #3f3f46;
+		border-radius: 0.35rem;
+		padding: 0.05rem 0.35rem;
+		font-size: 0.7rem;
+		white-space: nowrap;
+	}
+
+	.badge.ship {
+		border-color: #a16207;
+		background: #2a1f05;
+		color: #fde68a;
+	}
+
+	.badge.warn {
+		border-color: #4d4d16;
+		color: #e4e48a;
+	}
+
+	.badge.bad {
+		border-color: #7f1d1d;
+		color: #fca5a5;
+	}
+
+	.badge.info {
+		color: #8b8b93;
+	}
+
+	.pin-ok {
+		border-color: #14532d;
+		color: #86efac;
+	}
+
+	.pin-behind {
+		border-color: #a16207;
+		color: #fcd34d;
+	}
+
+	.pin-local {
+		border-color: #1e3a8a;
+		color: #93c5fd;
+	}
+
+	.legend {
+		margin-top: 0.7rem;
+		font-size: 0.74rem;
+		color: #8b8b93;
+	}
+
+	aside {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+	}
+
+	.panel {
+		border: 1px solid #27272a;
+		border-radius: 0.6rem;
+		padding: 0.9rem;
+	}
+
+	label {
+		display: block;
+		font-size: 0.7rem;
+		color: #8b8b93;
+		margin-bottom: 0.25rem;
+	}
+
+	.row {
+		display: flex;
+		gap: 0.4rem;
+	}
+
+	input:not([type]) {
+		flex: 1;
+		min-width: 0;
+		border: 1px solid #3f3f46;
+		background: #18181b;
+		color: #e4e4e7;
+		border-radius: 0.4rem;
+		padding: 0.25rem 0.5rem;
+		font-size: 0.8rem;
+	}
+
+	select {
+		border: 1px solid #3f3f46;
+		background: #18181b;
+		color: #e4e4e7;
+		border-radius: 0.35rem;
+		font-size: 0.72rem;
+		padding: 0.15rem 0.2rem;
+	}
+
+	.bump {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem;
+		align-items: center;
+	}
+
+	.candidates,
+	.log {
+		list-style: none;
+		margin: 0.5rem 0;
+		padding: 0;
+		max-height: 20rem;
+		overflow: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+	}
+
+	.candidates li {
+		display: flex;
+		gap: 0.5rem;
+		align-items: flex-start;
+		border: 1px solid #27272a;
+		border-radius: 0.4rem;
+		padding: 0.3rem 0.45rem;
+	}
+
+	.candidates li.already {
+		opacity: 0.55;
+	}
+
+	.log li {
+		border: 1px solid #27272a;
+		border-radius: 0.4rem;
+		padding: 0.3rem 0.45rem;
+		font-size: 0.76rem;
+	}
+
+	summary {
+		cursor: pointer;
+	}
+
+	pre {
+		margin: 0.4rem 0 0;
+		max-height: 14rem;
+		overflow: auto;
+		white-space: pre-wrap;
+		font-size: 0.68rem;
+		color: #a1a1aa;
 	}
 </style>

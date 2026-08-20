@@ -31,19 +31,12 @@ function parseAheadBehind(header: string): { ahead: number | null; behind: numbe
 }
 
 export function readGit(projectRoot: string, fetch = false): GitCell {
+	// A failed fetch must not hide the local truth (branch, dirt, ahead/behind).
+	let fetchError: string | undefined;
 	if (fetch) {
 		const fetched = runGit(projectRoot, ['fetch', '--quiet', 'origin']);
 		if (!fetched.ok && !/no such remote|does not exist/i.test(fetched.stderr)) {
-			return {
-				repo: true,
-				dirty: false,
-				staged: 0,
-				unstaged: 0,
-				untracked: 0,
-				ahead: null,
-				behind: null,
-				error: `git fetch: ${fetched.stderr}`,
-			};
+			fetchError = fetched.stderr;
 		}
 	}
 
@@ -60,6 +53,7 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 			untracked: 0,
 			ahead: null,
 			behind: null,
+			...(fetchError ? { fetchError } : {}),
 			error: status.stderr,
 		};
 	}
@@ -114,6 +108,7 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 		backup,
 		detached,
 		busy,
+		...(fetchError ? { fetchError } : {}),
 	};
 }
 

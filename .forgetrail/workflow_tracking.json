@@ -306,6 +306,22 @@
       "issue": "findManifest walked forever on Windows: toPosix flipped Z: and Z:/ so parent never equaled dir. enroll appeared to hang.",
       "resolution": "Normalize drive roots as X:/, stop walk-up at isFsRoot, cap iterations at 64.",
       "category": "tooling"
+    },
+    {
+      "timestamp": "2026-08-20T20:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 2,
+      "issue": "A failed git fetch (SSH publickey denied on git@github.com remotes) replaced the whole git cell with a stack of stderr, so dirty/ahead/behind and the unpublished-ahead signal were invisible for localhelm and localberth.",
+      "resolution": "readGit records fetchError and keeps reading local status; the dashboard shows local truth plus a short 'remote not read' note, and the CLI adds a remote-unreadable note.",
+      "category": "integration"
+    },
+    {
+      "timestamp": "2026-08-20T20:12:00Z",
+      "phase": "2-scaffolding",
+      "session": 2,
+      "issue": "Leftover vite dev process kept port 54322 bound after the parent serve was killed, so the next localhelm serve failed with strictPort.",
+      "resolution": "Kill the whole tree (taskkill /T) or check the port owner before reserving; a LocalBerth lease avoids the collision.",
+      "category": "tooling"
     }
   ],
   "sessions": [
