@@ -3,7 +3,7 @@ import path from 'node:path';
 import ignore, { type Ignore } from 'ignore';
 import { homedir } from 'node:os';
 import { pathExists } from './pkg.js';
-import { toPosix } from './paths.js';
+import { parentDir, toPosix } from './paths.js';
 
 export const IGNORE_FILE_NAME = '.localhelmignore';
 
@@ -29,7 +29,7 @@ export async function loadScanIgnore(scanRoot: string): Promise<Ignore> {
 	let dir = toPosix(scanRoot);
 	for (let i = 0; i < 8; i += 1) {
 		files.push(toPosix(path.join(dir, IGNORE_FILE_NAME)));
-		const parent = toPosix(path.dirname(dir));
+		const parent = parentDir(dir);
 		if (parent === dir) break;
 		dir = parent;
 	}

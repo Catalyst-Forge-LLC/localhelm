@@ -2,7 +2,7 @@ import path from 'node:path';
 import type { LoadedManifest } from './manifest.js';
 import { emptyManifest, writeManifest } from './manifest.js';
 import { isDir, pathExists, readPkg, rootPkgPath } from './pkg.js';
-import { manifestName, relativeToRoot, resolveUserPath, slugId, toPosix } from './paths.js';
+import { manifestName, parentDir, relativeToRoot, resolveUserPath, slugId, toPosix } from './paths.js';
 import type { EnrollPlan, FleetManifest, FleetProject } from './types.js';
 
 export type EnrollRequest = {
@@ -13,6 +13,15 @@ export type EnrollRequest = {
 	manifestPath?: string;
 };
 
+export function inferManifestPath(absPaths: string[], cwd: string): string {
+	if (absPaths.length === 0) return toPosix(path.join(cwd, manifestName()));
+	const parents = absPaths.map((p) => parentDir(p));
+	if (parents.every((p) => p === parents[0])) {
+		return toPosix(path.join(parents[0], manifestName()));
+	}
+	return toPosix(path.join(cwd, manifestName()));
+}
+
 function nextId(base: string, used: Set<string>): string {
 	if (!used.has(base)) return base;
 	let i = 2;
@@ -22,7 +31,10 @@ function nextId(base: string, used: Set<string>): string {
 
 export async function planEnroll(req: EnrollRequest, existing: LoadedManifest | null): Promise<EnrollPlan> {
 	const cwd = req.cwd ?? process.cwd();
-	const manifestPath = toPosix(req.manifestPath ?? existing?.manifestPath ?? path.join(cwd, manifestName()));
+	const resolved = req.paths.map((raw) => resolveUserPath(raw, cwd));
+	const manifestPath = toPosix(
+		req.manifestPath ?? existing?.manifestPath ?? inferManifestPath(resolved, cwd),
+	);
 	const workspaceRoot = toPosix(path.dirname(manifestPath));
 	const manifest: FleetManifest = existing?.manifest ?? emptyManifest();
 	const usedIds = new Set(manifest.projects.map((p) => p.id));

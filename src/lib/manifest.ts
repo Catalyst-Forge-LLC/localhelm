@@ -8,6 +8,7 @@ import {
 import {
 	joinRoot,
 	manifestName,
+	parentDir,
 	resolveUserPath,
 	toPosix,
 	userGlobalManifestPath,
@@ -78,10 +79,10 @@ export async function readManifestFile(filePath: string): Promise<LoadedManifest
 
 export async function findManifest(cwd = process.cwd()): Promise<LoadedManifest | null> {
 	let dir = resolveUserPath(cwd);
-	for (;;) {
+	for (let i = 0; i < 64; i += 1) {
 		const candidate = toPosix(path.join(dir, manifestName()));
 		if (await pathExists(candidate)) return readManifestFile(candidate);
-		const parent = toPosix(path.dirname(dir));
+		const parent = parentDir(dir);
 		if (parent === dir) break;
 		dir = parent;
 	}

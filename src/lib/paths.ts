@@ -5,8 +5,21 @@ const MANIFEST_NAME = 'localhelm.fleet.json';
 
 export function normalizePath(input: string): string {
 	const next = input.replace(/\\/g, '/');
-	if (/^[A-Za-z]:$/.test(next)) return `${next}/`;
+	if (/^[A-Za-z]:\/?$/.test(next)) return `${next.slice(0, 2)}/`;
 	return next.replace(/\/+$/, '') || next;
+}
+
+export function isFsRoot(dir: string): boolean {
+	const n = toPosix(dir);
+	return n === '/' || /^[A-Za-z]:\/$/.test(n);
+}
+
+export function parentDir(dir: string): string {
+	const n = toPosix(dir);
+	if (isFsRoot(n)) return n;
+	const parent = toPosix(path.dirname(n));
+	if (parent === n || isFsRoot(parent)) return isFsRoot(parent) ? parent : n;
+	return parent;
 }
 
 export function toPosix(input: string): string {

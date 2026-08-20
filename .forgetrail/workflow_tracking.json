@@ -296,7 +296,16 @@
       "status": "active"
     }
   ],
-  "gotchas": [],
+  "gotchas": [
+    {
+      "timestamp": "2026-08-20T19:05:00Z",
+      "phase": "2-scaffolding",
+      "session": 1,
+      "issue": "findManifest walked forever on Windows: toPosix flipped Z: and Z:/ so parent never equaled dir. enroll appeared to hang.",
+      "resolution": "Normalize drive roots as X:/, stop walk-up at isFsRoot, cap iterations at 64.",
+      "category": "tooling"
+    }
+  ],
   "sessions": [
     {
       "session": 1,

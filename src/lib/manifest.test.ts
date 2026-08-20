@@ -3,7 +3,8 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
-import { applyEnroll, planEnroll } from './enroll.js';
+import { applyEnroll, inferManifestPath, planEnroll } from './enroll.js';
+import { findManifest } from './manifest.js';
 import { readManifestFile, validateManifest } from './manifest.js';
 import { scanFolders } from './scan.js';
 
@@ -15,6 +16,18 @@ describe('manifest and enroll', () => {
 				'test.json',
 			),
 		);
+	});
+
+	it('findManifest returns quickly when none exists', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-none-'));
+		const found = await findManifest(root);
+		assert.equal(found, null);
+	});
+
+	it('infers manifest at the shared parent of sibling folders', () => {
+		const ws = 'Z:/workspace';
+		const inferred = inferManifestPath([`${ws}/localhelm`, `${ws}/ollanet`], ws);
+		assert.equal(inferred, 'Z:/workspace/localhelm.fleet.json');
 	});
 
 	it('plans enroll then writes on apply', async () => {
