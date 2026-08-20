@@ -1,6 +1,6 @@
 import { readGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { npmLatest } from './npm.js';
+import { clearNpmCache, npmLatest } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pinsFromPkg } from './pins.js';
 import { pathExists, readPkg, rootPkgPath, sitePkgPath, type PkgJson } from './pkg.js';
@@ -25,6 +25,8 @@ type Prepared = {
 };
 
 export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions = {}): Promise<FleetInventory> {
+	// One request per package name *per run*. A long-lived `serve` must not keep yesterday's latest.
+	clearNpmCache();
 	const prepared: Prepared[] = [];
 	const names = new Set<string>();
 

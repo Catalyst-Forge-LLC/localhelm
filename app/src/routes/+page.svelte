@@ -458,7 +458,7 @@
 				<div class="group">
 					<span class="group-label">Read — changes nothing</span>
 					<div class="group-buttons">
-						<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()} title="Re-read package.json, git, and npm. No network writes.">
+						<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()} title="Re-read package.json, git, and npm latest. Clears the in-process npm cache.">
 							Refresh status
 						</button>
 						<button
