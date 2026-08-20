@@ -13,6 +13,13 @@
 	};
 	type ReadyRow = { id: string; localVersion: string | null; npmLatest?: string; reason?: string };
 	type CascadeTarget = { id: string; npm: string; latest: string; behind: number; linked: number };
+	type PluginBoard = {
+		plugin: string;
+		title: string;
+		note?: string;
+		columns: { id: string; label: string }[];
+		rows: { id: string; cells: Record<string, string>; actions: { id: string; label: string; write: boolean }[] }[];
+	};
 	type Project = {
 		id: string;
 		path: string;
@@ -84,6 +91,8 @@
 	let plannedUnenroll = $state<string | null>(null);
 	let plannedBump = $state<Record<string, string>>({});
 	let plannedCascade = $state<string | null>(null);
+	let pluginBoards = $state<PluginBoard[]>([]);
+	let plannedPlugin = $state<string | null>(null);
 
 	let entries = $state<LogEntry[]>([]);
 	let busy = $state('');
@@ -148,6 +157,7 @@
 		plannedUnenroll = null;
 		plannedEnroll = null;
 		plannedCascade = null;
+		plannedPlugin = null;
 	}
 
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
@@ -196,6 +206,12 @@
 			for (const row of data.inventory?.projects ?? []) kinds[row.id] ??= 'patch';
 			bumpKind = kinds;
 			clearPlans();
+			try {
+				const plug = (await call('/api/plugins')) as { boards: PluginBoard[] };
+				pluginBoards = plug.boards;
+			} catch {
+				pluginBoards = [];
+			}
 		});
 	}
 
@@ -298,6 +314,19 @@
 			}
 			plannedPull = eligible.length;
 			note(`pull plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
+		});
+	}
+
+	async function pluginJob(plugin: string, action: string, ids: string[], apply: boolean): Promise<void> {
+		const key = `${plugin}:${action}:${[...ids].sort().join(',')}`;
+		await run(apply ? `${plugin} ${action}` : `planning ${plugin} ${action}`, async () => {
+			const data = await call('/api/plugin', {
+				method: 'POST',
+				body: JSON.stringify({ id: plugin, action, ids, apply }),
+			});
+			note(apply ? `${plugin} ${action} --apply` : `${plugin} ${action} plan`, data);
+			if (apply) await refresh();
+			else plannedPlugin = key;
 		});
 	}
 
@@ -632,6 +661,66 @@
 				<strong>Plan</strong> buttons only print what would happen. <strong>Write</strong> buttons change files on disk, one job at a time.
 				LocalHelm never runs <code>npm publish</code> and never pushes to git.
 			</p>
+
+			{#each pluginBoards as board (board.plugin)}
+				<section class="plugin-board">
+					<div class="section-head">
+						<div>
+							<h2>{board.title}</h2>
+							<p class="hint">{board.note}</p>
+						</div>
+					</div>
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th>site</th>
+									{#each board.columns as col (col.id)}
+										<th>{col.label}</th>
+									{/each}
+									<th>plugin jobs</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each board.rows as row (row.id)}
+									<tr>
+										<td class="id">{row.id}</td>
+										{#each board.columns as col (col.id)}
+											<td class="small">{row.cells[col.id] ?? '—'}</td>
+										{/each}
+										<td>
+											<div class="bump">
+												{#each row.actions as act (act.id)}
+													<button
+														class="btn btn-sm"
+														disabled={Boolean(busy)}
+														onclick={() => pluginJob(board.plugin, act.id, [row.id], false)}
+													>
+														Plan {act.label.toLowerCase()}
+													</button>
+													<button
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy) || plannedPlugin !== `${board.plugin}:${act.id}:${row.id}`}
+														onclick={() => pluginJob(board.plugin, act.id, [row.id], true)}
+														title={plannedPlugin === `${board.plugin}:${act.id}:${row.id}`
+															? `Run ${act.label} via the ${board.title} plugin.`
+															: 'Run the matching Plan first.'}
+													>
+														{act.label}
+													</button>
+												{/each}
+											</div>
+										</td>
+									</tr>
+								{/each}
+								{#if !board.rows.length}
+									<tr><td class="empty" colspan={board.columns.length + 2}>No rows from this plugin.</td></tr>
+								{/if}
+							</tbody>
+						</table>
+					</div>
+				</section>
+			{/each}
 		</section>
 
 		<aside>
@@ -986,6 +1075,10 @@
 		justify-content: space-between;
 		gap: 0.6rem;
 		margin-bottom: 0.6rem;
+	}
+
+	.plugin-board {
+		margin-top: 1.75rem;
 	}
 
 	.table-wrap {

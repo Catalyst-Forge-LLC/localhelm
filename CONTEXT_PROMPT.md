@@ -75,6 +75,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - M1 CLI: `scan`, `enroll`, `unenroll`, `status`, `deps` (+ `--json`)
 - M2: `bump`, `fetch`, `pull`, `export`, job lock, SvelteKit `app/` + `localhelm serve`
 - M3: `ready`, `cascade` (plan/apply `^V`, skip `link:`/`file:`, commit on apply)
+- Plugin host: `localhelm.plugin.mjs` on an enrolled project. FilePress plugin lives in the filepress checkout and calls the sibling library (headers, link→npm, ship). You can run those jobs from LocalHelm instead of `pnpm siblings`.
 
 ### In Progress
 

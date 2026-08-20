@@ -311,6 +311,16 @@
       "rationale": "Locked brief D12–D14 plus genesis 6.2–6.6. FilePress already taught us not to treat a leftover link: as current.",
       "alternatives_considered": ["Auto-convert link: to registry", "Commit opt-in", "Cascade the next wave in the same job"],
       "status": "active"
+    },
+    {
+      "id": "d17",
+      "timestamp": "2026-08-20T21:15:00Z",
+      "phase": "2-scaffolding",
+      "session": 3,
+      "decision": "FilePress-specific jobs (discover content sites, link:→registry, _headers merge, pnpm ship) are a plugin loaded from the enrolled filepress checkout (localhelm.plugin.mjs). LocalHelm core stays generic and does not reimplement header merge or engine pin rewrite.",
+      "rationale": "Operator wanted one window (absorb C) without baking FilePress into the public localhelm package. Compose: host here, library stays in FilePress.",
+      "alternatives_considered": ["Keep a second siblings dashboard only", "Copy header merge into localhelm", "Deep-link only"],
+      "status": "active"
     }
   ],
   "gotchas": [

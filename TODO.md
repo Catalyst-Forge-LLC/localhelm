@@ -25,8 +25,8 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 
 ## M4 — Compose + agents
 
+- [x] Plugin host: enrolled `localhelm.plugin.mjs` (FilePress sites board)
 - [ ] Optional LocalBerth lease / IngotVault column
-- [ ] FilePress siblings deep-link (still separate)
 - [ ] MCP for status / deps / plans
 
 ## Later

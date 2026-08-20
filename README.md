@@ -24,6 +24,8 @@ localhelm pull                          # plan; add --apply for ff-only
 localhelm export                        # plan; add --apply to write localhelm.status.json
 localhelm ready                         # eligible to publish (you still publish)
 localhelm cascade ollanet               # plan pin updates to ^npm; --apply writes + commits
+localhelm plugins                       # FilePress (and later others) if the enrolled project has localhelm.plugin.mjs
+localhelm plugin filepress              # content sites: headers, link→npm, ship
 localhelm serve                         # dashboard on 127.0.0.1:54322
 ```
 

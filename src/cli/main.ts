@@ -1,6 +1,7 @@
 import { applyBump, planBump } from '../lib/bump.js';
 import { applyCascade, planCascade } from '../lib/cascade.js';
 import { fleetDeps } from '../lib/deps.js';
+import { loadPlugins, requirePlugin } from '../lib/plugin.js';
 import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { applyExport, planExport } from '../lib/export.js';
@@ -28,6 +29,8 @@ Usage:
   localhelm export [file] [--apply]
   localhelm ready [--json]
   localhelm cascade <id> [--to V] [--apply] [--no-commit]
+  localhelm plugins
+  localhelm plugin <id> [action] [name...] [--apply] [--no-commit]
   localhelm serve [--host ADDR] [--port N]
 
 scan never writes. Mutating commands print a plan; pass --apply to write.
@@ -415,6 +418,66 @@ async function main(): Promise<void> {
 			if (!apply) lines.push('', 'Nothing written. Re-run with --apply to write pins and lockfiles.');
 			else if (!result.rows.some((r) => r.writes)) lines.push('', 'Nothing written.');
 			process.stdout.write(`${lines.join('\n')}\n`);
+		}
+		return;
+	}
+
+	if (cmd === 'plugins') {
+		const json = takeFlag(argv, '--json');
+		if (argv.length) fail('usage: localhelm plugins [--json]');
+		const loaded = await requireManifest();
+		const plugins = await loadPlugins(loaded);
+		if (json) printJson({ plugins: plugins.map((p) => ({ id: p.id, label: p.label, source: p.source })) });
+		else if (plugins.length === 0) {
+			process.stdout.write('No plugins. An enrolled project can expose localhelm.plugin.mjs.\n');
+		} else {
+			process.stdout.write(
+				`${['id\tlabel\tsource', ...plugins.map((p) => `${p.id}\t${p.label}\t${p.source}`)].join('\n')}\n`,
+			);
+		}
+		return;
+	}
+
+	if (cmd === 'plugin') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		takeFlag(argv, '--no-commit');
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		const pluginId = argv.shift();
+		if (!pluginId) fail('usage: localhelm plugin <id> [action] [name...] [--apply]');
+		const loaded = await requireManifest();
+		const plug = requirePlugin(await loadPlugins(loaded), pluginId);
+		const action = argv[0] && !argv[0].includes('/') ? argv.shift() : undefined;
+		const ids = argv;
+		if (!action) {
+			const board = await plug.plugin.board();
+			if (json) printJson(board);
+			else {
+				const head = ['id', ...board.columns.map((c) => c.id)].join('\t');
+				const body = board.rows.map((row) => [row.id, ...board.columns.map((c) => row.cells[c.id] ?? '')].join('\t'));
+				process.stdout.write(`${[board.title, board.note ?? '', head, ...body].filter(Boolean).join('\n')}\n`);
+			}
+			return;
+		}
+		if (apply) {
+			if (!plug.plugin.apply) fail(`plugin ${pluginId} has no apply`);
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				const result = await plug.plugin.apply(action, ids);
+				if (json) printJson(result);
+				else process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+			} finally {
+				await lock.release();
+			}
+			return;
+		}
+		if (!plug.plugin.plan) fail(`plugin ${pluginId} has no plan`);
+		const plan = await plug.plugin.plan(action, ids);
+		if (json) printJson(plan);
+		else {
+			process.stdout.write(`${JSON.stringify(plan, null, 2)}\n`);
+			process.stdout.write('Nothing written. Re-run with --apply to run the plugin job.\n');
 		}
 		return;
 	}

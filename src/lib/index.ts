@@ -9,6 +9,8 @@ export { clearNpmCache, npmHasVersion, npmLatest } from './npm.js';
 export { retargetSpecifier } from './pinwrite.js';
 export { fleetReady } from './ready.js';
 export type { ReadyView } from './ready.js';
+export { loadPlugins, requirePlugin } from './plugin.js';
+export type { HelmPlugin, LoadedPlugin, PluginBoard } from './plugin.js';
 export { applyBump, planBump } from './bump.js';
 export type { BumpPlan } from './bump.js';
 export { applyExport, defaultExportPath, planExport } from './export.js';
