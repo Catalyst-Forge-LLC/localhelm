@@ -3,14 +3,30 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Status for the products you ship. A named fleet of local repos: git, npm, dependents, and the public shelf.",
+  "description": "Status for the products you ship. A named fleet of local repos: git, npm, and dependents.",
   "license": "Apache-2.0",
   "author": "Catalyst Forge, LLC",
+  "bin": {
+    "localhelm": "./bin/localhelm.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/lib/index.d.ts",
+      "default": "./dist/lib/index.js"
+    }
+  },
+  "files": [
+    "bin",
+    "dist",
+    "LICENSE",
+    "NOTICE",
+    "README.md"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Catalyst-Forge-LLC/localhelm.git"
   },
-  "homepage": "https://github.com/Catalyst-Forge-LLC/localhelm",
+  "homepage": "https://localhelm.dev",
   "bugs": {
     "url": "https://github.com/Catalyst-Forge-LLC/localhelm/issues"
   },
@@ -25,12 +41,19 @@
   "engines": {
     "node": ">=22"
   },
-  "files": [
-    "LICENSE",
-    "NOTICE",
-    "README.md"
-  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/cli/main.ts",
+    "cli": "tsx src/cli/main.ts",
+    "test": "tsx --test src/lib/*.test.ts",
+    "prepublishOnly": "tsc -p tsconfig.json"
+  },
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.3"
   }
 }

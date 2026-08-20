@@ -24,3 +24,5 @@ Thumbs.db
 *.sqlite3
 
 .localhelm/
+/localhelm.fleet.json
+

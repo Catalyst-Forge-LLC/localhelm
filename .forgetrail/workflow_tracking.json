@@ -6,7 +6,7 @@
     "archetype": "product",
     "status": "active"
   },
-  "currentPhase": "1-architecture",
+  "currentPhase": "2-scaffolding",
   "agentContext": {
     "primaryAgent": "cursor-agent",
     "supportsSubagents": true,
@@ -14,9 +14,9 @@
   },
   "phases": {
     "1-architecture": {
-      "status": "in_progress",
+      "status": "completed",
       "startedAt": "2026-08-20T17:15:00Z",
-      "completedAt": null,
+      "completedAt": "2026-08-20T18:29:00Z",
       "exitCriteriaMet": [
         "Tech choices confirmed",
         "Folder structure confirmed",
@@ -34,17 +34,16 @@
         },
         {
           "timestamp": "2026-08-20T18:17:00Z",
-          "text": "Brief locked. Scan-then-confirm enroll; FilePress site + /docs; Apache-2.0; commit on apply; no push or publish in v1 (publish later optional); siblings separate; ^V; workspaceRoot .; groups; JSON M1 / MCP M4; CLI + SvelteKit. Waiting for operator to start the M1 spine."
+          "text": "Brief locked. Operator said go — Phase 2 M1 spine started."
         }
       ]
     },
     "2-scaffolding": {
-      "status": "not_started",
-      "startedAt": null,
+      "status": "in_progress",
+      "startedAt": "2026-08-20T18:29:00Z",
       "completedAt": null,
-      "exitCriteriaMet": [],
-      "exitCriteriaRemaining": [
-        "App runs with pnpm dev",
+      "exitCriteriaMet": [
+        "App runs with pnpm dev / pnpm cli",
         "Real data visible on screen",
         "Core CRUD works",
         "Hero flow functions end to end",
@@ -53,6 +52,15 @@
         "TODO.md created (from ForgeTrail template, seeded from PHASE_1_BRIEF §11)",
         "IDEAS.md created (from ForgeTrail template)",
         "Phase 2 doc scope only per WORKFLOW §1a (no premature extra templates)"
+      ],
+      "exitCriteriaRemaining": [
+        "SvelteKit dashboard (app/) is M2 — not part of this CLI spine"
+      ],
+      "notes": [
+        {
+          "timestamp": "2026-08-20T18:29:00Z",
+          "text": "M1 CLI spine: scan, enroll/unenroll --apply, status, deps, JSON. Tests and tsc pass."
+        }
       ],
       "notes": []
     },
@@ -292,9 +300,10 @@
         "package.json set to localhelm@0.0.0; operator published to npm",
         "D9: no CF shelf baked in; generic JSON export",
         "D10: localhelm.dev secured",
-        "PHASE_1_BRIEF locked with remaining §9 answers"
+        "PHASE_1_BRIEF locked with remaining §9 answers",
+        "M1 CLI: scan, enroll/unenroll --apply, status, deps, JSON"
       ],
-      "leftOff": "Brief locked. Waiting for the operator to start the M1 spine (scan → confirm enroll → status/deps/JSON).",
+      "leftOff": "M1 CLI scaffolded. Operator can scan a workspace, enroll with --apply, then status --json.",
       "contextLimitHit": false
     }
   ]

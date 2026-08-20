@@ -30,5 +30,5 @@ This repository uses **ForgeTrail Lite**. Full protocol: `.forgetrail/FORGETRAIL
 
 ## Session start
 
-1. Read `.forgetrail/workflow_tracking.json` and `docs/PHASE_1_BRIEF.md`.
+1. Read `.forgetrail/workflow_tracking.json`, `CONTEXT_PROMPT.md`, and `docs/PHASE_1_BRIEF.md`.
 2. If Phase 1 is not locked, do not scaffold.
