@@ -284,6 +284,16 @@
       "rationale": "Confirmed 2026-08-20. Not a tiny static page.",
       "alternatives_considered": ["Static HTML dashboard", "Svelte without SvelteKit", "Dashboard at repo root"],
       "status": "active"
+    },
+    {
+      "id": "d15",
+      "timestamp": "2026-08-20T18:41:00Z",
+      "phase": "2-scaffolding",
+      "session": 1,
+      "decision": "Scan reads gitignore-style .localhelmignore (walk-up) and optional ~/.localhelm/ignore. Hard skips remain node_modules, dot-dirs, __*.",
+      "rationale": "Operator asked for a folder ignore file so sandbox/noise is not proposed.",
+      "alternatives_considered": ["Hardcoded skip list only", "Ignore only in the manifest"],
+      "status": "active"
     }
   ],
   "gotchas": [],

@@ -160,7 +160,7 @@ Skipped. Inventory and plans are read from disk, git, and npm. No LLM chooses ve
 
 **D10.** Public site is `localhelm.dev`, FilePress explainer **plus `/docs`**. Site is not a v1 CLI blocker.
 
-**D11.** Enroll is **scan folder(s) → operator checks/confirms**. Discover proposes; nothing is written until confirm. Multiple roots allowed.
+**D11.** Enroll is **scan folder(s) → operator checks/confirms**. Discover proposes; nothing is written until confirm. Multiple roots allowed. Scan honors `.localhelmignore` (gitignore syntax) and `~/.localhelm/ignore`.
 
 **D12.** Commit on apply: **yes**, default on for cascade / export write. Message like `Helm: retarget <pkg> to <version>.` No attribution trailers.
 

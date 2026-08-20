@@ -18,4 +18,6 @@ localhelm deps
 
 `scan` never writes. `enroll` / `unenroll` print a plan; pass `--apply` to write `localhelm.fleet.json`. The tool never publishes and never git-pushes.
 
+Put gitignore-style patterns in `.localhelmignore` at the workspace (or a parent). `node_modules`, dot-folders, and `__*` are always skipped. Optional user-global list: `~/.localhelm/ignore`.
+
 Requires Node 22+. License Apache-2.0. Site: [localhelm.dev](https://localhelm.dev).

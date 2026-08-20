@@ -1,5 +1,7 @@
 import { readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
+import type { Ignore } from 'ignore';
+import { isIgnoredRel, loadScanIgnore } from './ignorefile.js';
 import { isDir, pathExists, readPkg, rootPkgPath, sitePkgPath } from './pkg.js';
 import { resolveUserPath, skipDirName, slugId, toPosix } from './paths.js';
 import type { ScanCandidate } from './types.js';
@@ -43,7 +45,14 @@ async function candidateFor(dir: string, workspaceHint?: string): Promise<ScanCa
 	return row;
 }
 
-async function walk(dir: string, depth: number, maxDepth: number, out: string[]): Promise<void> {
+async function walk(
+	dir: string,
+	depth: number,
+	maxDepth: number,
+	root: string,
+	ig: Ignore,
+	out: string[],
+): Promise<void> {
 	if (depth > maxDepth) return;
 	let entries;
 	try {
@@ -55,8 +64,10 @@ async function walk(dir: string, depth: number, maxDepth: number, out: string[])
 		if (!entry.isDirectory()) continue;
 		if (skipDirName(entry.name)) continue;
 		const child = toPosix(path.join(dir, entry.name));
+		const rel = toPosix(path.relative(root, child));
+		if (isIgnoredRel(ig, rel)) continue;
 		out.push(child);
-		await walk(child, depth + 1, maxDepth, out);
+		await walk(child, depth + 1, maxDepth, root, ig, out);
 	}
 }
 
@@ -75,9 +86,10 @@ export async function scanFolders(options: ScanOptions): Promise<ScanCandidate[]
 	const workspaceHint = absRoots.length === 1 ? absRoots[0] : undefined;
 	const dirs = new Set<string>();
 	for (const root of absRoots) {
+		const ig = await loadScanIgnore(root);
 		dirs.add(root);
 		const nested: string[] = [];
-		await walk(root, 0, maxDepth, nested);
+		await walk(root, 0, maxDepth, root, ig, nested);
 		for (const d of nested) dirs.add(d);
 	}
 	const rows: ScanCandidate[] = [];

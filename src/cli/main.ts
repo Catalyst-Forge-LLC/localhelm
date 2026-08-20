@@ -16,6 +16,7 @@ Usage:
   localhelm deps [id] [--json]
 
 scan never writes. enroll/unenroll print a plan; pass --apply to write the manifest.
+Scan also reads .localhelmignore (and ~/.localhelm/ignore).
 `;
 }
 

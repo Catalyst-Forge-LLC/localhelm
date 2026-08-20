@@ -7,7 +7,7 @@ _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking
 - **App:** TypeScript ESM CLI (`src/`) + later SvelteKit dashboard (`app/`) + later FilePress site (`site/` + `/docs`)
 - **Language:** TypeScript strict, Node 22+
 - **Package manager:** pnpm
-- **Storage:** `localhelm.fleet.json` (`workspaceRoot: "."`) + gitignored job state later. No PocketBase, no accounts, no telemetry.
+- **Storage:** `localhelm.fleet.json` (`workspaceRoot: "."`) + `.localhelmignore` (scan) + gitignored job state later. No PocketBase, no accounts, no telemetry.
 - **AI/LLM:** none
 - **Deploy:** npm `localhelm` (operator publishes). Site later at localhelm.dev
 - **Key dependencies:** Node built-ins + TypeScript. No catalog adapter.
@@ -40,6 +40,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - DECIDED Phase 1: Public product CLI `localhelm`, never `helm`. WHY: name collisions; name reserved at 0.0.0.
 - DECIDED Phase 1: No shop shelf. Export generic JSON. WHY: public package; CF may consume later.
 - DECIDED Phase 1: Enroll is scan then confirm. WHY: fleet is chosen, not auto-enrolled.
+- DECIDED Phase 2: `.localhelmignore` (gitignore syntax) plus `~/.localhelm/ignore`. WHY: operator asked; scan must skip sandbox/noise folders. Hard skips still: `node_modules`, dot-dirs, `__*`.
 - DECIDED Phase 1: Apache-2.0. WHY: operator 2026-08-20.
 - DECIDED Phase 1: No publish and no git push in v1. Publish is a future option. WHY: operator publishes.
 - DECIDED Phase 1: Cascade `^V`; commit on apply default on. WHY: house pins; operator said yes commit.

@@ -33,6 +33,18 @@ describe('manifest and enroll', () => {
 		assert.equal(loaded.manifest.projects[0]?.path, 'widget');
 	});
 
+	it('scan honors .localhelmignore', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-ign-'));
+		await mkdir(path.join(root, 'keep'));
+		await writeFile(path.join(root, 'keep', 'package.json'), JSON.stringify({ name: 'keep', version: '1.0.0' }));
+		await mkdir(path.join(root, 'sandbox'));
+		await writeFile(path.join(root, 'sandbox', 'package.json'), JSON.stringify({ name: 'sandbox', version: '1.0.0' }));
+		await writeFile(path.join(root, '.localhelmignore'), 'sandbox\n# comments\n');
+		const rows = await scanFolders({ roots: [root], cwd: root });
+		assert.equal(rows.some((r) => r.npmName === 'sandbox'), false);
+		assert.equal(rows.some((r) => r.npmName === 'keep'), true);
+	});
+
 	it('scan skips node_modules and proposes a package', async () => {
 		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-scan-'));
 		await mkdir(path.join(root, 'keep'));
