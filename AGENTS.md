@@ -11,14 +11,14 @@ This repository uses **ForgeTrail Lite**. Full protocol: `.forgetrail/FORGETRAIL
 ## Non-negotiables
 
 - **Phase gates:** wait for explicit user approval before advancing `currentPhase`.
-- **Phase 1 before code:** do not write project code until `docs/PHASE_1_BRIEF.md` is **locked** and stack is agreed.
-- **Phase 2 = full runnable spine** in one pass (M1 read-only fleet: manifest, discover/enroll, status, deps, JSON).
+- **Phase 1 before code:** do not write project code until `docs/PHASE_1_BRIEF.md` is **locked** and the operator says to start the spine.
+- **Phase 2 = full runnable spine** in one pass (M1: scan folders → confirm enroll, status, deps, JSON).
 - **Log decisions** in `.forgetrail/workflow_tracking.json → decisions[]`.
 - **Git commits:** plain `-m` or `-F` only; no unrequested attribution trailers.
 - **Lists:** numbered = order; bullets = parallel; letters = pick-one.
 - **No interactive CLIs** without every flag.
 - **Never** `npm publish` / `pnpm publish` from LocalHelm itself. **Never** `git push --force`.
-- **The operator always publishes to npm.** Agents do not run `npm publish` / `pnpm publish` in this repo (including the 0.0.0 name reservation). Prepare `package.json` and say when it is ready.
+- **The operator publishes to npm.** Agents do not run `npm publish` / `pnpm publish`. LocalHelm has no publish action in v1 (future option only). Prepare `package.json` and say when it is ready.
 
 ## Conventions
 

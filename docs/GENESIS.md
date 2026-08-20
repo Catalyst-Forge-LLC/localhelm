@@ -221,8 +221,8 @@ Proposed manifest shape (what, not the final schema library):
 ### 4.1 Fleet enrollment
 
 1.1. The operator can declare a workspace root and a list of projects in a manifest.
-1.2. `localhelm discover` prints candidate rows (folder, git?, `package.json` name/version, `private`, looks-like-FilePress-site) without writing the manifest unless `--write` (or equivalent) is confirmed.
-1.3. `localhelm enroll <path>` / `unenroll <id>` edits the manifest.
+1.2. `localhelm discover` (and enroll) can **scan one or more folders** and print candidate rows (folder, git?, `package.json` name/version, `private`, looks-like-FilePress-site). It does not write the manifest until the operator **checks/confirms** which rows to enroll.
+1.3. `localhelm enroll` applies the confirmed set (paths and optional `--npm`). `unenroll <id>` removes a row. Single-path enroll remains valid.
 1.4. A project with no `package.json` is still enrollable (docs-only, xFacts spec repo). Surfaces that do not apply show as "n/a," not errors.
 1.5. Duplicate `id` or two projects with the same absolute path: refuse to load the manifest.
 1.6. Missing path: row status `missing`, not a crash of the whole fleet.
@@ -434,18 +434,18 @@ The seed list will rot. The manifest is the source of truth after day one.
 
 ## 9. Open questions
 
-1. **Domain.** **`localhelm.dev`** — secured 2026-08-20. FilePress explainer in-repo like LocalBerth, when the CLI is real. `.com` not used.
-2. **License.** Apache-2.0 (IngotVault, LocalBerth, ForgeTrail) vs MIT (FilePress, aiBreze). Proposal: **Apache-2.0**.
-3. **Commit on apply.** FilePress siblings commit pin+lock+headers automatically. Proposal for LocalHelm: **plan includes an optional commit**, default on for cascade/catalog, message `Helm: retarget <pkg> to <version>.` / `Helm: shelf versions from npm.` No attribution trailers.
-4. **Push.** Proposal: **not in v1**. Fetch and pull only.
-5. **Publish button.** Proposal: **never**. Eligible badge only. Matches the house npm rule and the Exec Foundry "no auto-apply" line.
-6. **FilePress siblings.** Keep that dashboard for headers and engine-only site sync. LocalHelm lists FilePress sites as dependents of `getfilepress` and may say "headers: use FilePress siblings." Revisit absorb only after M3.
-7. **Default range policy.** Cascade writes `^V` vs exact V. Proposal: `^V` to match the house today.
-8. **Global vs workspace manifest.** Proposal: workspace file at `<workspaceRoot>/localhelm.fleet.json` (gitignored or committed? **committed** if the fleet is the shop; then do not put machine-only paths in it; `workspaceRoot` can be `"."` or omitted). User-global file is a fallback.
-9. **xFacts.** One grouped row vs six enrolled repos. Proposal: six repos in the fleet, one catalog card, group id `xfacts`.
-10. **MCP in M3 vs M4.** Proposal: M4. JSON in M1 is enough for a determined agent.
-11. **Dashboard stack.** CLI-first. UI can be small (static HTML + fetch, or Svelte). Do not stand up a second SvelteKit product app if a LocalBerth-style page will do.
-12. **Name collision with Helm / TaskHelm / iamgp/helm.** Keep **LocalHelm** + CLI `localhelm`. One-liner stays "status for the products you ship." If npm `localhelm` is taken, `getlocalhelm` (FilePress pattern) or `@catalyst-forge/localhelm`.
+1. **Domain.** **`localhelm.dev`** — secured. FilePress explainer **plus `/docs`**. Closed 2026-08-20.
+2. **License.** **Apache-2.0**. Closed 2026-08-20.
+3. **Commit on apply.** **Yes**, default on for cascade / export write. Message `Helm: retarget <pkg> to <version>.` No attribution trailers. Closed 2026-08-20.
+4. **Push.** **Not in v1.** Fetch and pull only. Later milestone, harsh confirm. Closed 2026-08-20.
+5. **Publish.** **Not in v1** (eligible badge). Future option; never the first ship. Operator publishes. Closed 2026-08-20.
+6. **FilePress siblings.** Stay separate. Revisit absorb only after M3. Closed 2026-08-20.
+7. **Default range policy.** Cascade writes **`^V`**. Closed 2026-08-20.
+8. **Manifest.** `<workspaceRoot>/localhelm.fleet.json`, **`workspaceRoot` is `"."`**. User-global file is a fallback. Closed 2026-08-20.
+9. **Groups.** Optional `group` on a fleet row. Shop-specific shelf grouping lives in the consumer. Closed 2026-08-20.
+10. **MCP.** JSON in M1; MCP in M4. Closed 2026-08-20.
+11. **Dashboard.** CLI + **SvelteKit**. FilePress `site/` + `/docs` for the public explainer. Closed 2026-08-20.
+12. **Name.** **`localhelm`** reserved on npm as `0.0.0`. Closed 2026-08-20.
 
 ---
 

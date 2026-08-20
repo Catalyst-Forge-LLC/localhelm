@@ -17,8 +17,7 @@
       "status": "in_progress",
       "startedAt": "2026-08-20T17:15:00Z",
       "completedAt": null,
-      "exitCriteriaMet": [],
-      "exitCriteriaRemaining": [
+      "exitCriteriaMet": [
         "Tech choices confirmed",
         "Folder structure confirmed",
         "Data model shape confirmed",
@@ -27,10 +26,15 @@
         "PHASE_1_BRIEF.md created, complete, and locked (docs/)",
         "Major decisions recorded in workflow_tracking.json decisions[]"
       ],
+      "exitCriteriaRemaining": [],
       "notes": [
         {
           "timestamp": "2026-08-20T17:15:00Z",
-          "text": "Kickoff with existing docs/GENESIS.md. Ingested into draft PHASE_1_BRIEF.md. Brief not locked. Operator always publishes (D4). localhelm@0.0.0 is on npm. D9: no CF/projects.js shelf in the package; generic JSON export for consumers."
+          "text": "Kickoff with existing docs/GENESIS.md. Ingested into draft PHASE_1_BRIEF.md."
+        },
+        {
+          "timestamp": "2026-08-20T18:17:00Z",
+          "text": "Brief locked. Scan-then-confirm enroll; FilePress site + /docs; Apache-2.0; commit on apply; no push or publish in v1 (publish later optional); siblings separate; ^V; workspaceRoot .; groups; JSON M1 / MCP M4; CLI + SvelteKit. Waiting for operator to start the M1 spine."
         }
       ]
     },
@@ -158,19 +162,19 @@
       "timestamp": "2026-08-20T17:15:00Z",
       "phase": "1-architecture",
       "session": 1,
-      "decision": "License Apache-2.0 (proposed).",
-      "rationale": "Matches IngotVault, LocalBerth, ForgeTrail. Genesis §9 still lists MIT as the FilePress/aiBreze alternative.",
+      "decision": "License Apache-2.0.",
+      "rationale": "Confirmed 2026-08-20. Matches IngotVault, LocalBerth, ForgeTrail.",
       "alternatives_considered": ["MIT"],
-      "status": "revisit"
+      "status": "active"
     },
     {
       "id": "d4",
       "timestamp": "2026-08-20T17:15:00Z",
       "phase": "1-architecture",
       "session": 1,
-      "decision": "The operator always publishes to npm. LocalHelm never publishes (eligible badge only). Agents never run npm/pnpm publish. Never force-push; git push is not a v1 action.",
-      "rationale": "Confirmed 2026-08-20. House npm rule. Wrong pin across fifteen sites is worse than a missing convenience button.",
-      "alternatives_considered": ["Publish button", "Push in v1"],
+      "decision": "No publish action and no git push in v1. Operator publishes. Agents never run npm/pnpm publish. Publish may be a later option; never the first ship. Push is a later milestone with harsh confirm. Never force-push.",
+      "rationale": "Confirmed 2026-08-20. Eligible badge only at first. Future publish/push are explicit later work.",
+      "alternatives_considered": ["Publish in v1", "Push in v1", "Never publish ever"],
       "status": "active"
     },
     {
@@ -228,9 +232,49 @@
       "timestamp": "2026-08-20T18:08:00Z",
       "phase": "1-architecture",
       "session": 1,
-      "decision": "Public site domain is localhelm.dev. FilePress explainer later; not a v1 CLI blocker.",
-      "rationale": "Operator secured the domain 2026-08-20. Matches the genesis proposal. .com not used.",
-      "alternatives_considered": ["localhelm.com", "hold until first usable CLI"],
+      "decision": "Public site is localhelm.dev with a FilePress explainer plus /docs. Not a v1 CLI blocker.",
+      "rationale": "Domain secured 2026-08-20. Operator asked for /docs on the FilePress site.",
+      "alternatives_considered": ["localhelm.com", "explainer without /docs"],
+      "status": "active"
+    },
+    {
+      "id": "d11",
+      "timestamp": "2026-08-20T18:17:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "Enroll scans one or more folders and the operator checks/confirms which rows to enroll. Nothing written until confirm.",
+      "rationale": "A named fleet is chosen, not auto-enrolled from a disk walk.",
+      "alternatives_considered": ["Print-only discover plus one-path enroll only", "Auto-enroll on scan"],
+      "status": "active"
+    },
+    {
+      "id": "d12",
+      "timestamp": "2026-08-20T18:17:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "Commit on apply, default on for cascade and export write. No attribution trailers.",
+      "rationale": "Confirmed 2026-08-20. Operator said yes commit.",
+      "alternatives_considered": ["Never commit", "Commit opt-in default off"],
+      "status": "active"
+    },
+    {
+      "id": "d13",
+      "timestamp": "2026-08-20T18:17:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "Cascade writes ^V. Manifest workspaceRoot is \".\". Optional group on rows. JSON inventory in M1; MCP in M4.",
+      "rationale": "Confirmed 2026-08-20.",
+      "alternatives_considered": ["Exact V", "User-global manifest as primary", "MCP in M3"],
+      "status": "active"
+    },
+    {
+      "id": "d14",
+      "timestamp": "2026-08-20T18:17:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "CLI + SvelteKit dashboard in app/. Shared library and CLI in src/. FilePress site/ with /docs.",
+      "rationale": "Confirmed 2026-08-20. Not a tiny static page.",
+      "alternatives_considered": ["Static HTML dashboard", "Svelte without SvelteKit", "Dashboard at repo root"],
       "status": "active"
     }
   ],
@@ -247,9 +291,10 @@
         "origin set to git@github.com:Catalyst-Forge-LLC/localhelm.git",
         "package.json set to localhelm@0.0.0; operator published to npm",
         "D9: no CF shelf baked in; generic JSON export",
-        "D10: localhelm.dev secured"
+        "D10: localhelm.dev secured",
+        "PHASE_1_BRIEF locked with remaining §9 answers"
       ],
-      "leftOff": "Brief still draft. D4, D9, D10 locked. Remaining §9 items then lock PHASE_1_BRIEF before the M1 spine.",
+      "leftOff": "Brief locked. Waiting for the operator to start the M1 spine (scan → confirm enroll → status/deps/JSON).",
       "contextLimitHit": false
     }
   ]

@@ -4,11 +4,11 @@
 
 _Structured capture of planning and architecture **before** code scaffolding. Goal: Phase 2 (or a new agent/session) can start from this file + `.forgetrail/workflow_tracking.json` without re-reading the whole Phase 1 chat._
 
-**Status:** `draft`  
-**Last updated:** 2026-08-20 (D9: no product-specific shelf)  
-**Phase 1 exit:** Do not mark Phase 1 complete in `.forgetrail/workflow_tracking.json` until this brief is **locked** and major commitments are in `decisions[]`.
+**Status:** `locked`  
+**Last updated:** 2026-08-20  
+**Phase 1 exit:** This brief is **locked**. Do not advance `currentPhase` to scaffolding until the operator says to start the spine.
 
-Source spec: [`docs/GENESIS.md`](GENESIS.md).
+Source spec: [`docs/GENESIS.md`](GENESIS.md). Amendments in this brief win where they differ (no shop shelf; enroll is scan-then-confirm).
 
 ---
 
@@ -16,13 +16,13 @@ Source spec: [`docs/GENESIS.md`](GENESIS.md).
 
 **What we are building (2–4 sentences):**
 
-On a machine with dozens of sibling repos, `git status` in one folder answers one repo. The scarce resource is knowing which **products** are dirty, unpublished, or still pinned to last week's package. **LocalHelm** is a local operator tool: enroll a named fleet, read every ship surface (local version, npm, git), show the dependency graph, and run bulk actions that you confirm. It exports a generic JSON inventory any site can consume. Pairing: **LocalBerth** is the slip; **LocalHelm** is the wheel. It is not a Catalyst Forge shelf tool.
+On a machine with dozens of sibling repos, `git status` in one folder answers one repo. The scarce resource is knowing which **products** are dirty, unpublished, or still pinned to last week's package. **LocalHelm** is a local operator tool: scan folder(s), confirm a named fleet, read every ship surface (local version, npm, git), show the dependency graph, and run bulk actions that you confirm. It exports a generic JSON inventory any site can consume. Pairing: **LocalBerth** is the slip; **LocalHelm** is the wheel. It is not a Catalyst Forge shelf tool.
 
 **Project archetype:** `product`
 
 **What “done” looks like for v1 (measurable where possible):**
 
-Given a named fleet of sibling packages, `localhelm status` (and `--json`) shows local vs npm, pin/link edges, and git dirt. After a human publishes package A, a confirmed cascade retargets dependents' pins and lockfiles to published V — or skips a dirty row with a reason. A documented JSON export is the contract for any public shelf (including, later, Catalyst Forge). The tool never publishes and never force-pushes.
+The operator points LocalHelm at one or more folders, sees proposed rows, and checks which to enroll. `localhelm status` (and `--json`) shows local vs npm, pin/link edges, and git dirt. After a human publishes package A, a confirmed cascade retargets dependents' pins and lockfiles to `^V` — or skips a dirty row with a reason. v1 does not publish and does not git-push. A FilePress site at `localhelm.dev` (with `/docs`) can wait until the CLI is real.
 
 ---
 
@@ -34,7 +34,7 @@ Any operator who ships several public npm packages from a workspace of sibling r
 
 **The single most important workflow (hero flow) end-to-end:**
 
-Enroll a named fleet → `status` shows who is dirty / unpublished-ahead / cascade-behind → after a human publishes A@V, confirm `cascade A` → each consumer gets a pin + lockfile update or a skipped row with a reason.
+Scan folder(s) → check/confirm which projects to enroll → `status` shows who is dirty / unpublished-ahead / cascade-behind → after a human publishes A@V, confirm `cascade A` → each consumer gets a pin + lockfile update (and a commit if still on) or a skipped row with a reason.
 
 **Secondary workflows (if any) for v1:**
 
@@ -42,7 +42,7 @@ Enroll a named fleet → `status` shows who is dirty / unpublished-ahead / casca
 - `bump` one project's root version (no publish, no tag)
 - `fetch` / `pull` (clean + behind only)
 - `ready` list (eligible to publish)
-- `serve` loopback dashboard with the same inventory
+- `serve` SvelteKit loopback dashboard with the same inventory (scan/enroll checkboxes, status)
 
 ---
 
@@ -50,26 +50,31 @@ Enroll a named fleet → `status` shows who is dirty / unpublished-ahead / casca
 
 _Hard requirements the stack and design must respect._
 
-- **Technical:** Windows / macOS / Linux; kickoff machine is Windows (`Z:\` and Git-Bash). TypeScript, ESM, pnpm, Node 22+. Bind dashboard to `127.0.0.1` by default. Status without `--fetch` is a local walk plus one npm request per distinct package name. Comfortable at ~80 enrolled rows.
-- **Business / timeline:** Public CLI `localhelm` (`0.0.0` on npm; operator publishes). Public site **`localhelm.dev`** (secured 2026-08-20); FilePress explainer later, same split as LocalBerth.
+- **Technical:** Windows / macOS / Linux; kickoff machine is Windows (`Z:\` and Git-Bash). TypeScript, ESM, pnpm, Node 22+. SvelteKit dashboard binds `127.0.0.1` by default. Status without `--fetch` is a local walk plus one npm request per distinct package name. Comfortable at ~80 enrolled rows.
+- **Business / timeline:** Public CLI `localhelm` (`0.0.0` on npm; operator publishes). Public site **`localhelm.dev`** (secured); FilePress explainer plus `/docs`. License **Apache-2.0**.
 - **Explicit non-goals for v1:** see §10.
 
 ---
 
 ## 4. Stack and tooling
 
-_Confirmed choices only after user sign-off. Mirror the same choices into `CONTEXT_PROMPT.md` → Tech Stack in Phase 2._
-
 | Area | Choice | Status | Notes / WHY |
 | --- | --- | --- | --- |
-| App shape | CLI-first + small loopback dashboard | proposed | Genesis §9.11. Do not stand up a second SvelteKit product app if a LocalBerth-style page will do. |
-| Language | TypeScript ESM | proposed | House default. |
-| State persistence | Local files only (manifest + gitignored job state) | proposed | A-local. No PocketBase, no accounts. |
-| Auth / storage | None / on-disk | proposed | Loopback dashboard; no telemetry. |
-| Styling | Deferred until dashboard | proposed | CLI is the spine. |
-| Deploy / CI | npm package; optional FilePress site later | confirmed | Operator always publishes. Tool and agents never run publish. |
-| Package manager | pnpm | proposed | House default. |
-| License | Apache-2.0 | proposed | Matches LocalBerth / IngotVault; MIT still listed in genesis §9. |
+| App shape | CLI + SvelteKit dashboard + FilePress `site/` | confirmed | CLI is the spine. Dashboard is SvelteKit (`localhelm serve`). Site is FilePress at `localhelm.dev` including `/docs`. |
+| Language | TypeScript ESM | confirmed | House default. |
+| State persistence | Local files only (manifest + gitignored job state) | confirmed | A-local. No PocketBase, no accounts. |
+| Auth / storage | None / on-disk | confirmed | Loopback dashboard; no telemetry. |
+| Styling | Tailwind via SvelteKit (dashboard); FilePress for the public site | confirmed | Dashboard ships with the app; site is separate. |
+| Deploy / CI | npm package; FilePress site on Pages later | confirmed | Operator publishes. Tool has no publish action in v1 (future option). |
+| Package manager | pnpm | confirmed | House default. |
+| License | Apache-2.0 | confirmed | Matches LocalBerth / IngotVault / ForgeTrail. |
+| State persistence | Local files | confirmed | Manifest `workspaceRoot: "."`. |
+
+**Folder shape (locked):**
+
+- `src/` — shared library + CLI (what npm ships after build)
+- `app/` — SvelteKit loopback dashboard
+- `site/` — FilePress explainer + `/docs` (not in the npm tarball)
 
 ---
 
@@ -79,22 +84,23 @@ _Entities and relationships — not full schemas. Enough for Phase 2 scaffolding
 
 **Core entities:**
 
-- **Workspace** — one root of sibling checkouts (kickoff default: parent of this repo).
+- **Workspace** — one root of sibling checkouts. Manifest `workspaceRoot` is `"."` (the folder that holds `localhelm.fleet.json`).
 - **Fleet** — enrolled subset. Named. Source of truth is the manifest.
-- **Project** — one enrolled row (usually one git repo). May have root + `site/package.json`.
+- **Project** — one enrolled row (usually one git repo). May have root + `site/package.json`. Optional `group`.
 - **Ship surface** — local version, npm latest, git; optional tag, `ship` script, LocalBerth lease, IngotVault backup remote.
 - **Pin / dependent / consumer / publisher** — graph edges from dependency specifiers.
-- **Cascade** — plan then job to move dependents to published V.
+- **Cascade** — plan then job to move dependents to published V with range `^V`.
 - **Export** — documented JSON inventory (status digest). Any site may consume it. Not a product-specific shelf file.
-- **Plan / Job** — dry-run then one confirmed mutating run.
+- **Plan / Job** — dry-run then one confirmed mutating run. Default **commit on apply** for cascade / export write.
+- **Scan** — walk one or more folders; propose rows; write nothing until the operator checks/confirms enrollment.
 
 **Relationships:**
 
-Workspace 1—* Project. Project 1—* Pin. Pin → Package name (enrolled `npm` field). Publisher 1—* Dependent. Job 1—* sequential project results.
+Workspace 1—* Project. Project 1—* Pin. Pin → Package name (enrolled `npm` field). Publisher 1—* Dependent. Project optional `group`. Job 1—* sequential project results.
 
-**Existing data / migration:** Discover proposes from a workspace root. A first-machine seed list may live in operator docs (genesis §4.10), not in package code. Manifest is source of truth after day one. No built-in catalog adapter.
+**Existing data / migration:** Scan proposes from given folder(s). No shop-specific seed in package code. Manifest is source of truth after confirm. No built-in catalog adapter.
 
-Proposed manifest path: `<workspaceRoot>/localhelm.fleet.json` (committed if the fleet is the shop; no machine-only paths). User-global `~/.localhelm/fleet.json` is fallback.
+Manifest path: `<workspaceRoot>/localhelm.fleet.json` (committed if the fleet is the shop; no machine-only paths; `workspaceRoot` is `"."`). User-global `~/.localhelm/fleet.json` is fallback.
 
 ---
 
@@ -103,12 +109,13 @@ Proposed manifest path: `<workspaceRoot>/localhelm.fleet.json` (committed if the
 | Integration | Purpose | Auth / secrets | Risk notes |
 | --- | --- | --- | --- |
 | npm registry | Latest version per package name | None (public GET) | 404 = unpublished. Other non-OK = error cell, not "none." |
-| git | Porcelain, remotes, ahead/behind | Operator's existing remotes | Read-only unless confirmed. Never force-push. Never rewrite `origin`. Never touch IngotVault `backup`. |
-| Inventory export | JSON contract for any consumer (sites, agents) | None | LocalHelm owns the schema. No `projects.js` path. CF may consume later. |
+| git | Porcelain, remotes, ahead/behind; commit on apply | Operator's remotes | Read-only unless confirmed. No push in v1. Never force-push. Never rewrite `origin`. Never touch IngotVault `backup`. |
+| Inventory export | JSON contract for any consumer (sites, agents, MCP in M4) | None | LocalHelm owns the schema. No `projects.js` path. |
 | LocalBerth (optional) | Dashboard lease; optional column | Local binary | Missing binary is "no lease tool." |
 | IngotVault (optional) | Backup-remote column | Local | Do not push mirrors. |
-| FilePress siblings | Headers / engine-only site sync | Existing tool | Compose; do not reimplement. |
-| Cloudflare Pages | v1 does not call the API | Operator Wrangler login | `pnpm ship` is the deploy action if invoked. |
+| FilePress siblings | Headers / engine-only site sync | Existing tool | Stay separate (compose later). Do not reimplement. |
+| FilePress `site/` | Public explainer + `/docs` on `localhelm.dev` | Operator Wrangler when shipping | Not in the npm tarball. |
+| Cloudflare Pages | v1 does not call the API | Operator Wrangler login | `pnpm ship` in `site/` when the explainer exists. |
 | LLM | None | — | Skip §6a. |
 
 ---
@@ -122,35 +129,48 @@ Skipped. Inventory and plans are read from disk, git, and npm. No LLM chooses ve
 ## 7. Hardest problems and risks
 
 1. **Folder ≠ npm name ≠ display name.** Guessy matching will attach dependents to the wrong row. Manifest fields are explicit.
-2. **Local ahead of npm.** Cascade must target published V and say local is unpublished (FilePress already hit this class of bug).
-3. **Export schema drift.** LocalHelm owns the JSON shape; consumers adapt. Do not special-case a shop's marketing file.
+2. **Local ahead of npm.** Cascade must target published V and say local is unpublished.
+3. **Export schema drift.** LocalHelm owns the JSON shape; consumers adapt.
 4. **`link:` / `file:` vs registry.** A cascade that silently keeps `link:` and calls it current is a lie.
-5. **Windows paths** (`Z:\` vs `Z:/`, spaces, worktrees). Normalize; do not store a path form that fails on the same machine.
+5. **Windows paths** (`Z:\` vs `Z:/`, spaces, worktrees). Normalize.
 6. **One mutating job at a time.** Concurrent dashboards or overlapping writes.
+7. **Scan noise.** Propose; never auto-enroll. Skip `__*`, dot-dirs, `node_modules`, obvious non-dirs. Operator checks the list.
 
 ---
 
 ## 8. Architectural decisions (numbered)
 
-**D1.** Product archetype. WHY: public installable CLI. Rejected: internal-tool / one-shot.
+**D1.** Product archetype. WHY: public installable CLI.
 
-**D2.** TypeScript + ESM + pnpm + Node 22+; no accounts; no telemetry. WHY: house defaults and local-only product.
+**D2.** TypeScript + ESM + pnpm + Node 22+; no accounts; no telemetry.
 
-**D3.** Apache-2.0 (proposed). WHY: sibling pairing with LocalBerth / IngotVault. Still confirm vs MIT.
+**D3.** License **Apache-2.0**. WHY: confirmed 2026-08-20. Rejected: MIT.
 
-**D4.** The operator always publishes to npm. LocalHelm never has a publish button (eligible badge only). Agents never run `npm publish` / `pnpm publish`. Never force-push; no git push in v1. WHY: confirmed 2026-08-20 — house rule.
+**D4.** No publish action in v1 (eligible badge only). Operator publishes. Agents never run `npm publish` / `pnpm publish`. A publish action is a **future option**, never the first ship. WHY: confirmed 2026-08-20.
 
-**D5.** CLI `localhelm`, never `helm`. `package.json` is `0.0.0` so the name can be reserved.
+**D5.** CLI `localhelm`, never `helm`. Name reserved on npm as `0.0.0`.
 
-**D6.** Compose, don't clone: IngotVault, LocalBerth, FilePress siblings stay owners of their jobs.
+**D6.** FilePress siblings stay separate. Compose later (after M3); do not reimplement `_headers` / engine pin rewrite.
 
 **D7.** Local file state only. No PocketBase. Dashboard loopback.
 
 **D8.** No LLM-produced content.
 
-**D9.** No product-specific shelf. LocalHelm does not read or write Catalyst Forge `projects.js` (or any other shop catalog). It exports generic JSON; a site may consume that later. WHY: this is a public package, not a CF internal. Rejected: baked-in catalog adapter.
+**D9.** No product-specific shelf. Generic JSON export only.
 
-**D10.** Public site is `localhelm.dev`. WHY: secured 2026-08-20. Rejected: `.com`, or holding the name until the CLI ships. The explainer site itself still waits until the CLI is real.
+**D10.** Public site is `localhelm.dev`, FilePress explainer **plus `/docs`**. Site is not a v1 CLI blocker.
+
+**D11.** Enroll is **scan folder(s) → operator checks/confirms**. Discover proposes; nothing is written until confirm. Multiple roots allowed.
+
+**D12.** Commit on apply: **yes**, default on for cascade / export write. Message like `Helm: retarget <pkg> to <version>.` No attribution trailers.
+
+**D13.** No git **push** in v1 (fetch/pull only). Push is a later milestone, with a harsh confirm.
+
+**D14.** Cascade writes `^V`.
+
+**D15.** Manifest at `<workspaceRoot>/localhelm.fleet.json` with `workspaceRoot: "."`. Optional `group` on rows. JSON inventory in M1; MCP in M4.
+
+**D16.** Dashboard is **SvelteKit** in `app/`. CLI library in `src/`. FilePress in `site/`.
 
 ---
 
@@ -158,47 +178,49 @@ Skipped. Inventory and plans are read from disk, git, and npm. No LLM chooses ve
 
 | # | Question | Owner / resolve by |
 | - | --- | --- |
-| 1 | Domain: **`localhelm.dev`** (secured). FilePress explainer later; not a v1 blocker | Closed 2026-08-20 |
-| 2 | License: Apache-2.0 (proposal) vs MIT | User — before 0.1.0 |
-| 3 | Commit on apply: optional commit, default on for cascade / export write | User — before M2 writes |
-| 4 | Git push from LocalHelm: not in v1 (proposal) | User — confirm |
-| 5 | Publish button in LocalHelm: **never**. Operator always publishes. | Closed 2026-08-20 |
-| 6 | FilePress siblings stay separate until after M3 (proposal) | User — confirm |
-| 7 | Cascade range: `^V` (proposal) | User — confirm |
-| 8 | Manifest: committed workspace `localhelm.fleet.json`; `workspaceRoot` is `"."` or omitted | User — confirm |
-| 9 | Optional `group` on a fleet row (generic). Shop-specific grouping (e.g. xFacts) lives in the consumer | Closed with D9 — not a LocalHelm shelf card |
-| 10 | MCP in M4; JSON in M1 | User — confirm |
-| 11 | Dashboard stack: CLI-first; small static/Svelte page vs SvelteKit | User — before M2 dashboard |
-| 12 | Name reservation: `package.json` is `localhelm@0.0.0`. Operator publishes. | Operator |
+| 1 | Domain `localhelm.dev` + FilePress `/docs` | Closed 2026-08-20 |
+| 2 | License Apache-2.0 | Closed 2026-08-20 |
+| 3 | Commit on apply, default on | Closed 2026-08-20 |
+| 4 | No git push in v1; later yes | Closed 2026-08-20 |
+| 5 | No publish in v1; future option | Closed 2026-08-20 |
+| 6 | FilePress siblings stay separate | Closed 2026-08-20 |
+| 7 | Cascade range `^V` | Closed 2026-08-20 |
+| 8 | Manifest `workspaceRoot: "."` | Closed 2026-08-20 |
+| 9 | Optional `group` on rows | Closed 2026-08-20 |
+| 10 | JSON in M1; MCP in M4 | Closed 2026-08-20 |
+| 11 | CLI + SvelteKit dashboard | Closed 2026-08-20 |
+| 12 | npm name `localhelm` reserved | Closed 2026-08-20 |
+
+No open product questions block scaffolding.
 
 ---
 
 ## 10. Explicitly out of scope (v1)
 
-- Not a monorepo merger. Not a scan-everything git TUI.
-- Not IngotVault, LocalBerth, FilePress siblings, Lerna, or Dependabot.
+- Not a monorepo merger. Not a scan-everything git TUI that auto-enrolls.
+- Not IngotVault, LocalBerth, or the FilePress sibling dashboard.
 - Not a remote fleet manager. No SSH, no hosted accounts, no telemetry.
-- No auto-publish, no force-push, no rewriting unrelated dirty files.
+- No publish action, no git push, no force-push, no rewriting unrelated dirty files.
 - No starting/stopping other apps' dev servers.
-- No Catalyst Forge (or other shop) shelf file in this package — no `projects.js` adapter, no baked-in catalog names.
+- No Catalyst Forge (or other shop) shelf file in this package.
 - No "create a new sibling product" scaffolder.
-- No LLM choosing versions or skip lists.
+- No LLM choosing versions, commit messages, or skip lists.
 
 ---
 
 ## 11. First feature batch (post-scaffold)
 
-1. **M1 — Read-only fleet:** manifest, discover (print-only), enroll/unenroll, `status` + `deps` (local / npm / git), JSON export (documented schema). No shop-specific seed in code.
-2. **M2 — Safe writes:** optional write of the export file, `bump`, `fetch` / `pull`, `serve` with the same inventory.
-3. **M3 — Cascade:** plan/apply pin + lockfile, `link:` vs registry explicit, `ready`, dashboard plan/confirm/log.
-4. **M4 — Compose + agents:** optional LocalBerth lease, IngotVault column, FilePress siblings deep-link, MCP for status/deps/plans.
-5. **M5 — Polish if wanted:** selected `origin` push with harsh confirm, tag on bump, outside-package watch list.
+1. **M1 — Read-only fleet:** scan folder(s) → confirm enroll / unenroll, `status` + `deps` (local / npm / git), JSON export. Manifest `workspaceRoot: "."`. No shop-specific seed in code.
+2. **M2 — Safe writes + dashboard:** `bump`, `fetch` / `pull`, export file write, SvelteKit `serve` with scan/enroll checkboxes and the same inventory.
+3. **M3 — Cascade:** plan/apply pin + lockfile at `^V`, `link:` vs registry explicit, default commit on apply, `ready`.
+4. **M4 — Compose + agents:** optional LocalBerth lease, IngotVault column, FilePress siblings deep-link (still separate), MCP for status/deps/plans.
+5. **M5+ — Later:** selected `origin` push with harsh confirm; optional publish action (never the first ship); FilePress `site/` + `/docs` on `localhelm.dev` if not already started; tag on bump.
 
 ---
 
 ## 12. Handoff checklist (before leaving Phase 1)
 
-- [ ] User has confirmed stack, folder shape, data sketch, hero flow, and v1 boundaries
-- [ ] This brief is **locked** (no `[draft]` ambiguity) or remaining items are only in §9 Open questions
-- [ ] `.forgetrail/workflow_tracking.json` updated: `decisions[]` for each major D#; `phases["1-architecture"]` notes summarize sign-off
-- [ ] Phase 2 opener will read **this file** + `.forgetrail/workflow_tracking.json` first
+- [x] User has confirmed stack, folder shape, data sketch, hero flow, and v1 boundaries
+- [x] This brief is **locked**
+- [x] `.forgetrail/workflow_tracking.json` updated: `decisions[]` for each major D#; phase 1 notes summarize sign-off
+- [x] Phase 2 opener will read **this file** + `.forgetrail/workflow_tracking.json` first
