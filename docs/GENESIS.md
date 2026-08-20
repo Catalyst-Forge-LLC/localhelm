@@ -6,7 +6,7 @@ On a machine with dozens of sibling repos, the scarce resource is not a git stat
 
 **LocalHelm** is a local operator tool: enroll a named fleet, read every ship surface, show the dependency graph, and run bulk actions that you confirm. It does not scan every folder on disk and call that a product list. It does not publish to npm. It does not push unless you ask.
 
-Public name **LocalHelm**. CLI and npm package **`localhelm`**. Repo folder `localhelm`. Proposed site `localhelm.dev` (open question). The app runs on your machine. The site, when it exists, is a FilePress explainer, same split as LocalBerth.
+Public name **LocalHelm**. CLI and npm package **`localhelm`**. Repo folder `localhelm`. Site **`localhelm.dev`** (secured 2026-08-20). The app runs on your machine. The site, when it exists, is a FilePress explainer, same split as LocalBerth.
 
 ---
 
@@ -434,7 +434,7 @@ The seed list will rot. The manifest is the source of truth after day one.
 
 ## 9. Open questions
 
-1. **Domain.** `localhelm.dev` vs `.com` vs hold until first usable CLI. Proposal: register `localhelm.dev` when the CLI is real, FilePress site in-repo like LocalBerth.
+1. **Domain.** **`localhelm.dev`** — secured 2026-08-20. FilePress explainer in-repo like LocalBerth, when the CLI is real. `.com` not used.
 2. **License.** Apache-2.0 (IngotVault, LocalBerth, ForgeTrail) vs MIT (FilePress, aiBreze). Proposal: **Apache-2.0**.
 3. **Commit on apply.** FilePress siblings commit pin+lock+headers automatically. Proposal for LocalHelm: **plan includes an optional commit**, default on for cascade/catalog, message `Helm: retarget <pkg> to <version>.` / `Helm: shelf versions from npm.` No attribution trailers.
 4. **Push.** Proposal: **not in v1**. Fetch and pull only.

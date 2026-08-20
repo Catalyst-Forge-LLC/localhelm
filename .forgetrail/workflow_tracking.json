@@ -222,6 +222,16 @@
       "rationale": "localhelm is a public package. Baking a CF shelf would make every other shop a second-class citizen and couple the CLI to one marketing file.",
       "alternatives_considered": ["Built-in projects.js adapter", "catalogName as a first-class CF card"],
       "status": "active"
+    },
+    {
+      "id": "d10",
+      "timestamp": "2026-08-20T18:08:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "Public site domain is localhelm.dev. FilePress explainer later; not a v1 CLI blocker.",
+      "rationale": "Operator secured the domain 2026-08-20. Matches the genesis proposal. .com not used.",
+      "alternatives_considered": ["localhelm.com", "hold until first usable CLI"],
+      "status": "active"
     }
   ],
   "gotchas": [],
@@ -236,9 +246,10 @@
         "Draft PHASE_1_BRIEF.md from genesis",
         "origin set to git@github.com:Catalyst-Forge-LLC/localhelm.git",
         "package.json set to localhelm@0.0.0; operator published to npm",
-        "D9: no CF shelf baked in; generic JSON export"
+        "D9: no CF shelf baked in; generic JSON export",
+        "D10: localhelm.dev secured"
       ],
-      "leftOff": "Brief still draft. D4 and D9 locked. Remaining §9 items then lock PHASE_1_BRIEF before the M1 spine.",
+      "leftOff": "Brief still draft. D4, D9, D10 locked. Remaining §9 items then lock PHASE_1_BRIEF before the M1 spine.",
       "contextLimitHit": false
     }
   ]

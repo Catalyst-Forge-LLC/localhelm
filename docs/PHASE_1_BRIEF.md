@@ -51,7 +51,7 @@ Enroll a named fleet → `status` shows who is dirty / unpublished-ahead / casca
 _Hard requirements the stack and design must respect._
 
 - **Technical:** Windows / macOS / Linux; kickoff machine is Windows (`Z:\` and Git-Bash). TypeScript, ESM, pnpm, Node 22+. Bind dashboard to `127.0.0.1` by default. Status without `--fetch` is a local walk plus one npm request per distinct package name. Comfortable at ~80 enrolled rows.
-- **Business / timeline:** Public CLI `localhelm` (`package.json` at 0.0.0; operator publishes). Site later as FilePress explainer (`localhelm.dev` is an open question).
+- **Business / timeline:** Public CLI `localhelm` (`0.0.0` on npm; operator publishes). Public site **`localhelm.dev`** (secured 2026-08-20); FilePress explainer later, same split as LocalBerth.
 - **Explicit non-goals for v1:** see §10.
 
 ---
@@ -150,13 +150,15 @@ Skipped. Inventory and plans are read from disk, git, and npm. No LLM chooses ve
 
 **D9.** No product-specific shelf. LocalHelm does not read or write Catalyst Forge `projects.js` (or any other shop catalog). It exports generic JSON; a site may consume that later. WHY: this is a public package, not a CF internal. Rejected: baked-in catalog adapter.
 
+**D10.** Public site is `localhelm.dev`. WHY: secured 2026-08-20. Rejected: `.com`, or holding the name until the CLI ships. The explainer site itself still waits until the CLI is real.
+
 ---
 
 ## 9. Open questions (before or during Phase 2)
 
 | # | Question | Owner / resolve by |
 | - | --- | --- |
-| 1 | Domain: `localhelm.dev` vs `.com` vs hold until first usable CLI | User — before site work |
+| 1 | Domain: **`localhelm.dev`** (secured). FilePress explainer later; not a v1 blocker | Closed 2026-08-20 |
 | 2 | License: Apache-2.0 (proposal) vs MIT | User — before 0.1.0 |
 | 3 | Commit on apply: optional commit, default on for cascade / export write | User — before M2 writes |
 | 4 | Git push from LocalHelm: not in v1 (proposal) | User — confirm |
