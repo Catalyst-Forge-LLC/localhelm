@@ -20,7 +20,8 @@
     "dist",
     "LICENSE",
     "NOTICE",
-    "README.md"
+    "README.md",
+    "site/static/logo.png"
   ],
   "repository": {
     "type": "git",

@@ -337,6 +337,14 @@
       "issue": "Leftover vite dev process kept port 54322 bound after the parent serve was killed, so the next localhelm serve failed with strictPort.",
       "resolution": "Kill the whole tree (taskkill /T) or check the port owner before reserving; a LocalBerth lease avoids the collision.",
       "category": "tooling"
+    },
+    {
+      "timestamp": "2026-08-20T20:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 3,
+      "issue": "npmjs.com resolves README images from the published tarball. A logo at site/static/logo.png 404s unless that path is in package.json files.",
+      "resolution": "Ship site/static/logo.png in files, same pattern as LocalBerth.",
+      "category": "tooling"
     }
   ],
   "sessions": [

@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="site/static/logo.png" alt="LocalHelm" width="218" />
+</p>
+
 # LocalHelm
 
 **Status for the products you ship.**

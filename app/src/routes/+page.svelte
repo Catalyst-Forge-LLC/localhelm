@@ -430,7 +430,9 @@
 <div class="shell">
 	<header>
 		<div class="head-row">
-			<div>
+			<div class="brand">
+				<img class="mark" src="/logo.png" alt="" width="96" height="64" />
+				<div>
 				<p class="eyebrow">LocalHelm</p>
 				<h1>Status for the products you ship</h1>
 				<p class="sub">
@@ -449,6 +451,7 @@
 						</span>
 					{/if}
 				</p>
+				</div>
 			</div>
 
 			<div class="actions">
@@ -792,6 +795,18 @@
 		justify-content: space-between;
 		align-items: flex-start;
 		gap: 1.25rem;
+	}
+
+	.brand {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+	}
+
+	.mark {
+		width: 6rem;
+		height: auto;
+		flex-shrink: 0;
 	}
 
 	.eyebrow {
