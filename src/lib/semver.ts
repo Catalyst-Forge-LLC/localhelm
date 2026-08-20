@@ -51,6 +51,12 @@ export function rangeCovers(spec: string, version: string): boolean {
 	return cmp === 0;
 }
 
+export function caretRange(version: string): string {
+	const cleaned = version.trim().replace(/^v/i, '');
+	if (!parseTriple(cleaned)) throw new Error(`not a semver x.y.z: ${version}`);
+	return `^${cleaned}`;
+}
+
 export function bumpTriple(version: string, kind: BumpKind): string {
 	const t = parseTriple(version);
 	if (!t) throw new Error(`not a semver x.y.z: ${version}`);

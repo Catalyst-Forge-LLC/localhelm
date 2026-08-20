@@ -15,7 +15,7 @@ _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking
 ## Project Structure
 
 ```
-src/lib/     fleet, scan, git, npm, pins, status, deps, bump, export, lock
+src/lib/     fleet, scan, git, npm, pins, status, deps, bump, export, lock, cascade, ready
 src/cli/     localhelm commands
 bin/         localhelm.mjs → dist
 app/         SvelteKit dashboard (checkout only; localhelm serve)
@@ -74,14 +74,14 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - M1 CLI: `scan`, `enroll`, `unenroll`, `status`, `deps` (+ `--json`)
 - M2: `bump`, `fetch`, `pull`, `export`, job lock, SvelteKit `app/` + `localhelm serve`
+- M3: `ready`, `cascade` (plan/apply `^V`, skip `link:`/`file:`, commit on apply)
 
 ### In Progress
 
-- Operator can try the dashboard against the real workspace fleet
+- Operator can try cascade on a published package (e.g. ollanet) after reading the plan
 
 ### Not Started
 
-- M3 cascade
 - M4 MCP
 
 ## Recent Changes
@@ -94,3 +94,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 2 — 2026-08-20
 
 - M2 safe writes + loopback dashboard. Default port 54322. No publish, no force-push.
+
+### Session 3 — 2026-08-20
+
+- M3 cascade + ready. Target is published npm V as `^V`. Dirty and local-link rows skip with a reason. Default commit `Helm: retarget <pkg> to <version>.`

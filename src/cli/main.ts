@@ -1,5 +1,7 @@
 import { applyBump, planBump } from '../lib/bump.js';
+import { applyCascade, planCascade } from '../lib/cascade.js';
 import { fleetDeps } from '../lib/deps.js';
+import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { applyExport, planExport } from '../lib/export.js';
 import { applyFetch, applyPull, planFetch, planPull, type GitJobRow } from '../lib/git.js';
@@ -24,6 +26,8 @@ Usage:
   localhelm fetch
   localhelm pull [--apply]
   localhelm export [file] [--apply]
+  localhelm ready [--json]
+  localhelm cascade <id> [--to V] [--apply] [--no-commit]
   localhelm serve [--host ADDR] [--port N]
 
 scan never writes. Mutating commands print a plan; pass --apply to write.
@@ -341,6 +345,76 @@ async function main(): Promise<void> {
 		else {
 			const footer = apply ? `Wrote ${plan.file}` : 'Nothing written. Re-run with --apply to write.';
 			process.stdout.write(`${plan.action}\t${plan.file}\n${footer}\n`);
+		}
+		return;
+	}
+
+	if (cmd === 'ready') {
+		const json = takeFlag(argv, '--json');
+		if (argv.length) fail('usage: localhelm ready [--json]');
+		const loaded = await requireManifest();
+		const inventory = await fleetStatus(loaded);
+		const view = fleetReady(inventory);
+		if (json) printJson(view);
+		else {
+			if (view.eligible.length === 0) {
+				process.stdout.write('No projects are ready to publish. LocalHelm never publishes.\n');
+			} else {
+				const lines = [
+					'id\tlocal\tnpm\tnote',
+					...view.eligible.map((row) => `${row.id}\t${row.localVersion ?? ''}\t${row.npmLatest ?? 'none'}\tyou publish this`),
+					'',
+					'LocalHelm never runs npm publish.',
+				];
+				process.stdout.write(`${lines.join('\n')}\n`);
+			}
+		}
+		return;
+	}
+
+	if (cmd === 'cascade') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		const noCommit = takeFlag(argv, '--no-commit');
+		const to = takeOpt(argv, '--to');
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		if (argv.length !== 1) fail('usage: localhelm cascade <id> [--to V] [--apply] [--no-commit]');
+		const loaded = await requireManifest();
+		const plan = await planCascade(loaded, argv[0], { to, commit: !noCommit });
+		let result = plan;
+		if (apply) {
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				result = await applyCascade(plan);
+			} finally {
+				await lock.release();
+			}
+		}
+		if (json) printJson({ ...result, writes: apply ? result.rows.some((r) => r.writes) : false });
+		else {
+			const lines = [
+				`cascade\t${result.npm}@${result.to}`,
+				result.note,
+				...(result.localUnpublished
+					? [`local unpublished\t${result.localUnpublished} (targeting npm ${result.to})`]
+					: []),
+				...(result.cycles.length ? [`cycles\t${result.cycles.map((c) => c.join('→')).join(' ; ')}`] : []),
+				'id\tfile\taction\tfrom\tto\treason',
+				...result.rows.map((row) =>
+					[
+						row.fromId,
+						row.fromFile,
+						row.action,
+						row.fromSpec,
+						row.toSpec ?? '',
+						row.reason ?? (row.committed ? 'committed' : row.writes ? 'wrote' : ''),
+					].join('\t'),
+				),
+			];
+			if (!apply) lines.push('', 'Nothing written. Re-run with --apply to write pins and lockfiles.');
+			else if (!result.rows.some((r) => r.writes)) lines.push('', 'Nothing written.');
+			process.stdout.write(`${lines.join('\n')}\n`);
 		}
 		return;
 	}

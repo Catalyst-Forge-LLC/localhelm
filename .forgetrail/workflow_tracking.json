@@ -52,7 +52,8 @@
         "TODO.md created (from ForgeTrail template, seeded from PHASE_1_BRIEF §11)",
         "IDEAS.md created (from ForgeTrail template)",
         "Phase 2 doc scope only per WORKFLOW §1a (no premature extra templates)",
-        "M2 dashboard and safe writes: bump, fetch, pull, export, localhelm serve"
+        "M2 dashboard and safe writes: bump, fetch, pull, export, localhelm serve",
+        "M3 cascade + ready: ^V pins, lockfile, commit on apply, skip link:/file:"
       ],
       "exitCriteriaRemaining": [],
       "notes": [
@@ -63,6 +64,10 @@
         {
           "timestamp": "2026-08-20T19:30:00Z",
           "text": "M2: bump, fetch, pull --ff-only, export write, job.lock, SvelteKit app/ + localhelm serve on 127.0.0.1:54322."
+        },
+        {
+          "timestamp": "2026-08-20T20:45:00Z",
+          "text": "M3: ready list + cascade plan/apply at ^V. link:/file: skipped explicitly. Commit on apply default on. Dashboard Ready + Cascade panels."
         }
       ]
     },
@@ -296,6 +301,16 @@
       "rationale": "Operator asked for a folder ignore file so sandbox/noise is not proposed.",
       "alternatives_considered": ["Hardcoded skip list only", "Ignore only in the manifest"],
       "status": "active"
+    },
+    {
+      "id": "d16",
+      "timestamp": "2026-08-20T20:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 3,
+      "decision": "Cascade retargets registry pins to ^V (published npm only). link:/file: rows skip with an explicit reason instead of silently converting. Apply commits those package.json + lockfile paths by default (--no-commit to skip). One publisher per job; dependents are not published.",
+      "rationale": "Locked brief D12–D14 plus genesis 6.2–6.6. FilePress already taught us not to treat a leftover link: as current.",
+      "alternatives_considered": ["Auto-convert link: to registry", "Commit opt-in", "Cascade the next wave in the same job"],
+      "status": "active"
     }
   ],
   "gotchas": [
@@ -353,6 +368,17 @@
         "SvelteKit app/ dashboard calling the same library"
       ],
       "leftOff": "M2 complete. Next is M3 cascade when the operator says go.",
+      "contextLimitHit": false
+    },
+    {
+      "session": 3,
+      "date": "2026-08-20",
+      "phasesWorked": ["2-scaffolding"],
+      "accomplished": [
+        "Dashboard UX: needs-you column, plan-then-write gating, fetchError no longer hides local git",
+        "M3 ready + cascade plan/apply at ^V with default commit"
+      ],
+      "leftOff": "M3 landed. Operator can localhelm ready and localhelm cascade <id> (plan first). M4 next.",
       "contextLimitHit": false
     }
   ]

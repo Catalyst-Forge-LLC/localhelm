@@ -49,6 +49,27 @@ export async function npmLatest(name: string): Promise<NpmCell> {
 	}
 }
 
+export async function npmHasVersion(name: string, version: string): Promise<NpmCell> {
+	const url = `https://registry.npmjs.org/${encodeName(name)}/${encodeURIComponent(version)}`;
+	try {
+		const res = await fetch(url, {
+			headers: { accept: 'application/json' },
+			signal: AbortSignal.timeout(15_000),
+		});
+		if (res.status === 404) return { name, status: 'none' };
+		if (!res.ok) return { name, status: 'error', error: `npm HTTP ${res.status} for ${name}@${version}` };
+		const body: unknown = await res.json();
+		const found =
+			body && typeof body === 'object' && 'version' in body && typeof body.version === 'string'
+				? body.version
+				: undefined;
+		if (!found) return { name, status: 'error', error: `npm missing version for ${name}@${version}` };
+		return { name, latest: found, status: 'ok' };
+	} catch (err) {
+		return { name, status: 'error', error: err instanceof Error ? err.message : String(err) };
+	}
+}
+
 export function clearNpmCache(): void {
 	cache.clear();
 }

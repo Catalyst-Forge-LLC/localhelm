@@ -7,9 +7,12 @@
 		spec: string;
 		kind: string;
 		fromFile: 'root' | 'site';
+		targetId?: string;
 		onLatest?: boolean;
 		note?: string;
 	};
+	type ReadyRow = { id: string; localVersion: string | null; npmLatest?: string; reason?: string };
+	type CascadeTarget = { id: string; npm: string; latest: string; behind: number; linked: number };
 	type Project = {
 		id: string;
 		path: string;
@@ -31,6 +34,7 @@
 			behind: number | null;
 			origin?: string;
 			busy?: string;
+			detached?: boolean;
 			fetchError?: string;
 			error?: string;
 		};
@@ -79,6 +83,7 @@
 	let plannedEnroll = $state<string | null>(null);
 	let plannedUnenroll = $state<string | null>(null);
 	let plannedBump = $state<Record<string, string>>({});
+	let plannedCascade = $state<string | null>(null);
 
 	let entries = $state<LogEntry[]>([]);
 	let busy = $state('');
@@ -98,6 +103,43 @@
 	const staleRemotes = $derived(
 		(inventory?.projects ?? []).some((p) => p.git.repo && Boolean(p.git.fetchError)),
 	);
+	const readyRows = $derived(
+		(inventory?.projects ?? [])
+			.filter(
+				(row) =>
+					row.unpublishedAhead &&
+					!row.private &&
+					!row.missing &&
+					row.git.repo &&
+					!row.git.dirty &&
+					!row.git.busy &&
+					!row.git.detached,
+			)
+			.map(
+				(row): ReadyRow => ({
+					id: row.id,
+					localVersion: row.localVersion,
+					npmLatest: row.npm.latest,
+				}),
+			),
+	);
+	const cascadeTargets = $derived.by((): CascadeTarget[] => {
+		const projects = inventory?.projects ?? [];
+		return projects
+			.map((pub) => {
+				const pins = projects.flatMap((other) => other.pins.filter((pin) => pin.targetId === pub.id));
+				const behind = pins.filter((pin) => pin.kind === 'registry' && pin.onLatest === false).length;
+				const linked = pins.filter((pin) => pin.kind === 'link' || pin.kind === 'file').length;
+				return {
+					id: pub.id,
+					npm: pub.npm.name ?? pub.id,
+					latest: pub.npm.latest ?? '',
+					behind,
+					linked,
+				};
+			})
+			.filter((row) => row.behind > 0 || row.linked > 0);
+	});
 
 	function clearPlans(): void {
 		plannedPull = null;
@@ -105,6 +147,7 @@
 		plannedBump = {};
 		plannedUnenroll = null;
 		plannedEnroll = null;
+		plannedCascade = null;
 	}
 
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
@@ -258,6 +301,23 @@
 		});
 	}
 
+	async function cascade(id: string, apply: boolean): Promise<void> {
+		await run(apply ? `cascading ${id}` : `planning cascade ${id}`, async () => {
+			const data = (await call('/api/cascade', {
+				method: 'POST',
+				body: JSON.stringify({ id, apply }),
+			})) as { to: string; npm: string; rows: { action: string; writes?: boolean }[]; note: string };
+			const n = data.rows.filter((r) => r.action === 'retarget').length;
+			if (apply) {
+				note(`cascade ${data.npm}@${data.to} — wrote ${data.rows.filter((r) => r.writes).length} pin(s)`, data);
+				await refresh();
+				return;
+			}
+			plannedCascade = `${id}@${data.to}`;
+			note(`cascade plan ${data.npm}@${data.to} — ${n} pin(s) to retarget. ${data.note}`, data);
+		});
+	}
+
 	async function exportFile(apply: boolean): Promise<void> {
 		await run(apply ? 'writing the JSON export' : 'planning export', async () => {
 			const data = (await call('/api/export', { method: 'POST', body: JSON.stringify({ apply }) })) as {
@@ -333,7 +393,7 @@
 		if (row.git.dirty) out.push({ text: `dirty${dirtDetail(row) ? ` — ${dirtDetail(row)}` : ''}`, tone: 'warn' });
 		if (row.git.busy) out.push({ text: `mid-${row.git.busy}`, tone: 'bad' });
 		if (row.cascadeBehind) {
-			out.push({ text: `${row.cascadeBehind} pin(s) behind`, tone: 'warn', title: 'A dependency pin trails the published version. Cascade is M3.' });
+			out.push({ text: `${row.cascadeBehind} pin(s) behind`, tone: 'warn', title: 'A dependency pin would not install the published version. Plan a cascade on that package.' });
 		}
 		if (row.git.fetchError) {
 			out.push({
@@ -572,6 +632,65 @@
 		</section>
 
 		<aside>
+			<section class="panel">
+				<h2>Ready to publish</h2>
+				<p class="hint">You publish these. LocalHelm never runs npm publish.</p>
+				{#if readyRows.length === 0}
+					<p class="dim small">None — need local ahead of npm, public, and a clean git tree.</p>
+				{:else}
+					<ul class="candidates">
+						{#each readyRows as row (row.id)}
+							<li>
+								<div>
+									<div class="id">{row.id}</div>
+									<div class="dim small">{row.localVersion} local · npm {row.npmLatest ?? 'none'}</div>
+								</div>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</section>
+
+			<section class="panel">
+				<h2>Cascade</h2>
+				<p class="hint">
+					Retarget dependents' pins to the published <code>^V</code>. Does not publish those dependents or start the next wave.
+				</p>
+				{#if cascadeTargets.length === 0}
+					<p class="dim small">No enrolled pins are behind or still on link:/file:.</p>
+				{:else}
+					<ul class="candidates">
+						{#each cascadeTargets as row (row.id)}
+							<li>
+								<div class="grow">
+									<div class="id">{row.id}</div>
+									<div class="dim small">
+										{row.npm}{row.latest ? `@${row.latest}` : ''}
+										{row.behind ? ` · ${row.behind} behind` : ''}
+										{row.linked ? ` · ${row.linked} local link` : ''}
+									</div>
+									<div class="group-buttons" style="margin-top: 0.35rem">
+										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => cascade(row.id, false)}>
+											Plan cascade
+										</button>
+										<button
+											class="btn btn-sm btn-write"
+											disabled={Boolean(busy) || !plannedCascade?.startsWith(`${row.id}@`)}
+											onclick={() => cascade(row.id, true)}
+											title={plannedCascade?.startsWith(`${row.id}@`)
+												? `Write pins and lockfiles for ${plannedCascade}. Commits by default.`
+												: 'Run Plan cascade first.'}
+										>
+											{plannedCascade?.startsWith(`${row.id}@`) ? `Write ${plannedCascade.slice(row.id.length + 1)}` : 'Write pins'}
+										</button>
+									</div>
+								</div>
+							</li>
+						{/each}
+					</ul>
+				{/if}
+			</section>
+
 			<section class="panel">
 				<h2>Add projects</h2>
 				<p class="hint">Scanning proposes folders. Nothing joins the fleet until you tick it and write.</p>
@@ -1022,6 +1141,11 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.3rem;
+	}
+
+	.grow {
+		flex: 1;
+		min-width: 0;
 	}
 
 	.candidates li {

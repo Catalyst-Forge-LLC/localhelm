@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { bumpTriple, compareSemver, rangeCovers } from './semver.js';
+import { bumpTriple, caretRange, compareSemver, rangeCovers } from './semver.js';
 
 describe('semver', () => {
 	it('orders patch correctly', () => {
@@ -19,5 +19,9 @@ describe('semver', () => {
 		assert.equal(bumpTriple('0.1.8', 'patch'), '0.1.9');
 		assert.equal(bumpTriple('0.1.8', 'minor'), '0.2.0');
 		assert.equal(bumpTriple('0.1.8', 'major'), '1.0.0');
+	});
+
+	it('builds caret ranges', () => {
+		assert.equal(caretRange('0.1.9'), '^0.1.9');
 	});
 });

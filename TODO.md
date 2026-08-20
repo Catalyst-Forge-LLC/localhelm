@@ -18,10 +18,10 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 
 ## M3 — Cascade
 
-- [ ] Plan/apply pin + lockfile at `^V`
-- [ ] `link:` vs registry explicit
-- [ ] Commit on apply (default on)
-- [ ] `ready` list
+- [x] Plan/apply pin + lockfile at `^V`
+- [x] `link:` vs registry explicit
+- [x] Commit on apply (default on)
+- [x] `ready` list
 
 ## M4 — Compose + agents
 
