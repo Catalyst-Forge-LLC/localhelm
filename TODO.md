@@ -7,7 +7,7 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 - [x] Manifest `workspaceRoot: "."` + scan folder(s)
 - [x] Enroll / unenroll plan then `--apply`
 - [x] `status` and `deps` (local / npm / git) + JSON export
-- [ ] Seed a real workspace fleet by hand (operator)
+- [x] Seed a real workspace fleet by hand (operator) _(localhelm, localberth, ollanet, filepress)_
 
 ## M2 — Safe writes + dashboard
 
