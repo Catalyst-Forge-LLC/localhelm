@@ -131,9 +131,11 @@ Per enrolled path:
 
 Read-only unless the operator confirmed a named action (`fetch`, `pull`, `commit` of specified paths). **Never** `push --force`. **Never** prune. **Never** rewrite `origin`.
 
-### 2.4 The Catalyst Forge shelf
+### 2.4 Public shelf (not baked into LocalHelm)
 
-Canonical catalog today: `catalyst-forge/src/lib/projects.js`. It exports `projectGroups`. Each project has `name`, `version` (a display string like `v0.1.2` or `suite` or `pre-1.0`), `status`, `links[]`, optional `members[]`.
+**Amendment 2026-08-20:** LocalHelm does **not** read or write `catalyst-forge/src/lib/projects.js` or any other product-specific shelf. The first shop may still *use* LocalHelm that way, but the package exports a generic inventory (JSON). A site such as Catalyst Forge can consume that export later. Kickoff numbers below are workspace context only.
+
+Historical note — canonical CF catalog today: `catalyst-forge/src/lib/projects.js`. It exports `projectGroups`. Each project has `name`, `version` (a display string like `v0.1.2` or `suite` or `pre-1.0`), `status`, `links[]`, optional `members[]`. That adapter is **out of this package.**
 
 This file is hand-edited JavaScript, not JSON. A v1 catalog adapter:
 
@@ -377,9 +379,9 @@ The seed list will rot. The manifest is the source of truth after day one.
 **M1: Read-only fleet (smallest useful)**
 
 - Manifest + enroll / unenroll / discover (print-only).
-- `status` and `deps` with local version, npm latest, git porcelain, catalog read.
-- JSON output.
-- Seed the kickoff fleet by hand from §4.10. Prove the FilePress / ollanet / aiBreze drift table without walking 52 repos as the default view.
+- `status` and `deps` with local version, npm latest, git porcelain.
+- JSON export (generic schema; no catalog adapter). See §2.4 amendment: no `projects.js` in this package.
+- An operator may seed a first fleet by hand from §4.10. That list is shop context, not product code.
 
 **M2: Safe writes that pay for themselves**
 

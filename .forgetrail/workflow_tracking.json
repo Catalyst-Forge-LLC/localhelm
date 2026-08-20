@@ -2,7 +2,7 @@
   "project": {
     "name": "LocalHelm",
     "created": "2026-08-20",
-    "description": "Status for the products you ship. A named fleet board for git, npm, dependents, and the public shelf.",
+    "description": "Status for the products you ship. A named fleet board for git, npm, and dependents. Generic JSON export; no shop-specific shelf.",
     "archetype": "product",
     "status": "active"
   },
@@ -30,7 +30,7 @@
       "notes": [
         {
           "timestamp": "2026-08-20T17:15:00Z",
-          "text": "Kickoff with existing docs/GENESIS.md. Ingested into draft PHASE_1_BRIEF.md. Brief not locked. Operator always publishes to npm (D4 confirmed). package.json is localhelm@0.0.0 for the operator to publish. GitHub origin pointed at Catalyst-Forge-LLC/localhelm (empty private repo)."
+          "text": "Kickoff with existing docs/GENESIS.md. Ingested into draft PHASE_1_BRIEF.md. Brief not locked. Operator always publishes (D4). localhelm@0.0.0 is on npm. D9: no CF/projects.js shelf in the package; generic JSON export for consumers."
         }
       ]
     },
@@ -179,7 +179,7 @@
       "phase": "1-architecture",
       "session": 1,
       "decision": "CLI name localhelm. Never helm. Public name LocalHelm.",
-      "rationale": "Kubernetes Helm / TaskHelm / iamgp/helm collisions. package.json is localhelm@0.0.0; public publish still pending.",
+      "rationale": "Kubernetes Helm / TaskHelm / iamgp/helm collisions. localhelm@0.0.0 published 2026-08-20.",
       "alternatives_considered": ["getlocalhelm", "@catalyst-forge/localhelm"],
       "status": "active"
     },
@@ -208,9 +208,19 @@
       "timestamp": "2026-08-20T17:15:00Z",
       "phase": "1-architecture",
       "session": 1,
-      "decision": "No LLM-produced product content. Inventory is read from disk, git, npm, and the catalog file.",
+      "decision": "No LLM-produced product content. Inventory is read from disk, git, and npm.",
       "rationale": "Genesis non-goal: no LLM choosing versions, commit messages, or which dependents to skip.",
       "alternatives_considered": ["Runtime LLM API", "Build-time seed", "BYO-LLM paste"],
+      "status": "active"
+    },
+    {
+      "id": "d9",
+      "timestamp": "2026-08-20T17:56:00Z",
+      "phase": "1-architecture",
+      "session": 1,
+      "decision": "No product-specific shelf in LocalHelm. Do not read or write catalyst-forge projects.js or any other shop catalog. Export generic JSON; consumers (including CF later) adapt.",
+      "rationale": "localhelm is a public package. Baking a CF shelf would make every other shop a second-class citizen and couple the CLI to one marketing file.",
+      "alternatives_considered": ["Built-in projects.js adapter", "catalogName as a first-class CF card"],
       "status": "active"
     }
   ],
@@ -225,9 +235,10 @@
         "ForgeTrail kickoff files written",
         "Draft PHASE_1_BRIEF.md from genesis",
         "origin set to git@github.com:Catalyst-Forge-LLC/localhelm.git",
-        "package.json set to localhelm@0.0.0; operator always publishes (D4 confirmed)"
+        "package.json set to localhelm@0.0.0; operator published to npm",
+        "D9: no CF shelf baked in; generic JSON export"
       ],
-      "leftOff": "Brief is draft. Confirm genesis proposals (especially license and remaining §9 questions) then lock PHASE_1_BRIEF before any app spine.",
+      "leftOff": "Brief still draft. D4 and D9 locked. Remaining §9 items then lock PHASE_1_BRIEF before the M1 spine.",
       "contextLimitHit": false
     }
   ]
