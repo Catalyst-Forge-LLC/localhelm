@@ -21,6 +21,7 @@ localhelm deps
 localhelm bump filepress patch          # plan
 localhelm fetch
 localhelm pull                          # plan; add --apply for ff-only
+localhelm push localhelm filepress --apply   # origin only; name ids; never --force
 localhelm export                        # plan; add --apply to write localhelm.status.json
 localhelm ready                         # eligible to publish (you still publish)
 localhelm cascade ollanet               # plan pin updates to ^npm; --apply writes + commits
@@ -29,9 +30,9 @@ localhelm plugin filepress              # content sites: headers, link→npm, sh
 localhelm serve                         # dashboard on 127.0.0.1:54322
 ```
 
-`scan` never writes. Mutating commands print a plan; pass `--apply` to write. The tool never publishes and never git-pushes. One job at a time (`.localhelm/job.lock`).
+`scan` never writes. Mutating commands print a plan; pass `--apply` to write. The tool never publishes. `push` is origin only, requires named project ids, and never `--force`. One job at a time (`.localhelm/job.lock`).
 
-The loopback dashboard (`app/`, checkout only) calls the same library: scan/enroll, status, bump, fetch, pull, export, ready, cascade.
+The loopback dashboard (`app/`, checkout only) calls the same library: scan/enroll, status, bump, fetch, pull, push, export, ready, cascade.
 
 Put gitignore-style patterns in `.localhelmignore` at the workspace (or a parent). `node_modules`, dot-folders, and `__*` are always skipped. Optional user-global list: `~/.localhelm/ignore`.
 

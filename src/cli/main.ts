@@ -5,7 +5,7 @@ import { loadPlugins, requirePlugin } from '../lib/plugin.js';
 import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { applyExport, planExport } from '../lib/export.js';
-import { applyFetch, applyPull, planFetch, planPull, type GitJobRow } from '../lib/git.js';
+import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
@@ -26,6 +26,8 @@ Usage:
   localhelm bump <id> patch|minor|major [--apply]
   localhelm fetch
   localhelm pull [--apply]
+  localhelm push [id...]                 # plan
+  localhelm push <id>... --apply         # origin only; never --force
   localhelm export [file] [--apply]
   localhelm ready [--json]
   localhelm cascade <id> [--to V] [--apply] [--no-commit]
@@ -324,6 +326,47 @@ async function main(): Promise<void> {
 		else {
 			process.stdout.write(formatGitRows(rows));
 			if (!apply) process.stdout.write('Nothing written. Re-run with --apply to pull --ff-only.\n');
+		}
+		return;
+	}
+
+	if (cmd === 'push') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		if (argv.some((a) => a === '--force' || a === '-f' || a === '--force-with-lease')) {
+			fail('localhelm never force-pushes');
+		}
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		const loaded = await requireManifest();
+		let ids: string[] | undefined;
+		if (apply) {
+			try {
+				ids = requirePushIds(argv);
+			} catch (err) {
+				fail(err instanceof Error ? err.message : String(err));
+			}
+		} else if (argv.length) {
+			ids = argv;
+		}
+		const planned = await planPush(loaded, ids);
+		let rows = planned;
+		if (apply) {
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				rows = planned.map((row) => applyPush(loaded.workspaceRoot, row));
+			} finally {
+				await lock.release();
+			}
+		}
+		if (json) printJson({ rows, writes: apply });
+		else {
+			process.stdout.write(formatGitRows(rows));
+			if (!apply) {
+				process.stdout.write(
+					'Nothing written. Re-run with the same id(s) and --apply to git push origin <branch>. Never --force.\n',
+				);
+			}
 		}
 		return;
 	}

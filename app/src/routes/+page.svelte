@@ -68,7 +68,14 @@
 		git: boolean;
 		private?: boolean;
 	};
-	type GitRow = { id: string; action: string; reason?: string };
+	type GitRow = {
+		id: string;
+		action: string;
+		reason?: string;
+		origin?: string;
+		branch?: string;
+		ahead?: number | null;
+	};
 	type BumpPlan = { id: string; from: string | null; to: string | null; action: string; reason?: string };
 	type LogEntry = { time: string; title: string; body: string };
 
@@ -86,6 +93,7 @@
 
 	// A plan must be seen before its apply button unlocks. Any refresh clears them.
 	let plannedPull = $state<number | null>(null);
+	let plannedPush = $state<GitRow[] | null>(null);
 	let plannedExport = $state<string | null>(null);
 	let plannedEnroll = $state<string | null>(null);
 	let plannedUnenroll = $state<string | null>(null);
@@ -152,6 +160,7 @@
 
 	function clearPlans(): void {
 		plannedPull = null;
+		plannedPush = null;
 		plannedExport = null;
 		plannedBump = {};
 		plannedUnenroll = null;
@@ -314,6 +323,40 @@
 			}
 			plannedPull = eligible.length;
 			note(`pull plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
+		});
+	}
+
+	function pushConfirmCopy(rows: GitRow[]): string {
+		const lines = rows.map((row) => {
+			const n = row.ahead ?? '?';
+			return `${row.id}  ${row.branch ?? '?'}  ${n} commit(s)  →  origin ${row.origin ?? ''}`;
+		});
+		return `git push origin (never --force)\n\n${lines.join('\n')}\n\nPush these branches to origin?`;
+	}
+
+	async function push(apply: boolean): Promise<void> {
+		if (apply) {
+			const rows = plannedPush ?? [];
+			if (rows.length === 0) return;
+			if (!window.confirm(pushConfirmCopy(rows))) return;
+		}
+		await run(apply ? 'pushing to origin' : 'planning push', async () => {
+			const ids = apply ? (plannedPush ?? []).map((row) => row.id) : undefined;
+			const data = (await call('/api/push', { method: 'POST', body: JSON.stringify({ apply, ids }) })) as {
+				rows: GitRow[];
+			};
+			const eligible = data.rows.filter((r) => r.action === 'push');
+			if (apply) {
+				const failed = eligible.filter((r) => r.reason !== 'pushed');
+				note(
+					`push --apply — ${eligible.filter((r) => r.reason === 'pushed').length} pushed, ${failed.length} failed`,
+					data,
+				);
+				await refresh();
+				return;
+			}
+			plannedPush = eligible;
+			note(`push plan — ${eligible.length} of ${data.rows.length} eligible (origin only), nothing written`, data);
 		});
 	}
 
@@ -522,6 +565,23 @@
 						>
 							{plannedPull === null ? 'Pull' : `Pull ${plannedPull} repo${plannedPull === 1 ? '' : 's'}`}
 						</button>
+						<button class="btn" disabled={Boolean(busy)} onclick={() => push(false)} title="List repos that are clean and ahead of origin. Writes nothing.">
+							Plan push
+						</button>
+						<button
+							class="btn btn-write"
+							disabled={Boolean(busy) || plannedPush === null || plannedPush.length === 0}
+							onclick={() => push(true)}
+							title={plannedPush === null
+								? 'Run Plan push first. You will confirm each origin URL.'
+								: plannedPush.length === 0
+									? 'Nothing is eligible: repos must be clean, ahead, and not diverged.'
+									: 'git push origin <branch> on the planned repos. Never --force. Confirms remotes first.'}
+						>
+							{plannedPush === null
+								? 'Push'
+								: `Push ${plannedPush.length} to origin`}
+						</button>
 						<button class="btn" disabled={Boolean(busy)} onclick={() => exportFile(false)} title="Show where the JSON inventory would be written.">
 							Plan export
 						</button>
@@ -659,7 +719,7 @@
 
 			<p class="legend">
 				<strong>Plan</strong> buttons only print what would happen. <strong>Write</strong> buttons change files on disk, one job at a time.
-				LocalHelm never runs <code>npm publish</code> and never pushes to git.
+				LocalHelm never runs <code>npm publish</code>. Push is origin only, never <code>--force</code>, and never the IngotVault backup remote.
 			</p>
 
 			{#each pluginBoards as board (board.plugin)}

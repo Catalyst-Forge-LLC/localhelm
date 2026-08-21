@@ -115,11 +115,23 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 export type GitJobRow = {
 	id: string;
 	path: string;
-	action: 'fetch' | 'pull' | 'skip';
+	action: 'fetch' | 'pull' | 'push' | 'skip';
 	reason?: string;
 	stdout?: string;
 	stderr?: string;
+	remote?: string;
+	origin?: string;
+	branch?: string;
+	ahead?: number | null;
 };
+
+export function requirePushIds(ids: string[]): string[] {
+	const named = ids.map((id) => id.trim()).filter((id) => id.length > 0);
+	if (named.length === 0) {
+		throw new Error('name the project id(s) to push. LocalHelm will not push the whole fleet in one apply.');
+	}
+	return named;
+}
 
 export async function planFetch(loaded: LoadedManifest): Promise<GitJobRow[]> {
 	const rows: GitJobRow[] = [];
@@ -201,5 +213,75 @@ export function applyPull(workspaceRoot: string, row: GitJobRow): GitJobRow {
 		stdout: result.stdout.trim(),
 		stderr: result.stderr,
 		reason: result.ok ? 'pulled ff-only' : result.stderr,
+	};
+}
+
+function planPushOne(id: string, relPath: string, abs: string): GitJobRow {
+	const git = readGit(abs);
+	const base: GitJobRow = {
+		id,
+		path: relPath,
+		action: 'skip',
+		origin: git.origin,
+		branch: git.branch,
+		ahead: git.ahead,
+		remote: 'origin',
+	};
+	if (!git.repo) return { ...base, reason: 'no git' };
+	if (git.detached) return { ...base, reason: 'detached' };
+	if (git.busy) return { ...base, reason: git.busy };
+	if (git.dirty) return { ...base, reason: 'dirty' };
+	if (!git.origin) return { ...base, reason: 'no origin' };
+	if (!git.branch) return { ...base, reason: 'no branch' };
+	if (git.ahead == null || git.behind == null) return { ...base, reason: 'no upstream' };
+	if (git.behind > 0) return { ...base, reason: 'diverged' };
+	if (git.ahead === 0) return { ...base, reason: 'not ahead' };
+	return {
+		...base,
+		action: 'push',
+		reason: `${git.ahead} on ${git.branch} → ${git.origin}`,
+	};
+}
+
+export async function planPush(loaded: LoadedManifest, onlyIds?: string[]): Promise<GitJobRow[]> {
+	const rows: GitJobRow[] = [];
+	if (onlyIds?.length) {
+		for (const id of onlyIds) {
+			const project = loaded.manifest.projects.find((p) => p.id === id);
+			if (!project) {
+				rows.push({ id, path: '', action: 'skip', reason: 'not enrolled' });
+				continue;
+			}
+			const abs = joinRoot(loaded.workspaceRoot, project.path);
+			if (!(await pathExists(abs))) {
+				rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'missing' });
+				continue;
+			}
+			rows.push(planPushOne(project.id, project.path, abs));
+		}
+		return rows;
+	}
+	for (const project of loaded.manifest.projects) {
+		const abs = joinRoot(loaded.workspaceRoot, project.path);
+		if (!(await pathExists(abs))) {
+			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'missing' });
+			continue;
+		}
+		rows.push(planPushOne(project.id, project.path, abs));
+	}
+	return rows;
+}
+
+export function applyPush(workspaceRoot: string, row: GitJobRow): GitJobRow {
+	if (row.action !== 'push') return row;
+	if (!row.branch) return { ...row, action: 'skip', reason: 'no branch' };
+	const abs = joinRoot(workspaceRoot, row.path);
+	// origin + current branch only. Never --force, never backup, never extra remotes.
+	const result = runGit(abs, ['push', 'origin', row.branch]);
+	return {
+		...row,
+		stdout: result.stdout.trim(),
+		stderr: result.stderr,
+		reason: result.ok ? 'pushed' : result.stderr,
 	};
 }

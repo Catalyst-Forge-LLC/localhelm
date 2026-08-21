@@ -68,6 +68,10 @@
         {
           "timestamp": "2026-08-20T20:45:00Z",
           "text": "M3: ready list + cascade plan/apply at ^V. link:/file: skipped explicitly. Commit on apply default on. Dashboard Ready + Cascade panels."
+        },
+        {
+          "timestamp": "2026-08-21T17:28:00Z",
+          "text": "Selected origin push (D18): named ids on apply, dashboard confirm lists remotes, never --force."
         }
       ]
     },
@@ -188,9 +192,9 @@
       "phase": "1-architecture",
       "session": 1,
       "decision": "No publish action and no git push in v1. Operator publishes. Agents never run npm/pnpm publish. Publish may be a later option; never the first ship. Push is a later milestone with harsh confirm. Never force-push.",
-      "rationale": "Confirmed 2026-08-20. Eligible badge only at first. Future publish/push are explicit later work.",
+      "rationale": "Confirmed 2026-08-20. Eligible badge only at first. Future publish/push are explicit later work. Push lifted 2026-08-21 as d18.",
       "alternatives_considered": ["Publish in v1", "Push in v1", "Never publish ever"],
-      "status": "active"
+      "status": "superseded"
     },
     {
       "id": "d5",
@@ -321,6 +325,16 @@
       "rationale": "Operator wanted one window (absorb C) without baking FilePress into the public localhelm package. Compose: host here, library stays in FilePress.",
       "alternatives_considered": ["Keep a second siblings dashboard only", "Copy header merge into localhelm", "Deep-link only"],
       "status": "active"
+    },
+    {
+      "id": "d18",
+      "timestamp": "2026-08-21T17:28:00Z",
+      "phase": "2-scaffolding",
+      "session": 4,
+      "decision": "Selected origin push is in. CLI apply requires named project ids. Dashboard apply shows a confirm listing each id, branch, ahead count, and origin URL. git push origin <branch> only. Never --force / --force-with-lease. Never the IngotVault backup remote. Skip dirty, detached, diverged, not-ahead, no-upstream. Publish stays out of the tool.",
+      "rationale": "Operator 2026-08-21: opening each folder to push is the remaining pain. Genesis 4.6 / 4.8 already specified named push + harsh confirm. Lifts D13.",
+      "alternatives_considered": ["Fleet-wide push --apply", "force-with-lease", "push backup remotes", "keep push out"],
+      "status": "active"
     }
   ],
   "gotchas": [
@@ -397,6 +411,17 @@
         "M3 ready + cascade plan/apply at ^V with default commit"
       ],
       "leftOff": "M3 landed. Operator can localhelm ready and localhelm cascade <id> (plan first). M4 next.",
+      "contextLimitHit": false
+    },
+    {
+      "session": 4,
+      "date": "2026-08-21",
+      "phasesWorked": ["2-scaffolding"],
+      "accomplished": [
+        "HTTPS remotes for localhelm and localberth so fetch works",
+        "Selected origin push: plan, named ids, dashboard confirm, never --force"
+      ],
+      "leftOff": "Push landed. Operator can localhelm push <id>... --apply or Plan push / confirm on the dashboard. Publish still not in the tool.",
       "contextLimitHit": false
     }
   ]

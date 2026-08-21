@@ -31,7 +31,7 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 
 ## Later
 
-- [ ] Selected `origin` push with harsh confirm
+- [x] Selected `origin` push with harsh confirm _(named ids + confirm copy; never `--force`)_
 - [ ] Optional publish action (never the first ship)
 - [ ] FilePress `site/` + `/docs` on localhelm.dev
 - [ ] Tag on bump

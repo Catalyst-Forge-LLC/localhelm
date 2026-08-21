@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
-import { planFetch, planPull, readGit, runGit } from './git.js';
+import { applyPush, planFetch, planPull, planPush, readGit, requirePushIds, runGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
 
 async function gitRepo(dir: string): Promise<void> {
@@ -32,6 +32,9 @@ describe('git jobs', () => {
 		const pullRows = await planPull(loaded);
 		assert.equal(pullRows[0]?.action, 'skip');
 		assert.equal(pullRows[0]?.reason, 'no origin');
+		const pushRows = await planPush(loaded);
+		assert.equal(pushRows[0]?.action, 'skip');
+		assert.equal(pushRows[0]?.reason, 'no origin');
 	});
 
 	it('keeps local state when a fetch fails', async () => {
@@ -45,5 +48,46 @@ describe('git jobs', () => {
 		assert.ok(cell.branch);
 		assert.ok(cell.fetchError);
 		assert.equal(cell.error, undefined);
+	});
+
+	it('requires named ids before apply', () => {
+		assert.throws(() => requirePushIds([]), /name the project id/);
+		assert.deepEqual(requirePushIds([' localhelm ', 'filepress']), ['localhelm', 'filepress']);
+	});
+
+	it('skips dirty, not-ahead, and unknown ids; pushes a clean ahead repo', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-push-'));
+		const bare = path.join(root, 'origin.git');
+		await mkdir(bare);
+		assert.equal(runGit(bare, ['init', '--bare']).ok, true);
+		const pkgDir = path.join(root, 'widget');
+		await mkdir(pkgDir);
+		await gitRepo(pkgDir);
+		assert.equal(runGit(pkgDir, ['remote', 'add', 'origin', bare]).ok, true);
+		assert.equal(runGit(pkgDir, ['push', '-u', 'origin', 'HEAD']).ok, true);
+
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: { workspaceRoot: '.', projects: [{ id: 'widget', path: 'widget' }] },
+		};
+		assert.equal((await planPush(loaded))[0]?.reason, 'not ahead');
+
+		await writeFile(path.join(pkgDir, 'README.md'), 'hello\nmore\n');
+		assert.equal((await planPush(loaded))[0]?.reason, 'dirty');
+
+		assert.equal(runGit(pkgDir, ['add', 'README.md']).ok, true);
+		assert.equal(runGit(pkgDir, ['commit', '-m', 'ahead']).ok, true);
+		const planned = await planPush(loaded, ['widget']);
+		assert.equal(planned[0]?.action, 'push');
+		assert.match(planned[0]?.reason ?? '', /on /);
+		assert.equal(planned[0]?.remote, 'origin');
+
+		const unknown = await planPush(loaded, ['nope']);
+		assert.equal(unknown[0]?.reason, 'not enrolled');
+
+		const applied = applyPush(root, planned[0]!);
+		assert.equal(applied.reason, 'pushed');
+		assert.equal((await planPush(loaded))[0]?.reason, 'not ahead');
 	});
 });
