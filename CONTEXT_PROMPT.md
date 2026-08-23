@@ -80,7 +80,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
 - `publish`: plan then named-id `--apply`. Intended auth is `localhelm auth` + a granular automation token (Bypass 2FA) in the **user** `~/.npmrc`. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
 - Dashboard confirms use a `<dialog>` modal (not `window.confirm`). FilePress board has Plan engine sync / Sync N for all sites. Header Plan push all plans every enrolled origin.
-- Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply unlocks only when the plan marks `writes: true` — already-current FilePress sites stay disabled.
+- Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close). No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply unlocks only when the plan marks `writes: true` — already-current FilePress sites stay disabled.
 
 ### In Progress
 

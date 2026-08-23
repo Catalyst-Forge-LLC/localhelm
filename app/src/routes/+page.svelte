@@ -97,6 +97,8 @@
 
 	let inventory = $state<Inventory | null>(null);
 	let tab = $state<TabId>('today');
+	let activityOpen = $state(false);
+	let activityUnseen = $state(false);
 	let cwd = $state('');
 	let port = $state<string | null>(null);
 	let portSource = $state<string | null>(null);
@@ -207,13 +209,23 @@
 			.map((row) => row.id),
 	);
 
-	function setTab(next: TabId): void {
-		tab = next;
+	function persist(key: string, value: string): void {
 		try {
-			sessionStorage.setItem('localhelm.tab', next);
+			sessionStorage.setItem(key, value);
 		} catch {
 			/* ignore quota / private mode */
 		}
+	}
+
+	function setTab(next: TabId): void {
+		tab = next;
+		persist('localhelm.tab', next);
+	}
+
+	function setActivityOpen(next: boolean): void {
+		activityOpen = next;
+		if (next) activityUnseen = false;
+		persist('localhelm.activity', next ? '1' : '0');
 	}
 
 	function rowNeedsYou(row: Project): boolean {
@@ -262,6 +274,7 @@
 	function note(title: string, data: unknown): void {
 		const time = new Date().toLocaleTimeString();
 		entries = [{ time, title, body: JSON.stringify(data, null, 2) }, ...entries].slice(0, 40);
+		if (!activityOpen) activityUnseen = true;
 	}
 
 	async function run(label: string, fn: () => Promise<void>): Promise<void> {
@@ -702,6 +715,7 @@
 		try {
 			const saved = sessionStorage.getItem('localhelm.tab');
 			if (saved === 'today' || saved === 'fleet' || saved === 'sites') tab = saved;
+			activityOpen = sessionStorage.getItem('localhelm.activity') === '1';
 		} catch {
 			/* ignore */
 		}
@@ -856,8 +870,20 @@
 			Sites
 			{#if filepressBoard}<span class="count quiet">{filepressBoard.rows.length}</span>{/if}
 		</button>
+		<button
+			type="button"
+			class="tab activity-tab"
+			class:active={activityOpen}
+			class:hot={activityUnseen}
+			onclick={() => setActivityOpen(!activityOpen)}
+		>
+			Activity
+			{#if entries.length}<span class="count">{entries.length}</span>{/if}
+			{#if activityUnseen}<span class="count">new</span>{/if}
+		</button>
 	</nav>
 
+	<div class="workspace">
 	<main>
 		{#if tab === 'today'}
 			<div class="today-grid">
@@ -1332,16 +1358,22 @@
 				</section>
 			{/each}
 		{/if}
+	</main>
 
-		<section class="panel activity-dock">
+	{#if activityOpen}
+		<button type="button" class="drawer-backdrop" aria-label="Close activity" onclick={() => setActivityOpen(false)}></button>
+		<aside class="drawer" aria-label="Activity">
 			<div class="section-head">
 				<div>
 					<h2>Activity</h2>
 					<p class="hint">Every plan and write, newest first — the same output the CLI prints.</p>
 				</div>
-				{#if entries.length}
-					<button class="btn btn-sm" onclick={() => (entries = [])}>Clear</button>
-				{/if}
+				<div class="group-buttons">
+					{#if entries.length}
+						<button class="btn btn-sm" onclick={() => (entries = [])}>Clear</button>
+					{/if}
+					<button class="btn btn-sm" onclick={() => setActivityOpen(false)}>Close</button>
+				</div>
 			</div>
 			{#if entries.length === 0}
 				<p class="dim small">Nothing yet.</p>
@@ -1357,9 +1389,16 @@
 					{/each}
 				</ul>
 			{/if}
-		</section>
-	</main>
+		</aside>
+	{/if}
+	</div>
 </div>
+
+<svelte:window
+	onkeydown={(event) => {
+		if (event.key === 'Escape' && activityOpen && !confirmOpen) setActivityOpen(false);
+	}}
+/>
 
 <ConfirmModal
 	bind:open={confirmOpen}
@@ -1375,8 +1414,18 @@
 />
 
 <style>
+	:global(html),
+	:global(body) {
+		height: 100%;
+		margin: 0;
+		overflow: hidden;
+	}
+
 	.shell {
-		min-height: 100vh;
+		height: 100vh;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
 		background: #1c1c21;
 		color: #ececef;
 		font-family:
@@ -1386,6 +1435,7 @@
 	}
 
 	header {
+		flex-shrink: 0;
 		background: #000;
 		border-bottom: 1px solid #1f1f22;
 		padding: 1.1rem 1.5rem;
@@ -1582,10 +1632,15 @@
 	.tabs {
 		display: flex;
 		flex-wrap: wrap;
+		flex-shrink: 0;
 		gap: 0.35rem;
 		padding: 0.85rem 1.5rem 0;
 		background: #000;
 		border-bottom: 1px solid #1f1f22;
+	}
+
+	.activity-tab {
+		margin-left: auto;
 	}
 
 	.tab {
@@ -1630,11 +1685,67 @@
 		color: #a8a8b0;
 	}
 
+	.workspace {
+		flex: 1;
+		min-height: 0;
+		display: flex;
+		position: relative;
+		overflow: hidden;
+	}
+
 	main {
+		flex: 1;
+		min-width: 0;
+		min-height: 0;
+		overflow: auto;
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		padding: 1.1rem 1.5rem 2.5rem;
+		padding: 1.1rem 1.5rem 1.5rem;
+	}
+
+	.drawer-backdrop {
+		display: none;
+	}
+
+	.drawer {
+		width: min(26rem, 100%);
+		flex-shrink: 0;
+		height: 100%;
+		overflow: auto;
+		display: flex;
+		flex-direction: column;
+		background: #111114;
+		border-left: 1px solid #3d3d44;
+		padding: 0.95rem 1rem 1.25rem;
+		z-index: 20;
+	}
+
+	.drawer .log {
+		max-height: none;
+		flex: 1;
+	}
+
+	@media (max-width: 1100px) {
+		.drawer-backdrop {
+			display: block;
+			position: absolute;
+			inset: 0;
+			border: 0;
+			padding: 0;
+			background: rgb(0 0 0 / 0.45);
+			cursor: pointer;
+			z-index: 15;
+		}
+
+		.drawer {
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			width: min(26rem, 92vw);
+			box-shadow: -16px 0 40px rgb(0 0 0 / 0.45);
+		}
 	}
 
 	.today-grid,
@@ -1828,10 +1939,6 @@
 
 	.cascade-note {
 		margin: 0.35rem 0 0.25rem;
-	}
-
-	.activity-dock .log {
-		max-height: 14rem;
 	}
 
 	label {
