@@ -208,6 +208,11 @@
 			.filter((row) => row.actions.some((act) => act.id === 'sync'))
 			.map((row) => row.id),
 	);
+	const filepressPushIds = $derived(
+		(filepressBoard?.rows ?? [])
+			.filter((row) => row.actions.some((act) => act.id === 'push'))
+			.map((row) => row.id),
+	);
 
 	function persist(key: string, value: string): void {
 		try {
@@ -445,9 +450,10 @@
 		});
 	}
 
-	async function runPush(apply: boolean): Promise<void> {
-		await run(apply ? 'pushing to origin' : 'planning push all', async () => {
-			const ids = apply ? (plannedPush ?? []).map((row) => row.id) : undefined;
+	async function runPush(apply: boolean, onlyIds?: string[]): Promise<void> {
+		const scope = onlyIds?.length === 1 ? onlyIds[0] : onlyIds?.length ? `${onlyIds.length} repos` : 'all';
+		await run(apply ? `pushing ${scope}` : `planning push ${scope}`, async () => {
+			const ids = apply ? (onlyIds ?? (plannedPush ?? []).map((row) => row.id)) : onlyIds;
 			const data = (await call('/api/push', { method: 'POST', body: JSON.stringify({ apply, ids }) })) as {
 				rows: GitRow[];
 			};
@@ -462,21 +468,28 @@
 				return;
 			}
 			plannedPush = eligible;
+			if (eligible.length === 0 && onlyIds?.length === 1) {
+				error = `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'cannot push'}`;
+			}
 			note(`push plan — ${eligible.length} of ${data.rows.length} eligible (origin only), nothing written`, data);
 		});
 	}
 
-	function requestPush(): void {
-		const rows = plannedPush ?? [];
+	function requestPush(onlyIds?: string[]): void {
+		const rows = (plannedPush ?? []).filter((row) => !onlyIds?.length || onlyIds.includes(row.id));
 		if (rows.length === 0) return;
 		askConfirm({
-			title: 'Push these branches to origin?',
+			title: rows.length === 1 ? `Push ${rows[0]?.id} to origin?` : 'Push these branches to origin?',
 			hint: 'git push origin only. Never --force. Never the IngotVault backup remote.',
 			items: pushItems(rows),
-			confirmLabel: `Push ${rows.length} to origin`,
+			confirmLabel: rows.length === 1 ? `Push ${rows[0]?.id}` : `Push ${rows.length} to origin`,
 			variant: 'write',
-			run: () => void runPush(true),
+			run: () => void runPush(true, rows.map((row) => row.id)),
 		});
+	}
+
+	function pushPlanned(id: string): GitRow | undefined {
+		return plannedPush?.find((row) => row.id === id);
 	}
 
 	function publishItems(row: PublishRow): string[] {
@@ -586,7 +599,10 @@
 		if (ids.length === 0) return;
 		askConfirm({
 			title: `${label} for ${ids.length === 1 ? ids[0] : `${ids.length} sites`}?`,
-			hint: 'The FilePress plugin runs this in each listed checkout. LocalHelm does not reimplement it.',
+			hint:
+				action === 'push'
+					? 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.'
+					: 'The FilePress plugin runs this in each listed checkout. LocalHelm does not reimplement it.',
 			items: ids,
 			confirmLabel: ids.length === 1 ? label : `${label} ${ids.length}`,
 			variant: 'write',
@@ -974,6 +990,23 @@
 											</button>
 										</div>
 									{/if}
+									{#if (row.git.ahead ?? 0) > 0}
+										<div class="bump">
+											<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => runPush(false, [row.id])}>
+												Plan push
+											</button>
+											<button
+												class="btn btn-sm btn-write"
+												disabled={Boolean(busy) || !pushPlanned(row.id)}
+												onclick={() => requestPush([row.id])}
+												title={pushPlanned(row.id)
+													? `git push origin ${pushPlanned(row.id)?.branch ?? ''} — never --force.`
+													: 'Run Plan push first. You will confirm the origin URL.'}
+											>
+												{pushPlanned(row.id) ? `Push ${pushPlanned(row.id)?.ahead ?? ''} to origin` : 'Push'}
+											</button>
+										</div>
+									{/if}
 									{#if cascadeTarget}
 										<div class="dim small cascade-note">
 											Dependents still on an old {cascadeTarget.npm} pin
@@ -1185,6 +1218,21 @@
 												>
 													{plannedTarget(row.id) ? `Write ${plannedTarget(row.id)}` : 'Write'}
 												</button>
+												{#if (row.git.ahead ?? 0) > 0}
+													<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => runPush(false, [row.id])}>
+														Plan push
+													</button>
+													<button
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy) || !pushPlanned(row.id)}
+														onclick={() => requestPush([row.id])}
+														title={pushPlanned(row.id)
+															? `git push origin ${pushPlanned(row.id)?.branch ?? ''} — never --force.`
+															: 'Run Plan push first.'}
+													>
+														{pushPlanned(row.id) ? `Push ${pushPlanned(row.id)?.ahead ?? ''}` : 'Push'}
+													</button>
+												{/if}
 											</div>
 										</td>
 									</tr>
@@ -1288,6 +1336,30 @@
 											: 'Run Plan engine sync first.'}
 								>
 									{syncAllLabel(board.plugin, filepressSyncIds)}
+								</button>
+								<button
+									class="btn"
+									disabled={Boolean(busy) || filepressPushIds.length === 0}
+									onclick={() => runPluginJob(board.plugin, 'push', filepressPushIds, false)}
+									title="Plan git push origin for every listed FilePress site. Writes nothing. Never --force."
+								>
+									Plan origin push
+								</button>
+								<button
+									class="btn btn-write"
+									disabled={Boolean(busy) || !pluginJobWriteReady(board.plugin, 'push', filepressPushIds)}
+									onclick={() => requestPluginJob(board.plugin, 'push', plannedPluginWrites, 'Push')}
+									title={pluginJobWriteReady(board.plugin, 'push', filepressPushIds)
+										? `git push origin on ${plannedPluginWrites.length} site(s). Never --force.`
+										: pluginJobPlanned(board.plugin, 'push', filepressPushIds)
+											? 'Plan found nothing to push — no listed site is clean and ahead.'
+											: 'Run Plan origin push first.'}
+								>
+									{pluginJobPlanned(board.plugin, 'push', filepressPushIds)
+										? plannedPluginWrites.length
+											? `Push ${plannedPluginWrites.length} sites`
+											: 'Nothing to push'
+										: 'Push all'}
 								</button>
 							</div>
 						{/if}
