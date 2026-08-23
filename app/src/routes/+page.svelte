@@ -136,6 +136,7 @@
 	let confirmVariant = $state<'write' | 'danger'>('write');
 	let confirmItems = $state<string[]>([]);
 	let confirmCanApply = $state(true);
+	let confirmShowOtp = $state(false);
 	let confirmRun = $state<(() => void) | null>(null);
 
 	let entries = $state<LogEntry[]>([]);
@@ -285,6 +286,13 @@
 		return cascadeTargets.find((row) => row.id === id);
 	}
 
+	function todayNeed(row: Project): 'publish' | 'push' | 'pins' | 'look' {
+		if (row.unpublishedAhead) return 'publish';
+		if ((row.git.ahead ?? 0) > 0) return 'push';
+		if (cascadeFor(row.id)) return 'pins';
+		return 'look';
+	}
+
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
 		const res = await fetch(url, {
 			...init,
@@ -403,6 +411,7 @@
 		confirmLabel: string;
 		variant?: 'write' | 'danger';
 		canApply: boolean;
+		showOtp?: boolean;
 		run?: () => void;
 	}): void {
 		confirmTitle = spec.title;
@@ -411,6 +420,7 @@
 		confirmLabel = spec.confirmLabel;
 		confirmVariant = spec.variant ?? 'write';
 		confirmCanApply = spec.canApply;
+		confirmShowOtp = Boolean(spec.showOtp);
 		confirmRun = spec.canApply && spec.run ? spec.run : null;
 		confirmOpen = true;
 	}
@@ -632,15 +642,6 @@
 		selectedSites = next;
 	}
 
-	async function fetchOrigins(): Promise<void> {
-		await run('git fetch origin in every repo', async () => {
-			const data = (await call('/api/fetch', { method: 'POST' })) as { rows: GitRow[] };
-			const failed = data.rows.filter((r) => r.action === 'fetch' && r.reason !== 'fetched');
-			note(`fetch — ${data.rows.filter((r) => r.reason === 'fetched').length} fetched, ${failed.length} failed`, data);
-			await refresh();
-		});
-	}
-
 	async function startPull(): Promise<void> {
 		await run(
 			'planning pull',
@@ -781,6 +782,7 @@
 					confirmLabel: eligible.length === 1 ? `Publish ${eligible[0]?.version}` : `Publish ${eligible.length}`,
 					variant: 'danger',
 					canApply: eligible.length > 0,
+					showOtp: eligible.length > 0,
 					run: () => void applyPublish(eligible.map((row) => row.id)),
 				});
 			},
@@ -1061,10 +1063,10 @@
 
 			<div class="actions">
 				<div class="group">
-					<span class="group-label">Read — changes nothing</span>
+					<span class="group-label">Read</span>
 					<div class="group-buttons">
-						<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()} title="Re-read package.json, git, and npm latest. Clears the in-process npm cache.">
-							Refresh status
+						<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()} title="Re-read package.json, git, and npm latest.">
+							Refresh
 						</button>
 						<button
 							class="btn"
@@ -1072,16 +1074,13 @@
 							onclick={() => refresh(true)}
 							title="git fetch origin in each repo, then re-read. Updates the to push / to pull counts."
 						>
-							Refresh + fetch remotes
-						</button>
-						<button class="btn" disabled={Boolean(busy)} onclick={() => fetchOrigins()} title="git fetch origin only, with a per-repo result log.">
-							Fetch only
+							Fetch remotes
 						</button>
 					</div>
 				</div>
 
 				<div class="group group-write">
-					<span class="group-label">Write — confirm, then apply</span>
+					<span class="group-label">Write — confirm first</span>
 					<div class="group-buttons">
 						<button
 							class="btn btn-write"
@@ -1097,7 +1096,7 @@
 							onclick={() => startPush()}
 							title="Shows which clean, ahead repos would push to origin. Confirm in the modal. Never --force."
 						>
-							Push all
+							Push
 						</button>
 						<button
 							class="btn btn-write"
@@ -1182,11 +1181,11 @@
 						<div>
 							<h2>Needs you</h2>
 							<p class="hint">
-								Packages that need a publish, cascade, or a look. Each name appears once.
+								One gold button per row — the thing that matches the badge.
 								{#if readyRows.length}
-									{readyRows.length} already unpublished-ahead.
-								{:else if shipRows.length}
-									Nothing is unpublished-ahead. Publish on a row cuts a new version (bump if needed).
+									{readyRows.length} unpublished-ahead.
+								{:else}
+									Nothing is unpublished-ahead. Cut version is the extra if you want a new npm cut.
 								{/if}
 							</p>
 						</div>
@@ -1204,24 +1203,13 @@
 						{/if}
 					</div>
 
-					{#if shipRows.length}
-						<p class="dim small">
-							{#if npmUser}
-								npm is logged in as <code>{npmUser}</code>.
-							{:else}
-								npm is not ready. Run <code>localhelm auth</code> and set a granular automation token in your user <code>~/.npmrc</code> before you publish.
-							{/if}
-						</p>
-						<label for="publish-otp">Authenticator OTP only if npm asks for a numeric code</label>
-						<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
-					{/if}
-
 					{#if attentionRows.length === 0 && cascadeOnlyRows.length === 0}
 						<p class="quiet-banner">All quiet on the fleet. Open Fleet for the full table, Sites for FilePress, or Ports for leases.</p>
 					{:else}
 						<ul class="need-list">
 							{#each attentionRows as row (row.id)}
 								{@const cascadeTarget = cascadeFor(row.id)}
+								{@const need = todayNeed(row)}
 								<li class="need-card">
 									<div class="need-head">
 										<div>
@@ -1234,13 +1222,15 @@
 											{/each}
 										</div>
 									</div>
-									{#if canPublish(row)}
-										<div class="bump">
-											<select aria-label={`publish bump kind for ${row.id}`} bind:value={bumpKind[row.id]} disabled={row.unpublishedAhead}>
-												<option value="patch">patch</option>
-												<option value="minor">minor</option>
-												<option value="major">major</option>
-											</select>
+									{#if cascadeTarget}
+										<div class="dim small cascade-note">
+											Dependents still on an old {cascadeTarget.npm} pin
+											{cascadeTarget.behind ? ` · ${cascadeTarget.behind} behind` : ''}
+											{cascadeTarget.linked ? ` · ${cascadeTarget.linked} local link` : ''}
+										</div>
+									{/if}
+									<div class="need-actions">
+										{#if need === 'publish'}
 											<button
 												class="btn btn-sm btn-write"
 												disabled={Boolean(busy)}
@@ -1249,27 +1239,16 @@
 											>
 												Publish
 											</button>
-										</div>
-									{/if}
-									{#if (row.git.ahead ?? 0) > 0}
-										<div class="bump">
+										{:else if need === 'push'}
 											<button
 												class="btn btn-sm btn-write"
 												disabled={Boolean(busy)}
 												onclick={() => startPush([row.id])}
 												title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
 											>
-												Push
+												Push{row.git.ahead ? ` ${row.git.ahead}` : ''}
 											</button>
-										</div>
-									{/if}
-									{#if cascadeTarget}
-										<div class="dim small cascade-note">
-											Dependents still on an old {cascadeTarget.npm} pin
-											{cascadeTarget.behind ? ` · ${cascadeTarget.behind} behind` : ''}
-											{cascadeTarget.linked ? ` · ${cascadeTarget.linked} local link` : ''}
-										</div>
-										<div class="bump">
+										{:else if need === 'pins' && cascadeTarget}
 											<button
 												class="btn btn-sm btn-write"
 												disabled={Boolean(busy)}
@@ -1278,8 +1257,38 @@
 											>
 												Write pins
 											</button>
-										</div>
-									{/if}
+										{/if}
+										{#if need !== 'publish' && canPublish(row) && !row.git.dirty}
+											<button
+												class="btn btn-sm"
+												disabled={Boolean(busy)}
+												onclick={() => startPublish([row.id])}
+												title="Cuts a patch if local already matches npm, then publishes. Confirm in the modal. Use Fleet to pick minor or major."
+											>
+												Cut version
+											</button>
+										{/if}
+										{#if need !== 'push' && (row.git.ahead ?? 0) > 0}
+											<button
+												class="btn btn-sm"
+												disabled={Boolean(busy)}
+												onclick={() => startPush([row.id])}
+												title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
+											>
+												Push
+											</button>
+										{/if}
+										{#if need !== 'pins' && cascadeTarget}
+											<button
+												class="btn btn-sm"
+												disabled={Boolean(busy)}
+												onclick={() => startCascade(row.id)}
+												title="Shows which dependents would get the new pin. Confirm in the modal to write."
+											>
+												Write pins
+											</button>
+										{/if}
+									</div>
 								</li>
 							{/each}
 							{#each cascadeOnlyRows as target (target.id)}
@@ -1334,16 +1343,18 @@
 								· none waiting on an engine sync
 							{/if}
 						</p>
-						<div class="group-buttons">
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy) || filepressSyncIds.length === 0}
-								onclick={() => startPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, 'Sync engine')}
-								title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
-							>
-								Sync engine
-							</button>
-						</div>
+						{#if filepressSyncIds.length}
+							<div class="group-buttons">
+								<button
+									class="btn btn-write"
+									disabled={Boolean(busy)}
+									onclick={() => startPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, 'Sync engine')}
+									title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
+								>
+									Sync engine
+								</button>
+							</div>
+						{/if}
 						{#if sitesNeedingYou.length}
 							<ul class="need-list compact">
 								{#each sitesNeedingYou.slice(0, 8) as site (site.id)}
@@ -1404,7 +1415,7 @@
 					<div class="section-head">
 						<div>
 							<h2>Fleet</h2>
-							<p class="hint">Check rows, then bump, push, publish, or remove. Removing never deletes a folder. Bump only writes package.json. Publish bumps if local is already on npm, pushes if needed, then npm publish.</p>
+							<p class="hint">Check rows, then bump, push, publish, or remove from the toolbar. Removing never deletes a folder. Per-row Bump only writes package.json.</p>
 						</div>
 						<div class="group-buttons">
 							<button
@@ -1518,26 +1529,6 @@
 												>
 													Bump
 												</button>
-												{#if (row.git.ahead ?? 0) > 0}
-													<button
-														class="btn btn-sm btn-write"
-														disabled={Boolean(busy)}
-														onclick={() => startPush([row.id])}
-														title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
-													>
-														Push
-													</button>
-												{/if}
-												{#if canPublish(row)}
-													<button
-														class="btn btn-sm btn-write"
-														disabled={Boolean(busy)}
-														onclick={() => startPublish([row.id])}
-														title="Shows bump, push, and npm publish. Confirm in the modal. Never --force."
-													>
-														Publish
-													</button>
-												{/if}
 											</div>
 										</td>
 									</tr>
@@ -1550,7 +1541,7 @@
 					</div>
 
 					<p class="legend">
-						Check rows for bulk bump, push, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
+						Check rows for bulk bump, push, publish, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
 						Publish bumps if local is already on npm, pushes if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
 					</p>
 				</section>
@@ -1833,7 +1824,19 @@
 	onconfirm={() => {
 		confirmRun?.();
 	}}
-/>
+>
+	{#if confirmShowOtp}
+		<p class="dim small">
+			{#if npmUser}
+				npm is logged in as <code>{npmUser}</code>.
+			{:else}
+				npm is not ready. Run <code>localhelm auth</code> and put a granular automation token in your user <code>~/.npmrc</code>.
+			{/if}
+		</p>
+		<label for="publish-otp">Authenticator OTP only if npm asks for a numeric code</label>
+		<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
+	{/if}
+</ConfirmModal>
 
 <style>
 	:global(html),
@@ -2449,11 +2452,20 @@
 		padding: 0.15rem 0.2rem;
 	}
 
-	.bump {
+	.bump,
+	.need-actions {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.25rem;
 		align-items: center;
+	}
+
+	.need-actions {
+		margin-top: 0.45rem;
+	}
+
+	.need-actions:empty {
+		display: none;
 	}
 
 	.candidates,

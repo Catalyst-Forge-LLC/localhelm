@@ -419,6 +419,16 @@
       "rationale": "Operator 2026-08-23: parity with the current LocalBerth dashboard, and the tab should be called Ports.",
       "alternatives_considered": ["Put leases under Sites", "Reimplement observe in localhelm", "Add claim/release in the dashboard"],
       "status": "active"
+    },
+    {
+      "id": "d25",
+      "timestamp": "2026-08-23T20:52:00Z",
+      "phase": "2-scaffolding",
+      "session": 12,
+      "decision": "Today rows have one gold write matching the need (unpublished → Publish, git ahead → Push, dependents behind → Write pins). Cut version is a quiet extra. Publish OTP and npm login live in the confirm modal, not on the Today list. Fleet per-row Push/Publish removed; checkboxes + toolbar cover those. Header reads collapse to Refresh and Fetch remotes.",
+      "rationale": "Operator 2026-08-23: Today stacked patch + Publish + Push + OTP on every card and the header had three overlapping refresh buttons.",
+      "alternatives_considered": ["Keep every write gold on each card", "Move all writes to Fleet only", "Hamburger the header"],
+      "status": "active"
     }
   ],
   "gotchas": [

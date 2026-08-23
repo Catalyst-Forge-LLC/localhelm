@@ -79,7 +79,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Plugin host: `localhelm.plugin.mjs` on an enrolled project. FilePress plugin lives in the filepress checkout (Sites). LocalBerth plugin lives in the localberth checkout (Ports tab) and calls the sibling board. Do not reimplement leases, observe, or firewall. Site push is `git push origin <branch>` only — never `--force`.
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
 - `publish`: plan then named-id `--apply`. Intended auth is `localhelm auth` + a granular automation token (Bypass 2FA) in the **user** `~/.npmrc`. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
-- Dashboard writes are one button: click Push / Publish / Sync / Bump / etc., the modal shows the plan, then Confirm applies or Close if nothing to do. CLI still prints a plan and needs `--apply`. Publish is on Today (per row, including a new cut when local already matches npm) and on Fleet (row + checked bulk).
+- Dashboard writes are one button: click Push / Publish / Sync / Bump / etc., the modal shows the plan, then Confirm applies or Close if nothing to do. CLI still prints a plan and needs `--apply`. Today shows one gold write per need (Push, Publish, or Write pins). Cut version is the extra when you want a new npm cut. Publish OTP lives in the confirm modal. Fleet publish/push are toolbar + checked rows; per-row Bump stays.
 - Dashboard IA: **Today** (default, needs-you + FilePress + Ports snapshots), **Fleet** (table + enroll), **Sites** (FilePress plugin), **Ports** (LocalBerth plugin). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close) persisted at `.localhelm/activity.json`. No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`. Fleet and Sites checkboxes drive bulk bump/push/remove and plugin jobs; each still plans, then confirms. Ports is read-only parity with the LocalBerth board (leases + observed + Open). Claim/release stay on `localberth`.
 
 ### In Progress
@@ -137,3 +137,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 11 — 2026-08-23
 
 - Ports tab hosts the LocalBerth plugin (leases + observed + Open). Same board as `localberth serve`, not under Sites. Claim/release stay on the LocalBerth CLI.
+
+### Session 12 — 2026-08-23
+
+- Today: one gold write per need. Cut version is the extra. Publish OTP moved into the confirm modal. Fleet row Push/Publish dropped (toolbar + checks). Header reads are Refresh and Fetch remotes.
