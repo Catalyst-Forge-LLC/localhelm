@@ -826,7 +826,15 @@
 		if (row.git.dirty) out.push({ text: `dirty${dirtDetail(row) ? ` — ${dirtDetail(row)}` : ''}`, tone: 'warn' });
 		if (row.git.busy) out.push({ text: `mid-${row.git.busy}`, tone: 'bad' });
 		if (row.cascadeBehind) {
-			out.push({ text: `${row.cascadeBehind} pin(s) behind`, tone: 'warn', title: 'A dependency pin would not install the published version. Write pins on that package.' });
+			const behind = row.pins.filter((pin) => pin.kind === 'registry' && pin.onLatest === false);
+			const names = behind.map((pin) => `${pin.name} ${pin.spec}`).join(', ');
+			out.push({
+				text: behind.length === 1 ? `${behind[0]?.name} pin behind` : `${behind.length} pins behind`,
+				tone: 'warn',
+				title: names
+					? `${names} in this package.json would not install the latest published version. Cascade from that package to rewrite the pin.`
+					: 'A registry pin in this package.json would not install the latest published version.',
+			});
 		}
 		if (row.git.fetchError) {
 			out.push({

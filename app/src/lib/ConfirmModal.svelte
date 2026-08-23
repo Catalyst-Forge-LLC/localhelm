@@ -118,10 +118,17 @@
 		padding: 1rem;
 		border: none;
 		background: transparent;
+		overflow: auto;
+	}
+
+	.confirm:not([open]) {
+		display: none;
+	}
+
+	.confirm[open] {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		overflow: auto;
 	}
 
 	.panel {
