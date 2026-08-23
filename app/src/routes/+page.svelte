@@ -102,9 +102,11 @@
 	type BumpPlan = { id: string; from: string | null; to: string | null; action: string; reason?: string };
 	type LogEntry = { at: string; time: string; title: string; body: string };
 	type TabId = 'today' | 'fleet' | 'sites' | 'ports';
+	type PortPane = 'leases' | 'observed';
 
 	let inventory = $state<Inventory | null>(null);
 	let tab = $state<TabId>('today');
+	let portPane = $state<PortPane>('leases');
 	let activityOpen = $state(false);
 	let activityUnseen = $state(false);
 	let cwd = $state('');
@@ -198,6 +200,8 @@
 	const filepressBoard = $derived(siteBoards.find((board) => board.plugin === 'filepress') ?? siteBoards[0] ?? null);
 	const sitesNeedingYou = $derived((filepressBoard?.rows ?? []).filter((row) => siteNeedsYou(row.cells)));
 	const leaseBoard = $derived(portBoards.find((board) => board.title === 'Leases') ?? portBoards[0] ?? null);
+	const observedBoard = $derived(portBoards.find((board) => board.title === 'Observed') ?? null);
+	const visiblePortBoard = $derived(portPane === 'observed' ? observedBoard : leaseBoard);
 	const portsNeedingYou = $derived((leaseBoard?.rows ?? []).filter((row) => portNeedsYou(row.cells)));
 	const cascadeOnlyRows = $derived(
 		cascadeTargets.filter((target) => !attentionRows.some((row) => row.id === target.id)),
@@ -230,6 +234,11 @@
 	function setTab(next: TabId): void {
 		tab = next;
 		persist('localhelm.tab', next);
+	}
+
+	function setPortPane(next: PortPane): void {
+		portPane = next;
+		persist('localhelm.portPane', next);
 	}
 
 	function setActivityOpen(next: boolean): void {
@@ -986,6 +995,8 @@
 		try {
 			const saved = sessionStorage.getItem('localhelm.tab');
 			if (saved === 'today' || saved === 'fleet' || saved === 'sites' || saved === 'ports') tab = saved;
+			const pane = sessionStorage.getItem('localhelm.portPane');
+			if (pane === 'leases' || pane === 'observed') portPane = pane;
 			activityOpen = sessionStorage.getItem('localhelm.activity') === '1';
 		} catch {
 			/* ignore */
@@ -1634,61 +1645,90 @@
 				</section>
 			{/each}
 		{:else if tab === 'ports'}
-			{#each portBoards as board (board.plugin + board.title)}
-				<section class="panel plugin-board">
-					<div class="section-head">
-						<div>
-							<h2>{board.title}</h2>
-							<p class="hint">{board.note}</p>
-						</div>
-					</div>
-					<div class="table-wrap">
-						<table>
-							<thead>
-								<tr>
-									<th>{board.rowLabel ?? 'name'}</th>
-									{#each board.columns as col (col.id)}
-										<th>{col.label}</th>
-									{/each}
-									<th></th>
-								</tr>
-							</thead>
-							<tbody>
-								{#each board.rows as row (row.id)}
-									<tr>
-										<td class="id">{row.label ?? row.id}</td>
-										{#each board.columns as col (col.id)}
-											<td class="small">{row.cells[col.id] ?? '—'}</td>
-										{/each}
-										<td>
-											{#if row.href}
-												<a class="open-link" href={row.href} target="localberth-open" rel="noopener">Open</a>
-											{/if}
-										</td>
-									</tr>
-								{/each}
-								{#if !board.rows.length}
-									<tr><td class="empty" colspan={board.columns.length + 2}>Nothing here.</td></tr>
-								{/if}
-							</tbody>
-						</table>
-					</div>
-				</section>
-			{:else}
+			{#if !portBoards.length}
 				<section class="panel">
 					<h2>Ports</h2>
 					<p class="hint">No Ports plugin loaded. Enroll the localberth checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 				</section>
-			{/each}
-			<p class="dim small port-cli">
-				<code>localberth claim name --port N</code>
-				·
-				<code>localberth get name</code>
-				·
-				<code>localberth release name</code>
-				·
-				<code>localberth serve</code>
-			</p>
+			{:else}
+				<div class="subtabs" role="tablist" aria-label="Port views">
+					<button
+						type="button"
+						role="tab"
+						id="tab-leases"
+						aria-controls="pane-ports"
+						aria-selected={portPane === 'leases'}
+						class:active={portPane === 'leases'}
+						onclick={() => setPortPane('leases')}
+					>
+						Leases
+						{#if leaseBoard}<span class="count quiet">{leaseBoard.rows.length}</span>{/if}
+					</button>
+					<button
+						type="button"
+						role="tab"
+						id="tab-observed"
+						aria-controls="pane-ports"
+						aria-selected={portPane === 'observed'}
+						class:active={portPane === 'observed'}
+						onclick={() => setPortPane('observed')}
+					>
+						Observed
+						{#if observedBoard}<span class="count quiet">{observedBoard.rows.length}</span>{/if}
+					</button>
+				</div>
+				{#if visiblePortBoard}
+					{@const board = visiblePortBoard}
+					<section class="panel plugin-board" id="pane-ports" role="tabpanel" aria-labelledby={portPane === 'observed' ? 'tab-observed' : 'tab-leases'}>
+						<div class="section-head">
+							<div>
+								<h2>{board.title}</h2>
+								<p class="hint">{board.note}</p>
+							</div>
+						</div>
+						<div class="table-wrap">
+							<table>
+								<thead>
+									<tr>
+										<th>{board.rowLabel ?? 'name'}</th>
+										{#each board.columns as col (col.id)}
+											<th>{col.label}</th>
+										{/each}
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each board.rows as row (row.id)}
+										<tr>
+											<td class="id">{row.label ?? row.id}</td>
+											{#each board.columns as col (col.id)}
+												<td class="small">{row.cells[col.id] ?? '—'}</td>
+											{/each}
+											<td>
+												{#if row.href}
+													<a class="open-link" href={row.href} target="localberth-open" rel="noopener">Open</a>
+												{/if}
+											</td>
+										</tr>
+									{/each}
+									{#if !board.rows.length}
+										<tr><td class="empty" colspan={board.columns.length + 2}>Nothing here.</td></tr>
+									{/if}
+								</tbody>
+							</table>
+						</div>
+					</section>
+				{/if}
+				<p class="dim small port-cli">
+					<code>localberth claim name --port N</code>
+					·
+					<code>localberth get name</code>
+					·
+					<code>localberth release name</code>
+					·
+					<code>localberth serve</code>
+				</p>
+			{/if}
 		{/if}
 	</main>
 
@@ -2099,6 +2139,43 @@
 
 	.port-cli {
 		margin: 0.25rem 0 0;
+	}
+
+	.subtabs {
+		display: flex;
+		flex-shrink: 0;
+		gap: 0.25rem;
+	}
+
+	.subtabs button {
+		border: none;
+		border-bottom: 2px solid transparent;
+		background: transparent;
+		color: var(--muted, #6b6b74);
+		padding: 0.35rem 0.7rem;
+		font-size: 0.88rem;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.subtabs button:hover {
+		color: inherit;
+	}
+
+	.subtabs button.active {
+		border-bottom-color: var(--accent, #3d6b4f);
+		color: inherit;
+		font-weight: 600;
+	}
+
+	.subtabs .count {
+		font-size: 0.7rem;
+		border: 1px solid var(--line, #d5d5da);
+		border-radius: 999px;
+		padding: 0 0.4rem;
+		color: var(--muted, #6b6b74);
 	}
 
 	@media (min-width: 1100px) {
