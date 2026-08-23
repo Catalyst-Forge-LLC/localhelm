@@ -76,11 +76,11 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - M1 CLI: `scan`, `enroll`, `unenroll`, `status`, `deps` (+ `--json`)
 - M2: `bump`, `fetch`, `pull`, `export`, job lock, SvelteKit `app/` + `localhelm serve`
 - M3: `ready`, `cascade` (plan/apply `^V`, skip `link:`/`file:`, commit on apply)
-- Plugin host: `localhelm.plugin.mjs` on an enrolled project. FilePress plugin lives in the filepress checkout and calls the sibling library (headers, link→npm, origin push, ship). You can run those jobs from LocalHelm instead of `pnpm siblings`. Site push is `git push origin <branch>` only — never `--force`.
+- Plugin host: `localhelm.plugin.mjs` on an enrolled project. FilePress plugin lives in the filepress checkout (Sites). LocalBerth plugin lives in the localberth checkout (Ports tab) and calls the sibling board. Do not reimplement leases, observe, or firewall. Site push is `git push origin <branch>` only — never `--force`.
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
 - `publish`: plan then named-id `--apply`. Intended auth is `localhelm auth` + a granular automation token (Bypass 2FA) in the **user** `~/.npmrc`. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
 - Dashboard writes are one button: click Push / Publish / Sync / Bump / etc., the modal shows the plan, then Confirm applies or Close if nothing to do. CLI still prints a plan and needs `--apply`.
-- Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close) persisted at `.localhelm/activity.json`. No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`. Fleet and Sites checkboxes drive bulk bump/push/remove and plugin jobs; each still plans, then confirms.
+- Dashboard IA: **Today** (default, needs-you + FilePress + Ports snapshots), **Fleet** (table + enroll), **Sites** (FilePress plugin), **Ports** (LocalBerth plugin). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close) persisted at `.localhelm/activity.json`. No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`. Fleet and Sites checkboxes drive bulk bump/push/remove and plugin jobs; each still plans, then confirms. Ports is read-only parity with the LocalBerth board (leases + observed + Open). Claim/release stay on `localberth`.
 
 ### In Progress
 
@@ -133,3 +133,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 10 — 2026-08-23
 
 - Activity is written to `.localhelm/activity.json` (gitignored, next to the job lock). Refresh reloads it. Clear deletes the file.
+
+### Session 11 — 2026-08-23
+
+- Ports tab hosts the LocalBerth plugin (leases + observed + Open). Same board as `localberth serve`, not under Sites. Claim/release stay on the LocalBerth CLI.

@@ -1,7 +1,7 @@
 import { applyBump, planBump } from '../lib/bump.js';
 import { applyCascade, planCascade } from '../lib/cascade.js';
 import { fleetDeps } from '../lib/deps.js';
-import { loadPlugins, requirePlugin } from '../lib/plugin.js';
+import { asPluginBoards, loadPlugins, requirePlugin } from '../lib/plugin.js';
 import { pluginPlanWriteIds } from '../lib/pluginPlan.js';
 import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
@@ -592,12 +592,17 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 		const action = argv[0] && !argv[0].includes('/') ? argv.shift() : undefined;
 		const ids = argv;
 		if (!action) {
-			const board = await plug.plugin.board();
-			if (json) printJson(board);
+			const boards = asPluginBoards(await plug.plugin.board());
+			if (json) printJson(boards.length === 1 ? boards[0] : boards);
 			else {
-				const head = ['id', ...board.columns.map((c) => c.id)].join('\t');
-				const body = board.rows.map((row) => [row.id, ...board.columns.map((c) => row.cells[c.id] ?? '')].join('\t'));
-				process.stdout.write(`${[board.title, board.note ?? '', head, ...body].filter(Boolean).join('\n')}\n`);
+				const chunks = boards.map((board) => {
+					const head = ['id', ...board.columns.map((c) => c.id)].join('\t');
+					const body = board.rows.map((row) =>
+						[row.label ?? row.id, ...board.columns.map((c) => row.cells[c.id] ?? '')].join('\t'),
+					);
+					return [board.title, board.note ?? '', head, ...body].filter(Boolean).join('\n');
+				});
+				process.stdout.write(`${chunks.join('\n\n')}\n`);
 			}
 			return;
 		}

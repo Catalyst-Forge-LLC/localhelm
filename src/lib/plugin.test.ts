@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 import type { LoadedManifest } from './manifest.js';
-import { loadPluginFile, loadPlugins } from './plugin.js';
+import { asPluginBoards, loadPluginFile, loadPlugins } from './plugin.js';
 import { pluginPlanWriteIds } from './pluginPlan.js';
 
 describe('plugins', () => {
@@ -34,6 +34,7 @@ describe('plugins', () => {
 		assert.equal(plugins[0]?.id, 'demo');
 		const board = await plugins[0]!.plugin.board();
 		assert.equal(board.title, 'Demo');
+		assert.equal(asPluginBoards(board).length, 1);
 		assert.equal((await loadPluginFile(file)).id, 'demo');
 	});
 

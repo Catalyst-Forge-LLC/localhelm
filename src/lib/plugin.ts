@@ -13,8 +13,12 @@ export type PluginAction = {
 	write: boolean;
 };
 
+export type PluginTab = 'sites' | 'ports';
+
 export type PluginRow = {
 	id: string;
+	label?: string;
+	href?: string;
 	cells: Record<string, string>;
 	actions: PluginAction[];
 };
@@ -23,6 +27,8 @@ export type PluginBoard = {
 	plugin: string;
 	title: string;
 	note?: string;
+	tab?: PluginTab;
+	rowLabel?: string;
 	columns: { id: string; label: string }[];
 	rows: PluginRow[];
 };
@@ -30,10 +36,18 @@ export type PluginBoard = {
 export type HelmPlugin = {
 	id: string;
 	label: string;
-	board: () => Promise<PluginBoard>;
+	board: () => Promise<PluginBoard | PluginBoard[]>;
 	plan?: (action: string, ids: string[]) => Promise<unknown>;
 	apply?: (action: string, ids: string[]) => Promise<unknown>;
 };
+
+export function asPluginBoards(raw: PluginBoard | PluginBoard[]): PluginBoard[] {
+	return Array.isArray(raw) ? raw : [raw];
+}
+
+export function pluginTab(board: PluginBoard): PluginTab {
+	return board.tab === 'ports' ? 'ports' : 'sites';
+}
 
 export type LoadedPlugin = {
 	id: string;

@@ -32,8 +32,16 @@
 		plugin: string;
 		title: string;
 		note?: string;
+		tab?: 'sites' | 'ports';
+		rowLabel?: string;
 		columns: { id: string; label: string }[];
-		rows: { id: string; cells: Record<string, string>; actions: { id: string; label: string; write: boolean }[] }[];
+		rows: {
+			id: string;
+			label?: string;
+			href?: string;
+			cells: Record<string, string>;
+			actions: { id: string; label: string; write: boolean }[];
+		}[];
 	};
 	type Project = {
 		id: string;
@@ -93,7 +101,7 @@
 	};
 	type BumpPlan = { id: string; from: string | null; to: string | null; action: string; reason?: string };
 	type LogEntry = { at: string; time: string; title: string; body: string };
-	type TabId = 'today' | 'fleet' | 'sites';
+	type TabId = 'today' | 'fleet' | 'sites' | 'ports';
 
 	let inventory = $state<Inventory | null>(null);
 	let tab = $state<TabId>('today');
@@ -185,12 +193,18 @@
 			.filter((row) => row.behind > 0 || row.linked > 0);
 	});
 	const attentionRows = $derived((inventory?.projects ?? []).filter((row) => rowNeedsYou(row)));
-	const filepressBoard = $derived(pluginBoards.find((board) => board.plugin === 'filepress') ?? pluginBoards[0] ?? null);
+	const siteBoards = $derived(pluginBoards.filter((board) => (board.tab ?? 'sites') === 'sites'));
+	const portBoards = $derived(pluginBoards.filter((board) => board.tab === 'ports'));
+	const filepressBoard = $derived(siteBoards.find((board) => board.plugin === 'filepress') ?? siteBoards[0] ?? null);
 	const sitesNeedingYou = $derived((filepressBoard?.rows ?? []).filter((row) => siteNeedsYou(row.cells)));
+	const leaseBoard = $derived(portBoards.find((board) => board.title === 'Leases') ?? portBoards[0] ?? null);
+	const portsNeedingYou = $derived((leaseBoard?.rows ?? []).filter((row) => portNeedsYou(row.cells)));
 	const cascadeOnlyRows = $derived(
 		cascadeTargets.filter((target) => !attentionRows.some((row) => row.id === target.id)),
 	);
-	const todayCount = $derived(attentionRows.length + cascadeOnlyRows.length + sitesNeedingYou.length);
+	const todayCount = $derived(
+		attentionRows.length + cascadeOnlyRows.length + sitesNeedingYou.length + portsNeedingYou.length,
+	);
 	const filepressSyncIds = $derived(
 		(filepressBoard?.rows ?? [])
 			.filter((row) => row.actions.some((act) => act.id === 'sync'))
@@ -235,6 +249,11 @@
 		const updateStale = Boolean(update) && update !== '—' && !update.startsWith('already') && !update.startsWith('skip');
 		return updateStale || headers.startsWith('merge') || git === 'dirty';
 	}
+
+	function portNeedsYou(cells: Record<string, string>): boolean {
+		return cells.listening === 'no' || cells.conflict === 'yes' || cells.firewall === 'needs-elevation';
+	}
+
 
 	function canPublish(row: Project): boolean {
 		return !row.private && !row.missing && Boolean(row.npm.name);
@@ -966,7 +985,7 @@
 	onMount(() => {
 		try {
 			const saved = sessionStorage.getItem('localhelm.tab');
-			if (saved === 'today' || saved === 'fleet' || saved === 'sites') tab = saved;
+			if (saved === 'today' || saved === 'fleet' || saved === 'sites' || saved === 'ports') tab = saved;
 			activityOpen = sessionStorage.getItem('localhelm.activity') === '1';
 		} catch {
 			/* ignore */
@@ -1104,6 +1123,10 @@
 			Sites
 			{#if filepressBoard}<span class="count quiet">{filepressBoard.rows.length}</span>{/if}
 		</button>
+		<button type="button" class="tab" class:active={tab === 'ports'} class:hot={portsNeedingYou.length > 0} onclick={() => setTab('ports')}>
+			Ports
+			{#if leaseBoard}<span class="count quiet">{leaseBoard.rows.length}</span>{/if}
+		</button>
 		<button
 			type="button"
 			class="tab activity-tab"
@@ -1159,7 +1182,7 @@
 					{/if}
 
 					{#if attentionRows.length === 0 && cascadeOnlyRows.length === 0}
-						<p class="quiet-banner">All quiet on the fleet. Open Fleet for the full table, or Sites for FilePress.</p>
+						<p class="quiet-banner">All quiet on the fleet. Open Fleet for the full table, Sites for FilePress, or Ports for leases.</p>
 					{:else}
 						<ul class="need-list">
 							{#each attentionRows as row (row.id)}
@@ -1254,6 +1277,7 @@
 					{/if}
 				</section>
 
+				<div class="today-side">
 				<section class="panel">
 					<div class="section-head">
 						<div>
@@ -1303,6 +1327,41 @@
 						{/if}
 					{/if}
 				</section>
+				<section class="panel">
+					<div class="section-head">
+						<div>
+							<h2>Ports</h2>
+							<p class="hint">Named LocalBerth leases. Claim and release stay on the localberth CLI.</p>
+						</div>
+						<button type="button" class="btn btn-sm" onclick={() => setTab('ports')}>Open Ports</button>
+					</div>
+					{#if !leaseBoard}
+						<p class="dim small">No Ports plugin loaded. Enroll the localberth checkout to see leases here.</p>
+					{:else}
+						<p class="dim small">
+							{leaseBoard.rows.length} lease{leaseBoard.rows.length === 1 ? '' : 's'}
+							{#if portsNeedingYou.length}
+								· {portsNeedingYou.length} down, conflicted, or need a firewall
+							{:else}
+								· all listening
+							{/if}
+						</p>
+						{#if portsNeedingYou.length}
+							<ul class="need-list compact">
+								{#each portsNeedingYou.slice(0, 8) as row (row.id)}
+									<li class="need-card">
+										<div class="id">{row.label ?? row.id}</div>
+										<div class="dim small">
+											{row.cells.port ?? '—'}
+											· {row.cells.listening === 'no' ? 'not listening' : row.cells.conflict === 'yes' ? 'conflict' : row.cells.firewall}
+										</div>
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					{/if}
+				</section>
+				</div>
 			</div>
 		{:else if tab === 'fleet'}
 			<div class="fleet-layout">
@@ -1483,8 +1542,8 @@
 					{/if}
 				</section>
 			</div>
-		{:else}
-			{#each pluginBoards as board (board.plugin)}
+		{:else if tab === 'sites'}
+			{#each siteBoards as board (board.plugin + board.title)}
 				<section class="panel plugin-board">
 					<div class="section-head">
 						<div>
@@ -1523,7 +1582,7 @@
 											onchange={(event) => toggleSiteAll(board, event.currentTarget.checked)}
 										/>
 									</th>
-									<th>site</th>
+									<th>{board.rowLabel ?? 'site'}</th>
 									{#each board.columns as col (col.id)}
 										<th>{col.label}</th>
 									{/each}
@@ -1537,8 +1596,8 @@
 											<input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedSites[row.id]} />
 										</td>
 										<td class="id">
-											{row.id}
-											{#if enrolledIds.has(row.id)}
+											{row.label ?? row.id}
+											{#if board.plugin === 'filepress' && enrolledIds.has(row.id)}
 												<div class="dim small">FilePress site — not the fleet package</div>
 											{/if}
 										</td>
@@ -1571,9 +1630,65 @@
 			{:else}
 				<section class="panel">
 					<h2>Sites</h2>
-					<p class="hint">No plugins loaded. An enrolled project can expose <code>localhelm.plugin.mjs</code>.</p>
+					<p class="hint">No site plugins loaded. Enroll the filepress checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 				</section>
 			{/each}
+		{:else if tab === 'ports'}
+			{#each portBoards as board (board.plugin + board.title)}
+				<section class="panel plugin-board">
+					<div class="section-head">
+						<div>
+							<h2>{board.title}</h2>
+							<p class="hint">{board.note}</p>
+						</div>
+					</div>
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th>{board.rowLabel ?? 'name'}</th>
+									{#each board.columns as col (col.id)}
+										<th>{col.label}</th>
+									{/each}
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each board.rows as row (row.id)}
+									<tr>
+										<td class="id">{row.label ?? row.id}</td>
+										{#each board.columns as col (col.id)}
+											<td class="small">{row.cells[col.id] ?? '—'}</td>
+										{/each}
+										<td>
+											{#if row.href}
+												<a class="open-link" href={row.href} target="localberth-open" rel="noopener">Open</a>
+											{/if}
+										</td>
+									</tr>
+								{/each}
+								{#if !board.rows.length}
+									<tr><td class="empty" colspan={board.columns.length + 2}>Nothing here.</td></tr>
+								{/if}
+							</tbody>
+						</table>
+					</div>
+				</section>
+			{:else}
+				<section class="panel">
+					<h2>Ports</h2>
+					<p class="hint">No Ports plugin loaded. Enroll the localberth checkout to expose <code>localhelm.plugin.mjs</code>.</p>
+				</section>
+			{/each}
+			<p class="dim small port-cli">
+				<code>localberth claim name --port N</code>
+				·
+				<code>localberth get name</code>
+				·
+				<code>localberth release name</code>
+				·
+				<code>localberth serve</code>
+			</p>
 		{/if}
 	</main>
 
@@ -1970,6 +2085,20 @@
 	.fleet-layout {
 		display: grid;
 		gap: 1rem;
+	}
+
+	.today-side {
+		display: grid;
+		gap: 1rem;
+	}
+
+	.open-link {
+		color: var(--accent, #3d6b4f);
+		font-size: 0.85rem;
+	}
+
+	.port-cli {
+		margin: 0.25rem 0 0;
 	}
 
 	@media (min-width: 1100px) {
