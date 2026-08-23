@@ -209,11 +209,7 @@
 	const todayCount = $derived(
 		attentionRows.length + cascadeOnlyRows.length + sitesNeedingYou.length + portsNeedingYou.length,
 	);
-	const filepressSyncIds = $derived(
-		(filepressBoard?.rows ?? [])
-			.filter((row) => row.actions.some((act) => act.id === 'sync'))
-			.map((row) => row.id),
-	);
+	const filepressSyncIds = $derived(sitesNeedingYou.map((row) => row.id));
 	const filepressPushIds = $derived(
 		(filepressBoard?.rows ?? [])
 			.filter((row) => row.actions.some((act) => act.id === 'push'))
@@ -254,9 +250,20 @@
 	function siteNeedsYou(cells: Record<string, string>): boolean {
 		const update = (cells.update ?? '').trim().toLowerCase();
 		const headers = (cells.headers ?? '').trim().toLowerCase();
-		const git = (cells.git ?? '').trim().toLowerCase();
 		const updateStale = Boolean(update) && update !== '—' && !update.startsWith('already') && !update.startsWith('skip');
-		return updateStale || headers.startsWith('merge') || git === 'dirty';
+		return updateStale || headers.startsWith('merge');
+	}
+
+	function siteNeedReason(cells: Record<string, string>): string {
+		const update = (cells.update ?? '').trim();
+		const headers = (cells.headers ?? '').trim();
+		const updateLc = update.toLowerCase();
+		const parts: string[] = [];
+		if (update && update !== '—' && !updateLc.startsWith('already') && !updateLc.startsWith('skip')) {
+			parts.push(update);
+		}
+		if (headers.toLowerCase().startsWith('merge')) parts.push(headers);
+		return parts.join(' · ') || update || '—';
 	}
 
 	function portNeedsYou(cells: Record<string, string>): boolean {
@@ -1305,7 +1312,7 @@
 						<p class="dim small">
 							{filepressBoard.rows.length} sites
 							{#if sitesNeedingYou.length}
-								· {sitesNeedingYou.length} need a sync, header merge, or have a dirty git tree
+								· {sitesNeedingYou.length} need an engine sync or header merge
 							{:else}
 								· none waiting on an engine sync
 							{/if}
@@ -1328,7 +1335,7 @@
 										{#if enrolledIds.has(site.id)}
 											<div class="dim small">FilePress site — not the fleet package</div>
 										{/if}
-										<div class="dim small">{site.cells.update ?? '—'}</div>
+										<div class="dim small">{siteNeedReason(site.cells)}</div>
 									</li>
 								{/each}
 							</ul>
@@ -1865,7 +1872,7 @@
 	}
 
 	.dim {
-		color: #8b8b93;
+		color: #c4c4cc;
 	}
 
 	.small {
@@ -2043,19 +2050,22 @@
 	}
 
 	.tab.hot .count {
-		color: #fcd34d;
+		border-color: #c9a227;
+		background: #4a3a12;
+		color: #fde68a;
 	}
 
 	.tab .count {
 		font-size: 0.7rem;
-		border: 1px solid #5a5a64;
+		border: 1px solid #8b8b93;
+		background: #3a3a42;
 		border-radius: 999px;
 		padding: 0 0.4rem;
-		color: #d4d4dc;
+		color: #f4f4f5;
 	}
 
 	.tab .count.quiet {
-		color: #a8a8b0;
+		color: #f4f4f5;
 	}
 
 	.workspace {
@@ -2172,10 +2182,11 @@
 
 	.subtabs .count {
 		font-size: 0.7rem;
-		border: 1px solid var(--line, #d5d5da);
+		border: 1px solid #8b8b93;
+		background: #3a3a42;
 		border-radius: 999px;
 		padding: 0 0.4rem;
-		color: var(--muted, #6b6b74);
+		color: #f4f4f5;
 	}
 
 	@media (min-width: 1100px) {
