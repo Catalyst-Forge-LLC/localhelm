@@ -148,4 +148,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - Push of commits that are already ahead no longer waits for a clean tree. Dirty files stay local. Pull / publish / cascade still skip dirty.
 - Today / Fleet write buttons share the same skip reasons as the plan (`whyNotPush` / `whyNotPublish`). Gold Publish is hidden when dirty, diverged, or missing origin/upstream. Write pins is hidden when the only dependents are local links or dirty.
-- Today does not repeat the ahead count in the subtitle and badge when a Push button already has it. A failed push puts a short reason on the banner (SSH publickey → "origin rejected the SSH key"). This process has no ssh-agent; HTTPS remotes (localhelm, localberth) work. Do not rewrite remotes unless the operator asks.
+- Today does not repeat the ahead count in the subtitle and badge when a Push button already has it. A failed push puts a short reason on the banner (SSH publickey → "origin rejected the SSH key"). Operator 2026-08-23: set fleet `origin` remotes to HTTPS (`github.com` and `github-acmegeek` aliases). Backup/archive remotes unchanged. anticonfab still has no origin.

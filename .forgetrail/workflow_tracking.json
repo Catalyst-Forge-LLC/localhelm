@@ -479,6 +479,16 @@
       "rationale": "Operator 2026-08-23: ember-dossier push failed with Permission denied (publickey), and Today repeated 28 to push three times. Same SSH gap as session 4; HTTPS probe to that repo works.",
       "alternatives_considered": ["Rewrite fleet remotes to HTTPS", "Start ssh-agent from serve"],
       "status": "active"
+    },
+    {
+      "id": "d31",
+      "timestamp": "2026-08-23T21:28:00Z",
+      "phase": "2-scaffolding",
+      "session": 13,
+      "decision": "Fleet origin remotes use HTTPS. Operator confirmed. Rewrote git@github.com and git@github-acmegeek origins. Left backup (D:/git-mirrors) and forgetrail archive remotes. anticonfab has no remotes.",
+      "rationale": "Operator 2026-08-23: I'm fine with https on all. SSH agent is unavailable in this process; HTTPS ls-remote succeeded on every origin that exists.",
+      "alternatives_considered": ["Keep SSH and start an agent", "Rewrite backup/archive remotes too"],
+      "status": "active"
     }
   ],
   "gotchas": [
