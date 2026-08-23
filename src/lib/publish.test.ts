@@ -6,7 +6,7 @@ import { describe, it } from 'node:test';
 import { helmBumpMessage } from './commit.js';
 import { runGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { applyPublish, planPublishFromInventory, requirePublishIds } from './publish.js';
+import { applyPublish, NPM_PUBLISH_AUTH_HINT, planPublishFromInventory, requirePublishIds } from './publish.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
 
 function gitRepo(dir: string): void {
@@ -44,6 +44,11 @@ describe('publish plan', () => {
 	it('requires named ids before apply', () => {
 		assert.throws(() => requirePublishIds([]), /name the project id/);
 		assert.deepEqual(requirePublishIds([' ollanet ']), ['ollanet']);
+	});
+
+	it('tells the operator where the browser login happens', () => {
+		assert.match(NPM_PUBLISH_AUTH_HINT, /press Enter/i);
+		assert.match(NPM_PUBLISH_AUTH_HINT, /KeePass/i);
 	});
 
 	it('names the bump commit the house way', () => {

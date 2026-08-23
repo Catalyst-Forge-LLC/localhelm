@@ -29,6 +29,20 @@ export type PublishRow = {
 
 export type PublishRunner = (cwd: string, args: string[]) => { ok: boolean; stdout: string; stderr: string };
 
+export const NPM_PUBLISH_AUTH_HINT =
+	'If npm prints a login URL, switch to the LocalHelm terminal, press Enter, finish the browser login (KeePass is fine). LocalHelm never types a password.';
+
+export function npmWhoami(): string | null {
+	const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['whoami'], {
+		encoding: 'utf8',
+		windowsHide: true,
+		timeout: 15_000,
+	});
+	if (result.status !== 0) return null;
+	const user = (result.stdout ?? '').trim();
+	return user || null;
+}
+
 export function requirePublishIds(ids: string[]): string[] {
 	const named = ids.map((id) => id.trim()).filter((id) => id.length > 0);
 	if (named.length === 0) {
@@ -41,20 +55,23 @@ export function defaultPublishRunner(cwd: string, args: string[]): { ok: boolean
 	if (args.includes('--force') || args.includes('-f')) {
 		return { ok: false, stdout: '', stderr: 'localhelm never passes --force to npm publish' };
 	}
+	// Inherit the parent TTY so "Press ENTER to open in the browser" works.
+	// Dashboard apply uses the `localhelm serve` terminal; CLI apply uses this shell.
 	const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', args, {
 		cwd,
-		encoding: 'utf8',
-		windowsHide: true,
-		shell: process.platform === 'win32',
-		timeout: 180_000,
+		stdio: 'inherit',
+		windowsHide: false,
+		timeout: 600_000,
 	});
-	const stdout = result.stdout ?? '';
-	const stderr = result.stderr ?? '';
-	if (result.error) return { ok: false, stdout, stderr: result.error.message };
+	if (result.error) return { ok: false, stdout: '', stderr: result.error.message };
 	if (result.status !== 0) {
-		return { ok: false, stdout, stderr: stderr.trim() || `npm ${args.join(' ')} exited ${result.status}` };
+		return {
+			ok: false,
+			stdout: '',
+			stderr: `npm publish exited ${result.status}. If it asked for a browser login, that prompt is in the LocalHelm terminal.`,
+		};
 	}
-	return { ok: true, stdout, stderr };
+	return { ok: true, stdout: '', stderr: '' };
 }
 
 function summarize(steps: PublishStep[]): string {

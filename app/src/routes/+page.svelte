@@ -117,6 +117,10 @@
 	let plannedPlugin = $state<string | null>(null);
 	let plannedPublish = $state<Record<string, PublishRow>>({});
 	let publishOtp = $state('');
+	let npmUser = $state<string | null>(null);
+	let publishAuthHint = $state(
+		'If npm prints a login URL, switch to the LocalHelm terminal, press Enter, finish the browser login (KeePass is fine). LocalHelm never types a password.',
+	);
 	let confirmOpen = $state(false);
 	let confirmTitle = $state('');
 	let confirmHint = $state('');
@@ -441,7 +445,11 @@
 					kind: ids.length === 1 ? (bumpKind[ids[0] ?? ''] ?? 'patch') : 'patch',
 					otp: apply && publishOtp.trim() ? publishOtp.trim() : undefined,
 				}),
-			})) as { rows: PublishRow[] };
+			})) as { rows: PublishRow[]; npmUser?: string | null; authHint?: string };
+			if (!apply) {
+				if (data.authHint) publishAuthHint = data.authHint;
+				npmUser = data.npmUser ?? null;
+			}
 			if (apply) {
 				const published = data.rows.filter((r) => r.reason?.startsWith('published ')).length;
 				note(`publish --apply — ${published} published`, { rows: data.rows });
@@ -467,7 +475,7 @@
 		if (rows.length === 0) return;
 		askConfirm({
 			title: rows.length === 1 ? 'Publish this package?' : `Publish ${rows.length} packages?`,
-			hint: 'npm publish to the public registry. This cannot be undone.',
+			hint: `${publishAuthHint} Watch the terminal that is running localhelm serve.`,
 			items: rows.flatMap(publishItems),
 			confirmLabel: rows.length === 1 ? `Publish ${rows[0]?.version}` : `Publish ${rows.length}`,
 			variant: 'danger',
@@ -971,7 +979,15 @@
 						</button>
 					</div>
 				</div>
-				<label for="publish-otp">npm OTP (if your account requires it)</label>
+				<p class="dim small">
+					{#if npmUser}
+						npm is logged in as <code>{npmUser}</code>.
+					{:else}
+						npm login is not visible yet — apply waits in the <code>localhelm serve</code> terminal if npm asks you to press Enter and open a browser.
+					{/if}
+					{publishAuthHint}
+				</p>
+				<label for="publish-otp">Authenticator OTP only if npm asks for a numeric code (not the browser login)</label>
 				<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
 				{#if shipRows.length === 0}
 					<p class="dim small">No public packages enrolled.</p>

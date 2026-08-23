@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { applyPublish, planPublish, requirePublishIds } from '../../../../../src/lib/index.js';
+import { applyPublish, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, requirePublishIds } from '../../../../../src/lib/index.js';
 import type { BumpKind } from '../../../../../src/lib/index.js';
 import { errJson, loadRequired, withLockAt } from '$lib/server/helm';
 
@@ -27,7 +27,12 @@ export const POST: RequestHandler = async ({ request }) => {
 					return out;
 				})
 			: planned;
-		return json({ rows, writes: Boolean(body.apply) });
+		return json({
+			rows,
+			writes: Boolean(body.apply),
+			npmUser: body.apply ? undefined : npmWhoami(),
+			authHint: body.apply ? undefined : NPM_PUBLISH_AUTH_HINT,
+		});
 	} catch (err) {
 		return errJson(err);
 	}

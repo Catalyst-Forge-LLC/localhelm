@@ -6,7 +6,7 @@ import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { applyExport, planExport } from '../lib/export.js';
 import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
-import { applyPublish, planPublish, requirePublishIds, type PublishRow } from '../lib/publish.js';
+import { applyPublish, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, requirePublishIds, type PublishRow } from '../lib/publish.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
@@ -466,10 +466,17 @@ async function main(): Promise<void> {
 				await lock.release();
 			}
 		}
-		if (json) printJson({ rows, writes: apply });
+		const npmUser = json || !apply ? npmWhoami() : null;
+		if (json) printJson({ rows, writes: apply, npmUser });
 		else {
 			process.stdout.write(formatPublishRows(rows));
 			if (!apply) {
+				process.stdout.write(
+					npmUser
+						? `npm is logged in as ${npmUser}.\n`
+						: 'npm whoami failed — apply will wait in this terminal if npm asks you to press Enter and open a browser.\n',
+				);
+				process.stdout.write(`${NPM_PUBLISH_AUTH_HINT}\n`);
 				process.stdout.write(
 					'Nothing written. Re-run with the same id(s) and --apply to bump (if needed), push (if needed), and npm publish. Never --force.\n',
 				);
