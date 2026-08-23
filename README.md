@@ -21,6 +21,7 @@ localhelm deps
 localhelm bump filepress patch          # plan
 localhelm fetch
 localhelm pull                          # plan; add --apply for ff-only
+localhelm push                          # plan every enrolled origin
 localhelm push localhelm filepress --apply   # origin only; name ids; never --force
 localhelm export                        # plan; add --apply to write localhelm.status.json
 localhelm ready                         # already unpublished-ahead
@@ -29,6 +30,7 @@ localhelm publish ollanet --apply --otp 123456
 localhelm cascade ollanet               # plan pin updates to ^npm; --apply writes + commits
 localhelm plugins                       # FilePress (and later others) if the enrolled project has localhelm.plugin.mjs
 localhelm plugin filepress              # content sites: headers, link→npm, ship
+localhelm plugin filepress sync         # plan engine sync for every FilePress site
 localhelm serve                         # dashboard on 127.0.0.1:54322
 ```
 

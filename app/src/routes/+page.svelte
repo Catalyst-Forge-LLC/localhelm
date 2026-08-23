@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import ConfirmModal from '$lib/ConfirmModal.svelte';
 
 	type BumpKind = 'patch' | 'minor' | 'major';
 	type Pin = {
@@ -116,6 +117,13 @@
 	let plannedPlugin = $state<string | null>(null);
 	let plannedPublish = $state<Record<string, PublishRow>>({});
 	let publishOtp = $state('');
+	let confirmOpen = $state(false);
+	let confirmTitle = $state('');
+	let confirmHint = $state('');
+	let confirmLabel = $state('Confirm');
+	let confirmVariant = $state<'write' | 'danger'>('write');
+	let confirmItems = $state<string[]>([]);
+	let confirmRun = $state<(() => void) | null>(null);
 
 	let entries = $state<LogEntry[]>([]);
 	let busy = $state('');
@@ -157,6 +165,9 @@
 	);
 	const shipRows = $derived(
 		(inventory?.projects ?? []).filter((row) => !row.private && !row.missing && Boolean(row.npm.name)),
+	);
+	const plannedShipIds = $derived(
+		shipRows.map((row) => row.id).filter((id) => plannedPublish[id]?.action === 'publish'),
 	);
 	const cascadeTargets = $derived.by((): CascadeTarget[] => {
 		const projects = inventory?.projects ?? [];
@@ -345,21 +356,32 @@
 		});
 	}
 
-	function pushConfirmCopy(rows: GitRow[]): string {
-		const lines = rows.map((row) => {
-			const n = row.ahead ?? '?';
-			return `${row.id}  ${row.branch ?? '?'}  ${n} commit(s)  →  origin ${row.origin ?? ''}`;
-		});
-		return `git push origin (never --force)\n\n${lines.join('\n')}\n\nPush these branches to origin?`;
+	function askConfirm(spec: {
+		title: string;
+		hint: string;
+		items: string[];
+		confirmLabel: string;
+		variant: 'write' | 'danger';
+		run: () => void;
+	}): void {
+		confirmTitle = spec.title;
+		confirmHint = spec.hint;
+		confirmItems = spec.items;
+		confirmLabel = spec.confirmLabel;
+		confirmVariant = spec.variant;
+		confirmRun = spec.run;
+		confirmOpen = true;
 	}
 
-	async function push(apply: boolean): Promise<void> {
-		if (apply) {
-			const rows = plannedPush ?? [];
-			if (rows.length === 0) return;
-			if (!window.confirm(pushConfirmCopy(rows))) return;
-		}
-		await run(apply ? 'pushing to origin' : 'planning push', async () => {
+	function pushItems(rows: GitRow[]): string[] {
+		return rows.map((row) => {
+			const n = row.ahead ?? '?';
+			return `${row.id}  ${row.branch ?? '?'}  ${n} commit(s)  →  ${row.origin ?? ''}`;
+		});
+	}
+
+	async function runPush(apply: boolean): Promise<void> {
+		await run(apply ? 'pushing to origin' : 'planning push all', async () => {
 			const ids = apply ? (plannedPush ?? []).map((row) => row.id) : undefined;
 			const data = (await call('/api/push', { method: 'POST', body: JSON.stringify({ apply, ids }) })) as {
 				rows: GitRow[];
@@ -379,61 +401,107 @@
 		});
 	}
 
-	function publishConfirmCopy(row: PublishRow): string {
-		let n = 0;
-		const lines = row.steps.map((step) => {
-			if (step.kind === 'commit') return `   commit: ${step.message}`;
-			n += 1;
-			if (step.kind === 'bump') return `${n}. bump ${step.from} → ${step.to} (${step.bumpKind}) and commit`;
-			if (step.kind === 'push') return `${n}. git push origin ${step.branch} → ${step.origin}`;
-			return `${n}. npm publish ${step.name}@${step.version}`;
+	function requestPush(): void {
+		const rows = plannedPush ?? [];
+		if (rows.length === 0) return;
+		askConfirm({
+			title: 'Push these branches to origin?',
+			hint: 'git push origin only. Never --force. Never the IngotVault backup remote.',
+			items: pushItems(rows),
+			confirmLabel: `Push ${rows.length} to origin`,
+			variant: 'write',
+			run: () => void runPush(true),
 		});
-		return `npm publish (public registry)\n\n${row.id}  ${row.npm ?? ''}@${row.version ?? '?'}\n${lines.join('\n')}\n\nThis cannot be undone. Publish?`;
 	}
 
-	async function publish(id: string, apply: boolean): Promise<void> {
-		if (apply) {
-			const planned = plannedPublish[id];
-			if (!planned || planned.action !== 'publish') return;
-			if (!window.confirm(publishConfirmCopy(planned))) return;
+	function publishItems(row: PublishRow): string[] {
+		const lines = [`${row.id}  ${row.npm ?? ''}@${row.version ?? '?'}`];
+		let n = 0;
+		for (const step of row.steps) {
+			if (step.kind === 'commit') {
+				lines.push(`   commit: ${step.message}`);
+				continue;
+			}
+			n += 1;
+			if (step.kind === 'bump') lines.push(`${n}. bump ${step.from} → ${step.to} (${step.bumpKind}) and commit`);
+			else if (step.kind === 'push') lines.push(`${n}. git push origin ${step.branch} → ${step.origin}`);
+			else lines.push(`${n}. npm publish ${step.name}@${step.version}`);
 		}
-		await run(apply ? `publishing ${id}` : `planning publish ${id}`, async () => {
+		return lines;
+	}
+
+	async function runPublish(ids: string[], apply: boolean): Promise<void> {
+		const label = ids.length === 1 ? ids[0] : `${ids.length} packages`;
+		await run(apply ? `publishing ${label}` : `planning publish ${label}`, async () => {
 			const data = (await call('/api/publish', {
 				method: 'POST',
 				body: JSON.stringify({
 					apply,
-					ids: [id],
-					kind: bumpKind[id] ?? 'patch',
+					ids,
+					kind: ids.length === 1 ? (bumpKind[ids[0] ?? ''] ?? 'patch') : 'patch',
 					otp: apply && publishOtp.trim() ? publishOtp.trim() : undefined,
 				}),
 			})) as { rows: PublishRow[] };
-			const row = data.rows[0];
 			if (apply) {
-				note(`publish --apply ${id} — ${row?.reason ?? 'done'}`, { rows: data.rows });
+				const published = data.rows.filter((r) => r.reason?.startsWith('published ')).length;
+				note(`publish --apply — ${published} published`, { rows: data.rows });
 				publishOtp = '';
 				await refresh();
 				return;
 			}
-			if (!row || row.action !== 'publish') {
-				error = `${id}: ${row?.reason ?? 'cannot publish'}`;
-				note(`publish plan ${id} — skipped`, data);
-				return;
+			const next = { ...plannedPublish };
+			for (const row of data.rows) {
+				if (row.action === 'publish') next[row.id] = row;
 			}
-			plannedPublish = { ...plannedPublish, [id]: row };
-			note(`publish plan ${id} — ${row.reason}, nothing written`, data);
+			plannedPublish = next;
+			const eligible = data.rows.filter((r) => r.action === 'publish');
+			if (eligible.length === 0 && ids.length === 1) {
+				error = `${ids[0]}: ${data.rows[0]?.reason ?? 'cannot publish'}`;
+			}
+			note(`publish plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
 		});
 	}
 
-	async function pluginJob(plugin: string, action: string, ids: string[], apply: boolean): Promise<void> {
-		const key = `${plugin}:${action}:${[...ids].sort().join(',')}`;
-		await run(apply ? `${plugin} ${action}` : `planning ${plugin} ${action}`, async () => {
+	function requestPublish(ids: string[]): void {
+		const rows = ids.map((id) => plannedPublish[id]).filter((row): row is PublishRow => row?.action === 'publish');
+		if (rows.length === 0) return;
+		askConfirm({
+			title: rows.length === 1 ? 'Publish this package?' : `Publish ${rows.length} packages?`,
+			hint: 'npm publish to the public registry. This cannot be undone.',
+			items: rows.flatMap(publishItems),
+			confirmLabel: rows.length === 1 ? `Publish ${rows[0]?.version}` : `Publish ${rows.length}`,
+			variant: 'danger',
+			run: () => void runPublish(ids, true),
+		});
+	}
+
+	function pluginKey(plugin: string, action: string, ids: string[]): string {
+		return `${plugin}:${action}:${[...ids].sort().join(',')}`;
+	}
+
+	async function runPluginJob(plugin: string, action: string, ids: string[], apply: boolean): Promise<void> {
+		const key = pluginKey(plugin, action, ids);
+		const scope = ids.length ? `${ids.length} site(s)` : 'all sites';
+		await run(apply ? `${plugin} ${action} ${scope}` : `planning ${plugin} ${action} ${scope}`, async () => {
 			const data = await call('/api/plugin', {
 				method: 'POST',
 				body: JSON.stringify({ id: plugin, action, ids, apply }),
 			});
-			note(apply ? `${plugin} ${action} --apply` : `${plugin} ${action} plan`, data);
+			note(apply ? `${plugin} ${action} --apply ${scope}` : `${plugin} ${action} plan ${scope}`, data);
 			if (apply) await refresh();
 			else plannedPlugin = key;
+		});
+	}
+
+	function requestPluginJob(plugin: string, action: string, ids: string[], label: string): void {
+		if (ids.length === 0) return;
+		askConfirm({
+			title: `${label} for ${ids.length === 1 ? ids[0] : `${ids.length} sites`}?`,
+			hint: 'The FilePress plugin runs this in each listed checkout. LocalHelm does not reimplement it.',
+			items: ids,
+			confirmLabel: ids.length === 1 ? label : `${label} ${ids.length}`,
+			variant: 'write',
+			run: () => void runPluginJob(plugin, action, ids, true),
 		});
 	}
 
@@ -629,21 +697,21 @@
 						>
 							{plannedPull === null ? 'Pull' : `Pull ${plannedPull} repo${plannedPull === 1 ? '' : 's'}`}
 						</button>
-						<button class="btn" disabled={Boolean(busy)} onclick={() => push(false)} title="List repos that are clean and ahead of origin. Writes nothing.">
-							Plan push
+						<button class="btn" disabled={Boolean(busy)} onclick={() => runPush(false)} title="Plan git push origin for every enrolled repo that is clean and ahead.">
+							Plan push all
 						</button>
 						<button
 							class="btn btn-write"
 							disabled={Boolean(busy) || plannedPush === null || plannedPush.length === 0}
-							onclick={() => push(true)}
+							onclick={() => requestPush()}
 							title={plannedPush === null
-								? 'Run Plan push first. You will confirm each origin URL.'
+								? 'Run Plan push all first. You will confirm each origin URL in a modal.'
 								: plannedPush.length === 0
 									? 'Nothing is eligible: repos must be clean, ahead, and not diverged.'
-									: 'git push origin <branch> on the planned repos. Never --force. Confirms remotes first.'}
+									: 'git push origin <branch> on the planned repos. Never --force.'}
 						>
 							{plannedPush === null
-								? 'Push'
+								? 'Push all'
 								: `Push ${plannedPush.length} to origin`}
 						</button>
 						<button class="btn" disabled={Boolean(busy)} onclick={() => exportFile(false)} title="Show where the JSON inventory would be written.">
@@ -793,6 +861,31 @@
 							<h2>{board.title}</h2>
 							<p class="hint">{board.note}</p>
 						</div>
+						{#if board.plugin === 'filepress'}
+							{@const syncIds = board.rows.filter((row) => row.actions.some((act) => act.id === 'sync')).map((row) => row.id)}
+							<div class="group-buttons">
+								<button
+									class="btn"
+									disabled={Boolean(busy) || syncIds.length === 0}
+									onclick={() => runPluginJob(board.plugin, 'sync', syncIds, false)}
+									title="Plan engine sync for every listed FilePress site. Writes nothing."
+								>
+									Plan engine sync
+								</button>
+								<button
+									class="btn btn-write"
+									disabled={Boolean(busy) || plannedPlugin !== pluginKey(board.plugin, 'sync', syncIds)}
+									onclick={() => requestPluginJob(board.plugin, 'sync', syncIds, 'Sync engine')}
+									title={plannedPlugin === pluginKey(board.plugin, 'sync', syncIds)
+										? `Sync getfilepress + headers on ${syncIds.length} site(s).`
+										: 'Run Plan engine sync first.'}
+								>
+									{plannedPlugin === pluginKey(board.plugin, 'sync', syncIds)
+										? `Sync ${syncIds.length} sites`
+										: 'Sync all'}
+								</button>
+							</div>
+						{/if}
 					</div>
 					<div class="table-wrap">
 						<table>
@@ -818,15 +911,15 @@
 													<button
 														class="btn btn-sm"
 														disabled={Boolean(busy)}
-														onclick={() => pluginJob(board.plugin, act.id, [row.id], false)}
+														onclick={() => runPluginJob(board.plugin, act.id, [row.id], false)}
 													>
 														Plan {act.label.toLowerCase()}
 													</button>
 													<button
 														class="btn btn-sm btn-write"
-														disabled={Boolean(busy) || plannedPlugin !== `${board.plugin}:${act.id}:${row.id}`}
-														onclick={() => pluginJob(board.plugin, act.id, [row.id], true)}
-														title={plannedPlugin === `${board.plugin}:${act.id}:${row.id}`
+														disabled={Boolean(busy) || plannedPlugin !== pluginKey(board.plugin, act.id, [row.id])}
+														onclick={() => requestPluginJob(board.plugin, act.id, [row.id], act.label)}
+														title={plannedPlugin === pluginKey(board.plugin, act.id, [row.id])
 															? `Run ${act.label} via the ${board.title} plugin.`
 															: 'Run the matching Plan first.'}
 													>
@@ -849,13 +942,35 @@
 
 		<aside>
 			<section class="panel">
-				<h2>Ship</h2>
-				<p class="hint">
-					Plan first. Apply bumps and pushes only when needed, then <code>npm publish</code>.
-					{#if readyRows.length}
-						{readyRows.length} already unpublished-ahead.
-					{/if}
-				</p>
+				<div class="section-head">
+					<div>
+						<h2>Ship</h2>
+						<p class="hint">
+							Plan first. Apply bumps and pushes only when needed, then <code>npm publish</code>.
+							{#if readyRows.length}
+								{readyRows.length} already unpublished-ahead.
+							{/if}
+						</p>
+					</div>
+					<div class="group-buttons">
+						<button
+							class="btn btn-sm"
+							disabled={Boolean(busy) || shipRows.length === 0}
+							onclick={() => runPublish(shipRows.map((row) => row.id), false)}
+							title="Plan publish for every public enrolled package."
+						>
+							Plan all
+						</button>
+						<button
+							class="btn btn-sm btn-write"
+							disabled={Boolean(busy) || plannedShipIds.length === 0}
+							onclick={() => requestPublish(plannedShipIds)}
+							title={plannedShipIds.length ? `Publish ${plannedShipIds.length} planned package(s).` : 'Run Plan all (or plan a row) first.'}
+						>
+							{plannedShipIds.length ? `Publish ${plannedShipIds.length}` : 'Publish all'}
+						</button>
+					</div>
+				</div>
 				<label for="publish-otp">npm OTP (if your account requires it)</label>
 				<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
 				{#if shipRows.length === 0}
@@ -876,13 +991,13 @@
 											<option value="minor">minor</option>
 											<option value="major">major</option>
 										</select>
-										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => publish(row.id, false)}>
+										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => runPublish([row.id], false)}>
 											Plan publish
 										</button>
 										<button
 											class="btn btn-sm btn-write"
 											disabled={Boolean(busy) || plannedPublish[row.id]?.action !== 'publish'}
-											onclick={() => publish(row.id, true)}
+											onclick={() => requestPublish([row.id])}
 											title={plannedPublish[row.id]?.action === 'publish'
 												? plannedPublish[row.id]?.reason
 												: 'Run Plan publish first. You will confirm the registry version.'}
@@ -1017,6 +1132,22 @@
 		</aside>
 	</main>
 </div>
+
+<ConfirmModal
+	bind:open={confirmOpen}
+	title={confirmTitle}
+	hint={confirmHint}
+	confirmLabel={confirmLabel}
+	variant={confirmVariant}
+	busy={Boolean(busy)}
+	items={confirmItems}
+	onconfirm={() => {
+		const run = confirmRun;
+		confirmOpen = false;
+		confirmRun = null;
+		run?.();
+	}}
+/>
 
 <style>
 	.shell {
