@@ -92,7 +92,7 @@
 		ahead?: number | null;
 	};
 	type BumpPlan = { id: string; from: string | null; to: string | null; action: string; reason?: string };
-	type LogEntry = { time: string; title: string; body: string };
+	type LogEntry = { at: string; time: string; title: string; body: string };
 	type TabId = 'today' | 'fleet' | 'sites';
 
 	let inventory = $state<Inventory | null>(null);
@@ -254,10 +254,49 @@
 		return data;
 	}
 
+	function formatEntryTime(at: string): string {
+		const when = new Date(at);
+		return Number.isNaN(when.getTime()) ? at : when.toLocaleTimeString();
+	}
+
+	function toLog(row: { at: string; title: string; body: string }): LogEntry {
+		return { at: row.at, time: formatEntryTime(row.at), title: row.title, body: row.body };
+	}
+
+	async function loadActivity(): Promise<void> {
+		try {
+			const data = (await call('/api/activity')) as { entries: { at: string; title: string; body: string }[] };
+			entries = (data.entries ?? []).map(toLog);
+		} catch {
+			/* keep whatever is already on screen */
+		}
+	}
+
 	function note(title: string, data: unknown): void {
-		const time = new Date().toLocaleTimeString();
-		entries = [{ time, title, body: JSON.stringify(data, null, 2) }, ...entries].slice(0, 40);
+		const at = new Date().toISOString();
+		const body = JSON.stringify(data, null, 2);
+		entries = [{ at, time: formatEntryTime(at), title, body }, ...entries].slice(0, 200);
 		if (!activityOpen) activityUnseen = true;
+		void call('/api/activity', { method: 'POST', body: JSON.stringify({ title, data }) })
+			.then((res) => {
+				const saved = res as { entries: { at: string; title: string; body: string }[] };
+				if (Array.isArray(saved.entries)) entries = saved.entries.map(toLog);
+			})
+			.catch((err) => {
+				error = err instanceof Error ? err.message : String(err);
+			});
+	}
+
+	async function clearActivityLog(): Promise<void> {
+		await run(
+			'clearing activity',
+			async () => {
+				await call('/api/activity', { method: 'DELETE' });
+				entries = [];
+				activityUnseen = false;
+			},
+			{ closeConfirm: false },
+		);
 	}
 
 	async function run(label: string, fn: () => Promise<void>, opts?: { closeConfirm?: boolean }): Promise<void> {
@@ -300,6 +339,7 @@
 			} catch {
 				pluginBoards = [];
 			}
+			await loadActivity();
 		});
 	}
 
@@ -931,6 +971,7 @@
 		} catch {
 			/* ignore */
 		}
+		void loadActivity();
 		void refresh();
 	});
 </script>
@@ -1542,11 +1583,11 @@
 			<div class="section-head">
 				<div>
 					<h2>Activity</h2>
-					<p class="hint">Every plan and write, newest first — the same output the CLI prints.</p>
+					<p class="hint">Every plan and write, newest first. Kept in this workspace so a refresh does not wipe it.</p>
 				</div>
 				<div class="group-buttons">
 					{#if entries.length}
-						<button class="btn btn-sm" onclick={() => (entries = [])}>Clear</button>
+						<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => void clearActivityLog()}>Clear</button>
 					{/if}
 					<button class="btn btn-sm" onclick={() => setActivityOpen(false)}>Close</button>
 				</div>
@@ -1555,7 +1596,7 @@
 				<p class="dim small">Nothing yet.</p>
 			{:else}
 				<ul class="log">
-					{#each entries as entry (entry.time + entry.title)}
+					{#each entries as entry (entry.at + entry.title)}
 						<li>
 							<details>
 								<summary><span class="dim small">{entry.time}</span> {entry.title}</summary>

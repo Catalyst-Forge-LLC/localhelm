@@ -78,6 +78,10 @@
           "text": "Named publish (D19): bump+commit if local is on npm, push if origin is behind, then npm publish. Never --force."
         },
         {
+          "timestamp": "2026-08-23T19:50:00Z",
+          "text": "Activity persists at .localhelm/activity.json (D23). Refresh reloads; Clear deletes the file."
+        },
+        {
           "timestamp": "2026-08-23T18:45:00Z",
           "text": "Dashboard UX (D20): Today / Fleet / Sites tabs. Combined needs-you is the default. Lighter panels. FilePress site vs fleet package labeled when names match."
         },
@@ -390,6 +394,16 @@
       "decision": "Fleet and Sites checkboxes are a selection for bulk writes, not only unenroll. Fleet: Bump, Push, Remove on the checked ids. Sites: each plugin action on the checked sites. Select-all lives in the table header. Empty selection disables the bulk buttons. Each click still plans, then confirms. Publish stays on Today.",
       "rationale": "Operator 2026-08-23: checkboxes were only useful for multi-delete; the same selection should cover the other row actions, including FilePress sites.",
       "alternatives_considered": ["Unchecked means all rows", "Add publish to fleet bulk", "Keep sites as all-only bulk"],
+      "status": "active"
+    },
+    {
+      "id": "d23",
+      "timestamp": "2026-08-23T19:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 10,
+      "decision": "Dashboard Activity is persisted at <workspaceRoot>/.localhelm/activity.json (gitignored, same folder as job.lock). Newest first, cap 200. Load on refresh, append on each note, Clear deletes the file. No fleet required — fall back to operator cwd.",
+      "rationale": "Operator 2026-08-23: the drawer was in-memory only, so a refresh wiped the plan/write history.",
+      "alternatives_considered": ["sessionStorage only", "commit the log", "CLI stdout only"],
       "status": "active"
     }
   ],

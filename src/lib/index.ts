@@ -1,3 +1,5 @@
+export { ACTIVITY_LIMIT, activityPath, appendActivity, clearActivity, readActivity } from './activity.js';
+export type { ActivityEntry } from './activity.js';
 export { fleetDeps } from './deps.js';
 export { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from './enroll.js';
 export { findManifest, requireManifest, validateManifest, writeManifest } from './manifest.js';

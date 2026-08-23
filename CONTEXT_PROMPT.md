@@ -7,7 +7,7 @@ _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking
 - **App:** TypeScript ESM CLI (`src/`) + SvelteKit dashboard (`app/`) + later FilePress site (`site/` + `/docs`)
 - **Language:** TypeScript strict, Node 22+
 - **Package manager:** pnpm
-- **Storage:** `localhelm.fleet.json` (`workspaceRoot: "."`) + `.localhelmignore` (scan) + `.localhelm/job.lock`. No PocketBase, no accounts, no telemetry.
+- **Storage:** `localhelm.fleet.json` (`workspaceRoot: "."`) + `.localhelmignore` (scan) + `.localhelm/job.lock` + `.localhelm/activity.json` (dashboard log, gitignored). No PocketBase, no accounts, no telemetry.
 - **AI/LLM:** none
 - **Deploy:** npm `localhelm` (operator publishes). Site later at localhelm.dev
 - **Key dependencies:** Node built-ins + TypeScript. No catalog adapter.
@@ -15,7 +15,7 @@ _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking
 ## Project Structure
 
 ```
-src/lib/     fleet, scan, git, npm, pins, status, deps, bump, export, lock, cascade, ready
+src/lib/     fleet, scan, git, npm, pins, status, deps, bump, export, lock, cascade, ready, activity
 src/cli/     localhelm commands
 bin/         localhelm.mjs → dist
 app/         SvelteKit dashboard (checkout only; localhelm serve)
@@ -80,7 +80,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
 - `publish`: plan then named-id `--apply`. Intended auth is `localhelm auth` + a granular automation token (Bypass 2FA) in the **user** `~/.npmrc`. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
 - Dashboard writes are one button: click Push / Publish / Sync / Bump / etc., the modal shows the plan, then Confirm applies or Close if nothing to do. CLI still prints a plan and needs `--apply`.
-- Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close). No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`. Fleet and Sites checkboxes drive bulk bump/push/remove and plugin jobs; each still plans, then confirms.
+- Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close) persisted at `.localhelm/activity.json`. No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`. Fleet and Sites checkboxes drive bulk bump/push/remove and plugin jobs; each still plans, then confirms.
 
 ### In Progress
 
@@ -129,3 +129,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 9 — 2026-08-23
 
 - Fleet and Sites checkboxes run the same write jobs as the row buttons (bump/push/remove; sync/push/ship). Select-all is in the table header. Publish stays on Today.
+
+### Session 10 — 2026-08-23
+
+- Activity is written to `.localhelm/activity.json` (gitignored, next to the job lock). Refresh reloads it. Clear deletes the file.
