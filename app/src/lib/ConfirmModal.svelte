@@ -43,7 +43,9 @@
 		oncancel?.();
 	}
 
-	function confirm(): void {
+	function confirm(event: MouseEvent): void {
+		event.preventDefault();
+		event.stopPropagation();
 		if (busy) return;
 		onconfirm();
 	}
@@ -54,6 +56,10 @@
 	class="confirm"
 	aria-labelledby="confirm-title"
 	onclose={() => {
+		if (busy) {
+			dialogEl?.showModal();
+			return;
+		}
 		if (open) {
 			open = false;
 			oncancel?.();
@@ -63,7 +69,7 @@
 		if (event.key === 'Escape' && busy) event.preventDefault();
 	}}
 >
-	<form method="dialog" onsubmit={(event) => event.preventDefault()}>
+	<div class="body">
 		<h2 id="confirm-title">{title}</h2>
 		{#if hint}
 			<p class="hint">{hint}</p>
@@ -86,13 +92,12 @@
 				class:danger={variant === 'danger'}
 				class:write={variant === 'write'}
 				disabled={busy}
-				autofocus={variant !== 'danger'}
 				onclick={confirm}
 			>
-				{busy ? 'Working…' : confirmLabel}
+				{busy ? 'Working… look for a LocalHelm publish window' : confirmLabel}
 			</button>
 		</div>
-	</form>
+	</div>
 </dialog>
 
 <style>
@@ -111,7 +116,7 @@
 		background: rgb(0 0 0 / 0.62);
 	}
 
-	form {
+	.body {
 		padding: 1.15rem 1.25rem 1.1rem;
 	}
 

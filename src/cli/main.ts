@@ -474,7 +474,7 @@ async function main(): Promise<void> {
 				process.stdout.write(
 					npmUser
 						? `npm is logged in as ${npmUser}.\n`
-						: 'npm whoami failed — apply will wait in this terminal if npm asks you to press Enter and open a browser.\n',
+						: 'npm whoami failed — apply waits here (CLI) or opens a LocalHelm publish console (dashboard) if npm asks you to press Enter.\n',
 				);
 				process.stdout.write(`${NPM_PUBLISH_AUTH_HINT}\n`);
 				process.stdout.write(

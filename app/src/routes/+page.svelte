@@ -227,6 +227,8 @@
 			error = err instanceof Error ? err.message : String(err);
 		} finally {
 			busy = '';
+			confirmOpen = false;
+			confirmRun = null;
 		}
 	}
 
@@ -475,7 +477,7 @@
 		if (rows.length === 0) return;
 		askConfirm({
 			title: rows.length === 1 ? 'Publish this package?' : `Publish ${rows.length} packages?`,
-			hint: `${publishAuthHint} Watch the terminal that is running localhelm serve.`,
+			hint: publishAuthHint,
 			items: rows.flatMap(publishItems),
 			confirmLabel: rows.length === 1 ? `Publish ${rows[0]?.version}` : `Publish ${rows.length}`,
 			variant: 'danger',
@@ -983,7 +985,7 @@
 					{#if npmUser}
 						npm is logged in as <code>{npmUser}</code>.
 					{:else}
-						npm login is not visible yet — apply waits in the <code>localhelm serve</code> terminal if npm asks you to press Enter and open a browser.
+						npm login is not visible yet — apply opens a <code>LocalHelm publish</code> console so you can press Enter and use KeePass.
 					{/if}
 					{publishAuthHint}
 				</p>
@@ -1158,10 +1160,7 @@
 	busy={Boolean(busy)}
 	items={confirmItems}
 	onconfirm={() => {
-		const run = confirmRun;
-		confirmOpen = false;
-		confirmRun = null;
-		run?.();
+		confirmRun?.();
 	}}
 />
 

@@ -30,7 +30,18 @@ export type PublishRow = {
 export type PublishRunner = (cwd: string, args: string[]) => { ok: boolean; stdout: string; stderr: string };
 
 export const NPM_PUBLISH_AUTH_HINT =
-	'If npm prints a login URL, switch to the LocalHelm terminal, press Enter, finish the browser login (KeePass is fine). LocalHelm never types a password.';
+	'From the dashboard, a “LocalHelm publish” console opens. From the CLI, this terminal is the prompt. Press Enter if npm shows a URL; KeePass is fine. LocalHelm never types a password.';
+
+export function publishLaunchKind(
+	env: { stdinTTY?: boolean; stdoutTTY?: boolean; platform?: NodeJS.Platform } = {},
+): 'inherit' | 'windows-console' | 'need-tty' {
+	const stdinTTY = env.stdinTTY ?? Boolean(process.stdin.isTTY);
+	const stdoutTTY = env.stdoutTTY ?? Boolean(process.stdout.isTTY);
+	const platform = env.platform ?? process.platform;
+	if (stdinTTY && stdoutTTY) return 'inherit';
+	if (platform === 'win32') return 'windows-console';
+	return 'need-tty';
+}
 
 export function npmWhoami(): string | null {
 	const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['whoami'], {
@@ -55,20 +66,43 @@ export function defaultPublishRunner(cwd: string, args: string[]): { ok: boolean
 	if (args.includes('--force') || args.includes('-f')) {
 		return { ok: false, stdout: '', stderr: 'localhelm never passes --force to npm publish' };
 	}
-	// Inherit the parent TTY so "Press ENTER to open in the browser" works.
-	// Dashboard apply uses the `localhelm serve` terminal; CLI apply uses this shell.
-	const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', args, {
-		cwd,
-		stdio: 'inherit',
-		windowsHide: false,
-		timeout: 600_000,
-	});
+	const launch = publishLaunchKind();
+	if (launch === 'need-tty') {
+		return {
+			ok: false,
+			stdout: '',
+			stderr: 'npm publish needs a real terminal. From a checkout run: localhelm publish <id> --apply',
+		};
+	}
+
+	const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+	if (launch === 'inherit') {
+		const result = spawnSync(npm, args, {
+			cwd,
+			stdio: 'inherit',
+			windowsHide: false,
+			timeout: 600_000,
+		});
+		if (result.error) return { ok: false, stdout: '', stderr: result.error.message };
+		if (result.status !== 0) {
+			return { ok: false, stdout: '', stderr: `npm publish exited ${result.status}` };
+		}
+		return { ok: true, stdout: '', stderr: '' };
+	}
+
+	// Vite / dashboard has no usable TTY. Open a dedicated console and wait.
+	const line = args.map((a) => (/\s/.test(a) ? `"${a}"` : a)).join(' ');
+	const result = spawnSync(
+		'cmd.exe',
+		['/c', 'start', '/wait', '/d', cwd, 'LocalHelm publish', 'cmd.exe', '/c', `npm ${line} & if errorlevel 1 pause`],
+		{ windowsHide: false, timeout: 600_000 },
+	);
 	if (result.error) return { ok: false, stdout: '', stderr: result.error.message };
 	if (result.status !== 0) {
 		return {
 			ok: false,
 			stdout: '',
-			stderr: `npm publish exited ${result.status}. If it asked for a browser login, that prompt is in the LocalHelm terminal.`,
+			stderr: `npm publish exited ${result.status}. Check the “LocalHelm publish” console.`,
 		};
 	}
 	return { ok: true, stdout: '', stderr: '' };
