@@ -2,6 +2,7 @@ import { applyBump, planBump } from '../lib/bump.js';
 import { applyCascade, planCascade } from '../lib/cascade.js';
 import { fleetDeps } from '../lib/deps.js';
 import { loadPlugins, requirePlugin } from '../lib/plugin.js';
+import { pluginPlanWriteIds } from '../lib/pluginPlan.js';
 import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { applyExport, planExport } from '../lib/export.js';
@@ -617,7 +618,12 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 		if (json) printJson(plan);
 		else {
 			process.stdout.write(`${JSON.stringify(plan, null, 2)}\n`);
-			process.stdout.write('Nothing written. Re-run with --apply to run the plugin job.\n');
+			const writeIds = pluginPlanWriteIds(plan);
+			if (writeIds && writeIds.length === 0) {
+				process.stdout.write('Nothing to apply — every listed row is already current.\n');
+			} else {
+				process.stdout.write('Nothing written. Re-run with --apply to run the plugin job.\n');
+			}
 		}
 		return;
 	}

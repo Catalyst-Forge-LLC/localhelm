@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
+	import { pluginPlanWriteIds } from '$lib/pluginPlan';
 
 	type BumpKind = 'patch' | 'minor' | 'major';
 	type Pin = {
@@ -117,6 +118,7 @@
 	let plannedCascade = $state<string | null>(null);
 	let pluginBoards = $state<PluginBoard[]>([]);
 	let plannedPlugin = $state<string | null>(null);
+	let plannedPluginWrites = $state<string[]>([]);
 	let plannedPublish = $state<Record<string, PublishRow>>({});
 	let publishOtp = $state('');
 	let npmUser = $state<string | null>(null);
@@ -243,6 +245,7 @@
 		plannedEnroll = null;
 		plannedCascade = null;
 		plannedPlugin = null;
+		plannedPluginWrites = [];
 		plannedPublish = {};
 	}
 
@@ -532,6 +535,23 @@
 		return `${plugin}:${action}:${[...ids].sort().join(',')}`;
 	}
 
+	function pluginJobPlanned(plugin: string, action: string, ids: string[]): boolean {
+		return plannedPlugin === pluginKey(plugin, action, ids);
+	}
+
+	function pluginJobWriteReady(plugin: string, action: string, ids: string[]): boolean {
+		return pluginJobPlanned(plugin, action, ids) && plannedPluginWrites.length > 0;
+	}
+
+	function pluginRowWriteReady(plugin: string, action: string, id: string): boolean {
+		return plannedPlugin === pluginKey(plugin, action, [id]) && plannedPluginWrites.includes(id);
+	}
+
+	function syncAllLabel(plugin: string, ids: string[]): string {
+		if (!pluginJobPlanned(plugin, 'sync', ids)) return 'Sync all';
+		return plannedPluginWrites.length ? `Sync ${plannedPluginWrites.length} sites` : 'Already current';
+	}
+
 	async function runPluginJob(plugin: string, action: string, ids: string[], apply: boolean): Promise<void> {
 		const key = pluginKey(plugin, action, ids);
 		const scope = ids.length ? `${ids.length} site(s)` : 'all sites';
@@ -542,7 +562,10 @@
 			});
 			note(apply ? `${plugin} ${action} --apply ${scope}` : `${plugin} ${action} plan ${scope}`, data);
 			if (apply) await refresh();
-			else plannedPlugin = key;
+			else {
+				plannedPlugin = key;
+				plannedPluginWrites = pluginPlanWriteIds(data) ?? [...ids];
+			}
 		});
 	}
 
@@ -1019,15 +1042,15 @@
 							</button>
 							<button
 								class="btn btn-write"
-								disabled={Boolean(busy) || plannedPlugin !== pluginKey(filepressBoard.plugin, 'sync', filepressSyncIds)}
-								onclick={() => requestPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, 'Sync engine')}
-								title={plannedPlugin === pluginKey(filepressBoard.plugin, 'sync', filepressSyncIds)
-									? `Sync getfilepress + headers on ${filepressSyncIds.length} site(s).`
-									: 'Run Plan engine sync first.'}
+								disabled={Boolean(busy) || !pluginJobWriteReady(filepressBoard.plugin, 'sync', filepressSyncIds)}
+								onclick={() => requestPluginJob(filepressBoard.plugin, 'sync', plannedPluginWrites, 'Sync engine')}
+								title={pluginJobWriteReady(filepressBoard.plugin, 'sync', filepressSyncIds)
+									? `Sync getfilepress + headers on ${plannedPluginWrites.length} site(s).`
+									: pluginJobPlanned(filepressBoard.plugin, 'sync', filepressSyncIds)
+										? 'Plan found nothing to write — every listed site is already current.'
+										: 'Run Plan engine sync first.'}
 							>
-								{plannedPlugin === pluginKey(filepressBoard.plugin, 'sync', filepressSyncIds)
-									? `Sync ${filepressSyncIds.length} sites`
-									: 'Sync all'}
+								{syncAllLabel(filepressBoard.plugin, filepressSyncIds)}
 							</button>
 						</div>
 						{#if sitesNeedingYou.length}
@@ -1231,15 +1254,15 @@
 								</button>
 								<button
 									class="btn btn-write"
-									disabled={Boolean(busy) || plannedPlugin !== pluginKey(board.plugin, 'sync', filepressSyncIds)}
-									onclick={() => requestPluginJob(board.plugin, 'sync', filepressSyncIds, 'Sync engine')}
-									title={plannedPlugin === pluginKey(board.plugin, 'sync', filepressSyncIds)
-										? `Sync getfilepress + headers on ${filepressSyncIds.length} site(s).`
-										: 'Run Plan engine sync first.'}
+									disabled={Boolean(busy) || !pluginJobWriteReady(board.plugin, 'sync', filepressSyncIds)}
+									onclick={() => requestPluginJob(board.plugin, 'sync', plannedPluginWrites, 'Sync engine')}
+									title={pluginJobWriteReady(board.plugin, 'sync', filepressSyncIds)
+										? `Sync getfilepress + headers on ${plannedPluginWrites.length} site(s).`
+										: pluginJobPlanned(board.plugin, 'sync', filepressSyncIds)
+											? 'Plan found nothing to write — every listed site is already current.'
+											: 'Run Plan engine sync first.'}
 								>
-									{plannedPlugin === pluginKey(board.plugin, 'sync', filepressSyncIds)
-										? `Sync ${filepressSyncIds.length} sites`
-										: 'Sync all'}
+									{syncAllLabel(board.plugin, filepressSyncIds)}
 								</button>
 							</div>
 						{/if}
@@ -1279,13 +1302,17 @@
 													</button>
 													<button
 														class="btn btn-sm btn-write"
-														disabled={Boolean(busy) || plannedPlugin !== pluginKey(board.plugin, act.id, [row.id])}
+														disabled={Boolean(busy) || !pluginRowWriteReady(board.plugin, act.id, row.id)}
 														onclick={() => requestPluginJob(board.plugin, act.id, [row.id], act.label)}
-														title={plannedPlugin === pluginKey(board.plugin, act.id, [row.id])
+														title={pluginRowWriteReady(board.plugin, act.id, row.id)
 															? `Run ${act.label} via the ${board.title} plugin.`
-															: 'Run the matching Plan first.'}
+															: plannedPlugin === pluginKey(board.plugin, act.id, [row.id])
+																? 'Already current — nothing to write.'
+																: 'Run the matching Plan first.'}
 													>
-														{act.label}
+														{plannedPlugin === pluginKey(board.plugin, act.id, [row.id]) && !plannedPluginWrites.includes(row.id)
+															? 'Already current'
+															: act.label}
 													</button>
 												{/each}
 											</div>

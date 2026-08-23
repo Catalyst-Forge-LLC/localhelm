@@ -5,6 +5,7 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 import type { LoadedManifest } from './manifest.js';
 import { loadPluginFile, loadPlugins } from './plugin.js';
+import { pluginPlanWriteIds } from './pluginPlan.js';
 
 describe('plugins', () => {
 	it('loads a generic plugin from an enrolled project', async () => {
@@ -34,5 +35,20 @@ describe('plugins', () => {
 		const board = await plugins[0]!.plugin.board();
 		assert.equal(board.title, 'Demo');
 		assert.equal((await loadPluginFile(file)).id, 'demo');
+	});
+
+	it('reads write ids from a plugin plan and ignores already-current rows', () => {
+		assert.deepEqual(
+			pluginPlanWriteIds({
+				action: 'sync',
+				rows: [
+					{ id: 'aibreze', writes: false, update: 'already ^0.1.8' },
+					{ id: 'ember-dossier', writes: true, update: 'pnpm update getfilepress' },
+				],
+			}),
+			['ember-dossier'],
+		);
+		assert.deepEqual(pluginPlanWriteIds({ action: 'sync', rows: [{ id: 'a', writes: false }] }), []);
+		assert.equal(pluginPlanWriteIds({ note: 'old shape, no writes flags' }), null);
 	});
 });

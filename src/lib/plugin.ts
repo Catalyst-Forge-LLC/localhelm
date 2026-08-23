@@ -1,3 +1,4 @@
+import { stat } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { LoadedManifest } from './manifest.js';
@@ -48,7 +49,8 @@ function isPlugin(value: unknown): value is HelmPlugin {
 }
 
 export async function loadPluginFile(file: string): Promise<HelmPlugin> {
-	const href = pathToFileURL(file).href;
+	const stamp = (await stat(file)).mtimeMs;
+	const href = `${pathToFileURL(file).href}?t=${stamp}`;
 	const mod = (await import(href)) as { default?: unknown };
 	const candidate = mod.default ?? mod;
 	if (!isPlugin(candidate)) {
