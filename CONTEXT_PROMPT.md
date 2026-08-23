@@ -121,3 +121,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 7 — 2026-08-23
 
 - Dashboard writes collapsed to one action button. The modal is the plan: confirm to apply, or Close when nothing to do. Same idea on the FilePress sibling toolbar (Apply/Ship plan first, then confirm).
+
+### Session 8 — 2026-08-23
+
+- After a successful publish, `/latest` can still show the old version. Status now checks whether the local version exists on the registry before calling it unpublished. A publish plan that bumps says it is cutting a new version.

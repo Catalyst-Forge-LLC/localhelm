@@ -1,6 +1,6 @@
 import { readGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { clearNpmCache, npmLatest } from './npm.js';
+import { clearNpmCache, liftLatestIfVersionExists, npmLatest } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pinsFromPkg } from './pins.js';
 import { pathExists, readPkg, rootPkgPath, sitePkgPath, type PkgJson } from './pkg.js';
@@ -95,11 +95,15 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			continue;
 		}
 
-		const npm = row.privatePkg
+		let npm = row.privatePkg
 			? { name: row.npmName, status: 'private' as const }
 			: row.npmName
 				? await npmLatest(row.npmName)
 				: { status: 'none' as const };
+		if (!row.privatePkg && row.npmName && row.localVersion && npm.status === 'ok') {
+			npm = await liftLatestIfVersionExists(row.npmName, row.localVersion, npm);
+			if (npm.latest) latestByName.set(row.npmName, npm.latest);
+		}
 
 		const pins: PinEdge[] = [];
 		if (row.rootPkg) {

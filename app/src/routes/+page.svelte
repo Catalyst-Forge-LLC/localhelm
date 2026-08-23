@@ -613,11 +613,20 @@
 				if (data.authHint) publishAuthHint = data.authHint;
 				npmUser = data.npmUser ?? null;
 				const eligible = data.rows.filter((r) => r.action === 'publish');
+				const cuttingNew = eligible.some((row) => row.steps.some((step) => step.kind === 'bump'));
 				note(`publish plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
 				offerConfirm({
-					title: eligible.length === 1 ? 'Publish this package?' : eligible.length ? `Publish ${eligible.length} packages?` : 'Nothing to publish',
+					title: eligible.length === 1
+						? cuttingNew
+							? `Cut and publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
+							: `Publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
+						: eligible.length
+							? `Publish ${eligible.length} packages?`
+							: 'Nothing to publish',
 					hint: eligible.length
-						? publishAuthHint
+						? cuttingNew
+							? `${publishAuthHint} The current local version is already on npm. Confirming cuts a new version.`
+							: publishAuthHint
 						: ids.length === 1
 							? `${ids[0]}: ${data.rows[0]?.reason ?? 'cannot publish'}`
 							: 'No listed package is ready to publish.',

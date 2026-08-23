@@ -1,3 +1,4 @@
+import { compareSemver } from './semver.js';
 import type { NpmCell } from './types.js';
 
 const cache = new Map<string, NpmCell>();
@@ -72,4 +73,20 @@ export async function npmHasVersion(name: string, version: string): Promise<NpmC
 
 export function clearNpmCache(): void {
 	cache.clear();
+}
+
+/** `/latest` can lag a just-published version. If local is already on the registry, treat it as latest. */
+export function withPublishedLocal(latest: NpmCell, localVersion: string, localIsOnNpm: boolean): NpmCell {
+	if (!localIsOnNpm || latest.status !== 'ok' || !latest.latest) return latest;
+	const cmp = compareSemver(localVersion, latest.latest);
+	if (cmp === null || cmp <= 0) return latest;
+	return { ...latest, latest: localVersion };
+}
+
+export async function liftLatestIfVersionExists(name: string, localVersion: string, latest: NpmCell): Promise<NpmCell> {
+	if (latest.status !== 'ok' || !latest.latest) return latest;
+	const cmp = compareSemver(localVersion, latest.latest);
+	if (cmp === null || cmp <= 0) return latest;
+	const has = await npmHasVersion(name, localVersion);
+	return withPublishedLocal(latest, localVersion, has.status === 'ok');
 }

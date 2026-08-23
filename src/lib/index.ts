@@ -5,7 +5,7 @@ export type { LoadedManifest } from './manifest.js';
 export { applyCascade, planCascade } from './cascade.js';
 export type { CascadePlan, CascadeRow } from './cascade.js';
 export { helmBumpMessage, helmRetargetMessage } from './commit.js';
-export { clearNpmCache, npmHasVersion, npmLatest } from './npm.js';
+export { clearNpmCache, liftLatestIfVersionExists, npmHasVersion, npmLatest, withPublishedLocal } from './npm.js';
 export { retargetSpecifier } from './pinwrite.js';
 export { fleetReady } from './ready.js';
 export type { ReadyView } from './ready.js';
