@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@iconify-json/lucide':
+        specifier: ^1.2.125
+        version: 1.2.125
+      '@iconify/svelte':
+        specifier: ^5.2.2
+        version: 5.2.2(svelte@5.56.9)
     devDependencies:
       '@sveltejs/adapter-auto':
         specifier: ^7.0.1
@@ -37,6 +44,17 @@ importers:
         version: 8.2.2(jiti@2.7.0)
 
 packages:
+
+  '@iconify-json/lucide@1.2.125':
+    resolution: {integrity: sha512-tOCk1QKMtKnCfPAgZRHgjRkQTP7wF5IO+iPKvvp8vxGZYPkSLhx4HTV3Ng0pIZ3wNWrS6kVpHkunJ1dc19L1og==}
+
+  '@iconify/svelte@5.2.2':
+    resolution: {integrity: sha512-XMXxD3nzH7yB68C3K4sNwzrJ1TBscODR0ZqCeNf0KGuEMCTSuCo0jHNDZ0o0iRXTylO41NSz/DWam/4atLG1yw==}
+    peerDependencies:
+      svelte: '>5.0.0'
+
+  '@iconify/types@2.0.0':
+    resolution: {integrity: sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -677,6 +695,17 @@ packages:
     resolution: {integrity: sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ==}
 
 snapshots:
+
+  '@iconify-json/lucide@1.2.125':
+    dependencies:
+      '@iconify/types': 2.0.0
+
+  '@iconify/svelte@5.2.2(svelte@5.56.9)':
+    dependencies:
+      '@iconify/types': 2.0.0
+      svelte: 5.56.9
+
+  '@iconify/types@2.0.0': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

@@ -439,6 +439,16 @@
       "rationale": "Operator 2026-08-23: All quiet rendered while Working: reading status, and npm was already signed in from earlier in the session.",
       "alternatives_considered": ["Skeleton cards only", "whoami only inside publish"],
       "status": "active"
+    },
+    {
+      "id": "d27",
+      "timestamp": "2026-08-23T21:06:00Z",
+      "phase": "2-scaffolding",
+      "session": 13,
+      "decision": "Activity is a header icon-button that toggles the drawer (Lucide scroll-text, unseen badge), not a fifth tab. Dashboard icons are Iconify Lucide, bundled offline via @iconify-json/lucide, with one IconButton primitive.",
+      "rationale": "Operator 2026-08-23: show/hide activity as a tab does not make sense; follow Exec Foundry icon usage.",
+      "alternatives_considered": ["Keep Activity in the tab strip as an icon tab", "Emoji instead of Lucide", "Fetch Iconify from the API"],
+      "status": "active"
     }
   ],
   "gotchas": [

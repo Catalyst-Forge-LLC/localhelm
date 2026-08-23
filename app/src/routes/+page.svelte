@@ -2,6 +2,8 @@
 	import { onMount } from 'svelte';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
+	import Icon from '$lib/Icon.svelte';
+	import IconButton from '$lib/IconButton.svelte';
 	import { pluginPlanWriteIds } from '$lib/pluginPlan';
 
 	type BumpKind = 'patch' | 'minor' | 'major';
@@ -1080,6 +1082,7 @@
 					<span class="group-label">Read</span>
 					<div class="group-buttons">
 						<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()} title="Re-read package.json, git, and npm latest.">
+							<Icon icon="lucide:refresh-cw" />
 							Refresh
 						</button>
 						<button
@@ -1088,6 +1091,7 @@
 							onclick={() => refresh(true)}
 							title="git fetch origin in each repo, then re-read. Updates the to push / to pull counts."
 						>
+							<Icon icon="lucide:cloud-download" />
 							Fetch remotes
 						</button>
 					</div>
@@ -1102,6 +1106,7 @@
 							onclick={() => startPull()}
 							title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull."
 						>
+							<Icon icon="lucide:git-pull-request" />
 							Pull
 						</button>
 						<button
@@ -1110,6 +1115,7 @@
 							onclick={() => startPush()}
 							title="Shows which clean, ahead repos would push to origin. Confirm in the modal. Never --force."
 						>
+							<Icon icon="lucide:upload" />
 							Push
 						</button>
 						<button
@@ -1118,10 +1124,20 @@
 							onclick={() => startExport()}
 							title="Shows the inventory JSON path. Confirm in the modal to write it."
 						>
+							<Icon icon="lucide:file-json" />
 							Write JSON
 						</button>
 					</div>
 				</div>
+				<IconButton
+					icon="lucide:scroll-text"
+					label={activityOpen ? 'Close activity log' : 'Open activity log'}
+					title="Activity — every plan and write"
+					pressed={activityOpen}
+					hot={activityUnseen}
+					badge={activityUnseen ? 'new' : entries.length || ''}
+					onclick={() => setActivityOpen(!activityOpen)}
+				/>
 			</div>
 		</div>
 
@@ -1163,31 +1179,24 @@
 
 	<nav class="tabs" aria-label="Dashboard views">
 		<button type="button" class="tab" class:active={tab === 'today'} class:hot={todayCount > 0} onclick={() => setTab('today')}>
+			<Icon icon="lucide:sun" />
 			Today
 			{#if todayCount > 0}<span class="count">{todayCount}</span>{/if}
 		</button>
 		<button type="button" class="tab" class:active={tab === 'fleet'} onclick={() => setTab('fleet')}>
+			<Icon icon="lucide:ship" />
 			Fleet
 			{#if inventory}<span class="count quiet">{inventory.digest.projects}</span>{/if}
 		</button>
 		<button type="button" class="tab" class:active={tab === 'sites'} onclick={() => setTab('sites')}>
+			<Icon icon="lucide:globe" />
 			Sites
 			{#if filepressBoard}<span class="count quiet">{filepressBoard.rows.length}</span>{/if}
 		</button>
 		<button type="button" class="tab" class:active={tab === 'ports'} class:hot={portsNeedingYou.length > 0} onclick={() => setTab('ports')}>
+			<Icon icon="lucide:anchor" />
 			Ports
 			{#if leaseBoard}<span class="count quiet">{leaseBoard.rows.length}</span>{/if}
-		</button>
-		<button
-			type="button"
-			class="tab activity-tab"
-			class:active={activityOpen}
-			class:hot={activityUnseen}
-			onclick={() => setActivityOpen(!activityOpen)}
-		>
-			Activity
-			{#if entries.length}<span class="count">{entries.length}</span>{/if}
-			{#if activityUnseen}<span class="count">new</span>{/if}
 		</button>
 	</nav>
 
@@ -1217,6 +1226,7 @@
 									onclick={() => startPublish(shipRows.filter((row) => row.unpublishedAhead).map((row) => row.id))}
 									title="Shows bump, push, and npm publish for unpublished-ahead packages. Confirm in the modal."
 								>
+									<Icon icon="lucide:package-up" />
 									Publish unpublished
 								</button>
 							</div>
@@ -1345,7 +1355,7 @@
 							<h2>FilePress sites</h2>
 							<p class="hint">Content sites, not npm packages.</p>
 						</div>
-						<button type="button" class="btn btn-sm" onclick={() => setTab('sites')}>Open Sites</button>
+						<button type="button" class="btn btn-sm" onclick={() => setTab('sites')}><Icon icon="lucide:arrow-right" /> Open Sites</button>
 					</div>
 					{#if !filepressBoard}
 						<p class="dim small">No FilePress plugin loaded. Enroll the filepress checkout to see sites here.</p>
@@ -1366,6 +1376,7 @@
 									onclick={() => startPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, 'Sync engine')}
 									title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
 								>
+									<Icon icon="lucide:refresh-cw" />
 									Sync engine
 								</button>
 							</div>
@@ -1394,7 +1405,7 @@
 							<h2>Ports</h2>
 							<p class="hint">Named LocalBerth leases.</p>
 						</div>
-						<button type="button" class="btn btn-sm" onclick={() => setTab('ports')}>Open Ports</button>
+						<button type="button" class="btn btn-sm" onclick={() => setTab('ports')}><Icon icon="lucide:arrow-right" /> Open Ports</button>
 					</div>
 					{#if !leaseBoard}
 						<p class="dim small">No Ports plugin loaded. Enroll the localberth checkout to see leases here.</p>
@@ -1440,6 +1451,7 @@
 								onclick={() => (addOpen = true)}
 								title="Scan a folder and pick which projects to enroll."
 							>
+								<Icon icon="lucide:folder-plus" />
 								Add projects
 							</button>
 							<button
@@ -1448,6 +1460,7 @@
 								onclick={() => startBump(checkedIds)}
 								title="Shows the next version for each checked row. Confirm in the modal. No tag, no publish."
 							>
+								<Icon icon="lucide:chevrons-up" />
 								Bump{checkedIds.length ? ` (${checkedIds.length})` : ''}
 							</button>
 							<button
@@ -1456,6 +1469,7 @@
 								onclick={() => startPush(checkedIds)}
 								title="Shows which checked repos would push to origin. Confirm in the modal. Never --force."
 							>
+								<Icon icon="lucide:upload" />
 								Push{checkedIds.length ? ` (${checkedIds.length})` : ''}
 							</button>
 							<button
@@ -1464,6 +1478,7 @@
 								onclick={() => startPublish(checkedPublishIds)}
 								title="Shows bump, push, and npm publish for the checked public packages. Confirm in the modal."
 							>
+								<Icon icon="lucide:package-up" />
 								Publish{checkedPublishIds.length ? ` (${checkedPublishIds.length})` : ''}
 							</button>
 							<button
@@ -1472,6 +1487,7 @@
 								onclick={() => startUnenroll()}
 								title="Shows which fleet rows would be removed. Confirm in the modal. Never deletes a folder."
 							>
+								<Icon icon="lucide:folder-minus" />
 								Remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
 							</button>
 						</div>
@@ -1746,14 +1762,17 @@
 		<aside class="drawer" aria-label="Activity">
 			<div class="section-head">
 				<div>
-					<h2>Activity</h2>
+					<h2><Icon icon="lucide:scroll-text" /> Activity</h2>
 					<p class="hint">Every plan and write, newest first. Kept in this workspace so a refresh does not wipe it.</p>
 				</div>
 				<div class="group-buttons">
 					{#if entries.length}
-						<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => void clearActivityLog()}>Clear</button>
+						<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => void clearActivityLog()}>
+							<Icon icon="lucide:trash-2" />
+							Clear
+						</button>
 					{/if}
-					<button class="btn btn-sm" onclick={() => setActivityOpen(false)}>Close</button>
+					<IconButton icon="lucide:x" label="Close activity" onclick={() => setActivityOpen(false)} />
 				</div>
 			</div>
 			{#if entries.length === 0}
@@ -1785,7 +1804,7 @@
 	<label for="scan-root">Folder to scan</label>
 	<div class="row">
 		<input id="scan-root" bind:value={scanRoot} spellcheck="false" />
-		<button class="btn" disabled={Boolean(busy)} onclick={() => scan()}>Scan</button>
+		<button class="btn" disabled={Boolean(busy)} onclick={() => scan()}><Icon icon="lucide:search" /> Scan</button>
 	</div>
 	{#if candidates.length}
 		<p class="hint">
@@ -1820,6 +1839,7 @@
 				onclick={() => startEnroll()}
 				title="Shows which folders would join the fleet. Confirm in the modal to write localhelm.fleet.json."
 			>
+				<Icon icon="lucide:folder-plus" />
 				Add to fleet{checkedScan.length ? ` (${checkedScan.length})` : ''}
 			</button>
 		</div>
@@ -1916,6 +1936,8 @@
 	}
 
 	h2 {
+		display: inline-flex;
+		align-items: center;
 		font-size: 1.02rem;
 		font-weight: 600;
 		margin: 0;
@@ -1949,7 +1971,12 @@
 	.actions {
 		display: flex;
 		flex-wrap: wrap;
+		align-items: flex-end;
 		gap: 1rem;
+	}
+
+	h2 :global(.icon) {
+		margin-right: 0.35rem;
 	}
 
 	.group {
@@ -1981,6 +2008,9 @@
 	}
 
 	.btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
 		border: 1px solid #5a5a64;
 		background: #3c3c44;
 		color: #ececef;
@@ -2078,10 +2108,6 @@
 		padding: 0.85rem 1.5rem 0;
 		background: #000;
 		border-bottom: 1px solid #1f1f22;
-	}
-
-	.activity-tab {
-		margin-left: auto;
 	}
 
 	.tab {
