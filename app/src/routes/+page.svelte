@@ -210,6 +210,10 @@
 		attentionRows.length + cascadeOnlyRows.length + sitesNeedingYou.length + portsNeedingYou.length,
 	);
 	const filepressSyncIds = $derived(sitesNeedingYou.map((row) => row.id));
+	const checkedPublishIds = $derived(checkedIds.filter((id) => {
+		const row = inventory?.projects.find((p) => p.id === id);
+		return row ? canPublish(row) : false;
+	}));
 	const filepressPushIds = $derived(
 		(filepressBoard?.rows ?? [])
 			.filter((row) => row.actions.some((act) => act.id === 'push'))
@@ -962,6 +966,13 @@
 				title: 'Local version is ahead of npm. Publish will push if needed, then npm publish.',
 			});
 		}
+		if ((row.git.ahead ?? 0) > 0) {
+			out.push({
+				text: `${row.git.ahead} to push`,
+				tone: 'ship',
+				title: 'This branch is ahead of origin. Push the commits, or Publish to bump if needed, push, then npm publish.',
+			});
+		}
 		if (row.git.dirty) out.push({ text: `dirty${dirtDetail(row) ? ` — ${dirtDetail(row)}` : ''}`, tone: 'warn' });
 		if (row.git.busy) out.push({ text: `mid-${row.git.busy}`, tone: 'bad' });
 		if (row.cascadeBehind) {
@@ -1170,6 +1181,8 @@
 								Packages that need a publish, cascade, or a look. Each name appears once.
 								{#if readyRows.length}
 									{readyRows.length} already unpublished-ahead.
+								{:else if shipRows.length}
+									Nothing is unpublished-ahead. Publish on a row cuts a new version (bump if needed).
 								{/if}
 							</p>
 						</div>
@@ -1177,17 +1190,17 @@
 							<div class="group-buttons">
 								<button
 									class="btn btn-write"
-									disabled={Boolean(busy) || shipRows.length === 0}
-									onclick={() => startPublish(shipRows.map((row) => row.id))}
-									title="Shows what publish would do for every public enrolled package. Confirm in the modal."
+									disabled={Boolean(busy)}
+									onclick={() => startPublish(shipRows.filter((row) => row.unpublishedAhead).map((row) => row.id))}
+									title="Shows bump, push, and npm publish for unpublished-ahead packages. Confirm in the modal."
 								>
-									Publish all
+									Publish unpublished
 								</button>
 							</div>
 						{/if}
 					</div>
 
-					{#if (inventory?.digest.unpublishedAhead ?? 0) > 0}
+					{#if shipRows.length}
 						<p class="dim small">
 							{#if npmUser}
 								npm is logged in as <code>{npmUser}</code>.
@@ -1217,7 +1230,7 @@
 											{/each}
 										</div>
 									</div>
-									{#if canPublish(row) && (row.unpublishedAhead || row.npm.status === 'none')}
+									{#if canPublish(row)}
 										<div class="bump">
 											<select aria-label={`publish bump kind for ${row.id}`} bind:value={bumpKind[row.id]} disabled={row.unpublishedAhead}>
 												<option value="patch">patch</option>
@@ -1387,7 +1400,7 @@
 					<div class="section-head">
 						<div>
 							<h2>Fleet</h2>
-							<p class="hint">Check rows, then bump, push, or remove. Removing never deletes a folder. Version bump only writes package.json — publish lives on Today.</p>
+							<p class="hint">Check rows, then bump, push, publish, or remove. Removing never deletes a folder. Bump only writes package.json. Publish bumps if local is already on npm, pushes if needed, then npm publish.</p>
 						</div>
 						<div class="group-buttons">
 							<button
@@ -1405,6 +1418,14 @@
 								title="Shows which checked repos would push to origin. Confirm in the modal. Never --force."
 							>
 								Push{checkedIds.length ? ` (${checkedIds.length})` : ''}
+							</button>
+							<button
+								class="btn btn-write"
+								disabled={Boolean(busy) || !checkedPublishIds.length}
+								onclick={() => startPublish(checkedPublishIds)}
+								title="Shows bump, push, and npm publish for the checked public packages. Confirm in the modal."
+							>
+								Publish{checkedPublishIds.length ? ` (${checkedPublishIds.length})` : ''}
 							</button>
 							<button
 								class="btn btn-write"
@@ -1495,6 +1516,16 @@
 														Push
 													</button>
 												{/if}
+												{#if canPublish(row)}
+													<button
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy)}
+														onclick={() => startPublish([row.id])}
+														title="Shows bump, push, and npm publish. Confirm in the modal. Never --force."
+													>
+														Publish
+													</button>
+												{/if}
 											</div>
 										</td>
 									</tr>
@@ -1508,7 +1539,7 @@
 
 					<p class="legend">
 						Check rows for bulk bump, push, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
-						Publish lives on Today: bump and push only if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
+						Publish bumps if local is already on npm, pushes if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
 					</p>
 				</section>
 
