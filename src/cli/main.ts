@@ -33,6 +33,7 @@ Usage:
   localhelm ready [--json]
   localhelm publish [id...] [--kind patch|minor|major]
   localhelm publish <id>... --apply [--kind K] [--otp CODE]
+  localhelm auth
   localhelm cascade <id> [--to V] [--apply] [--no-commit]
   localhelm plugins
   localhelm plugin <id> [action] [name...] [--apply] [--no-commit]
@@ -424,6 +425,35 @@ async function main(): Promise<void> {
 				process.stdout.write(`${lines.join('\n')}\n`);
 			}
 		}
+		return;
+	}
+
+	if (cmd === 'auth') {
+		if (argv.length) fail('usage: localhelm auth');
+		const user = npmWhoami();
+		if (user) {
+			process.stdout.write(`npm whoami\t${user}\n`);
+			process.stdout.write(
+				'A token is already in your user ~/.npmrc. If publish still opens LastPass / a security key, that token is interactive.\n',
+			);
+		} else {
+			process.stdout.write('npm whoami failed. No usable user token.\n');
+		}
+		process.stdout.write(`
+Replace it with a granular automation token (bypasses 2FA for publish; still valid into early 2027):
+
+  1. Open https://www.npmjs.com/settings/${user ?? '~'}/tokens
+  2. Generate new token → Granular Access Token
+  3. Read and write. Packages you ship (or all you own).
+  4. Turn on Bypass 2FA / automation. Do not give it account-management rights.
+  5. Expiration: 90 days or a year — your call. IP allow-list if you want.
+  6. Copy the token once, then run (paste only in your terminal, not in chat):
+
+     npm config set //registry.npmjs.org/:_authToken "npm_PASTE_HERE" --location=user
+     npm whoami
+
+LocalHelm never stores the token. After that, publish should not open a browser.
+`);
 		return;
 	}
 

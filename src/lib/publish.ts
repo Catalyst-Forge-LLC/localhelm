@@ -42,7 +42,7 @@ export function extractNpmAuthUrl(text: string): string | null {
 
 export function openInBrowser(url: string): void {
 	if (process.platform === 'win32') {
-		spawn('cmd.exe', ['/c', 'start', '', url], { detached: true, stdio: 'ignore' }).unref();
+		spawn('explorer.exe', [url], { detached: true, stdio: 'ignore' }).unref();
 		return;
 	}
 	if (process.platform === 'darwin') {
@@ -53,13 +53,19 @@ export function openInBrowser(url: string): void {
 }
 
 export function npmWhoami(): string | null {
-	const result = spawnSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['whoami'], {
+	const win = process.platform === 'win32';
+	const result = spawnSync(win ? 'npm.cmd' : 'npm', ['whoami'], {
 		encoding: 'utf8',
 		windowsHide: true,
+		shell: win,
 		timeout: 15_000,
 	});
-	if (result.status !== 0) return null;
-	const user = (result.stdout ?? '').trim();
+	if (result.error || result.status !== 0) return null;
+	const user = (result.stdout ?? '')
+		.trim()
+		.split(/\r?\n/)
+		.map((line) => line.trim())
+		.find((line) => line.length > 0 && !line.startsWith('npm '));
 	return user || null;
 }
 
@@ -75,12 +81,14 @@ export function defaultPublishRunner(cwd: string, args: string[]): Promise<Publi
 	if (args.includes('--force') || args.includes('-f')) {
 		return Promise.resolve({ ok: false, stdout: '', stderr: 'localhelm never passes --force to npm publish' });
 	}
-	const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+	const win = process.platform === 'win32';
+	const npm = win ? 'npm.cmd' : 'npm';
 	return new Promise((resolve) => {
 		const child = spawn(npm, args, {
 			cwd,
 			stdio: ['pipe', 'pipe', 'pipe'],
 			windowsHide: true,
+			shell: win,
 		});
 		let stdout = '';
 		let stderr = '';
