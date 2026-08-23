@@ -138,6 +138,7 @@
 	let confirmCanApply = $state(true);
 	let confirmShowOtp = $state(false);
 	let confirmRun = $state<(() => void) | null>(null);
+	let statusReady = $state(false);
 
 	let entries = $state<LogEntry[]>([]);
 	let busy = $state('');
@@ -372,11 +373,16 @@
 				cwd: string;
 				port: string | null;
 				portSource: string | null;
+				npmUser?: string | null;
 			};
 			inventory = data.inventory;
 			cwd = data.cwd;
 			port = data.port;
 			portSource = data.portSource;
+			if (data.npmUser) {
+				npmUser = data.npmUser;
+				persist('localhelm.npmUser', data.npmUser);
+			}
 			if (fetchRemotes) fetchedAt = new Date().toLocaleTimeString();
 			if (!candidates.length) scanRoot = data.scanRoot;
 			const kinds = { ...bumpKind };
@@ -390,6 +396,7 @@
 			}
 			await loadActivity();
 		});
+		statusReady = true;
 	}
 
 	async function scan(): Promise<void> {
@@ -759,7 +766,10 @@
 					}),
 				})) as { rows: PublishRow[]; npmUser?: string | null; authHint?: string };
 				if (data.authHint) publishAuthHint = data.authHint;
-				npmUser = data.npmUser ?? null;
+				if (data.npmUser) {
+					npmUser = data.npmUser;
+					persist('localhelm.npmUser', data.npmUser);
+				}
 				const eligible = data.rows.filter((r) => r.action === 'publish');
 				const cuttingNew = eligible.some((row) => row.steps.some((step) => step.kind === 'bump'));
 				note(`publish plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
@@ -1022,6 +1032,8 @@
 			const pane = sessionStorage.getItem('localhelm.portPane');
 			if (pane === 'leases' || pane === 'observed') portPane = pane;
 			activityOpen = sessionStorage.getItem('localhelm.activity') === '1';
+			const savedNpm = sessionStorage.getItem('localhelm.npmUser');
+			if (savedNpm) npmUser = savedNpm;
 		} catch {
 			/* ignore */
 		}
@@ -1045,6 +1057,8 @@
 				<p class="sub">
 					{#if inventory}
 						Fleet <code>{inventory.manifestPath}</code>
+					{:else if !statusReady}
+						Reading the fleet…
 					{:else}
 						No fleet yet — open the Fleet tab, scan a folder, then enroll.
 					{/if}
@@ -1132,6 +1146,11 @@
 				<span class="chip quiet">
 					{fetchedAt ? `remotes fetched ${fetchedAt}` : 'remotes not fetched this session'}
 				</span>
+				{#if npmUser}
+					<span class="chip quiet" title="npm whoami">npm {npmUser}</span>
+				{:else if statusReady}
+					<span class="chip" title={publishAuthHint}>npm not signed in</span>
+				{/if}
 			</div>
 		{/if}
 
@@ -1181,11 +1200,12 @@
 						<div>
 							<h2>Needs you</h2>
 							<p class="hint">
-								One gold button per row — the thing that matches the badge.
-								{#if readyRows.length}
-									{readyRows.length} unpublished-ahead.
+								{#if !statusReady}
+									Reading status…
+								{:else if readyRows.length}
+									{readyRows.length} unpublished-ahead. Gold button is the matching write.
 								{:else}
-									Nothing is unpublished-ahead. Cut version is the extra if you want a new npm cut.
+									Gold button is the matching write. Cut version is the extra.
 								{/if}
 							</p>
 						</div>
@@ -1203,7 +1223,9 @@
 						{/if}
 					</div>
 
-					{#if attentionRows.length === 0 && cascadeOnlyRows.length === 0}
+					{#if !statusReady}
+						<p class="dim small">Waiting for status before we call the fleet quiet.</p>
+					{:else if attentionRows.length === 0 && cascadeOnlyRows.length === 0}
 						<p class="quiet-banner">All quiet on the fleet. Open Fleet for the full table, Sites for FilePress, or Ports for leases.</p>
 					{:else}
 						<ul class="need-list">
@@ -1211,24 +1233,20 @@
 								{@const cascadeTarget = cascadeFor(row.id)}
 								{@const need = todayNeed(row)}
 								<li class="need-card">
-									<div class="need-head">
-										<div>
-											<div class="id">{row.id}</div>
-											<div class="dim small">{row.npm.name ?? row.path} · {gitSummary(row)}</div>
-										</div>
-										<div class="badges">
-											{#each badges(row).filter((badge) => badge.text !== 'nothing to do') as badge (badge.text)}
-												<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
-											{/each}
+									<div class="need-main">
+										<div class="id">{row.id}</div>
+										<div class="dim small">
+											{row.npm.name ?? row.path} · {gitSummary(row)}
+											{#if cascadeTarget}
+												· dependents {cascadeTarget.behind ? `${cascadeTarget.behind} behind` : ''}{cascadeTarget.behind && cascadeTarget.linked ? ', ' : ''}{cascadeTarget.linked ? `${cascadeTarget.linked} local link` : ''}
+											{/if}
 										</div>
 									</div>
-									{#if cascadeTarget}
-										<div class="dim small cascade-note">
-											Dependents still on an old {cascadeTarget.npm} pin
-											{cascadeTarget.behind ? ` · ${cascadeTarget.behind} behind` : ''}
-											{cascadeTarget.linked ? ` · ${cascadeTarget.linked} local link` : ''}
-										</div>
-									{/if}
+									<div class="badges">
+										{#each badges(row).filter((badge) => badge.text !== 'nothing to do') as badge (badge.text)}
+											<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
+										{/each}
+									</div>
 									<div class="need-actions">
 										{#if need === 'publish'}
 											<button
@@ -1293,19 +1311,17 @@
 							{/each}
 							{#each cascadeOnlyRows as target (target.id)}
 								<li class="need-card">
-									<div class="need-head">
-										<div>
-											<div class="id">{target.id}</div>
-											<div class="dim small">
-												{target.npm}{target.latest ? `@${target.latest}` : ''} is published — dependents still need the pin
-											</div>
-										</div>
-										<div class="badges">
-											{#if target.behind}<span class="badge warn">{target.behind} pin(s) behind</span>{/if}
-											{#if target.linked}<span class="badge info">{target.linked} local link</span>{/if}
+									<div class="need-main">
+										<div class="id">{target.id}</div>
+										<div class="dim small">
+											{target.npm}{target.latest ? `@${target.latest}` : ''} is published — dependents still need the pin
 										</div>
 									</div>
-									<div class="bump">
+									<div class="badges">
+										{#if target.behind}<span class="badge warn">{target.behind} pin(s) behind</span>{/if}
+										{#if target.linked}<span class="badge info">{target.linked} local link</span>{/if}
+									</div>
+									<div class="need-actions">
 										<button
 											class="btn btn-sm btn-write"
 											disabled={Boolean(busy)}
@@ -1321,14 +1337,13 @@
 					{/if}
 				</section>
 
+				{#if statusReady}
 				<div class="today-side">
 				<section class="panel">
 					<div class="section-head">
 						<div>
 							<h2>FilePress sites</h2>
-							<p class="hint">
-								Content sites, not npm packages — a name can match a fleet row (for example localberth) and still be a different thing.
-							</p>
+							<p class="hint">Content sites, not npm packages.</p>
 						</div>
 						<button type="button" class="btn btn-sm" onclick={() => setTab('sites')}>Open Sites</button>
 					</div>
@@ -1377,7 +1392,7 @@
 					<div class="section-head">
 						<div>
 							<h2>Ports</h2>
-							<p class="hint">Named LocalBerth leases. Claim and release stay on the localberth CLI.</p>
+							<p class="hint">Named LocalBerth leases.</p>
 						</div>
 						<button type="button" class="btn btn-sm" onclick={() => setTab('ports')}>Open Ports</button>
 					</div>
@@ -1408,6 +1423,7 @@
 					{/if}
 				</section>
 				</div>
+				{/if}
 			</div>
 		{:else if tab === 'fleet'}
 			<div class="fleet-layout">
@@ -1863,7 +1879,7 @@
 		flex-shrink: 0;
 		background: #000;
 		border-bottom: 1px solid #1f1f22;
-		padding: 1.1rem 1.5rem;
+		padding: 0.75rem 1.5rem 0.7rem;
 	}
 
 	.head-row {
@@ -1999,7 +2015,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.4rem;
-		margin-top: 0.9rem;
+		margin-top: 0.55rem;
 	}
 
 	.chip {
@@ -2381,19 +2397,19 @@
 		background: #2f3d32;
 		border: 1px solid #3f6b4a;
 		color: #b8e0c2;
-		padding: 0.8rem 1rem;
-		border-radius: 0.55rem;
-		margin: 0.4rem 0 0;
-		font-size: 0.84rem;
+		padding: 0.45rem 0.7rem;
+		border-radius: 0.45rem;
+		margin: 0.35rem 0 0;
+		font-size: 0.8rem;
 	}
 
 	.need-list {
 		list-style: none;
-		margin: 0.65rem 0 0;
+		margin: 0.45rem 0 0;
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.55rem;
+		gap: 0.35rem;
 	}
 
 	.need-list.compact {
@@ -2402,22 +2418,23 @@
 	}
 
 	.need-card {
-		background: #3d3d46;
-		border: 1px solid #585860;
-		border-radius: 0.55rem;
-		padding: 0.7rem 0.8rem;
-	}
-
-	.need-head {
 		display: flex;
 		flex-wrap: wrap;
-		justify-content: space-between;
-		gap: 0.5rem;
-		margin-bottom: 0.45rem;
+		align-items: center;
+		gap: 0.4rem 0.65rem;
+		background: #3d3d46;
+		border: 1px solid #585860;
+		border-radius: 0.45rem;
+		padding: 0.4rem 0.55rem;
 	}
 
-	.cascade-note {
-		margin: 0.35rem 0 0.25rem;
+	.need-main {
+		min-width: 11rem;
+		flex: 1 1 11rem;
+	}
+
+	.need-card .badges {
+		flex: 0 1 auto;
 	}
 
 	label {
@@ -2461,7 +2478,7 @@
 	}
 
 	.need-actions {
-		margin-top: 0.45rem;
+		margin-left: auto;
 	}
 
 	.need-actions:empty {

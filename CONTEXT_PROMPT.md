@@ -141,3 +141,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 12 — 2026-08-23
 
 - Today: one gold write per need. Cut version is the extra. Publish OTP moved into the confirm modal. Fleet row Push/Publish dropped (toolbar + checks). Header reads are Refresh and Fetch remotes.
+- Status must finish before Today says the fleet is quiet or the header says there is no fleet. npm whoami rides with `/api/status` and is remembered if a later check flakes.

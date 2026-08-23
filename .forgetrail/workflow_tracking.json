@@ -429,6 +429,16 @@
       "rationale": "Operator 2026-08-23: Today stacked patch + Publish + Push + OTP on every card and the header had three overlapping refresh buttons.",
       "alternatives_considered": ["Keep every write gold on each card", "Move all writes to Fleet only", "Hamburger the header"],
       "status": "active"
+    },
+    {
+      "id": "d26",
+      "timestamp": "2026-08-23T20:58:00Z",
+      "phase": "2-scaffolding",
+      "session": 12,
+      "decision": "Today must not say the fleet is quiet or that there is no fleet until /api/status finishes. npm whoami rides with status, is shown as a chip, and a successful login is kept if a later whoami flakes.",
+      "rationale": "Operator 2026-08-23: All quiet rendered while Working: reading status, and npm was already signed in from earlier in the session.",
+      "alternatives_considered": ["Skeleton cards only", "whoami only inside publish"],
+      "status": "active"
     }
   ],
   "gotchas": [
