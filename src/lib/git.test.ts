@@ -55,7 +55,7 @@ describe('git jobs', () => {
 		assert.deepEqual(requirePushIds([' localhelm ', 'filepress']), ['localhelm', 'filepress']);
 	});
 
-	it('skips dirty, not-ahead, and unknown ids; pushes a clean ahead repo', async () => {
+	it('skips not-ahead and unknown ids; pushes ahead commits even when the tree is dirty', async () => {
 		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-push-'));
 		const bare = path.join(root, 'origin.git');
 		await mkdir(bare);
@@ -74,13 +74,15 @@ describe('git jobs', () => {
 		assert.equal((await planPush(loaded))[0]?.reason, 'not ahead');
 
 		await writeFile(path.join(pkgDir, 'README.md'), 'hello\nmore\n');
-		assert.equal((await planPush(loaded))[0]?.reason, 'dirty');
+		assert.equal((await planPush(loaded))[0]?.reason, 'not ahead');
 
 		assert.equal(runGit(pkgDir, ['add', 'README.md']).ok, true);
 		assert.equal(runGit(pkgDir, ['commit', '-m', 'ahead']).ok, true);
+		await writeFile(path.join(pkgDir, 'scratch.txt'), 'still dirty\n');
 		const planned = await planPush(loaded, ['widget']);
 		assert.equal(planned[0]?.action, 'push');
 		assert.match(planned[0]?.reason ?? '', /on /);
+		assert.match(planned[0]?.reason ?? '', /uncommitted files stay local/);
 		assert.equal(planned[0]?.remote, 'origin');
 
 		const unknown = await planPush(loaded, ['nope']);

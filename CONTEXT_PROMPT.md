@@ -77,7 +77,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - M2: `bump`, `fetch`, `pull`, `export`, job lock, SvelteKit `app/` + `localhelm serve`
 - M3: `ready`, `cascade` (plan/apply `^V`, skip `link:`/`file:`, commit on apply)
 - Plugin host: `localhelm.plugin.mjs` on an enrolled project. FilePress plugin lives in the filepress checkout (Sites). LocalBerth plugin lives in the localberth checkout (Ports tab) and calls the sibling board. Do not reimplement leases, observe, or firewall. Site push is `git push origin <branch>` only — never `--force`.
-- `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
+- `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`. Ahead commits push even if the working tree is dirty; uncommitted files stay local. Pull, publish, and cascade still skip dirty trees.
 - `publish`: plan then named-id `--apply`. Intended auth is `localhelm auth` + a granular automation token (Bypass 2FA) in the **user** `~/.npmrc`. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
 - Dashboard writes are one button: click Push / Publish / Sync / Bump / etc., the modal shows the plan, then Confirm applies or Close if nothing to do. CLI still prints a plan and needs `--apply`. Today shows one gold write per need (Push, Publish, or Write pins). Cut version is the extra when you want a new npm cut. Publish OTP lives in the confirm modal. Fleet publish/push are toolbar + checked rows; per-row Bump stays.
 - Dashboard IA: **Today** (default, needs-you + FilePress + Ports snapshots), **Fleet** (table + enroll), **Sites** (FilePress plugin), **Ports** (LocalBerth plugin). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close) persisted at `.localhelm/activity.json`. No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`. Fleet and Sites checkboxes drive bulk bump/push/remove and plugin jobs; each still plans, then confirms. Ports is read-only parity with the LocalBerth board (leases + observed + Open). Claim/release stay on `localberth`.
@@ -143,3 +143,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Today: one gold write per need. Cut version is the extra. Publish OTP moved into the confirm modal. Fleet row Push/Publish dropped (toolbar + checks). Header reads are Refresh and Fetch remotes.
 - Status must finish before Today says the fleet is quiet or the header says there is no fleet. npm whoami rides with `/api/status` and is remembered if a later check flakes.
 - Activity is a header icon (Lucide `scroll-text`), not a tab. Same Iconify + Lucide offline set as Exec Foundry. Tabs and write buttons carry icons too.
+
+### Session 13 — 2026-08-23
+
+- Push of commits that are already ahead no longer waits for a clean tree. Dirty files stay local. Pull / publish / cascade still skip dirty.

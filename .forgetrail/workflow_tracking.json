@@ -449,6 +449,16 @@
       "rationale": "Operator 2026-08-23: show/hide activity as a tab does not make sense; follow Exec Foundry icon usage.",
       "alternatives_considered": ["Keep Activity in the tab strip as an icon tab", "Emoji instead of Lucide", "Fetch Iconify from the API"],
       "status": "active"
+    },
+    {
+      "id": "d28",
+      "timestamp": "2026-08-23T21:11:00Z",
+      "phase": "2-scaffolding",
+      "session": 13,
+      "decision": "Push plans ahead commits even when the working tree is dirty. Uncommitted files stay local. Pull, publish, and cascade still skip dirty trees.",
+      "rationale": "Operator 2026-08-23: aibreze showed 2 to push then the modal said nothing to push because the plan treated dirty as a skip. git push does not require a clean tree.",
+      "alternatives_considered": ["Hide Push when dirty", "Keep skip-dirty and change the badge"],
+      "status": "active"
     }
   ],
   "gotchas": [

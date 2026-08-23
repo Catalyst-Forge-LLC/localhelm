@@ -230,16 +230,16 @@ function planPushOne(id: string, relPath: string, abs: string): GitJobRow {
 	if (!git.repo) return { ...base, reason: 'no git' };
 	if (git.detached) return { ...base, reason: 'detached' };
 	if (git.busy) return { ...base, reason: git.busy };
-	if (git.dirty) return { ...base, reason: 'dirty' };
 	if (!git.origin) return { ...base, reason: 'no origin' };
 	if (!git.branch) return { ...base, reason: 'no branch' };
 	if (git.ahead == null || git.behind == null) return { ...base, reason: 'no upstream' };
 	if (git.behind > 0) return { ...base, reason: 'diverged' };
 	if (git.ahead === 0) return { ...base, reason: 'not ahead' };
+	const dirt = git.dirty ? ' · uncommitted files stay local' : '';
 	return {
 		...base,
 		action: 'push',
-		reason: `${git.ahead} on ${git.branch} → ${git.origin}`,
+		reason: `${git.ahead} on ${git.branch} → ${git.origin}${dirt}`,
 	};
 }
 

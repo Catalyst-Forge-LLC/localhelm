@@ -707,10 +707,10 @@
 				offerConfirm({
 					title: eligible.length === 1 ? `Push ${eligible[0]?.id} to origin?` : eligible.length ? 'Push these branches to origin?' : 'Nothing to push',
 					hint: eligible.length
-						? 'git push origin only. Never --force. Never the IngotVault backup remote.'
+						? 'git push origin only. Never --force. Never the IngotVault backup remote. Uncommitted files stay in the working tree.'
 						: onlyIds?.length === 1
 							? `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'cannot push'}`
-							: 'Nothing is eligible: repos must be clean, ahead, and not diverged.',
+							: 'Nothing is eligible: repos must be ahead of origin and not diverged.',
 					items: eligible.length ? pushItems(eligible) : ['Nothing to push.'],
 					confirmLabel: eligible.length === 1 ? `Push ${eligible[0]?.id}` : `Push ${eligible.length} to origin`,
 					canApply: eligible.length > 0,
