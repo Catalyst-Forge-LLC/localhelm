@@ -123,7 +123,7 @@
 	let publishOtp = $state('');
 	let npmUser = $state<string | null>(null);
 	let publishAuthHint = $state(
-		'LocalHelm opens the npm login URL in your browser. Finish LastPass / passkey there. An npm automation token in your user .npmrc skips this.',
+		'Run localhelm auth and put a granular automation token (Bypass 2FA) in your user ~/.npmrc before you publish. LocalHelm never stores the token.',
 	);
 	let confirmOpen = $state(false);
 	let confirmTitle = $state('');
@@ -899,11 +899,10 @@
 							{#if npmUser}
 								npm is logged in as <code>{npmUser}</code>.
 							{:else}
-								npm login is not visible yet — apply opens the npm auth page in your browser (LastPass / passkey).
+								npm is not ready. Run <code>localhelm auth</code> and set a granular automation token in your user <code>~/.npmrc</code> before you publish.
 							{/if}
-							{publishAuthHint}
 						</p>
-						<label for="publish-otp">Authenticator OTP only if npm asks for a numeric code (not the browser login)</label>
+						<label for="publish-otp">Authenticator OTP only if npm asks for a numeric code</label>
 						<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
 					{/if}
 

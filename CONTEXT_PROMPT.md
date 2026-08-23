@@ -78,7 +78,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - M3: `ready`, `cascade` (plan/apply `^V`, skip `link:`/`file:`, commit on apply)
 - Plugin host: `localhelm.plugin.mjs` on an enrolled project. FilePress plugin lives in the filepress checkout and calls the sibling library (headers, link→npm, ship). You can run those jobs from LocalHelm instead of `pnpm siblings`.
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
-- `publish`: plan then named-id `--apply`. Detects npm’s `auth/cli` URL and opens it. For dozens of publishes a week, use a granular automation token (Bypass 2FA) in the **user** `~/.npmrc` — `localhelm auth` prints the steps. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
+- `publish`: plan then named-id `--apply`. Intended auth is `localhelm auth` + a granular automation token (Bypass 2FA) in the **user** `~/.npmrc`. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
 - Dashboard confirms use a `<dialog>` modal (not `window.confirm`). FilePress board has Plan engine sync / Sync N for all sites. Header Plan push all plans every enrolled origin.
 - Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply unlocks only when the plan marks `writes: true` — already-current FilePress sites stay disabled.
 

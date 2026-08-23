@@ -31,7 +31,7 @@ export type PublishResult = { ok: boolean; stdout: string; stderr: string };
 export type PublishRunner = (cwd: string, args: string[]) => PublishResult | Promise<PublishResult>;
 
 export const NPM_PUBLISH_AUTH_HINT =
-	'LocalHelm opens the npm login URL in your browser. Finish LastPass / passkey there. An npm automation token in your user .npmrc skips this. LocalHelm never types a password.';
+	'Run localhelm auth and put a granular automation token (Bypass 2FA) in your user ~/.npmrc before you publish. LocalHelm never stores the token.';
 
 const NPM_AUTH_URL = /https:\/\/www\.npmjs\.com\/auth\/cli\/[0-9a-f-]+/i;
 

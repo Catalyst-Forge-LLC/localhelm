@@ -46,8 +46,8 @@ describe('publish plan', () => {
 		assert.deepEqual(requirePublishIds([' ollanet ']), ['ollanet']);
 	});
 
-	it('opens the npm CLI auth URL instead of waiting for Enter', () => {
-		assert.match(NPM_PUBLISH_AUTH_HINT, /LastPass/i);
+	it('points publish auth at localhelm auth, not a browser login', () => {
+		assert.match(NPM_PUBLISH_AUTH_HINT, /localhelm auth/);
 		assert.equal(
 			extractNpmAuthUrl('Authenticate at:\nhttps://www.npmjs.com/auth/cli/6547e76d-1a34-40be-92bd-a25953b08062\nPress ENTER'),
 			'https://www.npmjs.com/auth/cli/6547e76d-1a34-40be-92bd-a25953b08062',

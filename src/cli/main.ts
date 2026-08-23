@@ -505,7 +505,7 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 				process.stdout.write(
 					npmUser
 						? `npm is logged in as ${npmUser}.\n`
-						: 'npm whoami failed — apply opens the npm auth URL in your browser (LastPass / passkey). An automation token in ~/.npmrc skips that.\n',
+						: 'npm whoami failed. Run localhelm auth and set a granular automation token before --apply.\n',
 				);
 				process.stdout.write(`${NPM_PUBLISH_AUTH_HINT}\n`);
 				process.stdout.write(
