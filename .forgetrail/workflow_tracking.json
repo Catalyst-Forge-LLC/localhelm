@@ -84,6 +84,10 @@
         {
           "timestamp": "2026-08-23T19:20:00Z",
           "text": "Dashboard writes (D21): one action button plans, then a confirm modal shows what will run. Close if nothing to do. CLI still needs --apply."
+        },
+        {
+          "timestamp": "2026-08-23T19:45:00Z",
+          "text": "Bulk selection (D22): Fleet checkboxes drive bump, push, and remove. Sites checkboxes drive plugin jobs. Select-all in the header."
         }
       ]
     },
@@ -376,6 +380,16 @@
       "decision": "Dashboard writes are one button. Click Push / Publish / Sync / Bump / Pull / Cascade / Enroll / Export; the app runs the plan, the modal lists what will happen, Confirm applies. If the plan is empty the modal says so and only Close is offered. CLI stays plan-then--apply. FilePress sibling Apply/Ship now plan first, then confirm.",
       "rationale": "Operator 2026-08-23: Plan then Write pairs felt like extra steps with little benefit. Safety stays in the modal, not a second button.",
       "alternatives_considered": ["Keep Plan/Write unlock pairs", "Apply immediately without a plan modal"],
+      "status": "active"
+    },
+    {
+      "id": "d22",
+      "timestamp": "2026-08-23T19:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 9,
+      "decision": "Fleet and Sites checkboxes are a selection for bulk writes, not only unenroll. Fleet: Bump, Push, Remove on the checked ids. Sites: each plugin action on the checked sites. Select-all lives in the table header. Empty selection disables the bulk buttons. Each click still plans, then confirms. Publish stays on Today.",
+      "rationale": "Operator 2026-08-23: checkboxes were only useful for multi-delete; the same selection should cover the other row actions, including FilePress sites.",
+      "alternatives_considered": ["Unchecked means all rows", "Add publish to fleet bulk", "Keep sites as all-only bulk"],
       "status": "active"
     }
   ],

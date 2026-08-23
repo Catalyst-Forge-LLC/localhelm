@@ -80,7 +80,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
 - `publish`: plan then named-id `--apply`. Intended auth is `localhelm auth` + a granular automation token (Bypass 2FA) in the **user** `~/.npmrc`. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
 - Dashboard writes are one button: click Push / Publish / Sync / Bump / etc., the modal shows the plan, then Confirm applies or Close if nothing to do. CLI still prints a plan and needs `--apply`.
-- Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close). No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`.
+- Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close). No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`. Fleet and Sites checkboxes drive bulk bump/push/remove and plugin jobs; each still plans, then confirms.
 
 ### In Progress
 
@@ -125,3 +125,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 8 — 2026-08-23
 
 - After a successful publish, `/latest` can still show the old version. Status now checks whether the local version exists on the registry before calling it unpublished. A publish plan that bumps says it is cutting a new version.
+
+### Session 9 — 2026-08-23
+
+- Fleet and Sites checkboxes run the same write jobs as the row buttons (bump/push/remove; sync/push/ship). Select-all is in the table header. Publish stays on Today.

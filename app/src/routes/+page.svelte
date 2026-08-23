@@ -108,6 +108,7 @@
 	let candidates = $state<Candidate[]>([]);
 	let selectedScan = $state<Record<string, boolean>>({});
 	let selectedIds = $state<Record<string, boolean>>({});
+	let selectedSites = $state<Record<string, boolean>>({});
 	let bumpKind = $state<Record<string, BumpKind>>({});
 
 	let pluginBoards = $state<PluginBoard[]>([]);
@@ -200,6 +201,9 @@
 			.filter((row) => row.actions.some((act) => act.id === 'push'))
 			.map((row) => row.id),
 	);
+	const fleetIds = $derived((inventory?.projects ?? []).map((row) => row.id));
+	const fleetAllChecked = $derived(fleetIds.length > 0 && fleetIds.every((id) => selectedIds[id]));
+	const fleetSomeChecked = $derived(checkedIds.length > 0 && !fleetAllChecked);
 
 	function persist(key: string, value: string): void {
 		try {
@@ -443,46 +447,106 @@
 		});
 	}
 
-	async function startBump(id: string): Promise<void> {
-		const kind = bumpKind[id] ?? 'patch';
+	async function startBump(ids: string[]): Promise<void> {
+		if (ids.length === 0) {
+			error = 'Check at least one fleet row first.';
+			return;
+		}
+		const jobs = ids.map((id) => ({ id, kind: (bumpKind[id] ?? 'patch') as BumpKind }));
+		const scope = jobs.length === 1 ? jobs[0]?.id : `${jobs.length} projects`;
 		await run(
-			`planning ${kind} bump for ${id}`,
+			`planning bump for ${scope}`,
 			async () => {
-				const plan = (await call('/api/bump', {
-					method: 'POST',
-					body: JSON.stringify({ id, kind, apply: false }),
-				})) as BumpPlan;
-				note(
-					plan.action === 'bump'
-						? `bump plan ${id} ${plan.from} → ${plan.to}, nothing written`
-						: `bump plan ${id} — skipped`,
-					plan,
-				);
-				const can = plan.action === 'bump' && Boolean(plan.to);
+				const plans: BumpPlan[] = [];
+				for (const job of jobs) {
+					const plan = (await call('/api/bump', {
+						method: 'POST',
+						body: JSON.stringify({ id: job.id, kind: job.kind, apply: false }),
+					})) as BumpPlan;
+					plans.push(plan);
+					note(
+						plan.action === 'bump'
+							? `bump plan ${job.id} ${plan.from} → ${plan.to}, nothing written`
+							: `bump plan ${job.id} — skipped`,
+						plan,
+					);
+				}
+				const can = plans.filter((plan) => plan.action === 'bump' && Boolean(plan.to));
 				offerConfirm({
-					title: can ? `Bump ${id} to ${plan.to}?` : `Cannot bump ${id}`,
-					hint: can
-						? 'Writes package.json only. No tag, no publish.'
-						: (plan.reason ?? 'cannot bump'),
-					items: can ? [`${id}  ${plan.from ?? '?'} → ${plan.to}`] : [plan.reason ?? 'Nothing to bump.'],
-					confirmLabel: can ? `Write ${plan.to}` : 'Write',
-					canApply: can,
-					run: () => void applyBump(id, kind),
+					title: can.length === 1
+						? `Bump ${can[0]?.id} to ${can[0]?.to}?`
+						: can.length
+							? `Bump ${can.length} projects?`
+							: 'Nothing to bump',
+					hint: can.length
+						? 'Writes package.json only. No tag, no publish. Each row uses its own patch/minor/major.'
+						: plans[0]?.reason ?? 'cannot bump',
+					items: plans.map((plan) =>
+						plan.action === 'bump' && plan.to
+							? `${plan.id}  ${plan.from ?? '?'} → ${plan.to}`
+							: `${plan.id}  ${plan.reason ?? 'skipped'}`,
+					),
+					confirmLabel: can.length === 1 ? `Write ${can[0]?.to}` : `Write ${can.length}`,
+					canApply: can.length > 0,
+					run: () =>
+						void applyBumps(
+							can.map((plan) => ({
+								id: plan.id,
+								kind: jobs.find((job) => job.id === plan.id)?.kind ?? 'patch',
+							})),
+						),
 				});
 			},
 			{ closeConfirm: false },
 		);
 	}
 
-	async function applyBump(id: string, kind: BumpKind): Promise<void> {
-		await run(`bumping ${id}`, async () => {
-			const plan = (await call('/api/bump', {
-				method: 'POST',
-				body: JSON.stringify({ id, kind, apply: true }),
-			})) as BumpPlan;
-			note(`bumped ${id} to ${plan.to}`, plan);
+	async function applyBumps(jobs: { id: string; kind: BumpKind }[]): Promise<void> {
+		const scope = jobs.length === 1 ? jobs[0]?.id : `${jobs.length} projects`;
+		await run(`bumping ${scope}`, async () => {
+			for (const job of jobs) {
+				const plan = (await call('/api/bump', {
+					method: 'POST',
+					body: JSON.stringify({ id: job.id, kind: job.kind, apply: true }),
+				})) as BumpPlan;
+				note(`bumped ${job.id} to ${plan.to}`, plan);
+			}
 			await refresh();
 		});
+	}
+
+	function toggleFleetAll(on: boolean): void {
+		const next = { ...selectedIds };
+		for (const id of fleetIds) next[id] = on;
+		selectedIds = next;
+	}
+
+	function boardActions(board: PluginBoard): { id: string; label: string }[] {
+		const seen = new Map<string, { id: string; label: string }>();
+		for (const row of board.rows) {
+			for (const act of row.actions) {
+				if (!seen.has(act.id)) seen.set(act.id, { id: act.id, label: act.label });
+			}
+		}
+		return [...seen.values()];
+	}
+
+	function boardActionIds(board: PluginBoard, action: string): string[] {
+		return board.rows.filter((row) => row.actions.some((act) => act.id === action)).map((row) => row.id);
+	}
+
+	function checkedSiteIds(board: PluginBoard, action: string): string[] {
+		return boardActionIds(board, action).filter((id) => selectedSites[id]);
+	}
+
+	function siteAllChecked(board: PluginBoard): boolean {
+		return board.rows.length > 0 && board.rows.every((row) => selectedSites[row.id]);
+	}
+
+	function toggleSiteAll(board: PluginBoard, on: boolean): void {
+		const next = { ...selectedSites };
+		for (const row of board.rows) next[row.id] = on;
+		selectedSites = next;
 	}
 
 	async function fetchOrigins(): Promise<void> {
@@ -1205,9 +1269,25 @@
 					<div class="section-head">
 						<div>
 							<h2>Fleet</h2>
-							<p class="hint">Check rows to remove them from the fleet. Removing never deletes a folder. Version bump only writes package.json — publish lives on Today.</p>
+							<p class="hint">Check rows, then bump, push, or remove. Removing never deletes a folder. Version bump only writes package.json — publish lives on Today.</p>
 						</div>
 						<div class="group-buttons">
+							<button
+								class="btn btn-write"
+								disabled={Boolean(busy) || !checkedIds.length}
+								onclick={() => startBump(checkedIds)}
+								title="Shows the next version for each checked row. Confirm in the modal. No tag, no publish."
+							>
+								Bump{checkedIds.length ? ` (${checkedIds.length})` : ''}
+							</button>
+							<button
+								class="btn btn-write"
+								disabled={Boolean(busy) || !checkedIds.length}
+								onclick={() => startPush(checkedIds)}
+								title="Shows which checked repos would push to origin. Confirm in the modal. Never --force."
+							>
+								Push{checkedIds.length ? ` (${checkedIds.length})` : ''}
+							</button>
 							<button
 								class="btn btn-write"
 								disabled={Boolean(busy) || !checkedIds.length}
@@ -1223,7 +1303,15 @@
 						<table>
 							<thead>
 								<tr>
-									<th class="tick"></th>
+									<th class="tick">
+										<input
+											type="checkbox"
+											aria-label="Select all fleet rows"
+											checked={fleetAllChecked}
+											indeterminate={fleetSomeChecked}
+											onchange={(event) => toggleFleetAll(event.currentTarget.checked)}
+										/>
+									</th>
 									<th>project</th>
 									<th>local</th>
 									<th>on npm</th>
@@ -1274,7 +1362,7 @@
 												<button
 													class="btn btn-sm btn-write"
 													disabled={Boolean(busy)}
-													onclick={() => startBump(row.id)}
+													onclick={() => startBump([row.id])}
 													title="Shows the next version. Confirm in the modal to write package.json. No tag, no publish."
 												>
 													Bump
@@ -1301,7 +1389,7 @@
 					</div>
 
 					<p class="legend">
-						Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
+						Check rows for bulk bump, push, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
 						Publish lives on Today: bump and push only if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
 					</p>
 				</section>
@@ -1365,33 +1453,35 @@
 								{#if board.plugin === 'filepress'}
 									Site names can match a fleet package and still be a different checkout.
 								{/if}
+								Check rows, then run a job on the selection.
 							</p>
 						</div>
-						{#if board.plugin === 'filepress'}
-							<div class="group-buttons">
+						<div class="group-buttons">
+							{#each boardActions(board) as act (act.id)}
 								<button
 									class="btn btn-write"
-									disabled={Boolean(busy) || filepressSyncIds.length === 0}
-									onclick={() => startPluginJob(board.plugin, 'sync', filepressSyncIds, 'Sync engine')}
-									title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
+									disabled={Boolean(busy) || checkedSiteIds(board, act.id).length === 0}
+									onclick={() => startPluginJob(board.plugin, act.id, checkedSiteIds(board, act.id), act.label)}
+									title={`Shows what ${act.label.toLowerCase()} would do for the checked sites. Confirm in the modal.`}
 								>
-									Sync engine
+									{act.label}{checkedSiteIds(board, act.id).length ? ` (${checkedSiteIds(board, act.id).length})` : ''}
 								</button>
-								<button
-									class="btn btn-write"
-									disabled={Boolean(busy) || filepressPushIds.length === 0}
-									onclick={() => startPluginJob(board.plugin, 'push', filepressPushIds, 'Push')}
-									title="Shows which FilePress sites would push to origin. Confirm in the modal. Never --force."
-								>
-									Push all
-								</button>
-							</div>
-						{/if}
+							{/each}
+						</div>
 					</div>
 					<div class="table-wrap">
 						<table>
 							<thead>
 								<tr>
+									<th class="tick">
+										<input
+											type="checkbox"
+											aria-label={`Select all ${board.title} rows`}
+											checked={siteAllChecked(board)}
+											indeterminate={board.rows.some((row) => selectedSites[row.id]) && !siteAllChecked(board)}
+											onchange={(event) => toggleSiteAll(board, event.currentTarget.checked)}
+										/>
+									</th>
 									<th>site</th>
 									{#each board.columns as col (col.id)}
 										<th>{col.label}</th>
@@ -1402,6 +1492,9 @@
 							<tbody>
 								{#each board.rows as row (row.id)}
 									<tr>
+										<td class="tick">
+											<input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedSites[row.id]} />
+										</td>
 										<td class="id">
 											{row.id}
 											{#if enrolledIds.has(row.id)}
@@ -1428,7 +1521,7 @@
 									</tr>
 								{/each}
 								{#if !board.rows.length}
-									<tr><td class="empty" colspan={board.columns.length + 2}>No rows from this plugin.</td></tr>
+									<tr><td class="empty" colspan={board.columns.length + 3}>No rows from this plugin.</td></tr>
 								{/if}
 							</tbody>
 						</table>
