@@ -26,8 +26,8 @@ localhelm push localhelm filepress --apply   # origin only; name ids; never --fo
 localhelm export                        # plan; add --apply to write localhelm.status.json
 localhelm ready                         # already unpublished-ahead
 localhelm publish ollanet               # plan: bump/push only if needed, then npm publish
-localhelm publish ollanet --apply       # waits in this terminal if npm asks to press Enter / open a browser
-localhelm publish ollanet --apply --otp 123456   # only if npm asks for an authenticator code
+localhelm publish ollanet --apply       # opens npm’s login URL in the browser if needed (LastPass / passkey)
+localhelm publish ollanet --apply --otp 123456   # only if npm asks for a numeric authenticator code
 localhelm cascade ollanet               # plan pin updates to ^npm; --apply writes + commits
 localhelm plugins                       # FilePress (and later others) if the enrolled project has localhelm.plugin.mjs
 localhelm plugin filepress              # content sites: headers, link→npm, ship

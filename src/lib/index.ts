@@ -9,7 +9,7 @@ export { clearNpmCache, npmHasVersion, npmLatest } from './npm.js';
 export { retargetSpecifier } from './pinwrite.js';
 export { fleetReady } from './ready.js';
 export type { ReadyView } from './ready.js';
-export { applyPublish, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, planPublishFromInventory, publishLaunchKind, requirePublishIds } from './publish.js';
+export { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, planPublishFromInventory, requirePublishIds } from './publish.js';
 export type { PublishRow, PublishStep } from './publish.js';
 export { loadPlugins, requirePlugin } from './plugin.js';
 export type { HelmPlugin, LoadedPlugin, PluginBoard } from './plugin.js';

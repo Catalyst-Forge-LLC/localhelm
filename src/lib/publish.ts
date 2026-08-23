@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { applyBump, planBump } from './bump.js';
 import { commitPaths, helmBumpMessage } from './commit.js';
 import { applyPush, readGit, type GitJobRow } from './git.js';
@@ -27,20 +27,29 @@ export type PublishRow = {
 	stderr?: string;
 };
 
-export type PublishRunner = (cwd: string, args: string[]) => { ok: boolean; stdout: string; stderr: string };
+export type PublishResult = { ok: boolean; stdout: string; stderr: string };
+export type PublishRunner = (cwd: string, args: string[]) => PublishResult | Promise<PublishResult>;
 
 export const NPM_PUBLISH_AUTH_HINT =
-	'From the dashboard, a “LocalHelm publish” console opens. From the CLI, this terminal is the prompt. Press Enter if npm shows a URL; KeePass is fine. LocalHelm never types a password.';
+	'LocalHelm opens the npm login URL in your browser. Finish LastPass / passkey there. An npm automation token in your user .npmrc skips this. LocalHelm never types a password.';
 
-export function publishLaunchKind(
-	env: { stdinTTY?: boolean; stdoutTTY?: boolean; platform?: NodeJS.Platform } = {},
-): 'inherit' | 'windows-console' | 'need-tty' {
-	const stdinTTY = env.stdinTTY ?? Boolean(process.stdin.isTTY);
-	const stdoutTTY = env.stdoutTTY ?? Boolean(process.stdout.isTTY);
-	const platform = env.platform ?? process.platform;
-	if (stdinTTY && stdoutTTY) return 'inherit';
-	if (platform === 'win32') return 'windows-console';
-	return 'need-tty';
+const NPM_AUTH_URL = /https:\/\/www\.npmjs\.com\/auth\/cli\/[0-9a-f-]+/i;
+
+export function extractNpmAuthUrl(text: string): string | null {
+	const match = NPM_AUTH_URL.exec(text);
+	return match?.[0] ?? null;
+}
+
+export function openInBrowser(url: string): void {
+	if (process.platform === 'win32') {
+		spawn('cmd.exe', ['/c', 'start', '', url], { detached: true, stdio: 'ignore' }).unref();
+		return;
+	}
+	if (process.platform === 'darwin') {
+		spawn('open', [url], { detached: true, stdio: 'ignore' }).unref();
+		return;
+	}
+	spawn('xdg-open', [url], { detached: true, stdio: 'ignore' }).unref();
 }
 
 export function npmWhoami(): string | null {
@@ -62,50 +71,58 @@ export function requirePublishIds(ids: string[]): string[] {
 	return named;
 }
 
-export function defaultPublishRunner(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr: string } {
+export function defaultPublishRunner(cwd: string, args: string[]): Promise<PublishResult> {
 	if (args.includes('--force') || args.includes('-f')) {
-		return { ok: false, stdout: '', stderr: 'localhelm never passes --force to npm publish' };
+		return Promise.resolve({ ok: false, stdout: '', stderr: 'localhelm never passes --force to npm publish' });
 	}
-	const launch = publishLaunchKind();
-	if (launch === 'need-tty') {
-		return {
-			ok: false,
-			stdout: '',
-			stderr: 'npm publish needs a real terminal. From a checkout run: localhelm publish <id> --apply',
-		};
-	}
-
 	const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-	if (launch === 'inherit') {
-		const result = spawnSync(npm, args, {
+	return new Promise((resolve) => {
+		const child = spawn(npm, args, {
 			cwd,
-			stdio: 'inherit',
-			windowsHide: false,
-			timeout: 600_000,
+			stdio: ['pipe', 'pipe', 'pipe'],
+			windowsHide: true,
 		});
-		if (result.error) return { ok: false, stdout: '', stderr: result.error.message };
-		if (result.status !== 0) {
-			return { ok: false, stdout: '', stderr: `npm publish exited ${result.status}` };
-		}
-		return { ok: true, stdout: '', stderr: '' };
-	}
+		let stdout = '';
+		let stderr = '';
+		let opened = false;
+		const timer = setTimeout(() => {
+			child.kill();
+			resolve({ ok: false, stdout, stderr: stderr || 'npm publish timed out waiting for login' });
+		}, 600_000);
 
-	// Vite / dashboard has no usable TTY. Open a dedicated console and wait.
-	const line = args.map((a) => (/\s/.test(a) ? `"${a}"` : a)).join(' ');
-	const result = spawnSync(
-		'cmd.exe',
-		['/c', 'start', '/wait', '/d', cwd, 'LocalHelm publish', 'cmd.exe', '/c', `npm ${line} & if errorlevel 1 pause`],
-		{ windowsHide: false, timeout: 600_000 },
-	);
-	if (result.error) return { ok: false, stdout: '', stderr: result.error.message };
-	if (result.status !== 0) {
-		return {
-			ok: false,
-			stdout: '',
-			stderr: `npm publish exited ${result.status}. Check the “LocalHelm publish” console.`,
+		const onChunk = (chunk: Buffer | string, sink: 'stdout' | 'stderr'): void => {
+			const text = String(chunk);
+			if (sink === 'stdout') stdout += text;
+			else stderr += text;
+			try {
+				process.stdout.write(text);
+			} catch {
+				/* parent may have no TTY */
+			}
+			if (opened) return;
+			const url = extractNpmAuthUrl(stdout + stderr);
+			if (!url) return;
+			opened = true;
+			openInBrowser(url);
+			try {
+				child.stdin.write('\n');
+			} catch {
+				/* npm may have closed stdin */
+			}
 		};
-	}
-	return { ok: true, stdout: '', stderr: '' };
+
+		child.stdout.on('data', (chunk: Buffer) => onChunk(chunk, 'stdout'));
+		child.stderr.on('data', (chunk: Buffer) => onChunk(chunk, 'stderr'));
+		child.on('error', (err) => {
+			clearTimeout(timer);
+			resolve({ ok: false, stdout, stderr: err.message });
+		});
+		child.on('close', (code) => {
+			clearTimeout(timer);
+			if (code === 0) resolve({ ok: true, stdout, stderr });
+			else resolve({ ok: false, stdout, stderr: stderr.trim() || `npm publish exited ${code}` });
+		});
+	});
 }
 
 function summarize(steps: PublishStep[]): string {
@@ -244,7 +261,7 @@ export async function applyPublish(
 			const args = ['publish', '--access', 'public'];
 			if (opts.otp) args.push('--otp', opts.otp);
 			const run = opts.run ?? defaultPublishRunner;
-			const result = run(abs, args);
+			const result = await Promise.resolve(run(abs, args));
 			if (!result.ok) {
 				return {
 					...row,

@@ -119,7 +119,7 @@
 	let publishOtp = $state('');
 	let npmUser = $state<string | null>(null);
 	let publishAuthHint = $state(
-		'If npm prints a login URL, switch to the LocalHelm terminal, press Enter, finish the browser login (KeePass is fine). LocalHelm never types a password.',
+		'LocalHelm opens the npm login URL in your browser. Finish LastPass / passkey there. An npm automation token in your user .npmrc skips this.',
 	);
 	let confirmOpen = $state(false);
 	let confirmTitle = $state('');
@@ -985,7 +985,7 @@
 					{#if npmUser}
 						npm is logged in as <code>{npmUser}</code>.
 					{:else}
-						npm login is not visible yet — apply opens a <code>LocalHelm publish</code> console so you can press Enter and use KeePass.
+						npm login is not visible yet — apply opens the npm auth page in your browser (LastPass / passkey).
 					{/if}
 					{publishAuthHint}
 				</p>

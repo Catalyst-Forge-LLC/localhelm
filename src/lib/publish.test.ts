@@ -6,7 +6,7 @@ import { describe, it } from 'node:test';
 import { helmBumpMessage } from './commit.js';
 import { runGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { applyPublish, NPM_PUBLISH_AUTH_HINT, planPublishFromInventory, publishLaunchKind, requirePublishIds } from './publish.js';
+import { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, planPublishFromInventory, requirePublishIds } from './publish.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
 
 function gitRepo(dir: string): void {
@@ -46,12 +46,13 @@ describe('publish plan', () => {
 		assert.deepEqual(requirePublishIds([' ollanet ']), ['ollanet']);
 	});
 
-	it('tells the operator where the browser login happens', () => {
-		assert.match(NPM_PUBLISH_AUTH_HINT, /LocalHelm publish/i);
-		assert.match(NPM_PUBLISH_AUTH_HINT, /KeePass/i);
-		assert.equal(publishLaunchKind({ stdinTTY: true, stdoutTTY: true, platform: 'win32' }), 'inherit');
-		assert.equal(publishLaunchKind({ stdinTTY: false, stdoutTTY: false, platform: 'win32' }), 'windows-console');
-		assert.equal(publishLaunchKind({ stdinTTY: false, stdoutTTY: false, platform: 'linux' }), 'need-tty');
+	it('opens the npm CLI auth URL instead of waiting for Enter', () => {
+		assert.match(NPM_PUBLISH_AUTH_HINT, /LastPass/i);
+		assert.equal(
+			extractNpmAuthUrl('Authenticate at:\nhttps://www.npmjs.com/auth/cli/6547e76d-1a34-40be-92bd-a25953b08062\nPress ENTER'),
+			'https://www.npmjs.com/auth/cli/6547e76d-1a34-40be-92bd-a25953b08062',
+		);
+		assert.equal(extractNpmAuthUrl('no url here'), null);
 	});
 
 	it('names the bump commit the house way', () => {

@@ -78,7 +78,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - M3: `ready`, `cascade` (plan/apply `^V`, skip `link:`/`file:`, commit on apply)
 - Plugin host: `localhelm.plugin.mjs` on an enrolled project. FilePress plugin lives in the filepress checkout and calls the sibling library (headers, link→npm, ship). You can run those jobs from LocalHelm instead of `pnpm siblings`.
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
-- `publish`: plan then named-id `--apply`. Bump+commit+push only if needed, then `npm publish` with inherited TTY so browser-login “press Enter” works in the CLI or serve terminal. KeePass stays a human click. OTP field is only for a numeric authenticator code.
+- `publish`: plan then named-id `--apply`. Detects npm’s `auth/cli` URL, opens the browser, and sends Enter. LastPass / passkey stay a human click. An npm automation token in the user `.npmrc` skips the browser. OTP is only for a numeric authenticator if npm asks.
 - Dashboard confirms use a `<dialog>` modal (not `window.confirm`). FilePress board has Plan engine sync / Sync N for all sites. Header Plan push all plans every enrolled origin.
 
 ### In Progress
