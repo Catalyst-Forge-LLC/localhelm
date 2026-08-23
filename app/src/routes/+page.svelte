@@ -12,6 +12,19 @@
 		note?: string;
 	};
 	type ReadyRow = { id: string; localVersion: string | null; npmLatest?: string; reason?: string };
+	type PublishStep =
+		| { kind: 'bump'; from: string; to: string; bumpKind: BumpKind }
+		| { kind: 'commit'; message: string }
+		| { kind: 'push'; branch: string; origin: string }
+		| { kind: 'publish'; name: string; version: string };
+	type PublishRow = {
+		id: string;
+		action: string;
+		reason?: string;
+		version: string | null;
+		npm?: string;
+		steps: PublishStep[];
+	};
 	type CascadeTarget = { id: string; npm: string; latest: string; behind: number; linked: number };
 	type PluginBoard = {
 		plugin: string;
@@ -101,6 +114,8 @@
 	let plannedCascade = $state<string | null>(null);
 	let pluginBoards = $state<PluginBoard[]>([]);
 	let plannedPlugin = $state<string | null>(null);
+	let plannedPublish = $state<Record<string, PublishRow>>({});
+	let publishOtp = $state('');
 
 	let entries = $state<LogEntry[]>([]);
 	let busy = $state('');
@@ -140,6 +155,9 @@
 				}),
 			),
 	);
+	const shipRows = $derived(
+		(inventory?.projects ?? []).filter((row) => !row.private && !row.missing && Boolean(row.npm.name)),
+	);
 	const cascadeTargets = $derived.by((): CascadeTarget[] => {
 		const projects = inventory?.projects ?? [];
 		return projects
@@ -167,6 +185,7 @@
 		plannedEnroll = null;
 		plannedCascade = null;
 		plannedPlugin = null;
+		plannedPublish = {};
 	}
 
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
@@ -360,6 +379,51 @@
 		});
 	}
 
+	function publishConfirmCopy(row: PublishRow): string {
+		let n = 0;
+		const lines = row.steps.map((step) => {
+			if (step.kind === 'commit') return `   commit: ${step.message}`;
+			n += 1;
+			if (step.kind === 'bump') return `${n}. bump ${step.from} → ${step.to} (${step.bumpKind}) and commit`;
+			if (step.kind === 'push') return `${n}. git push origin ${step.branch} → ${step.origin}`;
+			return `${n}. npm publish ${step.name}@${step.version}`;
+		});
+		return `npm publish (public registry)\n\n${row.id}  ${row.npm ?? ''}@${row.version ?? '?'}\n${lines.join('\n')}\n\nThis cannot be undone. Publish?`;
+	}
+
+	async function publish(id: string, apply: boolean): Promise<void> {
+		if (apply) {
+			const planned = plannedPublish[id];
+			if (!planned || planned.action !== 'publish') return;
+			if (!window.confirm(publishConfirmCopy(planned))) return;
+		}
+		await run(apply ? `publishing ${id}` : `planning publish ${id}`, async () => {
+			const data = (await call('/api/publish', {
+				method: 'POST',
+				body: JSON.stringify({
+					apply,
+					ids: [id],
+					kind: bumpKind[id] ?? 'patch',
+					otp: apply && publishOtp.trim() ? publishOtp.trim() : undefined,
+				}),
+			})) as { rows: PublishRow[] };
+			const row = data.rows[0];
+			if (apply) {
+				note(`publish --apply ${id} — ${row?.reason ?? 'done'}`, { rows: data.rows });
+				publishOtp = '';
+				await refresh();
+				return;
+			}
+			if (!row || row.action !== 'publish') {
+				error = `${id}: ${row?.reason ?? 'cannot publish'}`;
+				note(`publish plan ${id} — skipped`, data);
+				return;
+			}
+			plannedPublish = { ...plannedPublish, [id]: row };
+			note(`publish plan ${id} — ${row.reason}, nothing written`, data);
+		});
+	}
+
 	async function pluginJob(plugin: string, action: string, ids: string[], apply: boolean): Promise<void> {
 		const key = `${plugin}:${action}:${[...ids].sort().join(',')}`;
 		await run(apply ? `${plugin} ${action}` : `planning ${plugin} ${action}`, async () => {
@@ -459,7 +523,7 @@
 			out.push({
 				text: row.npm.latest ? `unpublished ${row.localVersion} (npm ${row.npm.latest})` : `never published ${row.localVersion}`,
 				tone: 'ship',
-				title: 'Local version is ahead of npm. You publish it — LocalHelm never does.',
+				title: 'Local version is ahead of npm. Plan publish to push (if needed) and npm publish.',
 			});
 		}
 		if (row.git.dirty) out.push({ text: `dirty${dirtDetail(row) ? ` — ${dirtDetail(row)}` : ''}`, tone: 'warn' });
@@ -719,7 +783,7 @@
 
 			<p class="legend">
 				<strong>Plan</strong> buttons only print what would happen. <strong>Write</strong> buttons change files on disk, one job at a time.
-				LocalHelm never runs <code>npm publish</code>. Push is origin only, never <code>--force</code>, and never the IngotVault backup remote.
+				Publish is a named plan: bump and push only if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
 			</p>
 
 			{#each pluginBoards as board (board.plugin)}
@@ -785,17 +849,49 @@
 
 		<aside>
 			<section class="panel">
-				<h2>Ready to publish</h2>
-				<p class="hint">You publish these. LocalHelm never runs npm publish.</p>
-				{#if readyRows.length === 0}
-					<p class="dim small">None — need local ahead of npm, public, and a clean git tree.</p>
+				<h2>Ship</h2>
+				<p class="hint">
+					Plan first. Apply bumps and pushes only when needed, then <code>npm publish</code>.
+					{#if readyRows.length}
+						{readyRows.length} already unpublished-ahead.
+					{/if}
+				</p>
+				<label for="publish-otp">npm OTP (if your account requires it)</label>
+				<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
+				{#if shipRows.length === 0}
+					<p class="dim small">No public packages enrolled.</p>
 				{:else}
 					<ul class="candidates">
-						{#each readyRows as row (row.id)}
+						{#each shipRows as row (row.id)}
 							<li>
-								<div>
+								<div class="grow">
 									<div class="id">{row.id}</div>
-									<div class="dim small">{row.localVersion} local · npm {row.npmLatest ?? 'none'}</div>
+									<div class="dim small">
+										{row.npm.name} {row.localVersion ?? '?'} local · npm {row.npm.latest ?? row.npm.status}
+										{row.unpublishedAhead ? ' · already bumped' : ' · will bump'}
+									</div>
+									<div class="group-buttons" style="margin-top: 0.35rem">
+										<select aria-label={`publish bump kind for ${row.id}`} bind:value={bumpKind[row.id]} disabled={row.unpublishedAhead}>
+											<option value="patch">patch</option>
+											<option value="minor">minor</option>
+											<option value="major">major</option>
+										</select>
+										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => publish(row.id, false)}>
+											Plan publish
+										</button>
+										<button
+											class="btn btn-sm btn-write"
+											disabled={Boolean(busy) || plannedPublish[row.id]?.action !== 'publish'}
+											onclick={() => publish(row.id, true)}
+											title={plannedPublish[row.id]?.action === 'publish'
+												? plannedPublish[row.id]?.reason
+												: 'Run Plan publish first. You will confirm the registry version.'}
+										>
+											{plannedPublish[row.id]?.action === 'publish'
+												? `Publish ${plannedPublish[row.id]?.version}`
+												: 'Publish'}
+										</button>
+									</div>
 								</div>
 							</li>
 						{/each}

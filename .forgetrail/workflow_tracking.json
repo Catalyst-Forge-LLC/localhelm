@@ -72,6 +72,10 @@
         {
           "timestamp": "2026-08-21T17:28:00Z",
           "text": "Selected origin push (D18): named ids on apply, dashboard confirm lists remotes, never --force."
+        },
+        {
+          "timestamp": "2026-08-23T18:00:00Z",
+          "text": "Named publish (D19): bump+commit if local is on npm, push if origin is behind, then npm publish. Never --force."
         }
       ]
     },
@@ -335,6 +339,16 @@
       "rationale": "Operator 2026-08-21: opening each folder to push is the remaining pain. Genesis 4.6 / 4.8 already specified named push + harsh confirm. Lifts D13.",
       "alternatives_considered": ["Fleet-wide push --apply", "force-with-lease", "push backup remotes", "keep push out"],
       "status": "active"
+    },
+    {
+      "id": "d19",
+      "timestamp": "2026-08-23T18:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 5,
+      "decision": "Named publish is in. Plan shows bump+commit (only if local is already on npm), push (only if origin is behind or a bump will make it so), then npm publish --access public. Apply requires named project ids and a dashboard confirm listing the registry version. Never --force. OTP is optional --otp / dashboard field. Agents still do not apply publish unless the operator asked.",
+      "rationale": "Operator 2026-08-23: publishing by hand (bump, commit, push, npm publish) had become a chore. Lifts D4's 'future option'.",
+      "alternatives_considered": ["Keep ready-only", "Always bump", "pnpm publish", "fleet-wide apply"],
+      "status": "active"
     }
   ],
   "gotchas": [
@@ -422,6 +436,16 @@
         "Selected origin push: plan, named ids, dashboard confirm, never --force"
       ],
       "leftOff": "Push landed. Operator can localhelm push <id>... --apply or Plan push / confirm on the dashboard. Publish still not in the tool.",
+      "contextLimitHit": false
+    },
+    {
+      "session": 5,
+      "date": "2026-08-23",
+      "phasesWorked": ["2-scaffolding"],
+      "accomplished": [
+        "Named publish: plan then apply bump/push only if needed, then npm publish"
+      ],
+      "leftOff": "Publish landed. Operator can localhelm publish <id> --apply or use the Ship panel. Restart serve to pick up /api/publish.",
       "contextLimitHit": false
     }
   ]

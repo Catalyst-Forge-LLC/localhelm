@@ -146,7 +146,7 @@ Skipped. Inventory and plans are read from disk, git, and npm. No LLM chooses ve
 
 **D3.** License **Apache-2.0**. WHY: confirmed 2026-08-20. Rejected: MIT.
 
-**D4.** No publish action in v1 (eligible badge only). Operator publishes. Agents never run `npm publish` / `pnpm publish`. A publish action is a **future option**, never the first ship. WHY: confirmed 2026-08-20.
+**D4.** No publish action in v1 (eligible badge only). Operator publishes. Agents never run `npm publish` / `pnpm publish`. A publish action is a **future option**, never the first ship. WHY: confirmed 2026-08-20. **Amended 2026-08-23:** operator asked for plan/apply publish. Apply requires named ids. Pipeline: bump+commit if local is already on npm, push if origin is behind, then `npm publish --access public`. Never `--force`. Agents still do not publish unless the operator asked to apply a named package.
 
 **D5.** CLI `localhelm`, never `helm`. Name reserved on npm as `0.0.0`.
 
@@ -200,7 +200,7 @@ No open product questions block scaffolding.
 - Not a monorepo merger. Not a scan-everything git TUI that auto-enrolls.
 - Not IngotVault, LocalBerth, or the FilePress sibling dashboard.
 - Not a remote fleet manager. No SSH, no hosted accounts, no telemetry.
-- No publish action, no force-push, no rewriting unrelated dirty files. Selected `origin` push is in (2026-08-21); never the backup remote.
+- No force-push, no rewriting unrelated dirty files. Selected `origin` push is in (2026-08-21); never the backup remote. Named `publish` landed 2026-08-23 (bump/push only if needed).
 - No starting/stopping other apps' dev servers.
 - No Catalyst Forge (or other shop) shelf file in this package.
 - No "create a new sibling product" scaffolder.
@@ -214,7 +214,7 @@ No open product questions block scaffolding.
 2. **M2 — Safe writes + dashboard:** `bump`, `fetch` / `pull`, export file write, SvelteKit `serve` with scan/enroll checkboxes and the same inventory.
 3. **M3 — Cascade:** plan/apply pin + lockfile at `^V`, `link:` vs registry explicit, default commit on apply, `ready`.
 4. **M4 — Compose + agents:** optional LocalBerth lease, IngotVault column, FilePress siblings deep-link (still separate), MCP for status/deps/plans.
-5. **M5+ — Later:** optional publish action (never the first ship); FilePress `site/` + `/docs` on `localhelm.dev` if not already started; tag on bump. Selected `origin` push landed 2026-08-21.
+5. **M5+ — Later:** FilePress `site/` + `/docs` on `localhelm.dev` if not already started; tag on bump. Selected `origin` push landed 2026-08-21. Named `publish` landed 2026-08-23.
 
 ---
 

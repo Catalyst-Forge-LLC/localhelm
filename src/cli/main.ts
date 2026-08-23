@@ -6,6 +6,7 @@ import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { applyExport, planExport } from '../lib/export.js';
 import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
+import { applyPublish, planPublish, requirePublishIds, type PublishRow } from '../lib/publish.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
@@ -30,6 +31,8 @@ Usage:
   localhelm push <id>... --apply         # origin only; never --force
   localhelm export [file] [--apply]
   localhelm ready [--json]
+  localhelm publish [id...] [--kind patch|minor|major]
+  localhelm publish <id>... --apply [--kind K] [--otp CODE]
   localhelm cascade <id> [--to V] [--apply] [--no-commit]
   localhelm plugins
   localhelm plugin <id> [action] [name...] [--apply] [--no-commit]
@@ -100,6 +103,12 @@ function formatPlan(plan: EnrollPlan, kind: 'enroll' | 'unenroll'): string {
 function formatGitRows(rows: GitJobRow[]): string {
 	if (rows.length === 0) return 'No enrolled projects.\n';
 	const lines = ['id\taction\treason', ...rows.map((row) => [row.id, row.action, row.reason ?? ''].join('\t'))];
+	return `${lines.join('\n')}\n`;
+}
+
+function formatPublishRows(rows: PublishRow[]): string {
+	if (rows.length === 0) return 'No enrolled projects.\n';
+	const lines = ['id\taction\tversion\treason', ...rows.map((row) => [row.id, row.action, row.version ?? '', row.reason ?? ''].join('\t'))];
 	return `${lines.join('\n')}\n`;
 }
 
@@ -404,15 +413,66 @@ async function main(): Promise<void> {
 		if (json) printJson(view);
 		else {
 			if (view.eligible.length === 0) {
-				process.stdout.write('No projects are ready to publish. LocalHelm never publishes.\n');
+				process.stdout.write('No projects are already unpublished-ahead. Use localhelm publish to plan a bump+push+publish.\n');
 			} else {
 				const lines = [
 					'id\tlocal\tnpm\tnote',
-					...view.eligible.map((row) => `${row.id}\t${row.localVersion ?? ''}\t${row.npmLatest ?? 'none'}\tyou publish this`),
+					...view.eligible.map((row) => `${row.id}\t${row.localVersion ?? ''}\t${row.npmLatest ?? 'none'}\tready — plan publish`),
 					'',
-					'LocalHelm never runs npm publish.',
+					'Plan a ship with localhelm publish <id>. --apply bumps/pushes only if needed, then npm publish.',
 				];
 				process.stdout.write(`${lines.join('\n')}\n`);
+			}
+		}
+		return;
+	}
+
+	if (cmd === 'publish') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		const kindRaw = takeOpt(argv, '--kind') ?? 'patch';
+		const otp = takeOpt(argv, '--otp');
+		if (kindRaw !== 'patch' && kindRaw !== 'minor' && kindRaw !== 'major') {
+			fail('usage: localhelm publish [id...] [--kind patch|minor|major] [--apply] [--otp CODE]');
+		}
+		if (argv.some((a) => a === '--force' || a === '-f' || a === '--force-with-lease')) {
+			fail('localhelm never force-publishes or force-pushes');
+		}
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		const loaded = await requireManifest();
+		let ids: string[] | undefined;
+		if (apply) {
+			try {
+				ids = requirePublishIds(argv);
+			} catch (err) {
+				fail(err instanceof Error ? err.message : String(err));
+			}
+		} else if (argv.length) {
+			ids = argv;
+		}
+		const planned = await planPublish(loaded, ids, kindRaw);
+		let rows = planned;
+		if (apply) {
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				rows = [];
+				for (const row of planned) {
+					const next = await applyPublish(loaded, row, { otp });
+					rows.push(next);
+					if (row.action === 'publish' && !next.reason?.startsWith('published ')) break;
+				}
+			} finally {
+				await lock.release();
+			}
+		}
+		if (json) printJson({ rows, writes: apply });
+		else {
+			process.stdout.write(formatPublishRows(rows));
+			if (!apply) {
+				process.stdout.write(
+					'Nothing written. Re-run with the same id(s) and --apply to bump (if needed), push (if needed), and npm publish. Never --force.\n',
+				);
 			}
 		}
 		return;

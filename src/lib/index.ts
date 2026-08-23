@@ -4,11 +4,13 @@ export { findManifest, requireManifest, validateManifest, writeManifest } from '
 export type { LoadedManifest } from './manifest.js';
 export { applyCascade, planCascade } from './cascade.js';
 export type { CascadePlan, CascadeRow } from './cascade.js';
-export { helmRetargetMessage } from './commit.js';
+export { helmBumpMessage, helmRetargetMessage } from './commit.js';
 export { clearNpmCache, npmHasVersion, npmLatest } from './npm.js';
 export { retargetSpecifier } from './pinwrite.js';
 export { fleetReady } from './ready.js';
 export type { ReadyView } from './ready.js';
+export { applyPublish, planPublish, planPublishFromInventory, requirePublishIds } from './publish.js';
+export type { PublishRow, PublishStep } from './publish.js';
 export { loadPlugins, requirePlugin } from './plugin.js';
 export type { HelmPlugin, LoadedPlugin, PluginBoard } from './plugin.js';
 export { applyBump, planBump } from './bump.js';

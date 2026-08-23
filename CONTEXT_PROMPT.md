@@ -42,8 +42,8 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - DECIDED Phase 1: Enroll is scan then confirm. WHY: fleet is chosen, not auto-enrolled.
 - DECIDED Phase 2: `.localhelmignore` (gitignore syntax) plus `~/.localhelm/ignore`. WHY: operator asked; scan must skip sandbox/noise folders. Hard skips still: `node_modules`, dot-dirs, `__*`.
 - DECIDED Phase 1: Apache-2.0. WHY: operator 2026-08-20.
-- DECIDED Phase 1: No publish in v1. Publish is a future option. WHY: operator publishes.
 - DECIDED Phase 2: `push` is origin only, named ids on apply, dashboard confirm lists remotes. Never `--force`, never the backup remote. WHY: operator asked 2026-08-21; D13 later-milestone lifted.
+- DECIDED Phase 2: `publish` is a named plan. Bump+commit if local is already on npm; push if origin is behind; then `npm publish --access public`. Named ids on apply. Never `--force`. WHY: operator asked 2026-08-23; publishing by hand had become a chore.
 - DECIDED Phase 1: Cascade `^V`; commit on apply default on. WHY: house pins; operator said yes commit.
 - DECIDED Phase 1: CLI + SvelteKit in `app/`; FilePress `site/` + `/docs`. WHY: operator 2026-08-20.
 - DECIDED Phase 1: JSON in M1; MCP in M4.
@@ -55,7 +55,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - One npm request per distinct package name per run; cache in-process.
 - `link:` / `file:` are never "on npm latest."
 - Windows paths: store posix-ish relatives; resolve with `path`.
-- Agents never run `npm publish` / `pnpm publish`.
+- Agents never run `npm publish` / `pnpm publish` / `localhelm publish --apply` unless the operator asked to apply a named package.
 
 ## Design Philosophy
 
@@ -67,7 +67,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Baking `projects.js` or Catalyst Forge names into this package.
 - Auto-enrolling a disk walk.
 - Count-only failures with no stderr/reason.
-- Publishing or force-pushing from the tool. Named `push` to origin is allowed after a plan.
+- Force-pushing from the tool. Named `push` / `publish` are allowed after a plan.
 
 ## Current Feature State
 
@@ -78,6 +78,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - M3: `ready`, `cascade` (plan/apply `^V`, skip `link:`/`file:`, commit on apply)
 - Plugin host: `localhelm.plugin.mjs` on an enrolled project. FilePress plugin lives in the filepress checkout and calls the sibling library (headers, link→npm, ship). You can run those jobs from LocalHelm instead of `pnpm siblings`.
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
+- `publish`: plan then named-id `--apply`. Bump+commit+push only if needed, then `npm publish`. Dashboard Ship panel + OTP field.
 
 ### In Progress
 
@@ -105,3 +106,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 4 — 2026-08-21
 
 - Selected `origin` push. CLI: `localhelm push <id>... --apply`. Dashboard: Plan push, then confirm listing remotes. Never `--force`.
+
+### Session 5 — 2026-08-23
+
+- Plan/apply `publish`: bump and push only when needed, then `npm publish`. Named ids, confirm lists the registry version. Never `--force`.

@@ -6,6 +6,10 @@ export function helmRetargetMessage(pkg: string, version: string): string {
 	return `Helm: retarget ${pkg} to ${version}.`;
 }
 
+export function helmBumpMessage(pkg: string, version: string): string {
+	return `Helm: bump ${pkg} to ${version}.`;
+}
+
 export function commitPaths(
 	repoRoot: string,
 	files: string[],
