@@ -1068,9 +1068,7 @@
 				<p class="sub">
 					{#if inventory}
 						Fleet <code>{inventory.manifestPath}</code>
-					{:else if !statusReady}
-						Reading the fleet…
-					{:else}
+					{:else if statusReady}
 						No fleet yet — open the Fleet tab, scan a folder, then enroll.
 					{/if}
 					{#if port}
@@ -1217,15 +1215,15 @@
 					<div class="section-head">
 						<div>
 							<h2>Needs you</h2>
+							{#if statusReady}
 							<p class="hint">
-								{#if !statusReady}
-									Reading status…
-								{:else if readyRows.length}
+								{#if readyRows.length}
 									{readyRows.length} unpublished-ahead. Gold button is the matching write.
 								{:else}
 									Gold button is the matching write. Cut version is the extra.
 								{/if}
 							</p>
+							{/if}
 						</div>
 						{#if unpublishedPublishIds.length > 0}
 							<div class="group-buttons">
@@ -1242,11 +1240,9 @@
 						{/if}
 					</div>
 
-					{#if !statusReady}
-						<p class="dim small">Waiting for status before we call the fleet quiet.</p>
-					{:else if attentionRows.length === 0 && cascadeOnlyRows.length === 0}
+					{#if statusReady && attentionRows.length === 0 && cascadeOnlyRows.length === 0}
 						<p class="quiet-banner">All quiet on the fleet. Open Fleet for the full table, Sites for FilePress, or Ports for leases.</p>
-					{:else}
+					{:else if statusReady}
 						<ul class="need-list">
 							{#each attentionRows as row (row.id)}
 								{@const cascadeTarget = cascadeFor(row.id)}
