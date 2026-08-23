@@ -65,7 +65,7 @@ function isPlugin(value: unknown): value is HelmPlugin {
 export async function loadPluginFile(file: string): Promise<HelmPlugin> {
 	const stamp = (await stat(file)).mtimeMs;
 	const href = `${pathToFileURL(file).href}?t=${stamp}`;
-	const mod = (await import(href)) as { default?: unknown };
+	const mod = (await import(/* @vite-ignore */ href)) as { default?: unknown };
 	const candidate = mod.default ?? mod;
 	if (!isPlugin(candidate)) {
 		throw new Error(`${file} does not export a LocalHelm plugin (id, label, board)`);
