@@ -874,6 +874,84 @@
 		});
 	}
 
+	async function startLand(siteId: string): Promise<void> {
+		await run(
+			`planning land ${siteId}`,
+			async () => {
+				const data = (await call('/api/land', {
+					method: 'POST',
+					body: JSON.stringify({ apply: false, siteId }),
+				})) as {
+					plan: {
+						siteId: string;
+						companionId: string | null;
+						engineId: string;
+						steps: { kind: string; label: string }[];
+						needsPublish: boolean;
+						note: string;
+					};
+					npmUser?: string | null;
+					authHint?: string;
+				};
+				if (data.authHint) publishAuthHint = data.authHint;
+				if (data.npmUser) {
+					npmUser = data.npmUser;
+					persist('localhelm.npmUser', data.npmUser);
+				}
+				const steps = data.plan.steps;
+				note(`land plan ${siteId} — ${steps.length} step(s), nothing written`, data);
+				const companion = data.plan.companionId ? ` Companion package: ${data.plan.companionId}.` : ' No matching fleet package.';
+				offerConfirm({
+					title: steps.length ? `Land ${siteId}?` : `Nothing to land for ${siteId}`,
+					hint: steps.length
+						? `${data.plan.note}${companion}${data.plan.needsPublish ? ` ${publishAuthHint}` : ''}`
+						: data.plan.note,
+					items: steps.length
+						? steps.map((step, i) => `${i + 1}. ${step.label}`)
+						: ['Already current.'],
+					confirmLabel: steps.length ? `Land ${siteId}` : 'Land',
+					variant: data.plan.needsPublish ? 'danger' : 'write',
+					canApply: steps.length > 0,
+					showOtp: data.plan.needsPublish,
+					run: () => void applyLand(siteId),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyLand(siteId: string): Promise<void> {
+		await run(`landing ${siteId}`, async () => {
+			const data = (await call('/api/land', {
+				method: 'POST',
+				body: JSON.stringify({
+					apply: true,
+					siteId,
+					otp: publishOtp.trim() ? publishOtp.trim() : undefined,
+				}),
+			})) as {
+				result: {
+					ok: boolean;
+					stoppedAt?: string;
+					steps: { ok: boolean; label: string; reason: string }[];
+				};
+			};
+			const ok = data.result.steps.filter((s) => s.ok).length;
+			const failed = data.result.steps.filter((s) => !s.ok);
+			note(
+				data.result.ok
+					? `land --apply ${siteId} — ${ok} step(s) ok`
+					: `land --apply ${siteId} — stopped: ${data.result.stoppedAt ?? failed[0]?.label ?? 'failed'}`,
+				data,
+			);
+			publishOtp = '';
+			await refresh();
+			if (!data.result.ok) {
+				error = failed.map((s) => `${s.label}: ${s.reason}`).join(' · ') || data.result.stoppedAt || 'land failed';
+			}
+		});
+	}
+
 	async function startCascade(id: string): Promise<void> {
 		await run(
 			`planning cascade ${id}`,
@@ -1390,11 +1468,24 @@
 							<ul class="need-list compact">
 								{#each sitesNeedingYou.slice(0, 8) as site (site.id)}
 									<li class="need-card">
-										<div class="id">{site.id}</div>
-										{#if enrolledIds.has(site.id)}
-											<div class="dim small">FilePress site — not the fleet package</div>
-										{/if}
-										<div class="dim small">{siteNeedReason(site.cells)}</div>
+										<div class="need-main">
+											<div class="id">{site.id}</div>
+											{#if enrolledIds.has(site.id)}
+												<div class="dim small">FilePress site — not the fleet package</div>
+											{/if}
+											<div class="dim small">{siteNeedReason(site.cells)}</div>
+										</div>
+										<div class="need-actions">
+											<button
+												class="btn btn-sm btn-write"
+												disabled={Boolean(busy)}
+												onclick={() => startLand(site.id)}
+												title="Plans engine package, matching fleet package, then Sync → Push → Ship for this site. Confirm in the modal."
+											>
+												<Icon icon="lucide:plane-landing" />
+												Land
+											</button>
+										</div>
 									</li>
 								{/each}
 							</ul>
@@ -1592,7 +1683,7 @@
 							<p class="hint">
 								{board.note}
 								{#if board.plugin === 'filepress'}
-									Site names can match a fleet package and still be a different checkout.
+									Site names can match a fleet package and still be a different checkout. <strong>Land</strong> does needed engine/package writes, then Sync → Push → Ship for the site.
 								{/if}
 								Check rows, then run a job on the selection.
 							</p>
@@ -1647,9 +1738,20 @@
 										{/each}
 										<td>
 											<div class="bump">
-												{#each row.actions as act (act.id)}
+												{#if board.plugin === 'filepress'}
 													<button
 														class="btn btn-sm btn-write"
+														disabled={Boolean(busy)}
+														onclick={() => startLand(row.id)}
+														title="Plans engine package, matching fleet package, then Sync → Push → Ship for this site. Confirm in the modal."
+													>
+														<Icon icon="lucide:plane-landing" />
+														Land
+													</button>
+												{/if}
+												{#each row.actions as act (act.id)}
+													<button
+														class="btn btn-sm"
 														disabled={Boolean(busy)}
 														onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
 														title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}

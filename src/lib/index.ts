@@ -13,6 +13,17 @@ export { fleetReady } from './ready.js';
 export type { ReadyView } from './ready.js';
 export { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, planPublishFromInventory, requirePublishIds } from './publish.js';
 export type { PublishRow, PublishStep } from './publish.js';
+export {
+	applyLand,
+	companionIdForSite,
+	LAND_ENGINE_ID,
+	LAND_PLUGIN_ID,
+	landPluginApplyOk,
+	landWouldPublish,
+	planLand,
+	requireLandSiteId,
+} from './land.js';
+export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from './land.js';
 export { asPluginBoards, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
 export { pluginPlanWriteIds } from './pluginPlan.js';
 export type { HelmPlugin, LoadedPlugin, PluginBoard, PluginTab } from './plugin.js';

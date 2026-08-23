@@ -8,6 +8,7 @@ import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enr
 import { applyExport, planExport } from '../lib/export.js';
 import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
 import { applyPublish, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, requirePublishIds, type PublishRow } from '../lib/publish.js';
+import { applyLand, planLand, requireLandSiteId } from '../lib/land.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
@@ -36,6 +37,7 @@ Usage:
   localhelm publish <id>... --apply [--kind K] [--otp CODE]
   localhelm auth
   localhelm cascade <id> [--to V] [--apply] [--no-commit]
+  localhelm land <site-id> [--apply] [--otp CODE]
   localhelm plugins
   localhelm plugin <id> [action] [name...] [--apply] [--no-commit]
   localhelm serve [--host ADDR] [--port N]
@@ -559,6 +561,60 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 			if (!apply) lines.push('', 'Nothing written. Re-run with --apply to write pins and lockfiles.');
 			else if (!result.rows.some((r) => r.writes)) lines.push('', 'Nothing written.');
 			process.stdout.write(`${lines.join('\n')}\n`);
+		}
+		return;
+	}
+
+	if (cmd === 'land') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		const otp = takeOpt(argv, '--otp');
+		if (argv.some((a) => a === '--force' || a === '-f' || a === '--force-with-lease')) {
+			fail('localhelm never force-pushes or force-publishes');
+		}
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		if (argv.length !== 1) fail('usage: localhelm land <site-id> [--apply] [--otp CODE]');
+		let siteId: string;
+		try {
+			siteId = requireLandSiteId(argv[0]);
+		} catch (err) {
+			fail(err instanceof Error ? err.message : String(err));
+		}
+		const loaded = await requireManifest();
+		const plan = await planLand(loaded, siteId);
+		if (!apply) {
+			if (json) printJson({ plan, writes: false });
+			else {
+				const lines = [
+					`land\t${plan.siteId}`,
+					`companion\t${plan.companionId ?? '(none)'}`,
+					`engine\t${plan.engineId}`,
+					...plan.steps.map((step, i) => `${i + 1}.\t${step.label}`),
+					'',
+					plan.note,
+				];
+				if (!plan.steps.length) lines.push('Nothing to apply.');
+				else lines.push('Nothing written. Re-run with --apply to run these steps in order. Never --force.');
+				process.stdout.write(`${lines.join('\n')}\n`);
+			}
+			return;
+		}
+		const lock = await acquireJobLock(loaded.workspaceRoot);
+		try {
+			const result = await applyLand(loaded, plan, { otp });
+			if (json) printJson({ plan, result, writes: true });
+			else {
+				const lines = [
+					`land\t${plan.siteId}\t${result.ok ? 'ok' : 'stopped'}`,
+					...result.steps.map((step) => `${step.ok ? 'ok' : 'fail'}\t${step.label}\t${step.reason}`),
+				];
+				if (result.stoppedAt) lines.push(`stopped\t${result.stoppedAt}`);
+				process.stdout.write(`${lines.join('\n')}\n`);
+				if (!result.ok) process.exitCode = 1;
+			}
+		} finally {
+			await lock.release();
 		}
 		return;
 	}
