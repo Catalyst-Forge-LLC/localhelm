@@ -1386,8 +1386,8 @@
 	}
 
 	header {
-		background: #242429;
-		border-bottom: 1px solid #3d3d44;
+		background: #000;
+		border-bottom: 1px solid #1f1f22;
 		padding: 1.1rem 1.5rem;
 	}
 
@@ -1584,7 +1584,8 @@
 		flex-wrap: wrap;
 		gap: 0.35rem;
 		padding: 0.85rem 1.5rem 0;
-		border-bottom: 1px solid #3d3d44;
+		background: #000;
+		border-bottom: 1px solid #1f1f22;
 	}
 
 	.tab {
