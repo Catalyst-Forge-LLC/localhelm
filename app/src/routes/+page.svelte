@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
+	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
 	import { pluginPlanWriteIds } from '$lib/pluginPlan';
 
 	type BumpKind = 'patch' | 'minor' | 'major';
@@ -116,6 +117,7 @@
 
 	let scanRoot = $state('..');
 	let candidates = $state<Candidate[]>([]);
+	let addOpen = $state(false);
 	let selectedScan = $state<Record<string, boolean>>({});
 	let selectedIds = $state<Record<string, boolean>>({});
 	let selectedSites = $state<Record<string, boolean>>({});
@@ -477,6 +479,8 @@
 			});
 			note(`enrolled ${paths.length} project(s)`, plan);
 			selectedScan = {};
+			candidates = [];
+			addOpen = false;
 			await refresh();
 		});
 	}
@@ -1404,6 +1408,14 @@
 						</div>
 						<div class="group-buttons">
 							<button
+								class="btn"
+								disabled={Boolean(busy)}
+								onclick={() => (addOpen = true)}
+								title="Scan a folder and pick which projects to enroll."
+							>
+								Add projects
+							</button>
+							<button
 								class="btn btn-write"
 								disabled={Boolean(busy) || !checkedIds.length}
 								onclick={() => startBump(checkedIds)}
@@ -1531,7 +1543,7 @@
 									</tr>
 								{/each}
 								{#if !inventory?.projects.length}
-									<tr><td class="empty" colspan="8">Nothing enrolled yet. Scan a folder, tick the projects you ship, then enroll.</td></tr>
+									<tr><td class="empty" colspan="8">Nothing enrolled yet. Open Add projects, scan a folder, tick the ones you ship, then write.</td></tr>
 								{/if}
 							</tbody>
 						</table>
@@ -1541,54 +1553,6 @@
 						Check rows for bulk bump, push, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
 						Publish bumps if local is already on npm, pushes if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
 					</p>
-				</section>
-
-				<section class="panel">
-					<h2>Add projects</h2>
-					<p class="hint">Scanning proposes folders. Nothing joins the fleet until you tick it and write.</p>
-					<label for="scan-root">Folder to scan</label>
-					<div class="row">
-						<input id="scan-root" bind:value={scanRoot} spellcheck="false" />
-						<button class="btn" disabled={Boolean(busy)} onclick={() => scan()}>Scan</button>
-					</div>
-
-					{#if candidates.length}
-						<p class="hint">
-							{candidates.filter((c) => !enrolledIds.has(c.id)).length} new ·
-							{candidates.filter((c) => enrolledIds.has(c.id)).length} already enrolled
-						</p>
-						<ul class="candidates">
-							{#each candidates as row (row.absPath)}
-								{@const already = enrolledIds.has(row.id)}
-								<li class:already>
-									<input
-										type="checkbox"
-										aria-label={`enroll ${row.id}`}
-										disabled={already}
-										bind:checked={selectedScan[row.absPath]}
-									/>
-									<div>
-										<div class="id">{row.id}</div>
-										<div class="dim small">
-											{row.npmName ?? 'no package name'}{row.version ? ` ${row.version}` : ''}{row.git ? ' · git' : ' · no git'}{already
-												? ' · enrolled'
-												: ''}
-										</div>
-									</div>
-								</li>
-							{/each}
-						</ul>
-						<div class="group-buttons">
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy) || !checkedScan.length}
-								onclick={() => startEnroll()}
-								title="Shows which folders would join the fleet. Confirm in the modal to write localhelm.fleet.json."
-							>
-								Add to fleet{checkedScan.length ? ` (${checkedScan.length})` : ''}
-							</button>
-						</div>
-					{/if}
 				</section>
 			</div>
 		{:else if tab === 'sites'}
@@ -1806,9 +1770,56 @@
 
 <svelte:window
 	onkeydown={(event) => {
-		if (event.key === 'Escape' && activityOpen && !confirmOpen) setActivityOpen(false);
+		if (event.key === 'Escape' && activityOpen && !confirmOpen && !addOpen) setActivityOpen(false);
 	}}
 />
+
+<AddProjectsModal bind:open={addOpen} busy={Boolean(busy)}>
+	<label for="scan-root">Folder to scan</label>
+	<div class="row">
+		<input id="scan-root" bind:value={scanRoot} spellcheck="false" />
+		<button class="btn" disabled={Boolean(busy)} onclick={() => scan()}>Scan</button>
+	</div>
+	{#if candidates.length}
+		<p class="hint">
+			{candidates.filter((c) => !enrolledIds.has(c.id)).length} new ·
+			{candidates.filter((c) => enrolledIds.has(c.id)).length} already enrolled
+		</p>
+		<ul class="candidates">
+			{#each candidates as row (row.absPath)}
+				{@const already = enrolledIds.has(row.id)}
+				<li class:already>
+					<input
+						type="checkbox"
+						aria-label={`enroll ${row.id}`}
+						disabled={already}
+						bind:checked={selectedScan[row.absPath]}
+					/>
+					<div>
+						<div class="id">{row.id}</div>
+						<div class="dim small">
+							{row.npmName ?? 'no package name'}{row.version ? ` ${row.version}` : ''}{row.git ? ' · git' : ' · no git'}{already
+								? ' · enrolled'
+								: ''}
+						</div>
+					</div>
+				</li>
+			{/each}
+		</ul>
+		<div class="group-buttons">
+			<button
+				class="btn btn-write"
+				disabled={Boolean(busy) || !checkedScan.length}
+				onclick={() => startEnroll()}
+				title="Shows which folders would join the fleet. Confirm in the modal to write localhelm.fleet.json."
+			>
+				Add to fleet{checkedScan.length ? ` (${checkedScan.length})` : ''}
+			</button>
+		</div>
+	{:else}
+		<p class="dim small">Scan a folder to see candidates. Already enrolled rows stay in the list as disabled.</p>
+	{/if}
+</AddProjectsModal>
 
 <ConfirmModal
 	bind:open={confirmOpen}
@@ -2227,8 +2238,7 @@
 		}
 
 		.fleet-layout {
-			grid-template-columns: minmax(0, 1fr) 22rem;
-			align-items: start;
+			grid-template-columns: minmax(0, 1fr);
 		}
 	}
 
@@ -2456,6 +2466,10 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.3rem;
+	}
+
+	.candidates {
+		max-height: min(28rem, 50dvh);
 	}
 
 	.grow {
