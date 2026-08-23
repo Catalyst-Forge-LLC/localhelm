@@ -94,7 +94,7 @@
 				disabled={busy}
 				onclick={confirm}
 			>
-				{busy ? 'Working… watch the browser for npm / LastPass' : confirmLabel}
+				{busy ? 'Working…' : confirmLabel}
 			</button>
 		</div>
 	</div>
