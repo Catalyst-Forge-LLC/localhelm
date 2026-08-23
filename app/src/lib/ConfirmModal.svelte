@@ -9,6 +9,7 @@
 		cancelLabel?: string;
 		variant?: 'write' | 'danger';
 		busy?: boolean;
+		canApply?: boolean;
 		items?: string[];
 		children?: Snippet;
 		onconfirm: () => void;
@@ -23,6 +24,7 @@
 		cancelLabel = 'Cancel',
 		variant = 'write',
 		busy = false,
+		canApply = true,
 		items = [],
 		children,
 		onconfirm,
@@ -85,17 +87,19 @@
 			<div class="extra">{@render children()}</div>
 		{/if}
 		<div class="actions">
-			<button type="button" class="btn" disabled={busy} onclick={cancel}>{cancelLabel}</button>
-			<button
-				type="button"
-				class="btn"
-				class:danger={variant === 'danger'}
-				class:write={variant === 'write'}
-				disabled={busy}
-				onclick={confirm}
-			>
-				{busy ? 'Working…' : confirmLabel}
-			</button>
+			<button type="button" class="btn" disabled={busy} onclick={cancel}>{canApply ? cancelLabel : 'Close'}</button>
+			{#if canApply}
+				<button
+					type="button"
+					class="btn"
+					class:danger={variant === 'danger'}
+					class:write={variant === 'write'}
+					disabled={busy}
+					onclick={confirm}
+				>
+					{busy ? 'Working…' : confirmLabel}
+				</button>
+			{/if}
 		</div>
 	</div>
 </dialog>

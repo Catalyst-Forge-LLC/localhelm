@@ -79,8 +79,8 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Plugin host: `localhelm.plugin.mjs` on an enrolled project. FilePress plugin lives in the filepress checkout and calls the sibling library (headers, link→npm, origin push, ship). You can run those jobs from LocalHelm instead of `pnpm siblings`. Site push is `git push origin <branch>` only — never `--force`.
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`.
 - `publish`: plan then named-id `--apply`. Intended auth is `localhelm auth` + a granular automation token (Bypass 2FA) in the **user** `~/.npmrc`. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
-- Dashboard confirms use a `<dialog>` modal (not `window.confirm`). FilePress board has Plan engine sync / Sync N for all sites. Header Plan push all plans every enrolled origin.
-- Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close). No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply unlocks only when the plan marks `writes: true` — already-current FilePress sites stay disabled.
+- Dashboard writes are one button: click Push / Publish / Sync / Bump / etc., the modal shows the plan, then Confirm applies or Close if nothing to do. CLI still prints a plan and needs `--apply`.
+- Dashboard IA: **Today** (default, needs-you + FilePress snapshot), **Fleet** (table + enroll), **Sites** (plugin board). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close). No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`.
 
 ### In Progress
 
@@ -107,7 +107,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 4 — 2026-08-21
 
-- Selected `origin` push. CLI: `localhelm push <id>... --apply`. Dashboard: Plan push, then confirm listing remotes. Never `--force`.
+- Selected `origin` push. CLI: `localhelm push <id>... --apply`. Dashboard: Push opens a plan modal listing remotes. Never `--force`.
 
 ### Session 5 — 2026-08-23
 
@@ -117,3 +117,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 6 — 2026-08-23
 
 - Dashboard UX: Today / Fleet / Sites tabs, lighter panels, ship+cascade only on rows that need them.
+
+### Session 7 — 2026-08-23
+
+- Dashboard writes collapsed to one action button. The modal is the plan: confirm to apply, or Close when nothing to do. Same idea on the FilePress sibling toolbar (Apply/Ship plan first, then confirm).

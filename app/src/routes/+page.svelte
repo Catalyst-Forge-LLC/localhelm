@@ -110,18 +110,7 @@
 	let selectedIds = $state<Record<string, boolean>>({});
 	let bumpKind = $state<Record<string, BumpKind>>({});
 
-	// A plan must be seen before its apply button unlocks. Any refresh clears them.
-	let plannedPull = $state<number | null>(null);
-	let plannedPush = $state<GitRow[] | null>(null);
-	let plannedExport = $state<string | null>(null);
-	let plannedEnroll = $state<string | null>(null);
-	let plannedUnenroll = $state<string | null>(null);
-	let plannedBump = $state<Record<string, string>>({});
-	let plannedCascade = $state<string | null>(null);
 	let pluginBoards = $state<PluginBoard[]>([]);
-	let plannedPlugin = $state<string | null>(null);
-	let plannedPluginWrites = $state<string[]>([]);
-	let plannedPublish = $state<Record<string, PublishRow>>({});
 	let publishOtp = $state('');
 	let npmUser = $state<string | null>(null);
 	let publishAuthHint = $state(
@@ -133,6 +122,7 @@
 	let confirmLabel = $state('Confirm');
 	let confirmVariant = $state<'write' | 'danger'>('write');
 	let confirmItems = $state<string[]>([]);
+	let confirmCanApply = $state(true);
 	let confirmRun = $state<(() => void) | null>(null);
 
 	let entries = $state<LogEntry[]>([]);
@@ -175,9 +165,6 @@
 	);
 	const shipRows = $derived(
 		(inventory?.projects ?? []).filter((row) => !row.private && !row.missing && Boolean(row.npm.name)),
-	);
-	const plannedShipIds = $derived(
-		shipRows.map((row) => row.id).filter((id) => plannedPublish[id]?.action === 'publish'),
 	);
 	const cascadeTargets = $derived.by((): CascadeTarget[] => {
 		const projects = inventory?.projects ?? [];
@@ -253,19 +240,6 @@
 		return cascadeTargets.find((row) => row.id === id);
 	}
 
-	function clearPlans(): void {
-		plannedPull = null;
-		plannedPush = null;
-		plannedExport = null;
-		plannedBump = {};
-		plannedUnenroll = null;
-		plannedEnroll = null;
-		plannedCascade = null;
-		plannedPlugin = null;
-		plannedPluginWrites = [];
-		plannedPublish = {};
-	}
-
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
 		const res = await fetch(url, {
 			...init,
@@ -282,7 +256,7 @@
 		if (!activityOpen) activityUnseen = true;
 	}
 
-	async function run(label: string, fn: () => Promise<void>): Promise<void> {
+	async function run(label: string, fn: () => Promise<void>, opts?: { closeConfirm?: boolean }): Promise<void> {
 		busy = label;
 		error = '';
 		try {
@@ -291,8 +265,10 @@
 			error = err instanceof Error ? err.message : String(err);
 		} finally {
 			busy = '';
-			confirmOpen = false;
-			confirmRun = null;
+			if (opts?.closeConfirm !== false) {
+				confirmOpen = false;
+				confirmRun = null;
+			}
 		}
 	}
 
@@ -314,7 +290,6 @@
 			const kinds = { ...bumpKind };
 			for (const row of data.inventory?.projects ?? []) kinds[row.id] ??= 'patch';
 			bumpKind = kinds;
-			clearPlans();
 			try {
 				const plug = (await call('/api/plugins')) as { boards: PluginBoard[] };
 				pluginBoards = plug.boards;
@@ -332,72 +307,181 @@
 			})) as { candidates: Candidate[] };
 			candidates = data.candidates;
 			selectedScan = {};
-			plannedEnroll = null;
 			note(`scan ${scanRoot} — ${data.candidates.length} candidate(s), nothing written`, data);
 		});
 	}
 
-	async function enroll(apply: boolean): Promise<void> {
+	function offerConfirm(spec: {
+		title: string;
+		hint: string;
+		items: string[];
+		confirmLabel: string;
+		variant?: 'write' | 'danger';
+		canApply: boolean;
+		run?: () => void;
+	}): void {
+		confirmTitle = spec.title;
+		confirmHint = spec.hint;
+		confirmItems = spec.items;
+		confirmLabel = spec.confirmLabel;
+		confirmVariant = spec.variant ?? 'write';
+		confirmCanApply = spec.canApply;
+		confirmRun = spec.canApply && spec.run ? spec.run : null;
+		confirmOpen = true;
+	}
+
+	function rowLines(data: unknown): string[] {
+		if (!data || typeof data !== 'object') return [];
+		const rows = (data as { rows?: unknown }).rows;
+		if (!Array.isArray(rows)) return [];
+		return rows
+			.filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === 'object')
+			.map((row) => {
+				const id =
+					typeof row.id === 'string'
+						? row.id
+						: typeof row.fromId === 'string'
+							? row.fromId
+							: typeof row.path === 'string'
+								? row.path
+								: '?';
+				const action = typeof row.action === 'string' ? row.action : '';
+				const reason = typeof row.reason === 'string' ? row.reason : typeof row.update === 'string' ? row.update : '';
+				const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
+				const to = typeof row.to === 'string' ? row.to : typeof row.toSpec === 'string' ? row.toSpec : '';
+				const range = from && to ? `${from} → ${to}` : from || to;
+				return [id, action, range, reason].filter(Boolean).join('  ');
+			});
+	}
+
+	async function startEnroll(): Promise<void> {
 		if (!checkedScan.length) {
 			error = 'Check at least one scanned folder first.';
 			return;
 		}
-		const signature = [...checkedScan].sort().join('|');
-		await run(apply ? 'enrolling' : 'planning enroll', async () => {
+		const paths = [...checkedScan];
+		await run(
+			'planning enroll',
+			async () => {
+				const plan = await call('/api/enroll', {
+					method: 'POST',
+					body: JSON.stringify({ paths, apply: false }),
+				});
+				const adds = Array.isArray((plan as { rows?: { action?: string }[] }).rows)
+					? (plan as { rows: { action?: string }[] }).rows.filter((row) => row.action === 'add')
+					: [];
+				note(`enroll plan — ${paths.length} project(s), nothing written`, plan);
+				offerConfirm({
+					title: adds.length ? `Add ${adds.length} project${adds.length === 1 ? '' : 's'} to the fleet?` : 'Nothing to enroll',
+					hint: adds.length
+						? 'Writes these rows into localhelm.fleet.json. Does not copy or delete folders.'
+						: 'Every ticked folder is already enrolled or cannot be added.',
+					items: rowLines(plan).length ? rowLines(plan) : ['Nothing to enroll.'],
+					confirmLabel: adds.length === 1 ? 'Add to fleet' : `Add ${adds.length} to fleet`,
+					canApply: adds.length > 0,
+					run: () => void applyEnroll(paths),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyEnroll(paths: string[]): Promise<void> {
+		await run('enrolling', async () => {
 			const plan = await call('/api/enroll', {
 				method: 'POST',
-				body: JSON.stringify({ paths: checkedScan, apply }),
+				body: JSON.stringify({ paths, apply: true }),
 			});
-			note(apply ? `enrolled ${checkedScan.length} project(s)` : `enroll plan — ${checkedScan.length} project(s), nothing written`, plan);
-			if (apply) {
-				selectedScan = {};
-				await refresh();
-			} else {
-				plannedEnroll = signature;
-			}
+			note(`enrolled ${paths.length} project(s)`, plan);
+			selectedScan = {};
+			await refresh();
 		});
 	}
 
-	async function unenroll(apply: boolean): Promise<void> {
+	async function startUnenroll(): Promise<void> {
 		if (!checkedIds.length) {
 			error = 'Check at least one fleet row first.';
 			return;
 		}
-		const signature = [...checkedIds].sort().join('|');
-		await run(apply ? 'removing from fleet' : 'planning unenroll', async () => {
+		const ids = [...checkedIds];
+		await run(
+			'planning unenroll',
+			async () => {
+				const plan = await call('/api/unenroll', {
+					method: 'POST',
+					body: JSON.stringify({ ids, apply: false }),
+				});
+				const removes = Array.isArray((plan as { rows?: { action?: string }[] }).rows)
+					? (plan as { rows: { action?: string }[] }).rows.filter((row) => row.action === 'update')
+					: [];
+				note(`unenroll plan — ${ids.length} row(s), nothing written`, plan);
+				offerConfirm({
+					title: removes.length ? `Remove ${removes.length} project${removes.length === 1 ? '' : 's'} from the fleet?` : 'Nothing to remove',
+					hint: removes.length
+						? 'Rewrites localhelm.fleet.json without these rows. Never deletes a folder.'
+						: 'None of the ticked rows are enrolled.',
+					items: rowLines(plan).length ? rowLines(plan) : ['Nothing to remove.'],
+					confirmLabel: removes.length === 1 ? 'Remove from fleet' : `Remove ${removes.length} from fleet`,
+					variant: 'danger',
+					canApply: removes.length > 0,
+					run: () => void applyUnenroll(ids),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyUnenroll(ids: string[]): Promise<void> {
+		await run('removing from fleet', async () => {
 			const plan = await call('/api/unenroll', {
 				method: 'POST',
-				body: JSON.stringify({ ids: checkedIds, apply }),
+				body: JSON.stringify({ ids, apply: true }),
 			});
-			note(apply ? `removed ${checkedIds.length} project(s) from the fleet` : `unenroll plan — ${checkedIds.length} row(s), nothing written`, plan);
-			if (apply) {
-				selectedIds = {};
-				await refresh();
-			} else {
-				plannedUnenroll = signature;
-			}
+			note(`removed ${ids.length} project(s) from the fleet`, plan);
+			selectedIds = {};
+			await refresh();
 		});
 	}
 
-	async function bump(id: string, apply: boolean): Promise<void> {
+	async function startBump(id: string): Promise<void> {
 		const kind = bumpKind[id] ?? 'patch';
-		await run(apply ? `bumping ${id}` : `planning ${kind} bump for ${id}`, async () => {
+		await run(
+			`planning ${kind} bump for ${id}`,
+			async () => {
+				const plan = (await call('/api/bump', {
+					method: 'POST',
+					body: JSON.stringify({ id, kind, apply: false }),
+				})) as BumpPlan;
+				note(
+					plan.action === 'bump'
+						? `bump plan ${id} ${plan.from} → ${plan.to}, nothing written`
+						: `bump plan ${id} — skipped`,
+					plan,
+				);
+				const can = plan.action === 'bump' && Boolean(plan.to);
+				offerConfirm({
+					title: can ? `Bump ${id} to ${plan.to}?` : `Cannot bump ${id}`,
+					hint: can
+						? 'Writes package.json only. No tag, no publish.'
+						: (plan.reason ?? 'cannot bump'),
+					items: can ? [`${id}  ${plan.from ?? '?'} → ${plan.to}`] : [plan.reason ?? 'Nothing to bump.'],
+					confirmLabel: can ? `Write ${plan.to}` : 'Write',
+					canApply: can,
+					run: () => void applyBump(id, kind),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyBump(id: string, kind: BumpKind): Promise<void> {
+		await run(`bumping ${id}`, async () => {
 			const plan = (await call('/api/bump', {
 				method: 'POST',
-				body: JSON.stringify({ id, kind, apply }),
+				body: JSON.stringify({ id, kind, apply: true }),
 			})) as BumpPlan;
-			if (apply) {
-				note(`bumped ${id} to ${plan.to}`, plan);
-				await refresh();
-				return;
-			}
-			if (plan.action !== 'bump') {
-				error = `${id}: ${plan.reason ?? 'cannot bump'}`;
-				note(`bump plan ${id} — skipped`, plan);
-				return;
-			}
-			plannedBump = { ...plannedBump, [id]: `${kind}:${plan.to}` };
-			note(`bump plan ${id} ${plan.from} → ${plan.to}, nothing written`, plan);
+			note(`bumped ${id} to ${plan.to}`, plan);
+			await refresh();
 		});
 	}
 
@@ -410,37 +494,39 @@
 		});
 	}
 
-	async function pull(apply: boolean): Promise<void> {
-		await run(apply ? 'pulling (fast-forward only)' : 'planning pull', async () => {
-			const data = (await call('/api/pull', { method: 'POST', body: JSON.stringify({ apply }) })) as {
+	async function startPull(): Promise<void> {
+		await run(
+			'planning pull',
+			async () => {
+				const data = (await call('/api/pull', { method: 'POST', body: JSON.stringify({ apply: false }) })) as {
+					rows: GitRow[];
+				};
+				const eligible = data.rows.filter((r) => r.action === 'pull');
+				note(`pull plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
+				offerConfirm({
+					title: eligible.length ? `Pull ${eligible.length} repo${eligible.length === 1 ? '' : 's'}?` : 'Nothing to pull',
+					hint: eligible.length
+						? 'git pull --ff-only on the listed repos. Dirty or diverged trees are skipped.'
+						: 'Nothing is eligible: repos must be clean and behind.',
+					items: eligible.length ? eligible.map((row) => `${row.id}  ${row.branch ?? '?'}  ${row.reason ?? 'pull'}`) : ['Nothing to pull.'],
+					confirmLabel: eligible.length === 1 ? `Pull ${eligible[0]?.id}` : `Pull ${eligible.length} repos`,
+					canApply: eligible.length > 0,
+					run: () => void applyPull(),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyPull(): Promise<void> {
+		await run('pulling (fast-forward only)', async () => {
+			const data = (await call('/api/pull', { method: 'POST', body: JSON.stringify({ apply: true }) })) as {
 				rows: GitRow[];
 			};
 			const eligible = data.rows.filter((r) => r.action === 'pull');
-			if (apply) {
-				note(`pull --apply — ${eligible.length} repo(s) fast-forwarded`, data);
-				await refresh();
-				return;
-			}
-			plannedPull = eligible.length;
-			note(`pull plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
+			note(`pull --apply — ${eligible.length} repo(s) fast-forwarded`, data);
+			await refresh();
 		});
-	}
-
-	function askConfirm(spec: {
-		title: string;
-		hint: string;
-		items: string[];
-		confirmLabel: string;
-		variant: 'write' | 'danger';
-		run: () => void;
-	}): void {
-		confirmTitle = spec.title;
-		confirmHint = spec.hint;
-		confirmItems = spec.items;
-		confirmLabel = spec.confirmLabel;
-		confirmVariant = spec.variant;
-		confirmRun = spec.run;
-		confirmOpen = true;
 	}
 
 	function pushItems(rows: GitRow[]): string[] {
@@ -450,46 +536,48 @@
 		});
 	}
 
-	async function runPush(apply: boolean, onlyIds?: string[]): Promise<void> {
+	async function startPush(onlyIds?: string[]): Promise<void> {
 		const scope = onlyIds?.length === 1 ? onlyIds[0] : onlyIds?.length ? `${onlyIds.length} repos` : 'all';
-		await run(apply ? `pushing ${scope}` : `planning push ${scope}`, async () => {
-			const ids = apply ? (onlyIds ?? (plannedPush ?? []).map((row) => row.id)) : onlyIds;
-			const data = (await call('/api/push', { method: 'POST', body: JSON.stringify({ apply, ids }) })) as {
+		await run(
+			`planning push ${scope}`,
+			async () => {
+				const data = (await call('/api/push', {
+					method: 'POST',
+					body: JSON.stringify({ apply: false, ids: onlyIds }),
+				})) as { rows: GitRow[] };
+				const eligible = data.rows.filter((r) => r.action === 'push');
+				note(`push plan — ${eligible.length} of ${data.rows.length} eligible (origin only), nothing written`, data);
+				offerConfirm({
+					title: eligible.length === 1 ? `Push ${eligible[0]?.id} to origin?` : eligible.length ? 'Push these branches to origin?' : 'Nothing to push',
+					hint: eligible.length
+						? 'git push origin only. Never --force. Never the IngotVault backup remote.'
+						: onlyIds?.length === 1
+							? `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'cannot push'}`
+							: 'Nothing is eligible: repos must be clean, ahead, and not diverged.',
+					items: eligible.length ? pushItems(eligible) : ['Nothing to push.'],
+					confirmLabel: eligible.length === 1 ? `Push ${eligible[0]?.id}` : `Push ${eligible.length} to origin`,
+					canApply: eligible.length > 0,
+					run: () => void applyPush(eligible.map((row) => row.id)),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyPush(ids: string[]): Promise<void> {
+		const scope = ids.length === 1 ? ids[0] : `${ids.length} repos`;
+		await run(`pushing ${scope}`, async () => {
+			const data = (await call('/api/push', { method: 'POST', body: JSON.stringify({ apply: true, ids }) })) as {
 				rows: GitRow[];
 			};
 			const eligible = data.rows.filter((r) => r.action === 'push');
-			if (apply) {
-				const failed = eligible.filter((r) => r.reason !== 'pushed');
-				note(
-					`push --apply — ${eligible.filter((r) => r.reason === 'pushed').length} pushed, ${failed.length} failed`,
-					data,
-				);
-				await refresh();
-				return;
-			}
-			plannedPush = eligible;
-			if (eligible.length === 0 && onlyIds?.length === 1) {
-				error = `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'cannot push'}`;
-			}
-			note(`push plan — ${eligible.length} of ${data.rows.length} eligible (origin only), nothing written`, data);
+			const failed = eligible.filter((r) => r.reason !== 'pushed');
+			note(
+				`push --apply — ${eligible.filter((r) => r.reason === 'pushed').length} pushed, ${failed.length} failed`,
+				data,
+			);
+			await refresh();
 		});
-	}
-
-	function requestPush(onlyIds?: string[]): void {
-		const rows = (plannedPush ?? []).filter((row) => !onlyIds?.length || onlyIds.includes(row.id));
-		if (rows.length === 0) return;
-		askConfirm({
-			title: rows.length === 1 ? `Push ${rows[0]?.id} to origin?` : 'Push these branches to origin?',
-			hint: 'git push origin only. Never --force. Never the IngotVault backup remote.',
-			items: pushItems(rows),
-			confirmLabel: rows.length === 1 ? `Push ${rows[0]?.id}` : `Push ${rows.length} to origin`,
-			variant: 'write',
-			run: () => void runPush(true, rows.map((row) => row.id)),
-		});
-	}
-
-	function pushPlanned(id: string): GitRow | undefined {
-		return plannedPush?.find((row) => row.id === id);
 	}
 
 	function publishItems(row: PublishRow): string[] {
@@ -508,145 +596,172 @@
 		return lines;
 	}
 
-	async function runPublish(ids: string[], apply: boolean): Promise<void> {
+	async function startPublish(ids: string[]): Promise<void> {
+		if (ids.length === 0) return;
 		const label = ids.length === 1 ? ids[0] : `${ids.length} packages`;
-		await run(apply ? `publishing ${label}` : `planning publish ${label}`, async () => {
+		await run(
+			`planning publish ${label}`,
+			async () => {
+				const data = (await call('/api/publish', {
+					method: 'POST',
+					body: JSON.stringify({
+						apply: false,
+						ids,
+						kind: ids.length === 1 ? (bumpKind[ids[0] ?? ''] ?? 'patch') : 'patch',
+					}),
+				})) as { rows: PublishRow[]; npmUser?: string | null; authHint?: string };
+				if (data.authHint) publishAuthHint = data.authHint;
+				npmUser = data.npmUser ?? null;
+				const eligible = data.rows.filter((r) => r.action === 'publish');
+				note(`publish plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
+				offerConfirm({
+					title: eligible.length === 1 ? 'Publish this package?' : eligible.length ? `Publish ${eligible.length} packages?` : 'Nothing to publish',
+					hint: eligible.length
+						? publishAuthHint
+						: ids.length === 1
+							? `${ids[0]}: ${data.rows[0]?.reason ?? 'cannot publish'}`
+							: 'No listed package is ready to publish.',
+					items: eligible.length ? eligible.flatMap(publishItems) : data.rows.map((row) => `${row.id}  ${row.reason ?? 'skipped'}`),
+					confirmLabel: eligible.length === 1 ? `Publish ${eligible[0]?.version}` : `Publish ${eligible.length}`,
+					variant: 'danger',
+					canApply: eligible.length > 0,
+					run: () => void applyPublish(eligible.map((row) => row.id)),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyPublish(ids: string[]): Promise<void> {
+		const label = ids.length === 1 ? ids[0] : `${ids.length} packages`;
+		await run(`publishing ${label}`, async () => {
 			const data = (await call('/api/publish', {
 				method: 'POST',
 				body: JSON.stringify({
-					apply,
+					apply: true,
 					ids,
 					kind: ids.length === 1 ? (bumpKind[ids[0] ?? ''] ?? 'patch') : 'patch',
-					otp: apply && publishOtp.trim() ? publishOtp.trim() : undefined,
+					otp: publishOtp.trim() ? publishOtp.trim() : undefined,
 				}),
-			})) as { rows: PublishRow[]; npmUser?: string | null; authHint?: string };
-			if (!apply) {
-				if (data.authHint) publishAuthHint = data.authHint;
-				npmUser = data.npmUser ?? null;
-			}
-			if (apply) {
-				const published = data.rows.filter((r) => r.reason?.startsWith('published ')).length;
-				note(`publish --apply — ${published} published`, { rows: data.rows });
-				publishOtp = '';
-				await refresh();
-				return;
-			}
-			const next = { ...plannedPublish };
-			for (const row of data.rows) {
-				if (row.action === 'publish') next[row.id] = row;
-			}
-			plannedPublish = next;
-			const eligible = data.rows.filter((r) => r.action === 'publish');
-			if (eligible.length === 0 && ids.length === 1) {
-				error = `${ids[0]}: ${data.rows[0]?.reason ?? 'cannot publish'}`;
-			}
-			note(`publish plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
+			})) as { rows: PublishRow[] };
+			const published = data.rows.filter((r) => r.reason?.startsWith('published ')).length;
+			note(`publish --apply — ${published} published`, { rows: data.rows });
+			publishOtp = '';
+			await refresh();
 		});
 	}
 
-	function requestPublish(ids: string[]): void {
-		const rows = ids.map((id) => plannedPublish[id]).filter((row): row is PublishRow => row?.action === 'publish');
-		if (rows.length === 0) return;
-		askConfirm({
-			title: rows.length === 1 ? 'Publish this package?' : `Publish ${rows.length} packages?`,
-			hint: publishAuthHint,
-			items: rows.flatMap(publishItems),
-			confirmLabel: rows.length === 1 ? `Publish ${rows[0]?.version}` : `Publish ${rows.length}`,
-			variant: 'danger',
-			run: () => void runPublish(ids, true),
-		});
+	async function startPluginJob(plugin: string, action: string, ids: string[], label: string): Promise<void> {
+		if (ids.length === 0) return;
+		const scope = ids.length === 1 ? ids[0] : `${ids.length} sites`;
+		await run(
+			`planning ${plugin} ${action} ${scope}`,
+			async () => {
+				const data = await call('/api/plugin', {
+					method: 'POST',
+					body: JSON.stringify({ id: plugin, action, ids, apply: false }),
+				});
+				const writeIds = pluginPlanWriteIds(data);
+				const applyIds = writeIds ?? [...ids];
+				const items = rowLines(data);
+				note(`${plugin} ${action} plan ${scope}`, data);
+				offerConfirm({
+					title: applyIds.length
+						? `${label} for ${applyIds.length === 1 ? applyIds[0] : `${applyIds.length} sites`}?`
+						: `Nothing to ${label.toLowerCase()}`,
+					hint: applyIds.length
+						? action === 'push'
+							? 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.'
+							: 'The FilePress plugin runs this in each listed checkout. LocalHelm does not reimplement it.'
+						: writeIds
+							? 'Already current — nothing to write.'
+							: 'The plan found nothing to do.',
+					items: items.length ? items : ['Nothing to do.'],
+					confirmLabel: applyIds.length === 1 ? label : `${label} ${applyIds.length}`,
+					canApply: applyIds.length > 0,
+					run: () => void applyPluginJob(plugin, action, applyIds),
+				});
+			},
+			{ closeConfirm: false },
+		);
 	}
 
-	function pluginKey(plugin: string, action: string, ids: string[]): string {
-		return `${plugin}:${action}:${[...ids].sort().join(',')}`;
-	}
-
-	function pluginJobPlanned(plugin: string, action: string, ids: string[]): boolean {
-		return plannedPlugin === pluginKey(plugin, action, ids);
-	}
-
-	function pluginJobWriteReady(plugin: string, action: string, ids: string[]): boolean {
-		return pluginJobPlanned(plugin, action, ids) && plannedPluginWrites.length > 0;
-	}
-
-	function pluginRowWriteReady(plugin: string, action: string, id: string): boolean {
-		return plannedPlugin === pluginKey(plugin, action, [id]) && plannedPluginWrites.includes(id);
-	}
-
-	function syncAllLabel(plugin: string, ids: string[]): string {
-		if (!pluginJobPlanned(plugin, 'sync', ids)) return 'Sync all';
-		return plannedPluginWrites.length ? `Sync ${plannedPluginWrites.length} sites` : 'Already current';
-	}
-
-	async function runPluginJob(plugin: string, action: string, ids: string[], apply: boolean): Promise<void> {
-		const key = pluginKey(plugin, action, ids);
-		const scope = ids.length ? `${ids.length} site(s)` : 'all sites';
-		await run(apply ? `${plugin} ${action} ${scope}` : `planning ${plugin} ${action} ${scope}`, async () => {
+	async function applyPluginJob(plugin: string, action: string, ids: string[]): Promise<void> {
+		const scope = ids.length === 1 ? ids[0] : `${ids.length} sites`;
+		await run(`${plugin} ${action} ${scope}`, async () => {
 			const data = await call('/api/plugin', {
 				method: 'POST',
-				body: JSON.stringify({ id: plugin, action, ids, apply }),
+				body: JSON.stringify({ id: plugin, action, ids, apply: true }),
 			});
-			note(apply ? `${plugin} ${action} --apply ${scope}` : `${plugin} ${action} plan ${scope}`, data);
-			if (apply) await refresh();
-			else {
-				plannedPlugin = key;
-				plannedPluginWrites = pluginPlanWriteIds(data) ?? [...ids];
-			}
+			note(`${plugin} ${action} --apply ${scope}`, data);
+			await refresh();
 		});
 	}
 
-	function requestPluginJob(plugin: string, action: string, ids: string[], label: string): void {
-		if (ids.length === 0) return;
-		askConfirm({
-			title: `${label} for ${ids.length === 1 ? ids[0] : `${ids.length} sites`}?`,
-			hint:
-				action === 'push'
-					? 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.'
-					: 'The FilePress plugin runs this in each listed checkout. LocalHelm does not reimplement it.',
-			items: ids,
-			confirmLabel: ids.length === 1 ? label : `${label} ${ids.length}`,
-			variant: 'write',
-			run: () => void runPluginJob(plugin, action, ids, true),
-		});
+	async function startCascade(id: string): Promise<void> {
+		await run(
+			`planning cascade ${id}`,
+			async () => {
+				const data = (await call('/api/cascade', {
+					method: 'POST',
+					body: JSON.stringify({ id, apply: false }),
+				})) as { to: string; npm: string; rows: { action: string; writes?: boolean }[]; note: string };
+				const n = data.rows.filter((r) => r.action === 'retarget').length;
+				note(`cascade plan ${data.npm}@${data.to} — ${n} pin(s) to retarget. ${data.note}`, data);
+				offerConfirm({
+					title: n ? `Write ${data.npm}@${data.to} pins?` : `Nothing to cascade for ${id}`,
+					hint: n
+						? `${data.note} Writes pins and lockfiles. Commits by default.`
+						: data.note || 'No dependents need a pin update.',
+					items: rowLines(data).length ? rowLines(data) : ['Nothing to retarget.'],
+					confirmLabel: n ? `Write ${data.npm}@${data.to}` : 'Write pins',
+					canApply: n > 0,
+					run: () => void applyCascade(id),
+				});
+			},
+			{ closeConfirm: false },
+		);
 	}
 
-	async function cascade(id: string, apply: boolean): Promise<void> {
-		await run(apply ? `cascading ${id}` : `planning cascade ${id}`, async () => {
+	async function applyCascade(id: string): Promise<void> {
+		await run(`cascading ${id}`, async () => {
 			const data = (await call('/api/cascade', {
 				method: 'POST',
-				body: JSON.stringify({ id, apply }),
+				body: JSON.stringify({ id, apply: true }),
 			})) as { to: string; npm: string; rows: { action: string; writes?: boolean }[]; note: string };
-			const n = data.rows.filter((r) => r.action === 'retarget').length;
-			if (apply) {
-				note(`cascade ${data.npm}@${data.to} — wrote ${data.rows.filter((r) => r.writes).length} pin(s)`, data);
-				await refresh();
-				return;
-			}
-			plannedCascade = `${id}@${data.to}`;
-			note(`cascade plan ${data.npm}@${data.to} — ${n} pin(s) to retarget. ${data.note}`, data);
+			note(`cascade ${data.npm}@${data.to} — wrote ${data.rows.filter((r) => r.writes).length} pin(s)`, data);
+			await refresh();
 		});
 	}
 
-	async function exportFile(apply: boolean): Promise<void> {
-		await run(apply ? 'writing the JSON export' : 'planning export', async () => {
-			const data = (await call('/api/export', { method: 'POST', body: JSON.stringify({ apply }) })) as {
+	async function startExport(): Promise<void> {
+		await run(
+			'planning export',
+			async () => {
+				const data = (await call('/api/export', { method: 'POST', body: JSON.stringify({ apply: false }) })) as {
+					file: string;
+				};
+				note(`export plan — would write ${data.file}, nothing written`, data);
+				offerConfirm({
+					title: 'Write the JSON export?',
+					hint: 'Overwrites the inventory JSON file. Does not change any project.',
+					items: [data.file],
+					confirmLabel: 'Write JSON',
+					canApply: Boolean(data.file),
+					run: () => void applyExport(),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyExport(): Promise<void> {
+		await run('writing the JSON export', async () => {
+			const data = (await call('/api/export', { method: 'POST', body: JSON.stringify({ apply: true }) })) as {
 				file: string;
 			};
-			if (apply) {
-				note(`export --apply — wrote ${data.file}`, data);
-				return;
-			}
-			plannedExport = data.file;
-			note(`export plan — would write ${data.file}, nothing written`, data);
+			note(`export --apply — wrote ${data.file}`, data);
 		});
-	}
-
-	// The write button only unlocks for the exact kind that was planned.
-	function plannedTarget(id: string): string | null {
-		const entry = plannedBump[id];
-		if (!entry) return null;
-		const [kind, to] = entry.split(':');
-		return kind === (bumpKind[id] ?? 'patch') ? to : null;
 	}
 
 	function plainGitError(raw: string): string {
@@ -696,13 +811,13 @@
 			out.push({
 				text: row.npm.latest ? `unpublished ${row.localVersion} (npm ${row.npm.latest})` : `never published ${row.localVersion}`,
 				tone: 'ship',
-				title: 'Local version is ahead of npm. Plan publish to push (if needed) and npm publish.',
+				title: 'Local version is ahead of npm. Publish will push if needed, then npm publish.',
 			});
 		}
 		if (row.git.dirty) out.push({ text: `dirty${dirtDetail(row) ? ` — ${dirtDetail(row)}` : ''}`, tone: 'warn' });
 		if (row.git.busy) out.push({ text: `mid-${row.git.busy}`, tone: 'bad' });
 		if (row.cascadeBehind) {
-			out.push({ text: `${row.cascadeBehind} pin(s) behind`, tone: 'warn', title: 'A dependency pin would not install the published version. Plan a cascade on that package.' });
+			out.push({ text: `${row.cascadeBehind} pin(s) behind`, tone: 'warn', title: 'A dependency pin would not install the published version. Write pins on that package.' });
 		}
 		if (row.git.fetchError) {
 			out.push({
@@ -792,48 +907,29 @@
 				</div>
 
 				<div class="group group-write">
-					<span class="group-label">Write — plan, then apply</span>
+					<span class="group-label">Write — confirm, then apply</span>
 					<div class="group-buttons">
-						<button class="btn" disabled={Boolean(busy)} onclick={() => pull(false)} title="List repos that are clean and behind. Writes nothing.">
-							Plan pull
-						</button>
 						<button
 							class="btn btn-write"
-							disabled={Boolean(busy) || plannedPull === null || plannedPull === 0}
-							onclick={() => pull(true)}
-							title={plannedPull === null
-								? 'Run Plan pull first.'
-								: plannedPull === 0
-									? 'Nothing is eligible: repos must be clean and behind.'
-									: 'git pull --ff-only on the eligible repos.'}
+							disabled={Boolean(busy)}
+							onclick={() => startPull()}
+							title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull."
 						>
-							{plannedPull === null ? 'Pull' : `Pull ${plannedPull} repo${plannedPull === 1 ? '' : 's'}`}
-						</button>
-						<button class="btn" disabled={Boolean(busy)} onclick={() => runPush(false)} title="Plan git push origin for every enrolled repo that is clean and ahead.">
-							Plan push all
+							Pull
 						</button>
 						<button
 							class="btn btn-write"
-							disabled={Boolean(busy) || plannedPush === null || plannedPush.length === 0}
-							onclick={() => requestPush()}
-							title={plannedPush === null
-								? 'Run Plan push all first. You will confirm each origin URL in a modal.'
-								: plannedPush.length === 0
-									? 'Nothing is eligible: repos must be clean, ahead, and not diverged.'
-									: 'git push origin <branch> on the planned repos. Never --force.'}
+							disabled={Boolean(busy)}
+							onclick={() => startPush()}
+							title="Shows which clean, ahead repos would push to origin. Confirm in the modal. Never --force."
 						>
-							{plannedPush === null
-								? 'Push all'
-								: `Push ${plannedPush.length} to origin`}
-						</button>
-						<button class="btn" disabled={Boolean(busy)} onclick={() => exportFile(false)} title="Show where the JSON inventory would be written.">
-							Plan export
+							Push all
 						</button>
 						<button
 							class="btn btn-write"
-							disabled={Boolean(busy) || !plannedExport}
-							onclick={() => exportFile(true)}
-							title={plannedExport ? `Write ${plannedExport}` : 'Run Plan export first.'}
+							disabled={Boolean(busy)}
+							onclick={() => startExport()}
+							title="Shows the inventory JSON path. Confirm in the modal to write it."
 						>
 							Write JSON
 						</button>
@@ -914,29 +1010,21 @@
 								{/if}
 							</p>
 						</div>
-						{#if (inventory?.digest.unpublishedAhead ?? 0) > 0 || plannedShipIds.length}
+						{#if (inventory?.digest.unpublishedAhead ?? 0) > 0}
 							<div class="group-buttons">
 								<button
-									class="btn"
-									disabled={Boolean(busy) || shipRows.length === 0}
-									onclick={() => runPublish(shipRows.map((row) => row.id), false)}
-									title="Plan publish for every public enrolled package."
-								>
-									Plan publish all
-								</button>
-								<button
 									class="btn btn-write"
-									disabled={Boolean(busy) || plannedShipIds.length === 0}
-									onclick={() => requestPublish(plannedShipIds)}
-									title={plannedShipIds.length ? `Publish ${plannedShipIds.length} planned package(s).` : 'Run Plan publish all (or plan a card) first.'}
+									disabled={Boolean(busy) || shipRows.length === 0}
+									onclick={() => startPublish(shipRows.map((row) => row.id))}
+									title="Shows what publish would do for every public enrolled package. Confirm in the modal."
 								>
-									{plannedShipIds.length ? `Publish ${plannedShipIds.length}` : 'Publish all'}
+									Publish all
 								</button>
 							</div>
 						{/if}
 					</div>
 
-					{#if (inventory?.digest.unpublishedAhead ?? 0) > 0 || plannedShipIds.length}
+					{#if (inventory?.digest.unpublishedAhead ?? 0) > 0}
 						<p class="dim small">
 							{#if npmUser}
 								npm is logged in as <code>{npmUser}</code>.
@@ -973,37 +1061,25 @@
 												<option value="minor">minor</option>
 												<option value="major">major</option>
 											</select>
-											<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => runPublish([row.id], false)}>
-												Plan publish
-											</button>
 											<button
 												class="btn btn-sm btn-write"
-												disabled={Boolean(busy) || plannedPublish[row.id]?.action !== 'publish'}
-												onclick={() => requestPublish([row.id])}
-												title={plannedPublish[row.id]?.action === 'publish'
-													? plannedPublish[row.id]?.reason
-													: 'Run Plan publish first. You will confirm the registry version.'}
+												disabled={Boolean(busy)}
+												onclick={() => startPublish([row.id])}
+												title="Shows bump, push, and npm publish steps. Confirm in the modal."
 											>
-												{plannedPublish[row.id]?.action === 'publish'
-													? `Publish ${plannedPublish[row.id]?.version}`
-													: 'Publish'}
+												Publish
 											</button>
 										</div>
 									{/if}
 									{#if (row.git.ahead ?? 0) > 0}
 										<div class="bump">
-											<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => runPush(false, [row.id])}>
-												Plan push
-											</button>
 											<button
 												class="btn btn-sm btn-write"
-												disabled={Boolean(busy) || !pushPlanned(row.id)}
-												onclick={() => requestPush([row.id])}
-												title={pushPlanned(row.id)
-													? `git push origin ${pushPlanned(row.id)?.branch ?? ''} — never --force.`
-													: 'Run Plan push first. You will confirm the origin URL.'}
+												disabled={Boolean(busy)}
+												onclick={() => startPush([row.id])}
+												title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
 											>
-												{pushPlanned(row.id) ? `Push ${pushPlanned(row.id)?.ahead ?? ''} to origin` : 'Push'}
+												Push
 											</button>
 										</div>
 									{/if}
@@ -1014,18 +1090,13 @@
 											{cascadeTarget.linked ? ` · ${cascadeTarget.linked} local link` : ''}
 										</div>
 										<div class="bump">
-											<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => cascade(row.id, false)}>
-												Plan cascade
-											</button>
 											<button
 												class="btn btn-sm btn-write"
-												disabled={Boolean(busy) || !plannedCascade?.startsWith(`${row.id}@`)}
-												onclick={() => cascade(row.id, true)}
-												title={plannedCascade?.startsWith(`${row.id}@`)
-													? `Write pins and lockfiles for ${plannedCascade}. Commits by default.`
-													: 'Run Plan cascade first.'}
+												disabled={Boolean(busy)}
+												onclick={() => startCascade(row.id)}
+												title="Shows which dependents would get the new pin. Confirm in the modal to write."
 											>
-												{plannedCascade?.startsWith(`${row.id}@`) ? `Write ${plannedCascade.slice(row.id.length + 1)}` : 'Write pins'}
+												Write pins
 											</button>
 										</div>
 									{/if}
@@ -1046,20 +1117,13 @@
 										</div>
 									</div>
 									<div class="bump">
-										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => cascade(target.id, false)}>
-											Plan cascade
-										</button>
 										<button
 											class="btn btn-sm btn-write"
-											disabled={Boolean(busy) || !plannedCascade?.startsWith(`${target.id}@`)}
-											onclick={() => cascade(target.id, true)}
-											title={plannedCascade?.startsWith(`${target.id}@`)
-												? `Write pins and lockfiles for ${plannedCascade}. Commits by default.`
-												: 'Run Plan cascade first.'}
+											disabled={Boolean(busy)}
+											onclick={() => startCascade(target.id)}
+											title="Shows which dependents would get the new pin. Confirm in the modal to write."
 										>
-											{plannedCascade?.startsWith(`${target.id}@`)
-												? `Write ${plannedCascade.slice(target.id.length + 1)}`
-												: 'Write pins'}
+											Write pins
 										</button>
 									</div>
 								</li>
@@ -1091,24 +1155,12 @@
 						</p>
 						<div class="group-buttons">
 							<button
-								class="btn"
-								disabled={Boolean(busy) || filepressSyncIds.length === 0}
-								onclick={() => runPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, false)}
-								title="Plan engine sync for every listed FilePress site. Writes nothing."
-							>
-								Plan engine sync
-							</button>
-							<button
 								class="btn btn-write"
-								disabled={Boolean(busy) || !pluginJobWriteReady(filepressBoard.plugin, 'sync', filepressSyncIds)}
-								onclick={() => requestPluginJob(filepressBoard.plugin, 'sync', plannedPluginWrites, 'Sync engine')}
-								title={pluginJobWriteReady(filepressBoard.plugin, 'sync', filepressSyncIds)
-									? `Sync getfilepress + headers on ${plannedPluginWrites.length} site(s).`
-									: pluginJobPlanned(filepressBoard.plugin, 'sync', filepressSyncIds)
-										? 'Plan found nothing to write — every listed site is already current.'
-										: 'Run Plan engine sync first.'}
+								disabled={Boolean(busy) || filepressSyncIds.length === 0}
+								onclick={() => startPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, 'Sync engine')}
+								title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
 							>
-								{syncAllLabel(filepressBoard.plugin, filepressSyncIds)}
+								Sync engine
 							</button>
 						</div>
 						{#if sitesNeedingYou.length}
@@ -1139,16 +1191,13 @@
 							<p class="hint">Check rows to remove them from the fleet. Removing never deletes a folder. Version bump only writes package.json — publish lives on Today.</p>
 						</div>
 						<div class="group-buttons">
-							<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => unenroll(false)}>
-								Plan remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
-							</button>
 							<button
 								class="btn btn-write"
-								disabled={Boolean(busy) || !plannedUnenroll || plannedUnenroll !== [...checkedIds].sort().join('|')}
-								onclick={() => unenroll(true)}
-								title={plannedUnenroll ? 'Rewrite localhelm.fleet.json without these rows.' : 'Run Plan remove first.'}
+								disabled={Boolean(busy) || !checkedIds.length}
+								onclick={() => startUnenroll()}
+								title="Shows which fleet rows would be removed. Confirm in the modal. Never deletes a folder."
 							>
-								Remove from fleet
+								Remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
 							</button>
 						</div>
 					</div>
@@ -1205,32 +1254,22 @@
 													<option value="minor">minor</option>
 													<option value="major">major</option>
 												</select>
-												<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => bump(row.id, false)} title="Show the next version. Writes nothing.">
-													Plan
-												</button>
 												<button
 													class="btn btn-sm btn-write"
-													disabled={Boolean(busy) || !plannedTarget(row.id)}
-													onclick={() => bump(row.id, true)}
-													title={plannedTarget(row.id)
-														? `Write version ${plannedTarget(row.id)} to package.json. No tag, no publish.`
-														: 'Run Plan first for this bump size.'}
+													disabled={Boolean(busy)}
+													onclick={() => startBump(row.id)}
+													title="Shows the next version. Confirm in the modal to write package.json. No tag, no publish."
 												>
-													{plannedTarget(row.id) ? `Write ${plannedTarget(row.id)}` : 'Write'}
+													Bump
 												</button>
 												{#if (row.git.ahead ?? 0) > 0}
-													<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => runPush(false, [row.id])}>
-														Plan push
-													</button>
 													<button
 														class="btn btn-sm btn-write"
-														disabled={Boolean(busy) || !pushPlanned(row.id)}
-														onclick={() => requestPush([row.id])}
-														title={pushPlanned(row.id)
-															? `git push origin ${pushPlanned(row.id)?.branch ?? ''} — never --force.`
-															: 'Run Plan push first.'}
+														disabled={Boolean(busy)}
+														onclick={() => startPush([row.id])}
+														title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
 													>
-														{pushPlanned(row.id) ? `Push ${pushPlanned(row.id)?.ahead ?? ''}` : 'Push'}
+														Push
 													</button>
 												{/if}
 											</div>
@@ -1245,8 +1284,8 @@
 					</div>
 
 					<p class="legend">
-						<strong>Plan</strong> buttons only print what would happen. <strong>Write</strong> buttons change files on disk, one job at a time.
-						Publish is a named plan on Today: bump and push only if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
+						Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
+						Publish lives on Today: bump and push only if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
 					</p>
 				</section>
 
@@ -1273,7 +1312,6 @@
 										aria-label={`enroll ${row.id}`}
 										disabled={already}
 										bind:checked={selectedScan[row.absPath]}
-										onchange={() => (plannedEnroll = null)}
 									/>
 									<div>
 										<div class="id">{row.id}</div>
@@ -1287,16 +1325,13 @@
 							{/each}
 						</ul>
 						<div class="group-buttons">
-							<button class="btn" disabled={Boolean(busy) || !checkedScan.length} onclick={() => enroll(false)}>
-								Plan enroll{checkedScan.length ? ` (${checkedScan.length})` : ''}
-							</button>
 							<button
 								class="btn btn-write"
-								disabled={Boolean(busy) || !plannedEnroll || plannedEnroll !== [...checkedScan].sort().join('|')}
-								onclick={() => enroll(true)}
-								title={plannedEnroll ? 'Write these rows into localhelm.fleet.json.' : 'Run Plan enroll first.'}
+								disabled={Boolean(busy) || !checkedScan.length}
+								onclick={() => startEnroll()}
+								title="Shows which folders would join the fleet. Confirm in the modal to write localhelm.fleet.json."
 							>
-								Add to fleet
+								Add to fleet{checkedScan.length ? ` (${checkedScan.length})` : ''}
 							</button>
 						</div>
 					{/if}
@@ -1318,48 +1353,20 @@
 						{#if board.plugin === 'filepress'}
 							<div class="group-buttons">
 								<button
-									class="btn"
+									class="btn btn-write"
 									disabled={Boolean(busy) || filepressSyncIds.length === 0}
-									onclick={() => runPluginJob(board.plugin, 'sync', filepressSyncIds, false)}
-									title="Plan engine sync for every listed FilePress site. Writes nothing."
+									onclick={() => startPluginJob(board.plugin, 'sync', filepressSyncIds, 'Sync engine')}
+									title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
 								>
-									Plan engine sync
+									Sync engine
 								</button>
 								<button
 									class="btn btn-write"
-									disabled={Boolean(busy) || !pluginJobWriteReady(board.plugin, 'sync', filepressSyncIds)}
-									onclick={() => requestPluginJob(board.plugin, 'sync', plannedPluginWrites, 'Sync engine')}
-									title={pluginJobWriteReady(board.plugin, 'sync', filepressSyncIds)
-										? `Sync getfilepress + headers on ${plannedPluginWrites.length} site(s).`
-										: pluginJobPlanned(board.plugin, 'sync', filepressSyncIds)
-											? 'Plan found nothing to write — every listed site is already current.'
-											: 'Run Plan engine sync first.'}
-								>
-									{syncAllLabel(board.plugin, filepressSyncIds)}
-								</button>
-								<button
-									class="btn"
 									disabled={Boolean(busy) || filepressPushIds.length === 0}
-									onclick={() => runPluginJob(board.plugin, 'push', filepressPushIds, false)}
-									title="Plan git push origin for every listed FilePress site. Writes nothing. Never --force."
+									onclick={() => startPluginJob(board.plugin, 'push', filepressPushIds, 'Push')}
+									title="Shows which FilePress sites would push to origin. Confirm in the modal. Never --force."
 								>
-									Plan origin push
-								</button>
-								<button
-									class="btn btn-write"
-									disabled={Boolean(busy) || !pluginJobWriteReady(board.plugin, 'push', filepressPushIds)}
-									onclick={() => requestPluginJob(board.plugin, 'push', plannedPluginWrites, 'Push')}
-									title={pluginJobWriteReady(board.plugin, 'push', filepressPushIds)
-										? `git push origin on ${plannedPluginWrites.length} site(s). Never --force.`
-										: pluginJobPlanned(board.plugin, 'push', filepressPushIds)
-											? 'Plan found nothing to push — no listed site is clean and ahead.'
-											: 'Run Plan origin push first.'}
-								>
-									{pluginJobPlanned(board.plugin, 'push', filepressPushIds)
-										? plannedPluginWrites.length
-											? `Push ${plannedPluginWrites.length} sites`
-											: 'Nothing to push'
-										: 'Push all'}
+									Push all
 								</button>
 							</div>
 						{/if}
@@ -1391,25 +1398,12 @@
 											<div class="bump">
 												{#each row.actions as act (act.id)}
 													<button
-														class="btn btn-sm"
-														disabled={Boolean(busy)}
-														onclick={() => runPluginJob(board.plugin, act.id, [row.id], false)}
-													>
-														Plan {act.label.toLowerCase()}
-													</button>
-													<button
 														class="btn btn-sm btn-write"
-														disabled={Boolean(busy) || !pluginRowWriteReady(board.plugin, act.id, row.id)}
-														onclick={() => requestPluginJob(board.plugin, act.id, [row.id], act.label)}
-														title={pluginRowWriteReady(board.plugin, act.id, row.id)
-															? `Run ${act.label} via the ${board.title} plugin.`
-															: plannedPlugin === pluginKey(board.plugin, act.id, [row.id])
-																? 'Already current — nothing to write.'
-																: 'Run the matching Plan first.'}
+														disabled={Boolean(busy)}
+														onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
+														title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}
 													>
-														{plannedPlugin === pluginKey(board.plugin, act.id, [row.id]) && !plannedPluginWrites.includes(row.id)
-															? 'Already current'
-															: act.label}
+														{act.label}
 													</button>
 												{/each}
 											</div>
@@ -1479,6 +1473,7 @@
 	confirmLabel={confirmLabel}
 	variant={confirmVariant}
 	busy={Boolean(busy)}
+	canApply={confirmCanApply}
 	items={confirmItems}
 	onconfirm={() => {
 		confirmRun?.();

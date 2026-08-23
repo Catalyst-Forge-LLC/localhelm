@@ -80,6 +80,10 @@
         {
           "timestamp": "2026-08-23T18:45:00Z",
           "text": "Dashboard UX (D20): Today / Fleet / Sites tabs. Combined needs-you is the default. Lighter panels. FilePress site vs fleet package labeled when names match."
+        },
+        {
+          "timestamp": "2026-08-23T19:20:00Z",
+          "text": "Dashboard writes (D21): one action button plans, then a confirm modal shows what will run. Close if nothing to do. CLI still needs --apply."
         }
       ]
     },
@@ -362,6 +366,16 @@
       "decision": "Dashboard is tabbed: Today (default combined needs-you + FilePress snapshot + activity), Fleet (full table, bump, enroll), Sites (plugin board). Ship and cascade actions live on the cards that need them, not a second sidebar list. FilePress rows that share a fleet id are labeled as sites.",
       "rationale": "Operator 2026-08-23: localhelm and localberth appeared twice on one screen; the all-black board was hard to follow. Tabs plus lighter panels keep the same plan/apply jobs without repeating every package.",
       "alternatives_considered": ["Keep one scrolling page", "Hamburger the ship sidebar", "Merge FilePress site rows into fleet"],
+      "status": "active"
+    },
+    {
+      "id": "d21",
+      "timestamp": "2026-08-23T19:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 7,
+      "decision": "Dashboard writes are one button. Click Push / Publish / Sync / Bump / Pull / Cascade / Enroll / Export; the app runs the plan, the modal lists what will happen, Confirm applies. If the plan is empty the modal says so and only Close is offered. CLI stays plan-then--apply. FilePress sibling Apply/Ship now plan first, then confirm.",
+      "rationale": "Operator 2026-08-23: Plan then Write pairs felt like extra steps with little benefit. Safety stays in the modal, not a second button.",
+      "alternatives_considered": ["Keep Plan/Write unlock pairs", "Apply immediately without a plan modal"],
       "status": "active"
     }
   ],
