@@ -71,6 +71,7 @@
 		if (event.key === 'Escape' && busy) event.preventDefault();
 	}}
 >
+	<div class="panel">
 	<div class="body">
 		<h2 id="confirm-title">{title}</h2>
 		{#if hint}
@@ -102,17 +103,35 @@
 			{/if}
 		</div>
 	</div>
+	</div>
 </dialog>
 
 <style>
 	.confirm {
+		position: fixed;
+		inset: 0;
+		width: 100%;
+		max-width: none;
+		height: 100%;
+		max-height: none;
+		margin: 0;
+		padding: 1rem;
+		border: none;
+		background: transparent;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: auto;
+	}
+
+	.panel {
+		width: min(32rem, 100%);
+		max-height: calc(100dvh - 2rem);
+		overflow: auto;
 		border: 1px solid #3f3f46;
 		border-radius: 0.75rem;
 		background: #18181b;
 		color: #e4e4e7;
-		padding: 0;
-		max-width: 32rem;
-		width: calc(100% - 2rem);
 		box-shadow: 0 24px 48px rgb(0 0 0 / 0.55);
 	}
 

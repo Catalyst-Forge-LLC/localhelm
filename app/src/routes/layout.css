@@ -1,1 +1,6 @@
 @import 'tailwindcss';
+
+/* Tailwind preflight zeros margins; native dialog centering needs margin: auto. */
+dialog {
+	margin: auto;
+}
