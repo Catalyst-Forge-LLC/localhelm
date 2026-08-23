@@ -92,8 +92,10 @@
 	};
 	type BumpPlan = { id: string; from: string | null; to: string | null; action: string; reason?: string };
 	type LogEntry = { time: string; title: string; body: string };
+	type TabId = 'today' | 'fleet' | 'sites';
 
 	let inventory = $state<Inventory | null>(null);
+	let tab = $state<TabId>('today');
 	let cwd = $state('');
 	let port = $state<string | null>(null);
 	let portSource = $state<string | null>(null);
@@ -190,6 +192,47 @@
 			})
 			.filter((row) => row.behind > 0 || row.linked > 0);
 	});
+	const attentionRows = $derived((inventory?.projects ?? []).filter((row) => rowNeedsYou(row)));
+	const filepressBoard = $derived(pluginBoards.find((board) => board.plugin === 'filepress') ?? pluginBoards[0] ?? null);
+	const sitesNeedingYou = $derived((filepressBoard?.rows ?? []).filter((row) => siteNeedsYou(row.cells)));
+	const cascadeOnlyRows = $derived(
+		cascadeTargets.filter((target) => !attentionRows.some((row) => row.id === target.id)),
+	);
+	const todayCount = $derived(attentionRows.length + cascadeOnlyRows.length + sitesNeedingYou.length);
+	const filepressSyncIds = $derived(
+		(filepressBoard?.rows ?? [])
+			.filter((row) => row.actions.some((act) => act.id === 'sync'))
+			.map((row) => row.id),
+	);
+
+	function setTab(next: TabId): void {
+		tab = next;
+		try {
+			sessionStorage.setItem('localhelm.tab', next);
+		} catch {
+			/* ignore quota / private mode */
+		}
+	}
+
+	function rowNeedsYou(row: Project): boolean {
+		return badges(row).some((badge) => badge.text !== 'nothing to do');
+	}
+
+	function siteNeedsYou(cells: Record<string, string>): boolean {
+		const update = (cells.update ?? '').trim().toLowerCase();
+		const headers = (cells.headers ?? '').trim().toLowerCase();
+		const git = (cells.git ?? '').trim().toLowerCase();
+		const updateStale = Boolean(update) && update !== '—' && !update.startsWith('already') && !update.startsWith('skip');
+		return updateStale || headers.startsWith('merge') || git === 'dirty';
+	}
+
+	function canPublish(row: Project): boolean {
+		return !row.private && !row.missing && Boolean(row.npm.name);
+	}
+
+	function cascadeFor(id: string): CascadeTarget | undefined {
+		return cascadeTargets.find((row) => row.id === id);
+	}
 
 	function clearPlans(): void {
 		plannedPull = null;
@@ -633,6 +676,12 @@
 	}
 
 	onMount(() => {
+		try {
+			const saved = sessionStorage.getItem('localhelm.tab');
+			if (saved === 'today' || saved === 'fleet' || saved === 'sites') tab = saved;
+		} catch {
+			/* ignore */
+		}
 		void refresh();
 	});
 </script>
@@ -653,7 +702,7 @@
 					{#if inventory}
 						Fleet <code>{inventory.manifestPath}</code>
 					{:else}
-						No fleet yet — scan a folder on the right, then enroll.
+						No fleet yet — open the Fleet tab, scan a folder, then enroll.
 					{/if}
 					{#if port}
 						<span class="dim">
@@ -742,12 +791,22 @@
 
 		{#if inventory}
 			<div class="chips">
-				<span class="chip">{inventory.digest.projects} enrolled</span>
-				<span class="chip" class:hot={inventory.digest.unpublishedAhead > 0}>{inventory.digest.unpublishedAhead} unpublished</span>
-				<span class="chip" class:warm={inventory.digest.dirty > 0}>{inventory.digest.dirty} dirty</span>
-				<span class="chip" class:warm={inventory.digest.cascadeBehind > 0}>{inventory.digest.cascadeBehind} pins behind</span>
-				<span class="chip" class:bad={inventory.digest.missing > 0}>{inventory.digest.missing} missing</span>
-				<span class="chip" class:bad={inventory.digest.npmErrors > 0}>{inventory.digest.npmErrors} npm errors</span>
+				<button type="button" class="chip" onclick={() => setTab('fleet')}>{inventory.digest.projects} enrolled</button>
+				<button type="button" class="chip" class:hot={inventory.digest.unpublishedAhead > 0} onclick={() => setTab('today')}>
+					{inventory.digest.unpublishedAhead} unpublished
+				</button>
+				<button type="button" class="chip" class:warm={inventory.digest.dirty > 0} onclick={() => setTab('today')}>
+					{inventory.digest.dirty} dirty
+				</button>
+				<button type="button" class="chip" class:warm={inventory.digest.cascadeBehind > 0} onclick={() => setTab('today')}>
+					{inventory.digest.cascadeBehind} pins behind
+				</button>
+				<button type="button" class="chip" class:bad={inventory.digest.missing > 0} onclick={() => setTab('today')}>
+					{inventory.digest.missing} missing
+				</button>
+				<button type="button" class="chip" class:bad={inventory.digest.npmErrors > 0} onclick={() => setTab('today')}>
+					{inventory.digest.npmErrors} npm errors
+				</button>
 				<span class="chip quiet">
 					{fetchedAt ? `remotes fetched ${fetchedAt}` : 'remotes not fetched this session'}
 				</span>
@@ -761,137 +820,425 @@
 		{/if}
 	</header>
 
+	<nav class="tabs" aria-label="Dashboard views">
+		<button type="button" class="tab" class:active={tab === 'today'} class:hot={todayCount > 0} onclick={() => setTab('today')}>
+			Today
+			{#if todayCount > 0}<span class="count">{todayCount}</span>{/if}
+		</button>
+		<button type="button" class="tab" class:active={tab === 'fleet'} onclick={() => setTab('fleet')}>
+			Fleet
+			{#if inventory}<span class="count quiet">{inventory.digest.projects}</span>{/if}
+		</button>
+		<button type="button" class="tab" class:active={tab === 'sites'} onclick={() => setTab('sites')}>
+			Sites
+			{#if filepressBoard}<span class="count quiet">{filepressBoard.rows.length}</span>{/if}
+		</button>
+	</nav>
+
 	<main>
-		<section>
-			<div class="section-head">
-				<div>
-					<h2>Fleet</h2>
-					<p class="hint">Check rows to remove them from the fleet. Removing never deletes a folder.</p>
-				</div>
-				<div class="group-buttons">
-					<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => unenroll(false)}>
-						Plan remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
-					</button>
-					<button
-						class="btn btn-write"
-						disabled={Boolean(busy) || !plannedUnenroll || plannedUnenroll !== [...checkedIds].sort().join('|')}
-						onclick={() => unenroll(true)}
-						title={plannedUnenroll ? 'Rewrite localhelm.fleet.json without these rows.' : 'Run Plan remove first.'}
-					>
-						Remove from fleet
-					</button>
-				</div>
-			</div>
-
-			<div class="table-wrap">
-				<table>
-					<thead>
-						<tr>
-							<th class="tick"></th>
-							<th>project</th>
-							<th>local</th>
-							<th>on npm</th>
-							<th>git</th>
-							<th>fleet pins</th>
-							<th>needs you</th>
-							<th>version bump</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each inventory?.projects ?? [] as row (row.id)}
-							<tr>
-								<td class="tick"><input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedIds[row.id]} /></td>
-								<td>
-									<div class="id">{row.id}</div>
-									<div class="dim small">{row.npm.name ?? row.path}</div>
-								</td>
-								<td class="mono">{row.localVersion ?? '—'}</td>
-								<td class="mono" class:ahead={row.unpublishedAhead}>{npmLabel(row)}</td>
-								<td class="small">{gitSummary(row)}</td>
-								<td>
-									{#if row.pins.length}
-										<div class="pins">
-											{#each row.pins as pin (pin.fromFile + pin.name)}
-												<span class={`pin ${pinTone(pin)}`} title={`${pin.fromFile} package.json · ${pin.spec}${pin.note ? ` · ${pin.note}` : ''}`}>
-													{pinLabel(pin)}
-												</span>
-											{/each}
-										</div>
-									{:else}
-										<span class="dim">—</span>
-									{/if}
-								</td>
-								<td>
-									<div class="badges">
-										{#each badges(row) as badge (badge.text)}
-											<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
-										{/each}
-									</div>
-								</td>
-								<td>
-									<div class="bump">
-										<select aria-label={`bump kind for ${row.id}`} bind:value={bumpKind[row.id]}>
-											<option value="patch">patch</option>
-											<option value="minor">minor</option>
-											<option value="major">major</option>
-										</select>
-										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => bump(row.id, false)} title="Show the next version. Writes nothing.">
-											Plan
-										</button>
-										<button
-											class="btn btn-sm btn-write"
-											disabled={Boolean(busy) || !plannedTarget(row.id)}
-											onclick={() => bump(row.id, true)}
-											title={plannedTarget(row.id)
-												? `Write version ${plannedTarget(row.id)} to package.json. No tag, no publish.`
-												: 'Run Plan first for this bump size.'}
-										>
-											{plannedTarget(row.id) ? `Write ${plannedTarget(row.id)}` : 'Write'}
-										</button>
-									</div>
-								</td>
-							</tr>
-						{/each}
-						{#if !inventory?.projects.length}
-							<tr><td class="empty" colspan="8">Nothing enrolled yet. Scan a folder, tick the projects you ship, then enroll.</td></tr>
-						{/if}
-					</tbody>
-				</table>
-			</div>
-
-			<p class="legend">
-				<strong>Plan</strong> buttons only print what would happen. <strong>Write</strong> buttons change files on disk, one job at a time.
-				Publish is a named plan: bump and push only if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
-			</p>
-
-			{#each pluginBoards as board (board.plugin)}
-				<section class="plugin-board">
+		{#if tab === 'today'}
+			<div class="today-grid">
+				<section class="panel">
 					<div class="section-head">
 						<div>
-							<h2>{board.title}</h2>
-							<p class="hint">{board.note}</p>
+							<h2>Needs you</h2>
+							<p class="hint">
+								Packages that need a publish, cascade, or a look. Each name appears once.
+								{#if readyRows.length}
+									{readyRows.length} already unpublished-ahead.
+								{/if}
+							</p>
 						</div>
-						{#if board.plugin === 'filepress'}
-							{@const syncIds = board.rows.filter((row) => row.actions.some((act) => act.id === 'sync')).map((row) => row.id)}
+						{#if (inventory?.digest.unpublishedAhead ?? 0) > 0 || plannedShipIds.length}
 							<div class="group-buttons">
 								<button
 									class="btn"
-									disabled={Boolean(busy) || syncIds.length === 0}
-									onclick={() => runPluginJob(board.plugin, 'sync', syncIds, false)}
+									disabled={Boolean(busy) || shipRows.length === 0}
+									onclick={() => runPublish(shipRows.map((row) => row.id), false)}
+									title="Plan publish for every public enrolled package."
+								>
+									Plan publish all
+								</button>
+								<button
+									class="btn btn-write"
+									disabled={Boolean(busy) || plannedShipIds.length === 0}
+									onclick={() => requestPublish(plannedShipIds)}
+									title={plannedShipIds.length ? `Publish ${plannedShipIds.length} planned package(s).` : 'Run Plan publish all (or plan a card) first.'}
+								>
+									{plannedShipIds.length ? `Publish ${plannedShipIds.length}` : 'Publish all'}
+								</button>
+							</div>
+						{/if}
+					</div>
+
+					{#if (inventory?.digest.unpublishedAhead ?? 0) > 0 || plannedShipIds.length}
+						<p class="dim small">
+							{#if npmUser}
+								npm is logged in as <code>{npmUser}</code>.
+							{:else}
+								npm login is not visible yet — apply opens the npm auth page in your browser (LastPass / passkey).
+							{/if}
+							{publishAuthHint}
+						</p>
+						<label for="publish-otp">Authenticator OTP only if npm asks for a numeric code (not the browser login)</label>
+						<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
+					{/if}
+
+					{#if attentionRows.length === 0 && cascadeOnlyRows.length === 0}
+						<p class="quiet-banner">All quiet on the fleet. Open Fleet for the full table, or Sites for FilePress.</p>
+					{:else}
+						<ul class="need-list">
+							{#each attentionRows as row (row.id)}
+								{@const cascadeTarget = cascadeFor(row.id)}
+								<li class="need-card">
+									<div class="need-head">
+										<div>
+											<div class="id">{row.id}</div>
+											<div class="dim small">{row.npm.name ?? row.path} · {gitSummary(row)}</div>
+										</div>
+										<div class="badges">
+											{#each badges(row).filter((badge) => badge.text !== 'nothing to do') as badge (badge.text)}
+												<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
+											{/each}
+										</div>
+									</div>
+									{#if canPublish(row) && (row.unpublishedAhead || row.npm.status === 'none')}
+										<div class="bump">
+											<select aria-label={`publish bump kind for ${row.id}`} bind:value={bumpKind[row.id]} disabled={row.unpublishedAhead}>
+												<option value="patch">patch</option>
+												<option value="minor">minor</option>
+												<option value="major">major</option>
+											</select>
+											<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => runPublish([row.id], false)}>
+												Plan publish
+											</button>
+											<button
+												class="btn btn-sm btn-write"
+												disabled={Boolean(busy) || plannedPublish[row.id]?.action !== 'publish'}
+												onclick={() => requestPublish([row.id])}
+												title={plannedPublish[row.id]?.action === 'publish'
+													? plannedPublish[row.id]?.reason
+													: 'Run Plan publish first. You will confirm the registry version.'}
+											>
+												{plannedPublish[row.id]?.action === 'publish'
+													? `Publish ${plannedPublish[row.id]?.version}`
+													: 'Publish'}
+											</button>
+										</div>
+									{/if}
+									{#if cascadeTarget}
+										<div class="dim small cascade-note">
+											Dependents still on an old {cascadeTarget.npm} pin
+											{cascadeTarget.behind ? ` · ${cascadeTarget.behind} behind` : ''}
+											{cascadeTarget.linked ? ` · ${cascadeTarget.linked} local link` : ''}
+										</div>
+										<div class="bump">
+											<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => cascade(row.id, false)}>
+												Plan cascade
+											</button>
+											<button
+												class="btn btn-sm btn-write"
+												disabled={Boolean(busy) || !plannedCascade?.startsWith(`${row.id}@`)}
+												onclick={() => cascade(row.id, true)}
+												title={plannedCascade?.startsWith(`${row.id}@`)
+													? `Write pins and lockfiles for ${plannedCascade}. Commits by default.`
+													: 'Run Plan cascade first.'}
+											>
+												{plannedCascade?.startsWith(`${row.id}@`) ? `Write ${plannedCascade.slice(row.id.length + 1)}` : 'Write pins'}
+											</button>
+										</div>
+									{/if}
+								</li>
+							{/each}
+							{#each cascadeOnlyRows as target (target.id)}
+								<li class="need-card">
+									<div class="need-head">
+										<div>
+											<div class="id">{target.id}</div>
+											<div class="dim small">
+												{target.npm}{target.latest ? `@${target.latest}` : ''} is published — dependents still need the pin
+											</div>
+										</div>
+										<div class="badges">
+											{#if target.behind}<span class="badge warn">{target.behind} pin(s) behind</span>{/if}
+											{#if target.linked}<span class="badge info">{target.linked} local link</span>{/if}
+										</div>
+									</div>
+									<div class="bump">
+										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => cascade(target.id, false)}>
+											Plan cascade
+										</button>
+										<button
+											class="btn btn-sm btn-write"
+											disabled={Boolean(busy) || !plannedCascade?.startsWith(`${target.id}@`)}
+											onclick={() => cascade(target.id, true)}
+											title={plannedCascade?.startsWith(`${target.id}@`)
+												? `Write pins and lockfiles for ${plannedCascade}. Commits by default.`
+												: 'Run Plan cascade first.'}
+										>
+											{plannedCascade?.startsWith(`${target.id}@`)
+												? `Write ${plannedCascade.slice(target.id.length + 1)}`
+												: 'Write pins'}
+										</button>
+									</div>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</section>
+
+				<section class="panel">
+					<div class="section-head">
+						<div>
+							<h2>FilePress sites</h2>
+							<p class="hint">
+								Content sites, not npm packages — a name can match a fleet row (for example localberth) and still be a different thing.
+							</p>
+						</div>
+						<button type="button" class="btn btn-sm" onclick={() => setTab('sites')}>Open Sites</button>
+					</div>
+					{#if !filepressBoard}
+						<p class="dim small">No FilePress plugin loaded. Enroll the filepress checkout to see sites here.</p>
+					{:else}
+						<p class="dim small">
+							{filepressBoard.rows.length} sites
+							{#if sitesNeedingYou.length}
+								· {sitesNeedingYou.length} need a sync, header merge, or have a dirty git tree
+							{:else}
+								· none waiting on an engine sync
+							{/if}
+						</p>
+						<div class="group-buttons">
+							<button
+								class="btn"
+								disabled={Boolean(busy) || filepressSyncIds.length === 0}
+								onclick={() => runPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, false)}
+								title="Plan engine sync for every listed FilePress site. Writes nothing."
+							>
+								Plan engine sync
+							</button>
+							<button
+								class="btn btn-write"
+								disabled={Boolean(busy) || plannedPlugin !== pluginKey(filepressBoard.plugin, 'sync', filepressSyncIds)}
+								onclick={() => requestPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, 'Sync engine')}
+								title={plannedPlugin === pluginKey(filepressBoard.plugin, 'sync', filepressSyncIds)
+									? `Sync getfilepress + headers on ${filepressSyncIds.length} site(s).`
+									: 'Run Plan engine sync first.'}
+							>
+								{plannedPlugin === pluginKey(filepressBoard.plugin, 'sync', filepressSyncIds)
+									? `Sync ${filepressSyncIds.length} sites`
+									: 'Sync all'}
+							</button>
+						</div>
+						{#if sitesNeedingYou.length}
+							<ul class="need-list compact">
+								{#each sitesNeedingYou.slice(0, 8) as site (site.id)}
+									<li class="need-card">
+										<div class="id">{site.id}</div>
+										{#if enrolledIds.has(site.id)}
+											<div class="dim small">FilePress site — not the fleet package</div>
+										{/if}
+										<div class="dim small">{site.cells.update ?? '—'}</div>
+									</li>
+								{/each}
+							</ul>
+							{#if sitesNeedingYou.length > 8}
+								<p class="dim small">{sitesNeedingYou.length - 8} more on the Sites tab.</p>
+							{/if}
+						{/if}
+					{/if}
+				</section>
+			</div>
+		{:else if tab === 'fleet'}
+			<div class="fleet-layout">
+				<section class="panel">
+					<div class="section-head">
+						<div>
+							<h2>Fleet</h2>
+							<p class="hint">Check rows to remove them from the fleet. Removing never deletes a folder. Version bump only writes package.json — publish lives on Today.</p>
+						</div>
+						<div class="group-buttons">
+							<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => unenroll(false)}>
+								Plan remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
+							</button>
+							<button
+								class="btn btn-write"
+								disabled={Boolean(busy) || !plannedUnenroll || plannedUnenroll !== [...checkedIds].sort().join('|')}
+								onclick={() => unenroll(true)}
+								title={plannedUnenroll ? 'Rewrite localhelm.fleet.json without these rows.' : 'Run Plan remove first.'}
+							>
+								Remove from fleet
+							</button>
+						</div>
+					</div>
+
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th class="tick"></th>
+									<th>project</th>
+									<th>local</th>
+									<th>on npm</th>
+									<th>git</th>
+									<th>fleet pins</th>
+									<th>needs you</th>
+									<th>version bump</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each inventory?.projects ?? [] as row (row.id)}
+									<tr>
+										<td class="tick"><input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedIds[row.id]} /></td>
+										<td>
+											<div class="id">{row.id}</div>
+											<div class="dim small">{row.npm.name ?? row.path}</div>
+										</td>
+										<td class="mono">{row.localVersion ?? '—'}</td>
+										<td class="mono" class:ahead={row.unpublishedAhead}>{npmLabel(row)}</td>
+										<td class="small">{gitSummary(row)}</td>
+										<td>
+											{#if row.pins.length}
+												<div class="pins">
+													{#each row.pins as pin (pin.fromFile + pin.name)}
+														<span class={`pin ${pinTone(pin)}`} title={`${pin.fromFile} package.json · ${pin.spec}${pin.note ? ` · ${pin.note}` : ''}`}>
+															{pinLabel(pin)}
+														</span>
+													{/each}
+												</div>
+											{:else}
+												<span class="dim">—</span>
+											{/if}
+										</td>
+										<td>
+											<div class="badges">
+												{#each badges(row) as badge (badge.text)}
+													<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
+												{/each}
+											</div>
+										</td>
+										<td>
+											<div class="bump">
+												<select aria-label={`bump kind for ${row.id}`} bind:value={bumpKind[row.id]}>
+													<option value="patch">patch</option>
+													<option value="minor">minor</option>
+													<option value="major">major</option>
+												</select>
+												<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => bump(row.id, false)} title="Show the next version. Writes nothing.">
+													Plan
+												</button>
+												<button
+													class="btn btn-sm btn-write"
+													disabled={Boolean(busy) || !plannedTarget(row.id)}
+													onclick={() => bump(row.id, true)}
+													title={plannedTarget(row.id)
+														? `Write version ${plannedTarget(row.id)} to package.json. No tag, no publish.`
+														: 'Run Plan first for this bump size.'}
+												>
+													{plannedTarget(row.id) ? `Write ${plannedTarget(row.id)}` : 'Write'}
+												</button>
+											</div>
+										</td>
+									</tr>
+								{/each}
+								{#if !inventory?.projects.length}
+									<tr><td class="empty" colspan="8">Nothing enrolled yet. Scan a folder, tick the projects you ship, then enroll.</td></tr>
+								{/if}
+							</tbody>
+						</table>
+					</div>
+
+					<p class="legend">
+						<strong>Plan</strong> buttons only print what would happen. <strong>Write</strong> buttons change files on disk, one job at a time.
+						Publish is a named plan on Today: bump and push only if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
+					</p>
+				</section>
+
+				<section class="panel">
+					<h2>Add projects</h2>
+					<p class="hint">Scanning proposes folders. Nothing joins the fleet until you tick it and write.</p>
+					<label for="scan-root">Folder to scan</label>
+					<div class="row">
+						<input id="scan-root" bind:value={scanRoot} spellcheck="false" />
+						<button class="btn" disabled={Boolean(busy)} onclick={() => scan()}>Scan</button>
+					</div>
+
+					{#if candidates.length}
+						<p class="hint">
+							{candidates.filter((c) => !enrolledIds.has(c.id)).length} new ·
+							{candidates.filter((c) => enrolledIds.has(c.id)).length} already enrolled
+						</p>
+						<ul class="candidates">
+							{#each candidates as row (row.absPath)}
+								{@const already = enrolledIds.has(row.id)}
+								<li class:already>
+									<input
+										type="checkbox"
+										aria-label={`enroll ${row.id}`}
+										disabled={already}
+										bind:checked={selectedScan[row.absPath]}
+										onchange={() => (plannedEnroll = null)}
+									/>
+									<div>
+										<div class="id">{row.id}</div>
+										<div class="dim small">
+											{row.npmName ?? 'no package name'}{row.version ? ` ${row.version}` : ''}{row.git ? ' · git' : ' · no git'}{already
+												? ' · enrolled'
+												: ''}
+										</div>
+									</div>
+								</li>
+							{/each}
+						</ul>
+						<div class="group-buttons">
+							<button class="btn" disabled={Boolean(busy) || !checkedScan.length} onclick={() => enroll(false)}>
+								Plan enroll{checkedScan.length ? ` (${checkedScan.length})` : ''}
+							</button>
+							<button
+								class="btn btn-write"
+								disabled={Boolean(busy) || !plannedEnroll || plannedEnroll !== [...checkedScan].sort().join('|')}
+								onclick={() => enroll(true)}
+								title={plannedEnroll ? 'Write these rows into localhelm.fleet.json.' : 'Run Plan enroll first.'}
+							>
+								Add to fleet
+							</button>
+						</div>
+					{/if}
+				</section>
+			</div>
+		{:else}
+			{#each pluginBoards as board (board.plugin)}
+				<section class="panel plugin-board">
+					<div class="section-head">
+						<div>
+							<h2>{board.title}</h2>
+							<p class="hint">
+								{board.note}
+								{#if board.plugin === 'filepress'}
+									Site names can match a fleet package and still be a different checkout.
+								{/if}
+							</p>
+						</div>
+						{#if board.plugin === 'filepress'}
+							<div class="group-buttons">
+								<button
+									class="btn"
+									disabled={Boolean(busy) || filepressSyncIds.length === 0}
+									onclick={() => runPluginJob(board.plugin, 'sync', filepressSyncIds, false)}
 									title="Plan engine sync for every listed FilePress site. Writes nothing."
 								>
 									Plan engine sync
 								</button>
 								<button
 									class="btn btn-write"
-									disabled={Boolean(busy) || plannedPlugin !== pluginKey(board.plugin, 'sync', syncIds)}
-									onclick={() => requestPluginJob(board.plugin, 'sync', syncIds, 'Sync engine')}
-									title={plannedPlugin === pluginKey(board.plugin, 'sync', syncIds)
-										? `Sync getfilepress + headers on ${syncIds.length} site(s).`
+									disabled={Boolean(busy) || plannedPlugin !== pluginKey(board.plugin, 'sync', filepressSyncIds)}
+									onclick={() => requestPluginJob(board.plugin, 'sync', filepressSyncIds, 'Sync engine')}
+									title={plannedPlugin === pluginKey(board.plugin, 'sync', filepressSyncIds)
+										? `Sync getfilepress + headers on ${filepressSyncIds.length} site(s).`
 										: 'Run Plan engine sync first.'}
 								>
-									{plannedPlugin === pluginKey(board.plugin, 'sync', syncIds)
-										? `Sync ${syncIds.length} sites`
+									{plannedPlugin === pluginKey(board.plugin, 'sync', filepressSyncIds)
+										? `Sync ${filepressSyncIds.length} sites`
 										: 'Sync all'}
 								</button>
 							</div>
@@ -911,7 +1258,12 @@
 							<tbody>
 								{#each board.rows as row (row.id)}
 									<tr>
-										<td class="id">{row.id}</td>
+										<td class="id">
+											{row.id}
+											{#if enrolledIds.has(row.id)}
+												<div class="dim small">FilePress site — not the fleet package</div>
+											{/if}
+										</td>
 										{#each board.columns as col (col.id)}
 											<td class="small">{row.cells[col.id] ?? '—'}</td>
 										{/each}
@@ -947,207 +1299,39 @@
 						</table>
 					</div>
 				</section>
+			{:else}
+				<section class="panel">
+					<h2>Sites</h2>
+					<p class="hint">No plugins loaded. An enrolled project can expose <code>localhelm.plugin.mjs</code>.</p>
+				</section>
 			{/each}
-		</section>
+		{/if}
 
-		<aside>
-			<section class="panel">
-				<div class="section-head">
-					<div>
-						<h2>Ship</h2>
-						<p class="hint">
-							Plan first. Apply bumps and pushes only when needed, then <code>npm publish</code>.
-							{#if readyRows.length}
-								{readyRows.length} already unpublished-ahead.
-							{/if}
-						</p>
-					</div>
-					<div class="group-buttons">
-						<button
-							class="btn btn-sm"
-							disabled={Boolean(busy) || shipRows.length === 0}
-							onclick={() => runPublish(shipRows.map((row) => row.id), false)}
-							title="Plan publish for every public enrolled package."
-						>
-							Plan all
-						</button>
-						<button
-							class="btn btn-sm btn-write"
-							disabled={Boolean(busy) || plannedShipIds.length === 0}
-							onclick={() => requestPublish(plannedShipIds)}
-							title={plannedShipIds.length ? `Publish ${plannedShipIds.length} planned package(s).` : 'Run Plan all (or plan a row) first.'}
-						>
-							{plannedShipIds.length ? `Publish ${plannedShipIds.length}` : 'Publish all'}
-						</button>
-					</div>
-				</div>
-				<p class="dim small">
-					{#if npmUser}
-						npm is logged in as <code>{npmUser}</code>.
-					{:else}
-						npm login is not visible yet — apply opens the npm auth page in your browser (LastPass / passkey).
-					{/if}
-					{publishAuthHint}
-				</p>
-				<label for="publish-otp">Authenticator OTP only if npm asks for a numeric code (not the browser login)</label>
-				<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
-				{#if shipRows.length === 0}
-					<p class="dim small">No public packages enrolled.</p>
-				{:else}
-					<ul class="candidates">
-						{#each shipRows as row (row.id)}
-							<li>
-								<div class="grow">
-									<div class="id">{row.id}</div>
-									<div class="dim small">
-										{row.npm.name} {row.localVersion ?? '?'} local · npm {row.npm.latest ?? row.npm.status}
-										{row.unpublishedAhead ? ' · already bumped' : ' · will bump'}
-									</div>
-									<div class="group-buttons" style="margin-top: 0.35rem">
-										<select aria-label={`publish bump kind for ${row.id}`} bind:value={bumpKind[row.id]} disabled={row.unpublishedAhead}>
-											<option value="patch">patch</option>
-											<option value="minor">minor</option>
-											<option value="major">major</option>
-										</select>
-										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => runPublish([row.id], false)}>
-											Plan publish
-										</button>
-										<button
-											class="btn btn-sm btn-write"
-											disabled={Boolean(busy) || plannedPublish[row.id]?.action !== 'publish'}
-											onclick={() => requestPublish([row.id])}
-											title={plannedPublish[row.id]?.action === 'publish'
-												? plannedPublish[row.id]?.reason
-												: 'Run Plan publish first. You will confirm the registry version.'}
-										>
-											{plannedPublish[row.id]?.action === 'publish'
-												? `Publish ${plannedPublish[row.id]?.version}`
-												: 'Publish'}
-										</button>
-									</div>
-								</div>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</section>
-
-			<section class="panel">
-				<h2>Cascade</h2>
-				<p class="hint">
-					Retarget dependents' pins to the published <code>^V</code>. Does not publish those dependents or start the next wave.
-				</p>
-				{#if cascadeTargets.length === 0}
-					<p class="dim small">No enrolled pins are behind or still on link:/file:.</p>
-				{:else}
-					<ul class="candidates">
-						{#each cascadeTargets as row (row.id)}
-							<li>
-								<div class="grow">
-									<div class="id">{row.id}</div>
-									<div class="dim small">
-										{row.npm}{row.latest ? `@${row.latest}` : ''}
-										{row.behind ? ` · ${row.behind} behind` : ''}
-										{row.linked ? ` · ${row.linked} local link` : ''}
-									</div>
-									<div class="group-buttons" style="margin-top: 0.35rem">
-										<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => cascade(row.id, false)}>
-											Plan cascade
-										</button>
-										<button
-											class="btn btn-sm btn-write"
-											disabled={Boolean(busy) || !plannedCascade?.startsWith(`${row.id}@`)}
-											onclick={() => cascade(row.id, true)}
-											title={plannedCascade?.startsWith(`${row.id}@`)
-												? `Write pins and lockfiles for ${plannedCascade}. Commits by default.`
-												: 'Run Plan cascade first.'}
-										>
-											{plannedCascade?.startsWith(`${row.id}@`) ? `Write ${plannedCascade.slice(row.id.length + 1)}` : 'Write pins'}
-										</button>
-									</div>
-								</div>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</section>
-
-			<section class="panel">
-				<h2>Add projects</h2>
-				<p class="hint">Scanning proposes folders. Nothing joins the fleet until you tick it and write.</p>
-				<label for="scan-root">Folder to scan</label>
-				<div class="row">
-					<input id="scan-root" bind:value={scanRoot} spellcheck="false" />
-					<button class="btn" disabled={Boolean(busy)} onclick={() => scan()}>Scan</button>
-				</div>
-
-				{#if candidates.length}
-					<p class="hint">
-						{candidates.filter((c) => !enrolledIds.has(c.id)).length} new ·
-						{candidates.filter((c) => enrolledIds.has(c.id)).length} already enrolled
-					</p>
-					<ul class="candidates">
-						{#each candidates as row (row.absPath)}
-							{@const already = enrolledIds.has(row.id)}
-							<li class:already>
-								<input
-									type="checkbox"
-									aria-label={`enroll ${row.id}`}
-									disabled={already}
-									bind:checked={selectedScan[row.absPath]}
-									onchange={() => (plannedEnroll = null)}
-								/>
-								<div>
-									<div class="id">{row.id}</div>
-									<div class="dim small">
-										{row.npmName ?? 'no package name'}{row.version ? ` ${row.version}` : ''}{row.git ? ' · git' : ' · no git'}{already
-											? ' · enrolled'
-											: ''}
-									</div>
-								</div>
-							</li>
-						{/each}
-					</ul>
-					<div class="group-buttons">
-						<button class="btn" disabled={Boolean(busy) || !checkedScan.length} onclick={() => enroll(false)}>
-							Plan enroll{checkedScan.length ? ` (${checkedScan.length})` : ''}
-						</button>
-						<button
-							class="btn btn-write"
-							disabled={Boolean(busy) || !plannedEnroll || plannedEnroll !== [...checkedScan].sort().join('|')}
-							onclick={() => enroll(true)}
-							title={plannedEnroll ? 'Write these rows into localhelm.fleet.json.' : 'Run Plan enroll first.'}
-						>
-							Add to fleet
-						</button>
-					</div>
-				{/if}
-			</section>
-
-			<section class="panel">
-				<div class="section-head">
+		<section class="panel activity-dock">
+			<div class="section-head">
+				<div>
 					<h2>Activity</h2>
-					{#if entries.length}
-						<button class="btn btn-sm" onclick={() => (entries = [])}>Clear</button>
-					{/if}
+					<p class="hint">Every plan and write, newest first — the same output the CLI prints.</p>
 				</div>
-				<p class="hint">Every plan and write, newest first — the same output the CLI prints.</p>
-				{#if entries.length === 0}
-					<p class="dim small">Nothing yet.</p>
-				{:else}
-					<ul class="log">
-						{#each entries as entry (entry.time + entry.title)}
-							<li>
-								<details>
-									<summary><span class="dim small">{entry.time}</span> {entry.title}</summary>
-									<pre>{entry.body}</pre>
-								</details>
-							</li>
-						{/each}
-					</ul>
+				{#if entries.length}
+					<button class="btn btn-sm" onclick={() => (entries = [])}>Clear</button>
 				{/if}
-			</section>
-		</aside>
+			</div>
+			{#if entries.length === 0}
+				<p class="dim small">Nothing yet.</p>
+			{:else}
+				<ul class="log">
+					{#each entries as entry (entry.time + entry.title)}
+						<li>
+							<details>
+								<summary><span class="dim small">{entry.time}</span> {entry.title}</summary>
+								<pre>{entry.body}</pre>
+							</details>
+						</li>
+					{/each}
+				</ul>
+			{/if}
+		</section>
 	</main>
 </div>
 
@@ -1167,8 +1351,8 @@
 <style>
 	.shell {
 		min-height: 100vh;
-		background: #09090b;
-		color: #e4e4e7;
+		background: #1c1c21;
+		color: #ececef;
 		font-family:
 			ui-sans-serif,
 			system-ui,
@@ -1176,7 +1360,8 @@
 	}
 
 	header {
-		border-bottom: 1px solid #27272a;
+		background: #242429;
+		border-bottom: 1px solid #3d3d44;
 		padding: 1.1rem 1.5rem;
 	}
 
@@ -1204,7 +1389,7 @@
 		font-size: 0.68rem;
 		letter-spacing: 0.2em;
 		text-transform: uppercase;
-		color: #71717a;
+		color: #9b9ba3;
 	}
 
 	h1 {
@@ -1221,17 +1406,17 @@
 
 	.sub {
 		font-size: 0.82rem;
-		color: #a1a1aa;
+		color: #c4c4cc;
 	}
 
 	.hint {
 		font-size: 0.75rem;
-		color: #8b8b93;
+		color: #a8a8b0;
 		margin: 0.2rem 0 0.5rem;
 	}
 
 	.dim {
-		color: #71717a;
+		color: #8b8b93;
 	}
 
 	.small {
@@ -1251,14 +1436,15 @@
 	}
 
 	.group {
-		border: 1px solid #27272a;
+		border: 1px solid #4a4a52;
+		background: #323238;
 		border-radius: 0.6rem;
 		padding: 0.45rem 0.6rem 0.55rem;
 	}
 
 	.group-write {
-		border-color: #52400f;
-		background: #1a1509;
+		border-color: #8a6d1f;
+		background: #3d3420;
 	}
 
 	.group-label {
@@ -1266,7 +1452,7 @@
 		font-size: 0.66rem;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		color: #8b8b93;
+		color: #b4b4bc;
 		margin-bottom: 0.35rem;
 	}
 
@@ -1278,9 +1464,9 @@
 	}
 
 	.btn {
-		border: 1px solid #3f3f46;
-		background: #18181b;
-		color: #e4e4e7;
+		border: 1px solid #5a5a64;
+		background: #3c3c44;
+		color: #ececef;
 		border-radius: 0.4rem;
 		padding: 0.28rem 0.62rem;
 		font-size: 0.8rem;
@@ -1288,12 +1474,13 @@
 	}
 
 	.btn:hover:not(:disabled) {
-		border-color: #6b6b75;
+		border-color: #8b8b93;
+		background: #484850;
 	}
 
 	.btn-write {
-		border-color: #a16207;
-		background: #2a1f05;
+		border-color: #c9a227;
+		background: #4a3a12;
 		color: #fde68a;
 	}
 
@@ -1315,30 +1502,38 @@
 	}
 
 	.chip {
-		border: 1px solid #27272a;
+		border: 1px solid #4c4c54;
+		background: #333338;
 		border-radius: 999px;
 		padding: 0.12rem 0.6rem;
 		font-size: 0.72rem;
-		color: #a1a1aa;
+		color: #c4c4cc;
+		font: inherit;
+		cursor: pointer;
+	}
+
+	button.chip {
+		font-size: 0.72rem;
 	}
 
 	.chip.hot {
-		border-color: #a16207;
+		border-color: #c9a227;
 		color: #fcd34d;
 	}
 
 	.chip.warm {
-		border-color: #4d4d16;
-		color: #d9d97a;
+		border-color: #8a8a2a;
+		color: #e4e48a;
 	}
 
 	.chip.bad {
-		border-color: #7f1d1d;
+		border-color: #b45454;
 		color: #fca5a5;
 	}
 
 	.chip.quiet {
 		border-style: dashed;
+		cursor: default;
 	}
 
 	.line {
@@ -1358,15 +1553,78 @@
 		color: #93c5fd;
 	}
 
-	main {
-		display: grid;
-		gap: 1.75rem;
-		padding: 1.25rem 1.5rem 2.5rem;
+	.tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		padding: 0.85rem 1.5rem 0;
+		border-bottom: 1px solid #3d3d44;
 	}
 
-	@media (min-width: 1280px) {
-		main {
-			grid-template-columns: minmax(0, 1fr) 23rem;
+	.tab {
+		border: 1px solid transparent;
+		background: transparent;
+		color: #a8a8b0;
+		padding: 0.5rem 0.95rem;
+		border-radius: 0.55rem 0.55rem 0 0;
+		font-size: 0.88rem;
+		cursor: pointer;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.tab:hover {
+		color: #ececef;
+		background: #2c2c32;
+	}
+
+	.tab.active {
+		background: #333338;
+		color: #f4f4f5;
+		border-color: #4c4c54;
+		border-bottom-color: #333338;
+		margin-bottom: -1px;
+	}
+
+	.tab.hot .count {
+		color: #fcd34d;
+	}
+
+	.tab .count {
+		font-size: 0.7rem;
+		border: 1px solid #5a5a64;
+		border-radius: 999px;
+		padding: 0 0.4rem;
+		color: #d4d4dc;
+	}
+
+	.tab .count.quiet {
+		color: #a8a8b0;
+	}
+
+	main {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		padding: 1.1rem 1.5rem 2.5rem;
+	}
+
+	.today-grid,
+	.fleet-layout {
+		display: grid;
+		gap: 1rem;
+	}
+
+	@media (min-width: 1100px) {
+		.today-grid {
+			grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.85fr);
+			align-items: start;
+		}
+
+		.fleet-layout {
+			grid-template-columns: minmax(0, 1fr) 22rem;
+			align-items: start;
 		}
 	}
 
@@ -1380,12 +1638,13 @@
 	}
 
 	.plugin-board {
-		margin-top: 1.75rem;
+		margin-top: 0;
 	}
 
 	.table-wrap {
 		overflow-x: auto;
-		border: 1px solid #27272a;
+		border: 1px solid #4c4c54;
+		background: #2c2c32;
 		border-radius: 0.6rem;
 	}
 
@@ -1396,8 +1655,8 @@
 	}
 
 	thead {
-		background: #131316;
-		color: #8b8b93;
+		background: #3a3a42;
+		color: #c4c4cc;
 	}
 
 	th {
@@ -1411,7 +1670,7 @@
 
 	td {
 		padding: 0.55rem 0.7rem;
-		border-top: 1px solid #232326;
+		border-top: 1px solid #44444c;
 		vertical-align: top;
 	}
 
@@ -1428,7 +1687,7 @@
 	}
 
 	.empty {
-		color: #71717a;
+		color: #8b8b93;
 		padding: 1.4rem 0.7rem;
 	}
 
@@ -1437,75 +1696,121 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.25rem;
-		max-width: 20rem;
+		max-width: 22rem;
 	}
 
 	.badge,
 	.pin {
-		border: 1px solid #3f3f46;
+		border: 1px solid #5a5a64;
 		border-radius: 0.35rem;
 		padding: 0.05rem 0.35rem;
 		font-size: 0.7rem;
 		white-space: nowrap;
+		background: #2a2a30;
 	}
 
 	.badge.ship {
-		border-color: #a16207;
-		background: #2a1f05;
+		border-color: #c9a227;
+		background: #4a3a12;
 		color: #fde68a;
 	}
 
 	.badge.warn {
-		border-color: #4d4d16;
+		border-color: #8a8a2a;
 		color: #e4e48a;
+		background: #3a3a16;
 	}
 
 	.badge.bad {
-		border-color: #7f1d1d;
+		border-color: #b45454;
 		color: #fca5a5;
+		background: #3a1c1c;
 	}
 
 	.badge.info {
-		color: #8b8b93;
+		color: #c4c4cc;
 	}
 
 	.pin-ok {
-		border-color: #14532d;
+		border-color: #2d6a45;
 		color: #86efac;
 	}
 
 	.pin-behind {
-		border-color: #a16207;
+		border-color: #c9a227;
 		color: #fcd34d;
 	}
 
 	.pin-local {
-		border-color: #1e3a8a;
+		border-color: #3b6ea8;
 		color: #93c5fd;
 	}
 
 	.legend {
 		margin-top: 0.7rem;
 		font-size: 0.74rem;
-		color: #8b8b93;
-	}
-
-	aside {
-		display: flex;
-		flex-direction: column;
-		gap: 1.25rem;
+		color: #a8a8b0;
 	}
 
 	.panel {
-		border: 1px solid #27272a;
-		border-radius: 0.6rem;
-		padding: 0.9rem;
+		border: 1px solid #4c4c54;
+		background: #333338;
+		border-radius: 0.7rem;
+		padding: 0.95rem 1rem;
+		box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
+	}
+
+	.quiet-banner {
+		background: #2f3d32;
+		border: 1px solid #3f6b4a;
+		color: #b8e0c2;
+		padding: 0.8rem 1rem;
+		border-radius: 0.55rem;
+		margin: 0.4rem 0 0;
+		font-size: 0.84rem;
+	}
+
+	.need-list {
+		list-style: none;
+		margin: 0.65rem 0 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.55rem;
+	}
+
+	.need-list.compact {
+		max-height: 18rem;
+		overflow: auto;
+	}
+
+	.need-card {
+		background: #3d3d46;
+		border: 1px solid #585860;
+		border-radius: 0.55rem;
+		padding: 0.7rem 0.8rem;
+	}
+
+	.need-head {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0.5rem;
+		margin-bottom: 0.45rem;
+	}
+
+	.cascade-note {
+		margin: 0.35rem 0 0.25rem;
+	}
+
+	.activity-dock .log {
+		max-height: 14rem;
 	}
 
 	label {
 		display: block;
 		font-size: 0.7rem;
-		color: #8b8b93;
+		color: #a8a8b0;
 		margin-bottom: 0.25rem;
 	}
 
@@ -1517,18 +1822,18 @@
 	input:not([type]) {
 		flex: 1;
 		min-width: 0;
-		border: 1px solid #3f3f46;
-		background: #18181b;
-		color: #e4e4e7;
+		border: 1px solid #5a5a64;
+		background: #3c3c44;
+		color: #ececef;
 		border-radius: 0.4rem;
 		padding: 0.25rem 0.5rem;
 		font-size: 0.8rem;
 	}
 
 	select {
-		border: 1px solid #3f3f46;
-		background: #18181b;
-		color: #e4e4e7;
+		border: 1px solid #5a5a64;
+		background: #3c3c44;
+		color: #ececef;
 		border-radius: 0.35rem;
 		font-size: 0.72rem;
 		padding: 0.15rem 0.2rem;
@@ -1562,7 +1867,8 @@
 		display: flex;
 		gap: 0.5rem;
 		align-items: flex-start;
-		border: 1px solid #27272a;
+		border: 1px solid #4c4c54;
+		background: #3d3d46;
 		border-radius: 0.4rem;
 		padding: 0.3rem 0.45rem;
 	}
@@ -1572,7 +1878,8 @@
 	}
 
 	.log li {
-		border: 1px solid #27272a;
+		border: 1px solid #4c4c54;
+		background: #2c2c32;
 		border-radius: 0.4rem;
 		padding: 0.3rem 0.45rem;
 		font-size: 0.76rem;
@@ -1588,6 +1895,6 @@
 		overflow: auto;
 		white-space: pre-wrap;
 		font-size: 0.68rem;
-		color: #a1a1aa;
+		color: #c4c4cc;
 	}
 </style>

@@ -76,6 +76,10 @@
         {
           "timestamp": "2026-08-23T18:00:00Z",
           "text": "Named publish (D19): bump+commit if local is on npm, push if origin is behind, then npm publish. Never --force."
+        },
+        {
+          "timestamp": "2026-08-23T18:45:00Z",
+          "text": "Dashboard UX (D20): Today / Fleet / Sites tabs. Combined needs-you is the default. Lighter panels. FilePress site vs fleet package labeled when names match."
         }
       ]
     },
@@ -348,6 +352,16 @@
       "decision": "Named publish is in. Plan shows bump+commit (only if local is already on npm), push (only if origin is behind or a bump will make it so), then npm publish --access public. Apply requires named project ids and a dashboard confirm listing the registry version. Never --force. OTP is optional --otp / dashboard field. Agents still do not apply publish unless the operator asked.",
       "rationale": "Operator 2026-08-23: publishing by hand (bump, commit, push, npm publish) had become a chore. Lifts D4's 'future option'.",
       "alternatives_considered": ["Keep ready-only", "Always bump", "pnpm publish", "fleet-wide apply"],
+      "status": "active"
+    },
+    {
+      "id": "d20",
+      "timestamp": "2026-08-23T18:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 6,
+      "decision": "Dashboard is tabbed: Today (default combined needs-you + FilePress snapshot + activity), Fleet (full table, bump, enroll), Sites (plugin board). Ship and cascade actions live on the cards that need them, not a second sidebar list. FilePress rows that share a fleet id are labeled as sites.",
+      "rationale": "Operator 2026-08-23: localhelm and localberth appeared twice on one screen; the all-black board was hard to follow. Tabs plus lighter panels keep the same plan/apply jobs without repeating every package.",
+      "alternatives_considered": ["Keep one scrolling page", "Hamburger the ship sidebar", "Merge FilePress site rows into fleet"],
       "status": "active"
     }
   ],
