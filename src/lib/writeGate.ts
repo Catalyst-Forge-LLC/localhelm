@@ -22,6 +22,17 @@ export type PublishGateRow = {
 	git: GateGit;
 };
 
+/** Short line for fetch/push stderr. Keep the raw text in stderr / titles. */
+export function plainGitError(raw: string): string {
+	if (/permission denied \(publickey\)/i.test(raw)) return 'origin rejected the SSH key';
+	if (/authentication failed|could not read username/i.test(raw)) return 'origin needs credentials';
+	if (/timed out|operation timed out/i.test(raw)) return 'origin timed out';
+	if (/could not resolve host/i.test(raw)) return 'origin host not found';
+	if (/could not read from remote/i.test(raw)) return 'origin unreachable';
+	const first = raw.split(/\r?\n/).find((line) => line.trim().length > 0) ?? raw;
+	return first.slice(0, 90);
+}
+
 /** Same skips as planPushOne. Dirty is not a skip — uncommitted files stay local. */
 export function whyNotPush(git: GateGit): string | undefined {
 	if (!git.repo) return 'no git';

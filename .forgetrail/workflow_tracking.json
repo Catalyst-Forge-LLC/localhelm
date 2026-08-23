@@ -469,6 +469,16 @@
       "rationale": "Operator 2026-08-23: after the dirty-push skip, asked if other rules were similarly wrong. The remaining skips were correct; the UI was offering writes the plan refused.",
       "alternatives_considered": ["Allow dirty publish", "Keep the buttons and rely on the empty modal"],
       "status": "active"
+    },
+    {
+      "id": "d30",
+      "timestamp": "2026-08-23T21:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 13,
+      "decision": "Today shows the ahead count once (on Push N). gitSummary drops ahead/behind. Failed push apply sets a banner from plainGitError. LocalHelm does not rewrite git@ remotes to HTTPS.",
+      "rationale": "Operator 2026-08-23: ember-dossier push failed with Permission denied (publickey), and Today repeated 28 to push three times. Same SSH gap as session 4; HTTPS probe to that repo works.",
+      "alternatives_considered": ["Rewrite fleet remotes to HTTPS", "Start ssh-agent from serve"],
+      "status": "active"
     }
   ],
   "gotchas": [
@@ -495,6 +505,14 @@
       "issue": "Leftover vite dev process kept port 54322 bound after the parent serve was killed, so the next localhelm serve failed with strictPort.",
       "resolution": "Kill the whole tree (taskkill /T) or check the port owner before reserving; a LocalBerth lease avoids the collision.",
       "category": "tooling"
+    },
+    {
+      "timestamp": "2026-08-23T21:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 13,
+      "issue": "Dashboard git push to git@github.com failed: Permission denied (publickey). This process has no ssh-agent. HTTPS to the same repo works (localhelm and localberth already use HTTPS).",
+      "resolution": "Show a banner (origin rejected the SSH key). Do not rewrite remotes unless asked. Operator can switch origin to HTTPS or start serve from a shell where ssh-add -l lists a GitHub key.",
+      "category": "integration"
     },
     {
       "timestamp": "2026-08-20T20:50:00Z",

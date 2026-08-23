@@ -20,7 +20,7 @@ export { applyBump, planBump } from './bump.js';
 export type { BumpPlan } from './bump.js';
 export { applyExport, defaultExportPath, planExport } from './export.js';
 export type { ExportPlan } from './export.js';
-export { whyNotPublish, whyNotPush, writableCascadeCount } from './writeGate.js';
+export { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount } from './writeGate.js';
 export type { GateGit, PublishGateRow } from './writeGate.js';
 export { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds } from './git.js';
 export type { GitJobRow } from './git.js';

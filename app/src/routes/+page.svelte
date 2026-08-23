@@ -5,7 +5,7 @@
 	import Icon from '$lib/Icon.svelte';
 	import IconButton from '$lib/IconButton.svelte';
 	import { pluginPlanWriteIds } from '$lib/pluginPlan';
-	import { whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
+	import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
 
 	type BumpKind = 'patch' | 'minor' | 'major';
 	type Pin = {
@@ -729,11 +729,17 @@
 			};
 			const eligible = data.rows.filter((r) => r.action === 'push');
 			const failed = eligible.filter((r) => r.reason !== 'pushed');
+			const ok = eligible.length - failed.length;
 			note(
-				`push --apply — ${eligible.filter((r) => r.reason === 'pushed').length} pushed, ${failed.length} failed`,
+				failed.length
+					? `push --apply — ${ok} pushed, ${failed.length} failed: ${failed.map((r) => `${r.id}: ${r.reason ?? 'push failed'}`).join(' · ')}`
+					: `push --apply — ${ok} pushed`,
 				data,
 			);
 			await refresh();
+			if (failed.length) {
+				error = failed.map((r) => `${r.id}: ${r.reason ?? 'push failed'}`).join(' · ');
+			}
 		});
 	}
 
@@ -934,25 +940,22 @@
 		});
 	}
 
-	function plainGitError(raw: string): string {
-		if (/permission denied \(publickey\)/i.test(raw)) return 'origin rejected the SSH key';
-		if (/authentication failed|could not read username/i.test(raw)) return 'origin needs credentials';
-		if (/timed out|operation timed out/i.test(raw)) return 'origin timed out';
-		if (/could not resolve host/i.test(raw)) return 'origin host not found';
-		if (/could not read from remote/i.test(raw)) return 'origin unreachable';
-		return raw.split('\n')[0].slice(0, 90);
-	}
-
 	function gitSummary(row: Project): string {
 		if (row.missing) return 'folder missing';
 		if (!row.git.repo) return 'not a git repo';
 		if (row.git.error) return plainGitError(row.git.error);
 		const parts = [row.git.branch ?? 'detached', row.git.dirty ? 'dirty' : 'clean'];
-		if (row.git.ahead) parts.push(`${row.git.ahead} to push`);
-		if (row.git.behind) parts.push(`${row.git.behind} to pull`);
-		if (!row.git.ahead && !row.git.behind && row.git.origin) parts.push('in sync');
 		if (!row.git.origin) parts.push('no origin');
+		else if (!row.git.ahead && !row.git.behind) parts.push('in sync');
 		return parts.join(' · ');
+	}
+
+	function todayBadges(row: Project): Badge[] {
+		return badges(row).filter((badge) => {
+			if (badge.text === 'nothing to do') return false;
+			if (canPush(row) && badge.text.endsWith(' to push')) return false;
+			return true;
+		});
 	}
 
 	function dirtDetail(row: Project): string {
@@ -1259,7 +1262,7 @@
 										</div>
 									</div>
 									<div class="badges">
-										{#each badges(row).filter((badge) => badge.text !== 'nothing to do') as badge (badge.text)}
+										{#each todayBadges(row) as badge (badge.text)}
 											<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
 										{/each}
 									</div>
@@ -1309,7 +1312,7 @@
 												onclick={() => startPush([row.id])}
 												title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
 											>
-												Push
+												Push{row.git.ahead ? ` ${row.git.ahead}` : ''}
 											</button>
 										{/if}
 										{#if need !== 'pins' && cascadeTarget && cascadeTarget.writable > 0}

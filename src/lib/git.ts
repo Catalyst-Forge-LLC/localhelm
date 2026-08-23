@@ -3,7 +3,7 @@ import type { LoadedManifest } from './manifest.js';
 import { joinRoot } from './paths.js';
 import { pathExists } from './pkg.js';
 import type { GitCell } from './types.js';
-import { whyNotPush } from './writeGate.js';
+import { plainGitError, whyNotPush } from './writeGate.js';
 
 export function runGit(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr: string } {
 	const result = spawnSync('git', ['-C', cwd, ...args], {
@@ -277,6 +277,6 @@ export function applyPush(workspaceRoot: string, row: GitJobRow): GitJobRow {
 		...row,
 		stdout: result.stdout.trim(),
 		stderr: result.stderr,
-		reason: result.ok ? 'pushed' : result.stderr,
+		reason: result.ok ? 'pushed' : plainGitError(result.stderr),
 	};
 }

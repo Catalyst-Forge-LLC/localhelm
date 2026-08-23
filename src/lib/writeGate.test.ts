@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { whyNotPublish, whyNotPush, writableCascadeCount, type PublishGateRow } from './writeGate.js';
+import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount, type PublishGateRow } from './writeGate.js';
 
 function git(partial: Partial<PublishGateRow['git']> = {}): PublishGateRow['git'] {
 	return {
@@ -25,6 +25,15 @@ function row(partial: Partial<PublishGateRow> = {}): PublishGateRow {
 		...partial,
 	};
 }
+
+describe('plainGitError', () => {
+	it('shortens SSH publickey denial', () => {
+		assert.equal(
+			plainGitError('git@github.com: Permission denied (publickey).\r\nfatal: Could not read from remote repository.'),
+			'origin rejected the SSH key',
+		);
+	});
+});
 
 describe('whyNotPush', () => {
 	it('allows ahead commits on a dirty tree', () => {
