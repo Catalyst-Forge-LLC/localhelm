@@ -5,9 +5,10 @@ import { applyPush, readGit, type GitJobRow } from './git.js';
 import type { LoadedManifest } from './manifest.js';
 import { joinRoot } from './paths.js';
 import { rootPkgPath } from './pkg.js';
-import { bumpTriple, compareSemver, type BumpKind } from './semver.js';
+import { bumpTriple, type BumpKind } from './semver.js';
 import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
+import { whyNotPublish } from './writeGate.js';
 
 export type PublishStep =
 	| { kind: 'bump'; from: string; to: string; bumpKind: BumpKind }
@@ -153,23 +154,10 @@ function planPublishOne(row: ProjectStatus, kind: BumpKind): PublishRow {
 		action: 'skip',
 		steps: [],
 	};
-	if (row.missing) return { ...base, reason: 'folder missing' };
-	if (row.private) return { ...base, reason: 'private' };
-	if (row.error) return { ...base, reason: row.error };
-	if (!row.npm.name) return { ...base, reason: 'no npm package name' };
-	if (!row.localVersion) return { ...base, reason: 'no local version' };
-	if (row.npm.status === 'error') return { ...base, reason: row.npm.error ?? 'npm lookup failed' };
-	if (row.npm.status === 'private') return { ...base, reason: 'private' };
-	if (!row.git.repo) return { ...base, reason: 'not a git repo' };
-	if (row.git.busy) return { ...base, reason: `mid-${row.git.busy}` };
-	if (row.git.detached) return { ...base, reason: 'detached' };
-	if (row.git.dirty) return { ...base, reason: 'dirty' };
+	const blocked = whyNotPublish(row, kind);
+	if (blocked) return { ...base, reason: blocked };
 
 	const neverPublished = row.npm.status === 'none';
-	if (!neverPublished && row.npm.latest) {
-		const cmp = compareSemver(row.localVersion, row.npm.latest);
-		if (cmp !== null && cmp < 0) return { ...base, reason: 'local is behind npm' };
-	}
 
 	const steps: PublishStep[] = [];
 	let version = row.localVersion;

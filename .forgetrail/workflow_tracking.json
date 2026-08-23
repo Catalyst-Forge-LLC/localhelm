@@ -459,6 +459,16 @@
       "rationale": "Operator 2026-08-23: aibreze showed 2 to push then the modal said nothing to push because the plan treated dirty as a skip. git push does not require a clean tree.",
       "alternatives_considered": ["Hide Push when dirty", "Keep skip-dirty and change the badge"],
       "status": "active"
+    },
+    {
+      "id": "d29",
+      "timestamp": "2026-08-23T21:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 13,
+      "decision": "Today and Fleet only offer a write when the matching plan would act. Shared gates live in writeGate.ts (whyNotPush, whyNotPublish, writableCascadeCount). Publish stays skip-dirty; Write pins is not offered for link:/file: or dirty consumers.",
+      "rationale": "Operator 2026-08-23: after the dirty-push skip, asked if other rules were similarly wrong. The remaining skips were correct; the UI was offering writes the plan refused.",
+      "alternatives_considered": ["Allow dirty publish", "Keep the buttons and rely on the empty modal"],
+      "status": "active"
     }
   ],
   "gotchas": [

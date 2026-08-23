@@ -5,6 +5,7 @@
 	import Icon from '$lib/Icon.svelte';
 	import IconButton from '$lib/IconButton.svelte';
 	import { pluginPlanWriteIds } from '$lib/pluginPlan';
+	import { whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
 
 	type BumpKind = 'patch' | 'minor' | 'major';
 	type Pin = {
@@ -30,7 +31,7 @@
 		npm?: string;
 		steps: PublishStep[];
 	};
-	type CascadeTarget = { id: string; npm: string; latest: string; behind: number; linked: number };
+	type CascadeTarget = { id: string; npm: string; latest: string; behind: number; linked: number; writable: number };
 	type PluginBoard = {
 		plugin: string;
 		title: string;
@@ -162,16 +163,7 @@
 	);
 	const readyRows = $derived(
 		(inventory?.projects ?? [])
-			.filter(
-				(row) =>
-					row.unpublishedAhead &&
-					!row.private &&
-					!row.missing &&
-					row.git.repo &&
-					!row.git.dirty &&
-					!row.git.busy &&
-					!row.git.detached,
-			)
+			.filter((row) => row.unpublishedAhead && !whyNotPublish(row))
 			.map(
 				(row): ReadyRow => ({
 					id: row.id,
@@ -196,6 +188,7 @@
 					latest: pub.npm.latest ?? '',
 					behind,
 					linked,
+					writable: writableCascadeCount(pub.id, projects),
 				};
 			})
 			.filter((row) => row.behind > 0 || row.linked > 0);
@@ -210,7 +203,7 @@
 	const visiblePortBoard = $derived(portPane === 'observed' ? observedBoard : leaseBoard);
 	const portsNeedingYou = $derived((leaseBoard?.rows ?? []).filter((row) => portNeedsYou(row.cells)));
 	const cascadeOnlyRows = $derived(
-		cascadeTargets.filter((target) => !attentionRows.some((row) => row.id === target.id)),
+		cascadeTargets.filter((target) => target.writable > 0 && !attentionRows.some((row) => row.id === target.id)),
 	);
 	const todayCount = $derived(
 		attentionRows.length + cascadeOnlyRows.length + sitesNeedingYou.length + portsNeedingYou.length,
@@ -218,8 +211,11 @@
 	const filepressSyncIds = $derived(sitesNeedingYou.map((row) => row.id));
 	const checkedPublishIds = $derived(checkedIds.filter((id) => {
 		const row = inventory?.projects.find((p) => p.id === id);
-		return row ? canPublish(row) : false;
+		return row ? !whyNotPublish(row) : false;
 	}));
+	const unpublishedPublishIds = $derived(
+		shipRows.filter((row) => row.unpublishedAhead && !whyNotPublish(row)).map((row) => row.id),
+	);
 	const filepressPushIds = $derived(
 		(filepressBoard?.rows ?? [])
 			.filter((row) => row.actions.some((act) => act.id === 'push'))
@@ -282,7 +278,11 @@
 
 
 	function canPublish(row: Project): boolean {
-		return !row.private && !row.missing && Boolean(row.npm.name);
+		return !whyNotPublish(row);
+	}
+
+	function canPush(row: Project): boolean {
+		return !whyNotPush(row.git);
 	}
 
 	function cascadeFor(id: string): CascadeTarget | undefined {
@@ -290,9 +290,9 @@
 	}
 
 	function todayNeed(row: Project): 'publish' | 'push' | 'pins' | 'look' {
-		if (row.unpublishedAhead) return 'publish';
-		if ((row.git.ahead ?? 0) > 0) return 'push';
-		if (cascadeFor(row.id)) return 'pins';
+		if (row.unpublishedAhead && canPublish(row)) return 'publish';
+		if (canPush(row)) return 'push';
+		if ((cascadeFor(row.id)?.writable ?? 0) > 0) return 'pins';
 		return 'look';
 	}
 
@@ -978,17 +978,23 @@
 		const out: Badge[] = [];
 		if (row.missing) out.push({ text: 'folder missing', tone: 'bad' });
 		if (row.unpublishedAhead) {
+			const blocked = whyNotPublish(row);
 			out.push({
 				text: row.npm.latest ? `unpublished ${row.localVersion} (npm ${row.npm.latest})` : `never published ${row.localVersion}`,
 				tone: 'ship',
-				title: 'Local version is ahead of npm. Publish will push if needed, then npm publish.',
+				title: blocked
+					? `Local version is ahead of npm, but publish is blocked (${blocked}). Commit or stash leftover files, or fix origin/upstream, then publish.`
+					: 'Local version is ahead of npm. Publish will push if needed, then npm publish.',
 			});
 		}
 		if ((row.git.ahead ?? 0) > 0) {
+			const blocked = whyNotPush(row.git);
 			out.push({
 				text: `${row.git.ahead} to push`,
-				tone: 'ship',
-				title: 'This branch is ahead of origin. Push the commits, or Publish to bump if needed, push, then npm publish.',
+				tone: blocked ? 'warn' : 'ship',
+				title: blocked
+					? `Local commits look ahead, but push is blocked (${blocked}).`
+					: 'This branch is ahead of origin. Push the commits. Uncommitted files stay local.',
 			});
 		}
 		if (row.git.dirty) out.push({ text: `dirty${dirtDetail(row) ? ` — ${dirtDetail(row)}` : ''}`, tone: 'warn' });
@@ -1218,13 +1224,13 @@
 								{/if}
 							</p>
 						</div>
-						{#if (inventory?.digest.unpublishedAhead ?? 0) > 0}
+						{#if unpublishedPublishIds.length > 0}
 							<div class="group-buttons">
 								<button
 									class="btn btn-write"
 									disabled={Boolean(busy)}
-									onclick={() => startPublish(shipRows.filter((row) => row.unpublishedAhead).map((row) => row.id))}
-									title="Shows bump, push, and npm publish for unpublished-ahead packages. Confirm in the modal."
+									onclick={() => startPublish(unpublishedPublishIds)}
+									title="Shows bump, push, and npm publish for unpublished-ahead packages the plan would actually publish."
 								>
 									<Icon icon="lucide:package-up" />
 									Publish unpublished
@@ -1286,7 +1292,7 @@
 												Write pins
 											</button>
 										{/if}
-										{#if need !== 'publish' && canPublish(row) && !row.git.dirty}
+										{#if need !== 'publish' && canPublish(row)}
 											<button
 												class="btn btn-sm"
 												disabled={Boolean(busy)}
@@ -1296,7 +1302,7 @@
 												Cut version
 											</button>
 										{/if}
-										{#if need !== 'push' && (row.git.ahead ?? 0) > 0}
+										{#if need !== 'push' && canPush(row)}
 											<button
 												class="btn btn-sm"
 												disabled={Boolean(busy)}
@@ -1306,7 +1312,7 @@
 												Push
 											</button>
 										{/if}
-										{#if need !== 'pins' && cascadeTarget}
+										{#if need !== 'pins' && cascadeTarget && cascadeTarget.writable > 0}
 											<button
 												class="btn btn-sm"
 												disabled={Boolean(busy)}
