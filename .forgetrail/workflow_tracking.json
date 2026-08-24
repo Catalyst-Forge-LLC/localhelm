@@ -96,6 +96,10 @@
         {
           "timestamp": "2026-08-23T19:45:00Z",
           "text": "Bulk selection (D22): Fleet checkboxes drive bump, push, and remove. Sites checkboxes drive plugin jobs. Select-all in the header."
+        },
+        {
+          "timestamp": "2026-08-24T01:05:00Z",
+          "text": "URL selection state (D34): tab, ports, activity, fleet/sites CSV via replaceState — Exec Foundry pattern."
         }
       ]
     },
@@ -508,6 +512,16 @@
       "decision": "Land skips ship when the site HEAD+dirty fingerprint matches the last successful ship (stored in .localhelm/land-ships.json). FilePress exposes shipFingerprint and a one-pass plan --action land. Land status only loads engine+companion ids.",
       "rationale": "Operator 2026-08-23: Land modal was slow; after Ship, Land offered Ship again with nothing new.",
       "alternatives_considered": ["Always show ship", "Ask FilePress to track last deploy itself"],
+      "status": "active"
+    },
+    {
+      "id": "d34",
+      "timestamp": "2026-08-24T01:05:00Z",
+      "phase": "2-scaffolding",
+      "session": 14,
+      "decision": "Dashboard selection state lives in the URL via replaceState (Exec Foundry pattern): tab, ports, activity=1, fleet CSV, sites CSV. Defaults omitted. npmUser stays in sessionStorage. One-time migrate from old sessionStorage tab/pane/activity keys.",
+      "rationale": "Operator 2026-08-23: tabs/subtabs and other selection state should be preserved in the URL like Exec Foundry.",
+      "alternatives_considered": ["Keep sessionStorage only", "pushState per click", "Put npmUser in the URL"],
       "status": "active"
     }
   ],

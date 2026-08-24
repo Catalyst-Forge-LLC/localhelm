@@ -1,11 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import IconButton from '$lib/IconButton.svelte';
 	import { pluginPlanWriteIds } from '$lib/pluginPlan';
 	import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
+	import {
+		idsToSelection,
+		parseListParam,
+		selectionToIds,
+		serializeListParam,
+	} from '$lib/urlListParam';
 
 	type BumpKind = 'patch' | 'minor' | 'major';
 	type Pin = {
@@ -113,6 +120,7 @@
 	let portPane = $state<PortPane>('leases');
 	let activityOpen = $state(false);
 	let activityUnseen = $state(false);
+	let urlSyncReady = $state(false);
 	let cwd = $state('');
 	let port = $state<string | null>(null);
 	let portSource = $state<string | null>(null);
@@ -224,30 +232,107 @@
 	const fleetIds = $derived((inventory?.projects ?? []).map((row) => row.id));
 	const fleetAllChecked = $derived(fleetIds.length > 0 && fleetIds.every((id) => selectedIds[id]));
 	const fleetSomeChecked = $derived(checkedIds.length > 0 && !fleetAllChecked);
+	const checkedSiteIdList = $derived(selectionToIds(selectedSites));
 
-	function persist(key: string, value: string): void {
+	function persistNpmUser(value: string): void {
 		try {
-			sessionStorage.setItem(key, value);
+			sessionStorage.setItem('localhelm.npmUser', value);
 		} catch {
 			/* ignore quota / private mode */
 		}
 	}
 
+	function parseTab(raw: string | null): TabId | null {
+		if (raw === 'today' || raw === 'fleet' || raw === 'sites' || raw === 'ports') return raw;
+		return null;
+	}
+
+	function parsePortPane(raw: string | null): PortPane | null {
+		if (raw === 'leases' || raw === 'observed') return raw;
+		return null;
+	}
+
 	function setTab(next: TabId): void {
 		tab = next;
-		persist('localhelm.tab', next);
 	}
 
 	function setPortPane(next: PortPane): void {
 		portPane = next;
-		persist('localhelm.portPane', next);
 	}
 
 	function setActivityOpen(next: boolean): void {
 		activityOpen = next;
 		if (next) activityUnseen = false;
-		persist('localhelm.activity', next ? '1' : '0');
 	}
+
+	function restoreUrlState(params: URLSearchParams): void {
+		const tabParam = parseTab(params.get('tab'));
+		if (tabParam) tab = tabParam;
+		else {
+			try {
+				const saved = sessionStorage.getItem('localhelm.tab');
+				const fromSession = parseTab(saved);
+				if (fromSession) tab = fromSession;
+				sessionStorage.removeItem('localhelm.tab');
+			} catch {
+				/* ignore */
+			}
+		}
+
+		const portsParam = parsePortPane(params.get('ports'));
+		if (portsParam) portPane = portsParam;
+		else {
+			try {
+				const saved = sessionStorage.getItem('localhelm.portPane');
+				const fromSession = parsePortPane(saved);
+				if (fromSession) portPane = fromSession;
+				sessionStorage.removeItem('localhelm.portPane');
+			} catch {
+				/* ignore */
+			}
+		}
+
+		if (params.has('activity')) {
+			activityOpen = params.get('activity') === '1';
+		} else {
+			try {
+				activityOpen = sessionStorage.getItem('localhelm.activity') === '1';
+				sessionStorage.removeItem('localhelm.activity');
+			} catch {
+				/* ignore */
+			}
+		}
+
+		const fleetParam = params.get('fleet');
+		if (fleetParam !== null) selectedIds = idsToSelection(parseListParam(fleetParam));
+		const sitesParam = params.get('sites');
+		if (sitesParam !== null) selectedSites = idsToSelection(parseListParam(sitesParam));
+	}
+
+	$effect(() => {
+		if (!urlSyncReady) return;
+		const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+		if (tab === 'today') params.delete('tab');
+		else params.set('tab', tab);
+		if (portPane === 'leases') params.delete('ports');
+		else params.set('ports', portPane);
+		if (activityOpen) params.set('activity', '1');
+		else params.delete('activity');
+
+		const fleetCsv = serializeListParam(selectionToIds(selectedIds));
+		if (fleetCsv) params.set('fleet', fleetCsv);
+		else params.delete('fleet');
+
+		const sitesCsv = serializeListParam(checkedSiteIdList);
+		if (sitesCsv) params.set('sites', sitesCsv);
+		else params.delete('sites');
+
+		const next = params.toString();
+		const current = typeof window !== 'undefined' ? window.location.search.slice(1) : '';
+		if (next !== current) {
+			replaceState(next ? `?${next}` : window.location.pathname, {});
+		}
+	});
 
 	function rowNeedsYou(row: Project): boolean {
 		return badges(row).some((badge) => badge.text !== 'nothing to do');
@@ -383,7 +468,7 @@
 			portSource = data.portSource;
 			if (data.npmUser) {
 				npmUser = data.npmUser;
-				persist('localhelm.npmUser', data.npmUser);
+				persistNpmUser(data.npmUser);
 			}
 			if (fetchRemotes) fetchedAt = new Date().toLocaleTimeString();
 			if (!candidates.length) scanRoot = data.scanRoot;
@@ -776,7 +861,7 @@
 				if (data.authHint) publishAuthHint = data.authHint;
 				if (data.npmUser) {
 					npmUser = data.npmUser;
-					persist('localhelm.npmUser', data.npmUser);
+					persistNpmUser(data.npmUser);
 				}
 				const eligible = data.rows.filter((r) => r.action === 'publish');
 				const cuttingNew = eligible.some((row) => row.steps.some((step) => step.kind === 'bump'));
@@ -896,7 +981,7 @@
 				if (data.authHint) publishAuthHint = data.authHint;
 				if (data.npmUser) {
 					npmUser = data.npmUser;
-					persist('localhelm.npmUser', data.npmUser);
+					persistNpmUser(data.npmUser);
 				}
 				const steps = data.plan.steps;
 				note(`land plan ${siteId} — ${steps.length} step(s), nothing written`, data);
@@ -1115,17 +1200,15 @@
 	}
 
 	onMount(() => {
+		const params = new URLSearchParams(window.location.search);
+		restoreUrlState(params);
 		try {
-			const saved = sessionStorage.getItem('localhelm.tab');
-			if (saved === 'today' || saved === 'fleet' || saved === 'sites' || saved === 'ports') tab = saved;
-			const pane = sessionStorage.getItem('localhelm.portPane');
-			if (pane === 'leases' || pane === 'observed') portPane = pane;
-			activityOpen = sessionStorage.getItem('localhelm.activity') === '1';
 			const savedNpm = sessionStorage.getItem('localhelm.npmUser');
 			if (savedNpm) npmUser = savedNpm;
 		} catch {
 			/* ignore */
 		}
+		urlSyncReady = true;
 		void loadActivity();
 		void refresh();
 	});
