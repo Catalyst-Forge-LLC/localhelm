@@ -24,6 +24,8 @@ export {
 	requireLandSiteId,
 } from './land.js';
 export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from './land.js';
+export { landShipsPath, readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
+export type { LandShipRecord } from './landShips.js';
 export { asPluginBoards, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
 export { pluginPlanWriteIds } from './pluginPlan.js';
 export type { HelmPlugin, LoadedPlugin, PluginBoard, PluginTab } from './plugin.js';

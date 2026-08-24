@@ -1,6 +1,11 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { loadPlugins, requirePlugin } from '../../../../../src/lib/index.js';
+import {
+	landPluginApplyOk,
+	loadPlugins,
+	recordLandShip,
+	requirePlugin,
+} from '../../../../../src/lib/index.js';
 import { errJson, loadRequired, withLockAt } from '$lib/server/helm';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -20,7 +25,33 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json(await plug.plugin.plan(body.action, ids));
 		}
 		if (!plug.plugin.apply) return errJson(`plugin ${body.id} has no apply`);
-		return json(await withLockAt(loaded.workspaceRoot, () => plug.plugin.apply!(body.action as string, ids)));
+
+		const result = await withLockAt(loaded.workspaceRoot, async () => {
+			// Capture ship fingerprints before apply (tree usually unchanged by pnpm ship).
+			let fingerprints = new Map<string, string>();
+			if (body.id === 'filepress' && body.action === 'ship' && plug.plugin.plan) {
+				const planned = await plug.plugin.plan('ship', ids);
+				const rows = planned && typeof planned === 'object' ? (planned as { rows?: unknown }).rows : null;
+				if (Array.isArray(rows)) {
+					for (const row of rows) {
+						if (!row || typeof row !== 'object') continue;
+						const bodyRow = row as { id?: unknown; shipFingerprint?: unknown };
+						if (typeof bodyRow.id === 'string' && typeof bodyRow.shipFingerprint === 'string' && bodyRow.shipFingerprint) {
+							fingerprints.set(bodyRow.id, bodyRow.shipFingerprint);
+						}
+					}
+				}
+			}
+
+			const applied = await plug.plugin.apply!(body.action as string, ids);
+			if (body.id === 'filepress' && body.action === 'ship' && landPluginApplyOk(applied).ok) {
+				for (const [siteId, fp] of fingerprints) {
+					await recordLandShip(loaded.workspaceRoot, siteId, fp);
+				}
+			}
+			return applied;
+		});
+		return json(result);
 	} catch (err) {
 		return errJson(err);
 	}

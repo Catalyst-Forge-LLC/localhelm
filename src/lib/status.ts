@@ -9,6 +9,8 @@ import type { FleetDigest, FleetInventory, PinEdge, ProjectStatus } from './type
 
 export type StatusOptions = {
 	fetch?: boolean;
+	/** When set, only these project ids are read (npm + git). Faster for Land. */
+	onlyIds?: string[];
 };
 
 type Prepared = {
@@ -29,8 +31,10 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 	clearNpmCache();
 	const prepared: Prepared[] = [];
 	const names = new Set<string>();
+	const only = options.onlyIds?.length ? new Set(options.onlyIds) : null;
 
 	for (const project of loaded.manifest.projects) {
+		if (only && !only.has(project.id)) continue;
 		const absPath = joinRoot(loaded.workspaceRoot, project.path);
 		if (!(await pathExists(absPath))) {
 			prepared.push({

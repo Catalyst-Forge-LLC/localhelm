@@ -7,6 +7,7 @@ import {
 	requireLandSiteId,
 	LAND_ENGINE_ID,
 } from './land.js';
+import { shipUnchanged } from './landShips.js';
 import type { ProjectStatus } from './types.js';
 
 function project(partial: Partial<ProjectStatus> & Pick<ProjectStatus, 'id'>): ProjectStatus {
@@ -100,5 +101,14 @@ describe('landPluginApplyOk', () => {
 		});
 		assert.equal(failed.ok, false);
 		assert.match(failed.reason, /push failed|plugin failed/);
+	});
+});
+
+describe('shipUnchanged', () => {
+	it('skips ship only when fingerprints match', () => {
+		assert.equal(shipUnchanged('abc:def', 'abc:def'), true);
+		assert.equal(shipUnchanged('abc:def', 'abc:xyz'), false);
+		assert.equal(shipUnchanged(null, 'abc:def'), false);
+		assert.equal(shipUnchanged('abc:def', null), false);
 	});
 });

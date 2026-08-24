@@ -499,6 +499,16 @@
       "rationale": "Operator 2026-08-23: wanted a magic full-sync for a site (B+C: matching fleet package + engine). Name Land.",
       "alternatives_considered": ["Catch up", "Make current", "Site-only without packages"],
       "status": "active"
+    },
+    {
+      "id": "d33",
+      "timestamp": "2026-08-23T22:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 13,
+      "decision": "Land skips ship when the site HEAD+dirty fingerprint matches the last successful ship (stored in .localhelm/land-ships.json). FilePress exposes shipFingerprint and a one-pass plan --action land. Land status only loads engine+companion ids.",
+      "rationale": "Operator 2026-08-23: Land modal was slow; after Ship, Land offered Ship again with nothing new.",
+      "alternatives_considered": ["Always show ship", "Ask FilePress to track last deploy itself"],
+      "status": "active"
     }
   ],
   "gotchas": [
