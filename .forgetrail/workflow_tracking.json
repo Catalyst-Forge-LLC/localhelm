@@ -100,6 +100,10 @@
         {
           "timestamp": "2026-08-24T01:05:00Z",
           "text": "URL selection state (D34): tab, ports, activity, fleet/sites CSV via replaceState — Exec Foundry pattern."
+        },
+        {
+          "timestamp": "2026-08-24T04:50:00Z",
+          "text": "Ports Start/Stop (D35): LocalBerth owns process lifecycle; LocalHelm hosts plan/apply. ?leases= CSV."
         }
       ]
     },
@@ -522,6 +526,16 @@
       "decision": "Dashboard selection state lives in the URL via replaceState (Exec Foundry pattern): tab, ports, activity=1, fleet CSV, sites CSV. Defaults omitted. npmUser stays in sessionStorage. One-time migrate from old sessionStorage tab/pane/activity keys.",
       "rationale": "Operator 2026-08-23: tabs/subtabs and other selection state should be preserved in the URL like Exec Foundry.",
       "alternatives_considered": ["Keep sessionStorage only", "pushState per click", "Put npmUser in the URL"],
+      "status": "active"
+    },
+    {
+      "id": "d35",
+      "timestamp": "2026-08-24T04:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 15,
+      "decision": "Ports Start/Stop is hosted only: LocalBerth owns start/stop + lease recipe (default pnpm serve, detached). LocalHelm plan/apply buttons and ?leases= CSV. Observed-only rows stay read-only. Claim/release stay on the localberth CLI. Fleet dashboards expose pnpm serve as the house entry.",
+      "rationale": "Operator 2026-08-24: start/stop fleet apps that are not running, via LocalBerth as a LocalHelm plugin. Do not guess npm run dev.",
+      "alternatives_considered": ["Spawn from LocalHelm core", "Kill observed-only pids", "Claim/release in the dashboard"],
       "status": "active"
     }
   ],

@@ -80,8 +80,8 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - `push`: plan then named-id `--apply` to `origin` only. Dashboard confirm lists each remote. Never `--force`. Ahead commits push even if the working tree is dirty; uncommitted files stay local. Pull, publish, and cascade still skip dirty trees.
 - `publish`: plan then named-id `--apply`. Intended auth is `localhelm auth` + a granular automation token (Bypass 2FA) in the **user** `~/.npmrc`. That still publishes through ~Jan 2027; npm is moving to trusted/staged publish after that. Never store the token in this repo.
 - Dashboard writes are one button: click Push / Publish / Sync / Bump / etc., the modal shows the plan, then Confirm applies or Close if nothing to do. CLI still prints a plan and needs `--apply`. Today shows one gold write per need (Push, Publish, or Write pins) only when the plan would actually write. Cut version is the extra when you want a new npm cut. Publish OTP lives in the confirm modal. Fleet publish/push are toolbar + checked rows; per-row Bump stays. Write pins is only offered when a clean consumer has a registry pin behind — not for `link:`/`file:` or dirty dependents.
-- Dashboard IA: **Today** (default, needs-you + FilePress + Ports snapshots), **Fleet** (table + enroll), **Sites** (FilePress plugin), **Ports** (LocalBerth plugin). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close) persisted at `.localhelm/activity.json`. No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`. Fleet and Sites checkboxes drive bulk bump/push/remove and plugin jobs; each still plans, then confirms. Ports is read-only parity with the LocalBerth board (leases + observed + Open). Claim/release stay on `localberth`.
-- Dashboard URL state (Exec Foundry pattern): `replaceState` only — never push history for UI. Query params on `/`: `tab` (omit `today`), `ports` (omit `leases`), `activity=1` when the drawer is open, `fleet` / `sites` as CSV checked ids. Defaults omitted so URLs stay short. npm whoami stays in `sessionStorage` only. One-time migrate from old `sessionStorage` tab/pane/activity keys, then clear those keys.
+- Dashboard IA: **Today** (default, needs-you + FilePress + Ports snapshots), **Fleet** (table + enroll), **Sites** (FilePress plugin), **Ports** (LocalBerth plugin). Header and tabs stay pinned; each tab pane scrolls in the remaining viewport. Activity is a right drawer (Escape / Close) persisted at `.localhelm/activity.json`. No second ship list. FilePress site names that match a fleet id are labeled as sites, not packages. Plugin apply only offers write ids when the plan marks `writes: true`. Fleet and Sites checkboxes drive bulk bump/push/remove and plugin jobs; each still plans, then confirms. Ports hosts LocalBerth Start/Stop on named leases (recipe required, default `pnpm serve`, detached). Observed stays read-only. Claim/release stay on `localberth`.
+- Dashboard URL state (Exec Foundry pattern): `replaceState` only — never push history for UI. Query params on `/`: `tab` (omit `today`), `ports` (omit `leases` for the subtab), `activity=1` when the drawer is open, `fleet` / `sites` / `leases` as CSV checked ids. Defaults omitted so URLs stay short. npm whoami stays in `sessionStorage` only. One-time migrate from old `sessionStorage` tab/pane/activity keys, then clear those keys.
 
 ### In Progress
 
@@ -137,7 +137,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 11 — 2026-08-23
 
-- Ports tab hosts the LocalBerth plugin (leases + observed + Open). Same board as `localberth serve`, not under Sites. Claim/release stay on the LocalBerth CLI.
+- Ports tab hosts the LocalBerth plugin (leases + observed + Open + Start/Stop). Same board as `localberth serve`, not under Sites. Claim/release stay on the LocalBerth CLI.
 
 ### Session 12 — 2026-08-23
 
@@ -151,3 +151,11 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Today / Fleet write buttons share the same skip reasons as the plan (`whyNotPush` / `whyNotPublish`). Gold Publish is hidden when dirty, diverged, or missing origin/upstream. Write pins is hidden when the only dependents are local links or dirty.
 - Today does not repeat the ahead count in the subtitle and badge when a Push button already has it. A failed push puts a short reason on the banner (SSH publickey → "origin rejected the SSH key"). Operator 2026-08-23: set fleet `origin` remotes to HTTPS (`github.com` and `github-acmegeek` aliases). Backup/archive remotes unchanged. anticonfab still has no origin.
 - **Land** (Sites + Today site cards, CLI `localhelm land <site-id>`): one confirm for needed engine package writes (`filepress`), matching fleet package (`aibreze-site` → `aibreze`), then FilePress Sync → Push → Ship. Only already-needed writes. Stop on first failure. Publish OTP when a publish step is included. Never `--force`. Ship is skipped when the site tree fingerprint matches `.localhelm/land-ships.json` (recorded after a successful Land or Sites Ship). Land plan uses a one-pass FilePress `land` plan and status only for the engine/companion ids.
+
+### Session 14 — 2026-08-24
+
+- Dashboard tab / Ports pane / Activity / Fleet and Sites checks live in the URL (`replaceState`, defaults omitted).
+
+### Session 15 — 2026-08-24
+
+- Ports Start/Stop: LocalBerth starts/stops a stored recipe (`pnpm serve` by default) detached. LocalHelm only hosts the plan/confirm buttons. Observed stays read-only. Claim/release stay on `localberth`. Checked leases persist as `?leases=`.

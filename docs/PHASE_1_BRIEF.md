@@ -201,7 +201,7 @@ No open product questions block scaffolding.
 - Not IngotVault, LocalBerth, or the FilePress sibling dashboard.
 - Not a remote fleet manager. No SSH, no hosted accounts, no telemetry.
 - No force-push, no rewriting unrelated dirty files. Selected `origin` push is in (2026-08-21); never the backup remote. Named `publish` landed 2026-08-23 (bump/push only if needed).
-- No starting/stopping other apps' dev servers.
+- Starting/stopping other apps' dev servers is **not** implemented in LocalHelm core. LocalBerth owns `start`/`stop` + the lease recipe; LocalHelm Ports only hosts the plugin buttons (2026-08-24).
 - No Catalyst Forge (or other shop) shelf file in this package.
 - No "create a new sibling product" scaffolder.
 - No LLM choosing versions, commit messages, or skip lists.

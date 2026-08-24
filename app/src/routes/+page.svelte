@@ -132,6 +132,7 @@
 	let selectedScan = $state<Record<string, boolean>>({});
 	let selectedIds = $state<Record<string, boolean>>({});
 	let selectedSites = $state<Record<string, boolean>>({});
+	let selectedPorts = $state<Record<string, boolean>>({});
 	let bumpKind = $state<Record<string, BumpKind>>({});
 
 	let pluginBoards = $state<PluginBoard[]>([]);
@@ -233,6 +234,7 @@
 	const fleetAllChecked = $derived(fleetIds.length > 0 && fleetIds.every((id) => selectedIds[id]));
 	const fleetSomeChecked = $derived(checkedIds.length > 0 && !fleetAllChecked);
 	const checkedSiteIdList = $derived(selectionToIds(selectedSites));
+	const checkedPortIdList = $derived(selectionToIds(selectedPorts));
 
 	function persistNpmUser(value: string): void {
 		try {
@@ -307,6 +309,8 @@
 		if (fleetParam !== null) selectedIds = idsToSelection(parseListParam(fleetParam));
 		const sitesParam = params.get('sites');
 		if (sitesParam !== null) selectedSites = idsToSelection(parseListParam(sitesParam));
+		const leasesParam = params.get('leases');
+		if (leasesParam !== null) selectedPorts = idsToSelection(parseListParam(leasesParam));
 	}
 
 	$effect(() => {
@@ -326,6 +330,10 @@
 		const sitesCsv = serializeListParam(checkedSiteIdList);
 		if (sitesCsv) params.set('sites', sitesCsv);
 		else params.delete('sites');
+
+		const leasesCsv = serializeListParam(checkedPortIdList);
+		if (leasesCsv) params.set('leases', leasesCsv);
+		else params.delete('leases');
 
 		const next = params.toString();
 		const current = typeof window !== 'undefined' ? window.location.search.slice(1) : '';
@@ -736,6 +744,35 @@
 		selectedSites = next;
 	}
 
+	function checkedPortIds(board: PluginBoard, action: string): string[] {
+		return boardActionIds(board, action).filter((id) => selectedPorts[id]);
+	}
+
+	function portAllChecked(board: PluginBoard): boolean {
+		return board.rows.length > 0 && board.rows.every((row) => selectedPorts[row.id]);
+	}
+
+	function togglePortAll(board: PluginBoard, on: boolean): void {
+		const next = { ...selectedPorts };
+		for (const row of board.rows) next[row.id] = on;
+		selectedPorts = next;
+	}
+
+	function pluginJobHint(plugin: string, action: string, applyIds: string[], writeIds: string[] | null): string {
+		if (!applyIds.length) {
+			return writeIds ? 'Already current — nothing to write.' : 'The plan found nothing to do.';
+		}
+		if (plugin === 'localberth') {
+			return action === 'stop'
+				? 'LocalBerth stops the process tree on this lease. The lease stays. Observed-only rows are not killed.'
+				: 'LocalBerth starts the lease recipe (default pnpm serve) detached. Closing LocalHelm does not stop it.';
+		}
+		if (action === 'push') {
+			return 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.';
+		}
+		return 'The plugin runs this in each listed checkout. LocalHelm does not reimplement it.';
+	}
+
 	async function startPull(): Promise<void> {
 		await run(
 			'planning pull',
@@ -914,7 +951,8 @@
 
 	async function startPluginJob(plugin: string, action: string, ids: string[], label: string): Promise<void> {
 		if (ids.length === 0) return;
-		const scope = ids.length === 1 ? ids[0] : `${ids.length} sites`;
+		const unit = plugin === 'localberth' ? 'lease' : 'site';
+		const scope = ids.length === 1 ? ids[0] : `${ids.length} ${unit}s`;
 		await run(
 			`planning ${plugin} ${action} ${scope}`,
 			async () => {
@@ -928,15 +966,9 @@
 				note(`${plugin} ${action} plan ${scope}`, data);
 				offerConfirm({
 					title: applyIds.length
-						? `${label} for ${applyIds.length === 1 ? applyIds[0] : `${applyIds.length} sites`}?`
+						? `${label} for ${applyIds.length === 1 ? applyIds[0] : `${applyIds.length} ${unit}s`}?`
 						: `Nothing to ${label.toLowerCase()}`,
-					hint: applyIds.length
-						? action === 'push'
-							? 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.'
-							: 'The FilePress plugin runs this in each listed checkout. LocalHelm does not reimplement it.'
-						: writeIds
-							? 'Already current — nothing to write.'
-							: 'The plan found nothing to do.',
+					hint: pluginJobHint(plugin, action, applyIds, writeIds),
 					items: items.length ? items : ['Nothing to do.'],
 					confirmLabel: applyIds.length === 1 ? label : `${label} ${applyIds.length}`,
 					canApply: applyIds.length > 0,
@@ -948,7 +980,8 @@
 	}
 
 	async function applyPluginJob(plugin: string, action: string, ids: string[]): Promise<void> {
-		const scope = ids.length === 1 ? ids[0] : `${ids.length} sites`;
+		const unit = plugin === 'localberth' ? 'lease' : 'site';
+		const scope = ids.length === 1 ? ids[0] : `${ids.length} ${unit}s`;
 		await run(`${plugin} ${action} ${scope}`, async () => {
 			const data = await call('/api/plugin', {
 				method: 'POST',
@@ -1894,17 +1927,43 @@
 				</div>
 				{#if visiblePortBoard}
 					{@const board = visiblePortBoard}
+					{@const leaseActions = portPane === 'leases'}
 					<section class="panel plugin-board" id="pane-ports" role="tabpanel" aria-labelledby={portPane === 'observed' ? 'tab-observed' : 'tab-leases'}>
 						<div class="section-head">
 							<div>
 								<h2>{board.title}</h2>
 								<p class="hint">{board.note}</p>
 							</div>
+							{#if leaseActions}
+								<div class="group-buttons">
+									{#each boardActions(board) as act (act.id)}
+										<button
+											class="btn btn-write"
+											disabled={Boolean(busy) || checkedPortIds(board, act.id).length === 0}
+											onclick={() => startPluginJob(board.plugin, act.id, checkedPortIds(board, act.id), act.label)}
+											title={`Shows what ${act.label.toLowerCase()} would do for the checked leases. Confirm in the modal.`}
+										>
+											{act.label}{checkedPortIds(board, act.id).length ? ` (${checkedPortIds(board, act.id).length})` : ''}
+										</button>
+									{/each}
+								</div>
+							{/if}
 						</div>
 						<div class="table-wrap">
 							<table>
 								<thead>
 									<tr>
+										{#if leaseActions}
+											<th class="tick">
+												<input
+													type="checkbox"
+													aria-label={`Select all ${board.title} rows`}
+													checked={portAllChecked(board)}
+													indeterminate={board.rows.some((row) => selectedPorts[row.id]) && !portAllChecked(board)}
+													onchange={(event) => togglePortAll(board, event.currentTarget.checked)}
+												/>
+											</th>
+										{/if}
 										<th>{board.rowLabel ?? 'name'}</th>
 										{#each board.columns as col (col.id)}
 											<th>{col.label}</th>
@@ -1915,19 +1974,38 @@
 								<tbody>
 									{#each board.rows as row (row.id)}
 										<tr>
+											{#if leaseActions}
+												<td class="tick">
+													<input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedPorts[row.id]} />
+												</td>
+											{/if}
 											<td class="id">{row.label ?? row.id}</td>
 											{#each board.columns as col (col.id)}
 												<td class="small">{row.cells[col.id] ?? '—'}</td>
 											{/each}
 											<td>
-												{#if row.href}
-													<a class="open-link" href={row.href} target="localberth-open" rel="noopener">Open</a>
-												{/if}
+												<div class="bump">
+													{#if row.href}
+														<a class="open-link" href={row.href} target="localberth-open" rel="noopener">Open</a>
+													{/if}
+													{#if leaseActions}
+														{#each row.actions as act (act.id)}
+															<button
+																class="btn btn-sm"
+																disabled={Boolean(busy)}
+																onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
+																title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}
+															>
+																{act.label}
+															</button>
+														{/each}
+													{/if}
+												</div>
 											</td>
 										</tr>
 									{/each}
 									{#if !board.rows.length}
-										<tr><td class="empty" colspan={board.columns.length + 2}>Nothing here.</td></tr>
+										<tr><td class="empty" colspan={board.columns.length + (leaseActions ? 3 : 2)}>Nothing here.</td></tr>
 									{/if}
 								</tbody>
 							</table>
@@ -1935,13 +2013,13 @@
 					</section>
 				{/if}
 				<p class="dim small port-cli">
+					<code>localberth recipe name --cwd PATH</code>
+					·
+					<code>localberth start name</code>
+					·
+					<code>localberth stop name</code>
+					·
 					<code>localberth claim name --port N</code>
-					·
-					<code>localberth get name</code>
-					·
-					<code>localberth release name</code>
-					·
-					<code>localberth serve</code>
 				</p>
 			{/if}
 		{/if}
