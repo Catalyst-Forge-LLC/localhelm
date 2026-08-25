@@ -146,6 +146,9 @@ No new cloud. No schema in a sibling database from this package.
 - Confirm lines show the **command**, not `start start …`.
 - Skip lines are not recipes. Do not wrap mid-token.
 - LocalHelm never `git push --force`. Never spawn the tree.
+- A need that can write is a button on that row (`Push 15`, `Publish 0.0.1`). Do not make the operator select the row and hunt a toolbar.
+- Long plugin notes live in a ? tip, not the section head. Section heads stay one line so toolbar buttons do not wrap under a wall of text.
+- Ports **Stacks** chips check a family. They do not start. Cross-walk chips jump to the other board for the same id.
 
 ---
 
@@ -207,3 +210,4 @@ No new cloud. No schema in a sibling database from this package.
 - `2026-08-25:` H1 landed — family cards, look cards, `PORT`/`HOST` on Ports confirm. H2–H5 still unscheduled.
 - `2026-08-25:` H2–H5 landed — `brief`, archive hide/restore, family start/stop, save-guess. Today Ports is one column with titled Stacks / Down lists.
 - `2026-08-25:` C7 quiet, F2/F7/F9 cross-walk + copy + activity links, C3 guess-all. Tippy for labels and recipe/family facts.
+- `2026-08-25:` Attention UX — Ports actions on one line; stack chips labeled; Sites/Ports notes in ? tip; Fleet needs you is the row write.

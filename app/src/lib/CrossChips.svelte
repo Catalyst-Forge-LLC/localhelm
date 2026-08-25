@@ -9,12 +9,19 @@
 		chips: CrossChip[];
 		onOpen: (kind: CrossChip['kind']) => void;
 	} = $props();
+
+	function chipTip(kind: CrossChip['kind']): string {
+		if (kind === 'fleet') return 'Opens Fleet and checks this package.';
+		if (kind === 'sites') return 'Opens Sites and checks this FilePress site.';
+		return 'Opens Ports and checks this lease.';
+	}
 </script>
 
 {#if chips.length}
 	<div class="chips">
+		<span class="also">also on</span>
 		{#each chips as chip (chip.kind)}
-			<Tooltip title={`Opens the ${chip.label} board with this id.`}>
+			<Tooltip title={chipTip(chip.kind)}>
 				<button type="button" class="xchip" onclick={() => onOpen(chip.kind)}>{chip.label}</button>
 			</Tooltip>
 		{/each}
@@ -25,8 +32,16 @@
 	.chips {
 		display: flex;
 		flex-wrap: wrap;
+		align-items: center;
 		gap: 0.25rem;
 		margin-top: 0.2rem;
+	}
+
+	.also {
+		font-size: 0.62rem;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: #8b8b93;
 	}
 	.xchip {
 		margin: 0;

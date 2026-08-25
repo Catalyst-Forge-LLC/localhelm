@@ -6,6 +6,7 @@
 	import CrossChips from '$lib/CrossChips.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import IconButton from '$lib/IconButton.svelte';
+	import InfoHint from '$lib/InfoHint.svelte';
 	import Tooltip from '$lib/Tooltip.svelte';
 	import { activityLinkedIds } from '$lib/activityLinks';
 	import { crosswalkChips } from '$lib/crosswalk';
@@ -1479,6 +1480,66 @@
 		return pin.onLatest === false ? 'pin-behind' : 'pin-ok';
 	}
 
+	type NeedAction = { id: 'publish' | 'push' | 'pins'; label: string; title: string; run: () => void };
+
+	function needActions(row: Project): NeedAction[] {
+		const acts: NeedAction[] = [];
+		if (row.unpublishedAhead && canPublish(row)) {
+			acts.push({
+				id: 'publish',
+				label: `Publish ${row.localVersion ?? ''}`.trim(),
+				title: 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.',
+				run: () => startPublish([row.id]),
+			});
+		}
+		if ((row.git.ahead ?? 0) > 0 && canPush(row)) {
+			acts.push({
+				id: 'push',
+				label: `Push ${row.git.ahead}`,
+				title: 'Shows the origin URL and commit count. Confirm in the modal. Never --force.',
+				run: () => startPush([row.id]),
+			});
+		}
+		if ((cascadeFor(row.id)?.writable ?? 0) > 0) {
+			acts.push({
+				id: 'pins',
+				label: 'Write pins',
+				title: 'Shows which dependents would get the new pin. Confirm in the modal.',
+				run: () => startCascade(row.id),
+			});
+		}
+		return acts;
+	}
+
+	function leftoverBadges(row: Project): Badge[] {
+		const acts = needActions(row);
+		return badges(row).filter((badge) => {
+			if (badge.text === 'nothing to do') return acts.length === 0;
+			if (acts.some((act) => act.id === 'publish') && badge.text.includes('unpublished')) return false;
+			if (acts.some((act) => act.id === 'push') && badge.text.includes('to push')) return false;
+			if (acts.some((act) => act.id === 'pins') && badge.text.includes('pin')) return false;
+			return true;
+		});
+	}
+
+	function siteBoardHelp(board: PluginBoard): string {
+		const bits = [board.note ?? ''];
+		if (board.plugin === 'filepress') {
+			bits.push(
+				'Site names can match a fleet package and still be a different checkout.',
+				'Land does needed engine/package writes, then Sync → Push → Ship for the site.',
+				'Push is git push origin <branch> only — never --force.',
+			);
+		}
+		bits.push('Check rows, then run a job on the selection.');
+		return bits.filter(Boolean).join('\n\n');
+	}
+
+	function familyChipTip(family: { bits: string; members: { id: string }[] }): string {
+		const ids = family.members.map((member) => member.id).join(', ');
+		return `Checks ${ids}. Then use Start family or Stop family.\n${family.bits}`;
+	}
+
 	onMount(() => {
 		const params = new URLSearchParams(window.location.search);
 		restoreUrlState(params);
@@ -1992,7 +2053,7 @@
 					<div class="section-head">
 						<div>
 							<h2>Fleet</h2>
-							<p class="hint">Check rows, then bump, push, publish, or remove from the toolbar. Removing never deletes a folder. Per-row Bump only writes package.json.</p>
+							<p class="hint">Needs you is the write for that row. Check rows for bulk bump, push, publish, or remove. Removing never deletes a folder. Per-row Bump only writes package.json.</p>
 						</div>
 						<div class="group-buttons">
 							<button
@@ -2115,9 +2176,23 @@
 											{/if}
 										</td>
 										<td>
-											<div class="badges">
-												{#each badges(row) as badge (badge.text)}
-													<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
+											<div class="need-cell">
+												{#each needActions(row) as act (act.id)}
+													<Tooltip title={act.title}>
+														<button
+															type="button"
+															class="btn btn-sm btn-write"
+															disabled={Boolean(busy)}
+															onclick={act.run}
+														>
+															{act.label}
+														</button>
+													</Tooltip>
+												{/each}
+												{#each leftoverBadges(row) as badge (badge.text)}
+													<Tooltip title={badge.title ?? badge.text}>
+														<span class={`badge ${badge.tone}`}>{badge.text}</span>
+													</Tooltip>
 												{/each}
 											</div>
 										</td>
@@ -2159,13 +2234,12 @@
 					<div class="section-head">
 						<div>
 							<h2>{board.title}</h2>
-							<p class="hint">
-								{board.note}
-								{#if board.plugin === 'filepress'}
-									Site names can match a fleet package and still be a different checkout. <strong>Land</strong> does needed engine/package writes, then Sync → Push → Ship for the site.
-								{/if}
-								Check rows, then run a job on the selection.
-							</p>
+							<InfoHint
+								summary={board.plugin === 'filepress'
+									? 'Content sites. Check rows, then Sync, Push, or Ship.'
+									: 'Check rows, then run a job on the selection.'}
+								detail={siteBoardHelp(board)}
+							/>
 						</div>
 						<div class="group-buttons">
 							{#each boardActions(board) as act (act.id)}
@@ -2309,7 +2383,12 @@
 						<div class="section-head">
 							<div>
 								<h2>{board.title}</h2>
-								<p class="hint">{board.note}</p>
+								<InfoHint
+									summary={leaseActions
+										? 'Named leases. Start and Stop run the recipe detached. Click a stack to check that family.'
+										: 'Observed listeners only. Claim and release stay on the localberth CLI.'}
+									detail={board.note}
+								/>
 							</div>
 							{#if leaseActions}
 								<div class="group-buttons">
@@ -2379,21 +2458,22 @@
 							{/if}
 						</div>
 						{#if leaseActions && portFamilyCards.length}
-							<ul class="family-strip">
-								{#each portFamilyCards as family (family.stem)}
-									<li>
-										<Tooltip
-											wide
-											title={`${family.label}\n${family.bits}\n${family.members.map((m) => m.id).join('\n')}`}
-										>
-											<button type="button" class="family-chip" onclick={() => openPortsFamily(family.leaseIds)}>
-												<span class="id">{family.label}</span>
-												<span class="dim small">{family.bits}</span>
-											</button>
-										</Tooltip>
-									</li>
-								{/each}
-							</ul>
+							<div class="family-block">
+								<h3 class="looks-head">Stacks</h3>
+								<p class="hint">Click a stack to check those leases, then Start family or Stop family.</p>
+								<ul class="family-strip">
+									{#each portFamilyCards as family (family.stem)}
+										<li>
+											<Tooltip wide title={familyChipTip(family)}>
+												<button type="button" class="family-chip" onclick={() => openPortsFamily(family.leaseIds)}>
+													<span class="id">{family.label}</span>
+													<span class="dim small">{family.bits}</span>
+												</button>
+											</Tooltip>
+										</li>
+									{/each}
+								</ul>
+							</div>
 						{/if}
 						<div class="table-wrap">
 							<table>
@@ -2990,11 +3070,12 @@
 	}
 
 	.port-actions {
-		display: grid;
-		grid-template-columns: 2.15rem auto auto;
-		justify-content: end;
+		display: flex;
+		flex-wrap: nowrap;
+		justify-content: flex-end;
 		align-items: center;
 		gap: 0.25rem;
+		white-space: nowrap;
 	}
 
 	.open-link,
@@ -3085,10 +3166,20 @@
 	.section-head {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: flex-end;
+		align-items: flex-start;
 		justify-content: space-between;
 		gap: 0.6rem;
 		margin-bottom: 0.6rem;
+	}
+
+	.section-head > :first-child {
+		flex: 1 1 14rem;
+		min-width: 0;
+	}
+
+	.section-head .group-buttons {
+		flex: 0 1 auto;
+		justify-content: flex-end;
 	}
 
 	.plugin-board {
@@ -3256,9 +3347,17 @@
 		font-size: 1rem;
 	}
 
+	.family-block {
+		margin: 0 0 0.85rem;
+	}
+
+	.family-block .hint {
+		margin: 0 0 0.4rem;
+	}
+
 	.family-strip {
 		list-style: none;
-		margin: 0 0 0.75rem;
+		margin: 0;
 		padding: 0;
 		display: flex;
 		flex-wrap: wrap;
@@ -3335,7 +3434,8 @@
 	}
 
 	.bump,
-	.need-actions {
+	.need-actions,
+	.need-cell {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.25rem;

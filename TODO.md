@@ -46,3 +46,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Family start/stop (plugin ids only) _(H4, 2026-08-25)_
 - [x] Save guess without start _(H5, 2026-08-25)_
 - [x] Quiet sites, cross-walk chips, copy, activity links, recipe health + guess-all, Tippy _(2026-08-25)_
+- [x] Attention UX: row writes on Fleet needs you; Sites/Ports notes in ? tip; Ports actions one line; labeled stacks _(2026-08-25)_

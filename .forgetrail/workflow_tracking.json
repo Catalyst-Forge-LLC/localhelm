@@ -124,6 +124,10 @@
         {
           "timestamp": "2026-08-25T21:00:00Z",
           "text": "Quiet sites, cross-walk chips, copy, activity links, recipe health + guess-all, Tippy labels."
+        },
+        {
+          "timestamp": "2026-08-25T21:10:00Z",
+          "text": "Attention UX (d38): Fleet needs you is the row write; Sites/Ports notes in ? tip; Ports actions one line; labeled stacks."
         }
       ]
     },
@@ -576,6 +580,16 @@
       "decision": "H2–H5: localhelm brief is clipboard markdown. Archive hides fleet ids in .localhelm/archive.json (folder stays). Ports hosts park/unpark and family start/stop; row Start only when down, Stop only when up. Today Ports is one column with titled Stacks and Down or conflicted lists.",
       "rationale": "Operator 2026-08-25: two untitled Today Ports scrolls, Start shown while listening, then A/B/C (brief, archive/park, family + save-guess).",
       "alternatives_considered": ["Two compact scrolls", "Always show Start and Stop", "Unenroll instead of archive"],
+      "status": "active"
+    },
+    {
+      "id": "d38",
+      "timestamp": "2026-08-25T21:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 17,
+      "decision": "Fleet needs you is the row write (Push N, Publish version, Write pins) when the plan would write. Blockers stay as pills. Sites/Ports long notes live in a ? tip. Ports stack chips check a family; they do not start. Cross-walk chips are labeled also on and use tab names.",
+      "rationale": "Operator 2026-08-25: row actions wrapping, unclear family chips, Sites wall of text, inert needs-you pills, tab overlap.",
+      "alternatives_considered": ["Keep toolbar-only Fleet writes", "Info modal instead of Tippy", "Merge Fleet and Sites"],
       "status": "active"
     }
   ],
