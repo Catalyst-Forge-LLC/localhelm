@@ -157,20 +157,26 @@ function planPublishOne(row: ProjectStatus, kind: BumpKind): PublishRow {
 	const blocked = whyNotPublish(row, kind);
 	if (blocked) return { ...base, reason: blocked };
 
+	const localVersion = row.localVersion;
+	const npmName = row.npm.name;
+	if (!localVersion || !npmName) {
+		return { ...base, reason: !npmName ? 'no npm package name' : 'no local version' };
+	}
+
 	const neverPublished = row.npm.status === 'none';
 
 	const steps: PublishStep[] = [];
-	let version = row.localVersion;
+	let version = localVersion;
 	const needsBump = !neverPublished && !row.unpublishedAhead;
 	if (needsBump) {
 		let to: string;
 		try {
-			to = bumpTriple(row.localVersion, kind);
+			to = bumpTriple(localVersion, kind);
 		} catch (err) {
 			return { ...base, reason: err instanceof Error ? err.message : String(err) };
 		}
-		steps.push({ kind: 'bump', from: row.localVersion, to, bumpKind: kind });
-		steps.push({ kind: 'commit', message: helmBumpMessage(row.npm.name, to) });
+		steps.push({ kind: 'bump', from: localVersion, to, bumpKind: kind });
+		steps.push({ kind: 'commit', message: helmBumpMessage(npmName, to) });
 		version = to;
 	}
 
@@ -183,7 +189,7 @@ function planPublishOne(row: ProjectStatus, kind: BumpKind): PublishRow {
 		steps.push({ kind: 'push', branch: row.git.branch, origin: row.git.origin });
 	}
 
-	steps.push({ kind: 'publish', name: row.npm.name, version });
+	steps.push({ kind: 'publish', name: npmName, version });
 	return {
 		...base,
 		action: 'publish',

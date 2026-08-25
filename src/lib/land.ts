@@ -235,7 +235,7 @@ export async function planLand(loaded: LoadedManifest, siteIdRaw: string): Promi
 	const enrolledAll = loaded.manifest.projects.map((p) => p.id);
 	const companionId = companionIdForSite(siteId, enrolledAll, LAND_ENGINE_ID);
 	const packageIds = [LAND_ENGINE_ID, companionId].filter(
-		(id): id is string => Boolean(id) && enrolledAll.includes(id),
+		(id): id is string => typeof id === 'string' && enrolledAll.includes(id),
 	);
 	const uniqueIds = [...new Set(packageIds)];
 
