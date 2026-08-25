@@ -1,28 +1,38 @@
 @import 'tailwindcss';
-@import 'tippy.js/dist/tippy.css';
 
 /* Tailwind preflight zeros margins; native dialog centering needs margin: auto. */
 dialog {
 	margin: auto;
 }
 
+/* Tooltips append to body, which is outside .shell — set ink here. */
+html,
+body {
+	background: #1c1c21;
+	color: #ececef;
+}
+
+/* After Tailwind preflight: restore the arrow triangle and Helm colors. */
 .tippy-box[data-theme~='helm'] {
 	background: #2a2a32;
 	color: #ececef;
 	border: 1px solid #5a5a64;
 	border-radius: 0.4rem;
 	font-size: 0.78rem;
+	line-height: 1.45;
 	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 .tippy-box[data-theme~='helm'] .tippy-arrow {
 	color: #2a2a32;
+}
+.tippy-box[data-theme~='helm'] .tippy-arrow::before {
+	border-style: solid;
 }
 .tippy-box[data-theme~='helm'] .tippy-content {
 	white-space: pre-wrap;
 	max-width: min(26rem, 90vw);
 	max-height: min(50vh, 20rem);
 	overflow-y: auto;
-	line-height: 1.45;
 	padding: 0.45rem 0.6rem;
 }
 .tippy-box[data-theme~='helm-wide'] .tippy-content {

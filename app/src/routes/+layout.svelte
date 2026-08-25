@@ -1,5 +1,6 @@
 <script lang="ts">
 	import './layout.css';
+	import 'tippy.js/dist/tippy.css';
 	let { children } = $props();
 </script>
 
