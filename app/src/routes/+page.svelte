@@ -768,8 +768,31 @@
 		selectedPorts = next;
 	}
 
-	function pluginJobHint(plugin: string, action: string, applyIds: string[], writeIds: string[] | null): string {
+	function firstPlanReason(data: unknown): string {
+		if (!data || typeof data !== 'object') return '';
+		const rows = (data as { rows?: unknown }).rows;
+		if (!Array.isArray(rows) || !rows[0] || typeof rows[0] !== 'object') return '';
+		const reason = (rows[0] as { reason?: unknown }).reason;
+		return typeof reason === 'string' ? reason : '';
+	}
+
+	function pluginJobHint(
+		plugin: string,
+		action: string,
+		applyIds: string[],
+		writeIds: string[] | null,
+		data?: unknown,
+	): string {
 		if (!applyIds.length) {
+			if (plugin === 'localberth') {
+				const reason = firstPlanReason(data);
+				if (reason.includes('no recipe')) {
+					return 'Start needs a recipe: the project folder and a command (default pnpm serve). The plan line is the command to run once, then Start again.';
+				}
+				if (reason.includes('already listening')) return 'Already running on this lease.';
+				if (reason.includes('not running')) return 'Nothing is listening on this lease.';
+				return reason || 'Nothing to start or stop.';
+			}
 			return writeIds ? 'Already current — nothing to write.' : 'The plan found nothing to do.';
 		}
 		if (plugin === 'localberth') {
@@ -978,7 +1001,7 @@
 					title: applyIds.length
 						? `${label} for ${applyIds.length === 1 ? applyIds[0] : `${applyIds.length} ${unit}s`}?`
 						: `Nothing to ${label.toLowerCase()}`,
-					hint: pluginJobHint(plugin, action, applyIds, writeIds),
+					hint: pluginJobHint(plugin, action, applyIds, writeIds, data),
 					items: items.length ? items : ['Nothing to do.'],
 					confirmLabel: applyIds.length === 1 ? label : `${label} ${applyIds.length}`,
 					canApply: applyIds.length > 0,
