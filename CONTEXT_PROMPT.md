@@ -100,7 +100,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 2 — 2026-08-20
 
-- M2 safe writes + loopback dashboard. Default port 54322. No publish, no force-push.
+- M2 safe writes + loopback dashboard. Default port 4321. No publish, no force-push.
 
 ### Session 3 — 2026-08-20
 

@@ -63,7 +63,7 @@
         },
         {
           "timestamp": "2026-08-20T19:30:00Z",
-          "text": "M2: bump, fetch, pull --ff-only, export write, job.lock, SvelteKit app/ + localhelm serve on 127.0.0.1:54322."
+          "text": "M2: bump, fetch, pull --ff-only, export write, job.lock, SvelteKit app/ + localhelm serve on 127.0.0.1:4321."
         },
         {
           "timestamp": "2026-08-20T20:45:00Z",
@@ -560,7 +560,7 @@
       "timestamp": "2026-08-20T20:12:00Z",
       "phase": "2-scaffolding",
       "session": 2,
-      "issue": "Leftover vite dev process kept port 54322 bound after the parent serve was killed, so the next localhelm serve failed with strictPort.",
+      "issue": "Leftover vite dev process kept port 4321 bound after the parent serve was killed, so the next localhelm serve failed with strictPort.",
       "resolution": "Kill the whole tree (taskkill /T) or check the port owner before reserving; a LocalBerth lease avoids the collision.",
       "category": "tooling"
     },

@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export const DEFAULT_DASHBOARD_PORT = 54322;
+export const DEFAULT_DASHBOARD_PORT = 4321;
 
 function packageRoot(): string {
 	return path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
