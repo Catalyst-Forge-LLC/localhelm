@@ -5,7 +5,7 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 import type { LoadedManifest } from './manifest.js';
 import { asPluginBoards, loadPluginFile, loadPlugins } from './plugin.js';
-import { pluginPlanWriteIds } from './pluginPlan.js';
+import { formatPluginPlanLines, pluginPlanWriteIds } from './pluginPlan.js';
 
 describe('plugins', () => {
 	it('loads a generic plugin from an enrolled project', async () => {
@@ -51,5 +51,26 @@ describe('plugins', () => {
 		);
 		assert.deepEqual(pluginPlanWriteIds({ action: 'sync', rows: [{ id: 'a', writes: false }] }), []);
 		assert.equal(pluginPlanWriteIds({ note: 'old shape, no writes flags' }), null);
+	});
+
+	it('prints PORT and HOST on a start recipe line', () => {
+		assert.deepEqual(
+			formatPluginPlanLines({
+				rows: [
+					{
+						id: 'dictawhisper',
+						recipe: 'pnpm serve',
+						port: 7777,
+						host: '127.0.0.1',
+						proposedCwd: 'Z:/workspace/dictawhisper',
+					},
+					{ id: 'up', action: 'skip', reason: 'already listening (pid 9)' },
+				],
+			}),
+			[
+				'dictawhisper  pnpm serve  PORT=7777 HOST=127.0.0.1  in Z:/workspace/dictawhisper',
+				'up  —  already listening (pid 9)',
+			],
+		);
 	});
 });

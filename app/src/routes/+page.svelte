@@ -5,7 +5,8 @@
 	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import IconButton from '$lib/IconButton.svelte';
-	import { pluginPlanWriteIds } from '$lib/pluginPlan';
+	import { formatPluginPlanLines, pluginPlanWriteIds } from '$lib/pluginPlan';
+	import { portFamilies, portLooks } from '$lib/looks';
 	import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
 	import {
 		idsToSelection,
@@ -211,11 +212,27 @@
 	const observedBoard = $derived(portBoards.find((board) => board.title === 'Observed') ?? null);
 	const visiblePortBoard = $derived(portPane === 'observed' ? observedBoard : leaseBoard);
 	const portsNeedingYou = $derived((leaseBoard?.rows ?? []).filter((row) => portNeedsYou(row.cells)));
+	const portFamilyCards = $derived(
+		portFamilies({
+			fleetIds: (inventory?.projects ?? []).map((row) => row.id),
+			leaseRows: leaseBoard?.rows ?? [],
+		}),
+	);
+	const portLookCards = $derived(
+		portLooks({
+			fleetIds: (inventory?.projects ?? []).map((row) => row.id),
+			leaseRows: leaseBoard?.rows ?? [],
+		}),
+	);
 	const cascadeOnlyRows = $derived(
 		cascadeTargets.filter((target) => target.writable > 0 && !attentionRows.some((row) => row.id === target.id)),
 	);
 	const todayCount = $derived(
-		attentionRows.length + cascadeOnlyRows.length + sitesNeedingYou.length + portsNeedingYou.length,
+		attentionRows.length +
+			cascadeOnlyRows.length +
+			sitesNeedingYou.length +
+			portsNeedingYou.length +
+			portLookCards.length,
 	);
 	const filepressSyncIds = $derived(sitesNeedingYou.map((row) => row.id));
 	const checkedPublishIds = $derived(checkedIds.filter((id) => {
@@ -528,45 +545,13 @@
 	}
 
 	function rowLines(data: unknown): string[] {
-		if (!data || typeof data !== 'object') return [];
-		const rows = (data as { rows?: unknown }).rows;
-		if (!Array.isArray(rows)) return [];
-		return rows
-			.filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === 'object')
-			.map((row) => {
-				const id =
-					typeof row.id === 'string'
-						? row.id
-						: typeof row.fromId === 'string'
-							? row.fromId
-							: typeof row.path === 'string'
-								? row.path
-								: '?';
-				const recipe = typeof row.recipe === 'string' ? row.recipe.trim() : '';
-				const cwd = typeof row.proposedCwd === 'string' ? row.proposedCwd : '';
-				if (recipe) {
-					return [id, recipe, cwd ? `in ${cwd}` : ''].filter(Boolean).join('  ');
-				}
-				const skipAction = typeof row.action === 'string' ? row.action : '';
-				if (skipAction === 'skip') {
-					const why =
-						typeof row.reason === 'string'
-							? row.reason.replace(/\s+—\s+localberth recipe.*$/, '')
-							: 'nothing to do';
-					return `${id}  —  ${why}`;
-				}
-				const action = typeof row.action === 'string' ? row.action : '';
-				const reason = typeof row.reason === 'string' ? row.reason : typeof row.update === 'string' ? row.update : '';
-				const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
-				const to = typeof row.to === 'string' ? row.to : typeof row.toSpec === 'string' ? row.toSpec : '';
-				const range = from && to ? `${from} → ${to}` : from || to;
-				const guess =
-					typeof row.proposedCommand === 'string' && typeof row.proposedCwd === 'string'
-						? `${row.proposedCommand} in ${row.proposedCwd}`
-						: '';
-				const showAction = Boolean(action) && !reason.startsWith(action);
-				return [id, showAction ? action : '', range, reason, guess].filter(Boolean).join('  ');
-			});
+		return formatPluginPlanLines(data);
+	}
+
+	function openPortsFamily(ids: string[]): void {
+		selectedPorts = idsToSelection(ids);
+		portPane = 'leases';
+		setTab('ports');
 	}
 
 	async function startEnroll(): Promise<void> {
@@ -1495,9 +1480,9 @@
 						{/if}
 					</div>
 
-					{#if statusReady && attentionRows.length === 0 && cascadeOnlyRows.length === 0}
+					{#if statusReady && attentionRows.length === 0 && cascadeOnlyRows.length === 0 && portLookCards.length === 0}
 						<p class="quiet-banner">All quiet on the fleet. Open Fleet for the full table, Sites for FilePress, or Ports for leases.</p>
-					{:else if statusReady}
+					{:else if statusReady && (attentionRows.length > 0 || cascadeOnlyRows.length > 0)}
 						<ul class="need-list">
 							{#each attentionRows as row (row.id)}
 								{@const cascadeTarget = cascadeFor(row.id)}
@@ -1605,6 +1590,32 @@
 							{/each}
 						</ul>
 					{/if}
+					{#if statusReady && portLookCards.length}
+						<div class="looks-block">
+							<h3 class="looks-head">Looks</h3>
+							<p class="hint">Facts, not writes. Folder and port stay put.</p>
+							<ul class="need-list">
+								{#each portLookCards as look (look.id)}
+									<li class="need-card">
+										<div class="need-main">
+											<div class="id">{look.title}</div>
+											<div class="dim small">{look.detail}</div>
+										</div>
+										<div class="need-actions">
+											<button
+												type="button"
+												class="btn btn-sm"
+												onclick={() => openPortsFamily(look.leaseIds)}
+												title="Opens Ports with these leases checked."
+											>
+												Open Ports
+											</button>
+										</div>
+									</li>
+								{/each}
+							</ul>
+						</div>
+					{/if}
 				</section>
 
 				{#if statusReady}
@@ -1685,12 +1696,37 @@
 					{:else}
 						<p class="dim small">
 							{leaseBoard.rows.length} lease{leaseBoard.rows.length === 1 ? '' : 's'}
+							{#if portFamilyCards.length}
+								· {portFamilyCards.length} stack{portFamilyCards.length === 1 ? '' : 's'}
+							{/if}
 							{#if portsNeedingYou.length}
 								· {portsNeedingYou.length} down, conflicted, or need a firewall
 							{:else}
 								· all listening
 							{/if}
 						</p>
+						{#if portFamilyCards.length}
+							<ul class="need-list compact">
+								{#each portFamilyCards.slice(0, 8) as family (family.stem)}
+									<li class="need-card">
+										<div class="need-main">
+											<div class="id">{family.label}</div>
+											<div class="dim small">{family.bits}</div>
+										</div>
+										<div class="need-actions">
+											<button
+												type="button"
+												class="btn btn-sm"
+												onclick={() => openPortsFamily(family.leaseIds)}
+												title="Opens Ports with this stack checked."
+											>
+												Open
+											</button>
+										</div>
+									</li>
+								{/each}
+							</ul>
+						{/if}
 						{#if portsNeedingYou.length}
 							<ul class="need-list compact">
 								{#each portsNeedingYou.slice(0, 8) as row (row.id)}
@@ -2025,6 +2061,23 @@
 								</div>
 							{/if}
 						</div>
+						{#if leaseActions && portFamilyCards.length}
+							<ul class="family-strip">
+								{#each portFamilyCards as family (family.stem)}
+									<li>
+										<button
+											type="button"
+											class="family-chip"
+											onclick={() => openPortsFamily(family.leaseIds)}
+											title={family.members.map((m) => m.id).join(', ')}
+										>
+											<span class="id">{family.label}</span>
+											<span class="dim small">{family.bits}</span>
+										</button>
+									</li>
+								{/each}
+							</ul>
+						{/if}
 						<div class="table-wrap">
 							<table>
 								<thead>
@@ -2836,6 +2889,43 @@
 	.need-list.compact {
 		max-height: 18rem;
 		overflow: auto;
+	}
+
+	.looks-block {
+		margin-top: 1.15rem;
+		padding-top: 1rem;
+		border-top: 1px solid #3d3d44;
+	}
+
+	.looks-head {
+		margin: 0 0 0.2rem;
+		font-size: 1rem;
+	}
+
+	.family-strip {
+		list-style: none;
+		margin: 0 0 0.75rem;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
+	}
+
+	.family-chip {
+		border: 1px solid #4c4c54;
+		background: #2c2c32;
+		color: inherit;
+		border-radius: 0.45rem;
+		padding: 0.35rem 0.65rem;
+		display: grid;
+		gap: 0.1rem;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.family-chip:hover {
+		border-color: #6b6b74;
+		background: #333338;
 	}
 
 	.need-card {

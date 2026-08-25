@@ -112,6 +112,10 @@
         {
           "timestamp": "2026-08-25T17:15:00Z",
           "text": "Draft cheap-surfaces spec (docs/specs/cheap-surfaces.md). Twin in localberth. Not scheduled."
+        },
+        {
+          "timestamp": "2026-08-25T19:00:00Z",
+          "text": "H1 cheap surfaces: family stacks, look cards, PORT/HOST on Ports confirm (d36)."
         }
       ]
     },
@@ -544,6 +548,16 @@
       "decision": "Ports Start/Stop is hosted only: LocalBerth owns start/stop + lease recipe (default pnpm serve, detached). LocalHelm plan/apply buttons and ?leases= CSV. Observed-only rows stay read-only. Claim/release stay on the localberth CLI. Fleet dashboards expose pnpm serve as the house entry.",
       "rationale": "Operator 2026-08-24: start/stop fleet apps that are not running, via LocalBerth as a LocalHelm plugin. Do not guess npm run dev.",
       "alternatives_considered": ["Spawn from LocalHelm core", "Kill observed-only pids", "Claim/release in the dashboard"],
+      "status": "active"
+    },
+    {
+      "id": "d36",
+      "timestamp": "2026-08-25T19:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 16,
+      "decision": "Family is inferred from lease/fleet ids (strip one -site/-api, fold hyphens). Today shows look cards that are not writes. Ports Start confirm prints PORT and HOST from the LocalBerth plan. LocalHelm does not spawn or read ~/.localberth logs itself.",
+      "rationale": "Operator picked cheap-surfaces H1. Facts already on the plugin board were not on Today. file vs filepress must not collide.",
+      "alternatives_considered": ["Manifest group field first", "Exec localberth doctor from the dashboard", "Hard archive / folder move"],
       "status": "active"
     }
   ],

@@ -1,4 +1,66 @@
-/** If the plan lists `writes` on rows, return only those ids. `null` means the shape is unknown. Keep in sync with app/src/lib/pluginPlan.ts. */
+function envBits(row: Record<string, unknown>): string {
+	const port =
+		typeof row.port === 'number'
+			? String(row.port)
+			: typeof row.port === 'string' && row.port.trim()
+				? row.port.trim()
+				: '';
+	const host =
+		typeof row.host === 'string' && row.host.trim()
+			? row.host.trim()
+			: typeof row.bind === 'string' && row.bind.trim()
+				? row.bind.trim()
+				: '';
+	if (port && host) return `PORT=${port} HOST=${host}`;
+	if (port) return `PORT=${port}`;
+	if (host) return `HOST=${host}`;
+	return '';
+}
+
+/** Confirm lines for plugin plans. Recipe rows include the PORT/HOST start will inject. */
+export function formatPluginPlanLines(data: unknown): string[] {
+	if (!data || typeof data !== 'object') return [];
+	const rows = (data as { rows?: unknown }).rows;
+	if (!Array.isArray(rows)) return [];
+	return rows
+		.filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === 'object')
+		.map((row) => {
+			const id =
+				typeof row.id === 'string'
+					? row.id
+					: typeof row.fromId === 'string'
+						? row.fromId
+						: typeof row.path === 'string'
+							? row.path
+							: '?';
+			const recipe = typeof row.recipe === 'string' ? row.recipe.trim() : '';
+			const cwd = typeof row.proposedCwd === 'string' ? row.proposedCwd : '';
+			if (recipe) {
+				return [id, recipe, envBits(row), cwd ? `in ${cwd}` : ''].filter(Boolean).join('  ');
+			}
+			const skipAction = typeof row.action === 'string' ? row.action : '';
+			if (skipAction === 'skip') {
+				const why =
+					typeof row.reason === 'string'
+						? row.reason.replace(/\s+—\s+localberth recipe.*$/, '')
+						: 'nothing to do';
+				return `${id}  —  ${why}`;
+			}
+			const action = typeof row.action === 'string' ? row.action : '';
+			const reason = typeof row.reason === 'string' ? row.reason : typeof row.update === 'string' ? row.update : '';
+			const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
+			const to = typeof row.to === 'string' ? row.to : typeof row.toSpec === 'string' ? row.toSpec : '';
+			const range = from && to ? `${from} → ${to}` : from || to;
+			const guess =
+				typeof row.proposedCommand === 'string' && typeof row.proposedCwd === 'string'
+					? `${row.proposedCommand} in ${row.proposedCwd}`
+					: '';
+			const showAction = Boolean(action) && !reason.startsWith(action);
+			return [id, showAction ? action : '', range, reason, guess].filter(Boolean).join('  ');
+		});
+}
+
+/** If the plan lists `writes` on rows, return only those ids. `null` means the shape is unknown. */
 export function pluginPlanWriteIds(data: unknown): string[] | null {
 	if (!data || typeof data !== 'object') return null;
 	const rows = (data as { rows?: unknown }).rows;

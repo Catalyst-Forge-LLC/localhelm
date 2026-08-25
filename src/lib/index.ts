@@ -27,7 +27,10 @@ export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from
 export { landShipsPath, readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 export type { LandShipRecord } from './landShips.js';
 export { asPluginBoards, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
-export { pluginPlanWriteIds } from './pluginPlan.js';
+export { familyRole, familyStem, groupIdsByFamily } from './family.js';
+export { familyListenBits, portFamilies, portLooks } from './looks.js';
+export type { FamilyMember, LeaseRowInput, PortFamily, PortLook, PortLookKind } from './looks.js';
+export { formatPluginPlanLines, pluginPlanWriteIds } from './pluginPlan.js';
 export type { HelmPlugin, LoadedPlugin, PluginBoard, PluginTab } from './plugin.js';
 export { applyBump, planBump } from './bump.js';
 export type { BumpPlan } from './bump.js';

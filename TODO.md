@@ -38,9 +38,9 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 
 ## Cheap surfaces (draft spec)
 
-See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md). Not scheduled until you pick a slice.
+See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 
-- [ ] Family + look cards on Today; `PORT`/`HOST` on Ports confirm
+- [x] Family + look cards on Today; `PORT`/`HOST` on Ports confirm _(H1, 2026-08-25)_
 - [ ] `localhelm brief`
 - [ ] Soft archive (hide, not unenroll, not delete)
 - [ ] Family start/stop (plugin ids only)
