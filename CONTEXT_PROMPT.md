@@ -159,9 +159,10 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 15 — 2026-08-24
 
 - Ports Start/Stop: LocalBerth starts/stops a stored recipe (`pnpm serve` by default) detached. LocalHelm only hosts the plan/confirm buttons. Observed stays read-only. Claim/release stay on `localberth`. Checked leases persist as `?leases=`. Confirm lines show the recipe command, not `start start …`. A `-api` lease with no folder of that name guesses the package folder and `pnpm start` (dictawhisper-api → dictawhisper). Hyphenless lease names match hyphenated folders (`temperpass-site` → `temper-pass`). `start` sets `PORT` to that lease — dictawhisper `serve` must not let the UI port (7777) become the API (8008).
-- Cheap surfaces (draft): `docs/specs/cheap-surfaces.md`. H1 landed: family stacks on Today/Ports, look cards (no recipe, missing cwd, family split, enroll vs slip), `PORT`/`HOST` on Start confirm. Brief / archive / family start still unscheduled.
+- Cheap surfaces (draft): `docs/specs/cheap-surfaces.md`. H1–H5 landed: family stacks, look cards, `PORT`/`HOST` on confirm, `localhelm brief` + Copy brief, soft archive (`.localhelm/archive.json`, hide not delete), family start/stop, Save guess. Today Ports is one column with titled Stacks and Down or conflicted lists.
 - Confirm dismisses as soon as you say yes. The header keeps “Working…” while start/stop finishes. The dialog must not pin itself open just because a write is still in flight.
 
 ### Session 16 — 2026-08-25
 
 - H1: Today groups lease/fleet stacks (UI / API / site listen bits). Look cards are facts, not gold writes. Ports Start confirm prints `PORT` and `HOST`.
+- H2–H5: Copy brief / `localhelm brief`. Archive hides a fleet id (folder stays). Family start/stop and Save guess are Ports actions. Start is hidden when listening; Stop is hidden when quiet.

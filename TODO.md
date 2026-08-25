@@ -41,6 +41,7 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 
 - [x] Family + look cards on Today; `PORT`/`HOST` on Ports confirm _(H1, 2026-08-25)_
-- [ ] `localhelm brief`
-- [ ] Soft archive (hide, not unenroll, not delete)
-- [ ] Family start/stop (plugin ids only)
+- [x] `localhelm brief` + Copy brief _(H2, 2026-08-25)_
+- [x] Soft archive (hide, not unenroll, not delete) _(H3, 2026-08-25)_
+- [x] Family start/stop (plugin ids only) _(H4, 2026-08-25)_
+- [x] Save guess without start _(H5, 2026-08-25)_

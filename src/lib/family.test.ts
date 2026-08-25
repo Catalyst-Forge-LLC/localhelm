@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { familyRole, familyStem, groupIdsByFamily } from './family.js';
+import { familyMemberNames, familyRole, familyStem, groupIdsByFamily } from './family.js';
 
 describe('familyStem', () => {
 	it('strips one suffix then folds hyphens', () => {
@@ -9,6 +9,13 @@ describe('familyStem', () => {
 		assert.equal(familyStem('temperpass-site'), 'temperpass');
 		assert.notEqual(familyStem('file'), familyStem('filepress'));
 		assert.equal(familyRole('dictawhisper-site'), 'site');
+	});
+
+	it('lists family members from a seed', () => {
+		assert.deepEqual(familyMemberNames('dictawhisper', ['dictawhisper-api', 'filepress', 'dictawhisper-site']), [
+			'dictawhisper-api',
+			'dictawhisper-site',
+		]);
 	});
 
 	it('groups ids by stem', () => {

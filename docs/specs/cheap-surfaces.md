@@ -1,7 +1,7 @@
 # Cheap surfaces — LocalHelm
 
 **Spec kind:** Delivery  
-**Status:** Draft (2026-08-25) — H1 landed; remaining slices unscheduled  
+**Status:** Draft (2026-08-25) — H1–H5 landed  
 **Related:** `docs/PHASE_1_BRIEF.md` §10–11, `TODO.md` M4, `.forgetrail/IDEAS.md`, sibling [`localberth/docs/specs/cheap-surfaces.md`](../../../localberth/docs/specs/cheap-surfaces.md)  
 **Surfaces:** Today / Fleet / Ports host, CLI `status` / export, activity log
 
@@ -205,3 +205,4 @@ No new cloud. No schema in a sibling database from this package.
 
 - `2026-08-25:` Draft after Ports start/stop, recipe guess (`-site`/`-api`, hyphen fold), and the dictawhisper `PORT` leak.
 - `2026-08-25:` H1 landed — family cards, look cards, `PORT`/`HOST` on Ports confirm. H2–H5 still unscheduled.
+- `2026-08-25:` H2–H5 landed — `brief`, archive hide/restore, family start/stop, save-guess. Today Ports is one column with titled Stacks / Down lists.

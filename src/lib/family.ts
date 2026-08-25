@@ -13,6 +13,12 @@ export function familyRole(id: string): 'ui' | 'api' | 'site' {
 	return 'ui';
 }
 
+export function familyMemberNames(seed: string, names: Iterable<string>): string[] {
+	const stem = familyStem(seed);
+	if (!stem) return [];
+	return [...names].filter((name) => familyStem(name) === stem);
+}
+
 export function groupIdsByFamily(ids: Iterable<string>): Map<string, string[]> {
 	const groups = new Map<string, string[]>();
 	for (const id of ids) {

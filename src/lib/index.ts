@@ -27,7 +27,11 @@ export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from
 export { landShipsPath, readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 export type { LandShipRecord } from './landShips.js';
 export { asPluginBoards, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
-export { familyRole, familyStem, groupIdsByFamily } from './family.js';
+export { archiveIds, archivePath, isArchived, readArchive, restoreIds } from './archive.js';
+export type { ArchiveFile } from './archive.js';
+export { buildBrief, formatBrief } from './brief.js';
+export type { BriefLease, BriefProject } from './brief.js';
+export { familyMemberNames, familyRole, familyStem, groupIdsByFamily } from './family.js';
 export { familyListenBits, portFamilies, portLooks } from './looks.js';
 export type { FamilyMember, LeaseRowInput, PortFamily, PortLook, PortLookKind } from './looks.js';
 export { formatPluginPlanLines, pluginPlanWriteIds } from './pluginPlan.js';

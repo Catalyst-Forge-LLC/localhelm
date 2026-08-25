@@ -6,6 +6,8 @@
 	import Icon from '$lib/Icon.svelte';
 	import IconButton from '$lib/IconButton.svelte';
 	import { formatPluginPlanLines, pluginPlanWriteIds } from '$lib/pluginPlan';
+	import { formatBrief } from '$lib/briefFormat';
+	import { familyMemberNames } from '$lib/family';
 	import { portFamilies, portLooks } from '$lib/looks';
 	import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
 	import {
@@ -152,12 +154,20 @@
 	let confirmShowOtp = $state(false);
 	let confirmRun = $state<(() => void) | null>(null);
 	let statusReady = $state(false);
+	let archivedIds = $state<string[]>([]);
+	let showArchived = $state(false);
+	let showParked = $state(false);
+	let briefCopied = $state(false);
 
 	let entries = $state<LogEntry[]>([]);
 	let busy = $state('');
 	let error = $state('');
 
 	const enrolledIds = $derived(new Set((inventory?.projects ?? []).map((p) => p.id)));
+	const archivedSet = $derived(new Set(archivedIds));
+	const visibleProjects = $derived(
+		(inventory?.projects ?? []).filter((row) => showArchived || !archivedSet.has(row.id)),
+	);
 	const checkedScan = $derived(
 		Object.entries(selectedScan)
 			.filter(([, on]) => on)
@@ -203,29 +213,43 @@
 			})
 			.filter((row) => row.behind > 0 || row.linked > 0);
 	});
-	const attentionRows = $derived((inventory?.projects ?? []).filter((row) => rowNeedsYou(row)));
+	const attentionRows = $derived(visibleProjects.filter((row) => rowNeedsYou(row)));
 	const siteBoards = $derived(pluginBoards.filter((board) => (board.tab ?? 'sites') === 'sites'));
 	const portBoards = $derived(pluginBoards.filter((board) => board.tab === 'ports'));
 	const filepressBoard = $derived(siteBoards.find((board) => board.plugin === 'filepress') ?? siteBoards[0] ?? null);
 	const sitesNeedingYou = $derived((filepressBoard?.rows ?? []).filter((row) => siteNeedsYou(row.cells)));
-	const leaseBoard = $derived(portBoards.find((board) => board.title === 'Leases') ?? portBoards[0] ?? null);
+	const leaseBoardAll = $derived(portBoards.find((board) => board.title === 'Leases') ?? portBoards[0] ?? null);
+	const parkedLeaseCount = $derived((leaseBoardAll?.rows ?? []).filter((row) => row.cells.parked === 'yes').length);
+	const leaseBoard = $derived(
+		leaseBoardAll
+			? {
+					...leaseBoardAll,
+					rows: leaseBoardAll.rows.filter((row) => showParked || row.cells.parked !== 'yes'),
+				}
+			: null,
+	);
 	const observedBoard = $derived(portBoards.find((board) => board.title === 'Observed') ?? null);
 	const visiblePortBoard = $derived(portPane === 'observed' ? observedBoard : leaseBoard);
 	const portsNeedingYou = $derived((leaseBoard?.rows ?? []).filter((row) => portNeedsYou(row.cells)));
 	const portFamilyCards = $derived(
 		portFamilies({
-			fleetIds: (inventory?.projects ?? []).map((row) => row.id),
+			fleetIds: visibleProjects.map((row) => row.id),
 			leaseRows: leaseBoard?.rows ?? [],
 		}),
 	);
 	const portLookCards = $derived(
 		portLooks({
-			fleetIds: (inventory?.projects ?? []).map((row) => row.id),
+			fleetIds: visibleProjects.map((row) => row.id),
 			leaseRows: leaseBoard?.rows ?? [],
 		}),
 	);
 	const cascadeOnlyRows = $derived(
-		cascadeTargets.filter((target) => target.writable > 0 && !attentionRows.some((row) => row.id === target.id)),
+		cascadeTargets.filter(
+			(target) =>
+				target.writable > 0 &&
+				!attentionRows.some((row) => row.id === target.id) &&
+				(showArchived || !archivedSet.has(target.id)),
+		),
 	);
 	const todayCount = $derived(
 		attentionRows.length +
@@ -247,7 +271,7 @@
 			.filter((row) => row.actions.some((act) => act.id === 'push'))
 			.map((row) => row.id),
 	);
-	const fleetIds = $derived((inventory?.projects ?? []).map((row) => row.id));
+	const fleetIds = $derived(visibleProjects.map((row) => row.id));
 	const fleetAllChecked = $derived(fleetIds.length > 0 && fleetIds.every((id) => selectedIds[id]));
 	const fleetSomeChecked = $derived(checkedIds.length > 0 && !fleetAllChecked);
 	const checkedSiteIdList = $derived(selectionToIds(selectedSites));
@@ -507,6 +531,12 @@
 				/* keep the last boards — do not flash "plugin not loaded" on a flaky refresh */
 			}
 			await loadActivity();
+			try {
+				const archived = (await call('/api/archive')) as { ids?: string[] };
+				archivedIds = Array.isArray(archived.ids) ? archived.ids : [];
+			} catch {
+				/* keep the last archive list */
+			}
 		});
 		statusReady = true;
 	}
@@ -552,6 +582,87 @@
 		selectedPorts = idsToSelection(ids);
 		portPane = 'leases';
 		setTab('ports');
+	}
+
+	function currentBrief(): string {
+		return formatBrief({
+			projects: inventory?.projects ?? [],
+			leases: (leaseBoardAll?.rows ?? []).map((row) => ({
+				id: row.id,
+				listening: row.cells.listening === 'yes',
+				recipe: row.cells.recipe ?? '—',
+				parked: row.cells.parked === 'yes',
+			})),
+			activityTitles: entries.map((entry) => entry.title),
+		});
+	}
+
+	async function copyBrief(): Promise<void> {
+		const text = currentBrief();
+		try {
+			await navigator.clipboard.writeText(text);
+			briefCopied = true;
+			note('copied brief', text);
+			setTimeout(() => {
+				briefCopied = false;
+			}, 2000);
+		} catch (err) {
+			error = err instanceof Error ? err.message : String(err);
+		}
+	}
+
+	function familyIdsFromChecked(): string[] {
+		const names = (leaseBoard?.rows ?? []).map((row) => row.id);
+		return [...new Set(checkedPortIdList.flatMap((seed) => familyMemberNames(seed, names)))];
+	}
+
+	function startFamilyJob(action: 'start' | 'stop'): void {
+		const ids = familyIdsFromChecked();
+		if (!ids.length) return;
+		void startPluginJob(leaseBoard?.plugin ?? 'localberth', action, ids, action === 'start' ? 'Start family' : 'Stop family');
+	}
+
+	function startArchive(ids: string[], restore: boolean): void {
+		if (!ids.length) return;
+		const parkIds = restore
+			? []
+			: [
+					...new Set(
+						ids.flatMap((id) =>
+							familyMemberNames(
+								id,
+								(leaseBoardAll?.rows ?? []).map((row) => row.id),
+							),
+						),
+					),
+				];
+		offerConfirm({
+			title: restore ? 'Restore on Today?' : 'Hide on Today?',
+			hint: restore
+				? 'Puts these fleet rows back on Today. Folder was never moved. Does not unpark.'
+				: 'Hides on Today. Folder and port stay. Matching leases can be parked on the slip (port stays).',
+			items: [
+				...ids.map((id) => (restore ? `restore ${id}` : `hide ${id}`)),
+				...parkIds.map((id) => `park ${id} — port stays`),
+			],
+			confirmLabel: restore ? 'Restore' : parkIds.length ? 'Hide and park' : 'Hide',
+			canApply: true,
+			run: () => void applyArchive(ids, restore, parkIds),
+		});
+	}
+
+	async function applyArchive(ids: string[], restore: boolean, parkIds: string[]): Promise<void> {
+		await run(restore ? 'restoring on Today' : 'hiding on Today', async () => {
+			const data = (await call('/api/archive', {
+				method: 'POST',
+				body: JSON.stringify({ ids, restore }),
+			})) as { ids?: string[] };
+			archivedIds = Array.isArray(data.ids) ? data.ids : [];
+			note(restore ? `restore ${ids.join(', ')}` : `archive ${ids.join(', ')}`, data);
+			if (parkIds.length && leaseBoardAll) {
+				await applyPluginJob(leaseBoardAll.plugin, 'park', parkIds);
+			}
+		});
 	}
 
 	async function startEnroll(): Promise<void> {
@@ -736,6 +847,9 @@
 		if (act.id === 'ship') return 'lucide:ship';
 		if (act.id === 'start') return 'lucide:play';
 		if (act.id === 'stop') return 'lucide:square';
+		if (act.id === 'park') return 'lucide:circle-parking';
+		if (act.id === 'unpark') return 'lucide:circle-parking-off';
+		if (act.id === 'recipe') return 'lucide:save';
 		return null;
 	}
 
@@ -794,6 +908,7 @@
 				}
 				if (reason.includes('already listening')) return 'Already running on this lease.';
 				if (reason.includes('not running')) return 'Nothing is listening on this lease.';
+				if (reason.includes('park')) return 'Park hides the lease. The port stays yours. Unpark does not start.';
 				return reason || 'Nothing to start or stop.';
 			}
 			return writeIds ? 'Already current — nothing to write.' : 'The plan found nothing to do.';
@@ -801,6 +916,15 @@
 		if (plugin === 'localberth') {
 			if (action === 'stop') {
 				return 'LocalBerth stops the process tree on this lease. The lease stays. Observed-only rows are not killed.';
+			}
+			if (action === 'park') {
+				return 'Stops if we started it, then hides the lease. The port stays yours. Not a release.';
+			}
+			if (action === 'unpark') {
+				return 'Shows the lease again. Does not start it.';
+			}
+			if (action === 'recipe') {
+				return 'Saves the guessed folder and command. Does not start.';
 			}
 			const rows = data && typeof data === 'object' ? (data as { rows?: unknown }).rows : null;
 			const first = Array.isArray(rows) && rows[0] && typeof rows[0] === 'object' ? (rows[0] as Record<string, unknown>) : null;
@@ -1334,6 +1458,15 @@
 						</button>
 						<button
 							class="btn"
+							disabled={!statusReady}
+							onclick={() => void copyBrief()}
+							title="Copies a markdown brief of Today, Ports, and recent activity."
+						>
+							<Icon icon="lucide:clipboard" />
+							{briefCopied ? 'Copied brief' : 'Copy brief'}
+						</button>
+						<button
+							class="btn"
 							disabled={Boolean(busy)}
 							onclick={() => refresh(true)}
 							title="git fetch origin in each repo, then re-read. Updates the to push / to pull counts."
@@ -1465,8 +1598,17 @@
 							</p>
 							{/if}
 						</div>
-						{#if unpublishedPublishIds.length > 0}
-							<div class="group-buttons">
+						<div class="group-buttons">
+							<button
+								class="btn"
+								disabled={!statusReady}
+								onclick={() => void copyBrief()}
+								title="Copies a markdown brief of needs-you, Ports, and recent activity."
+							>
+								<Icon icon="lucide:clipboard" />
+								{briefCopied ? 'Copied brief' : 'Copy brief'}
+							</button>
+							{#if unpublishedPublishIds.length > 0}
 								<button
 									class="btn btn-write"
 									disabled={Boolean(busy)}
@@ -1476,8 +1618,8 @@
 									<Icon icon="lucide:package-up" />
 									Publish unpublished
 								</button>
-							</div>
-						{/if}
+							{/if}
+						</div>
 					</div>
 
 					{#if statusReady && attentionRows.length === 0 && cascadeOnlyRows.length === 0 && portLookCards.length === 0}
@@ -1705,41 +1847,57 @@
 								· all listening
 							{/if}
 						</p>
-						{#if portFamilyCards.length}
-							<ul class="need-list compact">
-								{#each portFamilyCards.slice(0, 8) as family (family.stem)}
-									<li class="need-card">
-										<div class="need-main">
-											<div class="id">{family.label}</div>
-											<div class="dim small">{family.bits}</div>
-										</div>
-										<div class="need-actions">
-											<button
-												type="button"
-												class="btn btn-sm"
-												onclick={() => openPortsFamily(family.leaseIds)}
-												title="Opens Ports with this stack checked."
-											>
-												Open
-											</button>
-										</div>
-									</li>
-								{/each}
-							</ul>
-						{/if}
-						{#if portsNeedingYou.length}
-							<ul class="need-list compact">
-								{#each portsNeedingYou.slice(0, 8) as row (row.id)}
-									<li class="need-card">
-										<div class="id">{row.label ?? row.id}</div>
-										<div class="dim small">
-											{row.cells.port ?? '—'}
-											· {row.cells.listening === 'no' ? 'not listening' : row.cells.conflict === 'yes' ? 'conflict' : row.cells.firewall}
-										</div>
-									</li>
-								{/each}
-							</ul>
-						{/if}
+						<div class="ports-snapshot">
+							{#if portFamilyCards.length}
+								<div>
+									<h3 class="looks-head">Stacks</h3>
+									<p class="hint">One line per family. Open checks those leases on Ports.</p>
+									<ul class="need-list">
+										{#each portFamilyCards.slice(0, 8) as family (family.stem)}
+											<li class="need-card">
+												<div class="need-main">
+													<div class="id">{family.label}</div>
+													<div class="dim small">{family.bits}</div>
+												</div>
+												<div class="need-actions">
+													<button
+														type="button"
+														class="btn btn-sm"
+														onclick={() => openPortsFamily(family.leaseIds)}
+														title="Opens Ports with this stack checked."
+													>
+														Open
+													</button>
+												</div>
+											</li>
+										{/each}
+									</ul>
+									{#if portFamilyCards.length > 8}
+										<p class="dim small">{portFamilyCards.length - 8} more on the Ports tab.</p>
+									{/if}
+								</div>
+							{/if}
+							{#if portsNeedingYou.length}
+								<div>
+									<h3 class="looks-head">Down or conflicted</h3>
+									<p class="hint">Single leases that are down, conflicted, or need a firewall.</p>
+									<ul class="need-list">
+										{#each portsNeedingYou.slice(0, 8) as row (row.id)}
+											<li class="need-card">
+												<div class="id">{row.label ?? row.id}</div>
+												<div class="dim small">
+													{row.cells.port ?? '—'}
+													· {row.cells.listening === 'no' ? 'not listening' : row.cells.conflict === 'yes' ? 'conflict' : row.cells.firewall}
+												</div>
+											</li>
+										{/each}
+									</ul>
+									{#if portsNeedingYou.length > 8}
+										<p class="dim small">{portsNeedingYou.length - 8} more on the Ports tab.</p>
+									{/if}
+								</div>
+							{/if}
+						</div>
 					{/if}
 				</section>
 				</div>
@@ -1799,6 +1957,25 @@
 								<Icon icon="lucide:folder-minus" />
 								Remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
 							</button>
+							<button
+								class="btn"
+								disabled={Boolean(busy) || !checkedIds.length}
+								onclick={() => startArchive(checkedIds, showArchived)}
+								title={showArchived ? 'Puts checked rows back on Today. Folder was never moved.' : 'Hides checked rows on Today. Folder and port stay.'}
+							>
+								<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
+								{showArchived ? 'Restore' : 'Archive'}{checkedIds.length ? ` (${checkedIds.length})` : ''}
+							</button>
+							{#if archivedIds.length}
+								<button
+									type="button"
+									class="btn"
+									onclick={() => (showArchived = !showArchived)}
+									title="Archived rows stay enrolled. This only changes what Today and Fleet show."
+								>
+									{showArchived ? 'Hide archived' : `Archived (${archivedIds.length})`}
+								</button>
+							{/if}
 						</div>
 					</div>
 
@@ -1825,7 +2002,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each inventory?.projects ?? [] as row (row.id)}
+								{#each visibleProjects as row (row.id)}
 									<tr>
 										<td class="tick"><input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedIds[row.id]} /></td>
 										<td>
@@ -2046,6 +2223,34 @@
 							</div>
 							{#if leaseActions}
 								<div class="group-buttons">
+									<button
+										class="btn btn-write"
+										disabled={Boolean(busy) || !familyIdsFromChecked().length}
+										onclick={() => startFamilyJob('start')}
+										title="Plans start for every unparked lease in the checked families."
+									>
+										<Icon icon="lucide:play" />
+										Start family
+									</button>
+									<button
+										class="btn btn-write"
+										disabled={Boolean(busy) || !familyIdsFromChecked().length}
+										onclick={() => startFamilyJob('stop')}
+										title="Plans stop for every unparked lease in the checked families."
+									>
+										<Icon icon="lucide:square" />
+										Stop family
+									</button>
+									{#if parkedLeaseCount}
+										<button
+											type="button"
+											class="btn"
+											onclick={() => (showParked = !showParked)}
+											title="Parked leases keep their port. Unpark does not start them."
+										>
+											{showParked ? 'Hide parked' : `Parked (${parkedLeaseCount})`}
+										</button>
+									{/if}
 									{#each boardActions(board) as act (act.id)}
 										{@const icon = actionIcon(act)}
 										<button
@@ -2889,6 +3094,13 @@
 	.need-list.compact {
 		max-height: 18rem;
 		overflow: auto;
+	}
+
+	.ports-snapshot {
+		display: flex;
+		flex-direction: column;
+		gap: 0.9rem;
+		margin-top: 0.45rem;
 	}
 
 	.looks-block {

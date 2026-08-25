@@ -116,6 +116,10 @@
         {
           "timestamp": "2026-08-25T19:00:00Z",
           "text": "H1 cheap surfaces: family stacks, look cards, PORT/HOST on Ports confirm (d36)."
+        },
+        {
+          "timestamp": "2026-08-25T20:15:00Z",
+          "text": "H2–H5 brief, archive, family start/stop, save-guess. Today Ports titled Stacks / Down lists."
         }
       ]
     },
@@ -558,6 +562,16 @@
       "decision": "Family is inferred from lease/fleet ids (strip one -site/-api, fold hyphens). Today shows look cards that are not writes. Ports Start confirm prints PORT and HOST from the LocalBerth plan. LocalHelm does not spawn or read ~/.localberth logs itself.",
       "rationale": "Operator picked cheap-surfaces H1. Facts already on the plugin board were not on Today. file vs filepress must not collide.",
       "alternatives_considered": ["Manifest group field first", "Exec localberth doctor from the dashboard", "Hard archive / folder move"],
+      "status": "active"
+    },
+    {
+      "id": "d37",
+      "timestamp": "2026-08-25T20:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 16,
+      "decision": "H2–H5: localhelm brief is clipboard markdown. Archive hides fleet ids in .localhelm/archive.json (folder stays). Ports hosts park/unpark and family start/stop; row Start only when down, Stop only when up. Today Ports is one column with titled Stacks and Down or conflicted lists.",
+      "rationale": "Operator 2026-08-25: two untitled Today Ports scrolls, Start shown while listening, then A/B/C (brief, archive/park, family + save-guess).",
+      "alternatives_considered": ["Two compact scrolls", "Always show Start and Stop", "Unenroll instead of archive"],
       "status": "active"
     }
   ],

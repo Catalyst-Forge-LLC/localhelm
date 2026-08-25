@@ -8,6 +8,8 @@ import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enr
 import { applyExport, planExport } from '../lib/export.js';
 import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
 import { applyPublish, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, requirePublishIds, type PublishRow } from '../lib/publish.js';
+import { archiveIds, readArchive, restoreIds } from '../lib/archive.js';
+import { buildBrief } from '../lib/brief.js';
 import { applyLand, planLand, requireLandSiteId } from '../lib/land.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
@@ -38,6 +40,8 @@ Usage:
   localhelm auth
   localhelm cascade <id> [--to V] [--apply] [--no-commit]
   localhelm land <site-id> [--apply] [--otp CODE]
+  localhelm brief [--json]
+  localhelm archive [id...] [--apply] [--restore]
   localhelm plugins
   localhelm plugin <id> [action] [name...] [--apply] [--no-commit]
   localhelm serve [--host ADDR] [--port N]
@@ -616,6 +620,46 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 		} finally {
 			await lock.release();
 		}
+		return;
+	}
+
+	if (cmd === 'brief') {
+		const json = takeFlag(argv, '--json');
+		if (argv.length) fail('usage: localhelm brief [--json]');
+		const loaded = await requireManifest();
+		const markdown = await buildBrief(loaded);
+		if (json) printJson({ markdown });
+		else process.stdout.write(markdown);
+		return;
+	}
+
+	if (cmd === 'archive') {
+		const apply = takeFlag(argv, '--apply');
+		const restore = takeFlag(argv, '--restore');
+		const json = takeFlag(argv, '--json');
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		const ids = argv;
+		const loaded = await requireManifest();
+		if (!ids.length) {
+			const file = await readArchive(loaded.workspaceRoot);
+			if (json) printJson(file);
+			else if (!file.ids.length) process.stdout.write('Nothing archived. Folder and port stay if you archive later.\n');
+			else process.stdout.write(`${file.ids.join('\n')}\n`);
+			return;
+		}
+		process.stdout.write(
+			restore
+				? `Restore ${ids.join(', ')} on Today. Folder was never moved.\n`
+				: `Archive ${ids.join(', ')} hides them on Today. Folder and port stay.\n`,
+		);
+		if (!apply) {
+			process.stdout.write('Nothing written. Re-run with --apply to confirm.\n');
+			return;
+		}
+		const file = restore ? await restoreIds(loaded.workspaceRoot, ids) : await archiveIds(loaded.workspaceRoot, ids);
+		if (json) printJson(file);
+		else process.stdout.write(`${file.ids.length ? file.ids.join('\n') : '(none archived)'}\n`);
 		return;
 	}
 
