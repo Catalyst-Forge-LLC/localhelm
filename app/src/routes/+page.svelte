@@ -1984,9 +1984,17 @@
 												<td class="small">{row.cells[col.id] ?? '—'}</td>
 											{/each}
 											<td>
-												<div class="bump">
+												<div class="port-actions">
 													{#if row.href}
-														<a class="open-link" href={row.href} target="localberth-open" rel="noopener">Open</a>
+														<a
+															class="open-link"
+															href={row.href}
+															target="localberth-open"
+															rel="noopener"
+															title="Open the listening URL in a browser"
+														>Open</a>
+													{:else}
+														<span class="open-slot" aria-hidden="true"></span>
 													{/if}
 													{#if leaseActions}
 														{#each row.actions as act (act.id)}
@@ -2497,9 +2505,22 @@
 		gap: 1rem;
 	}
 
+	.port-actions {
+		display: grid;
+		grid-template-columns: 2.75rem auto auto;
+		justify-content: end;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
 	.open-link {
 		color: var(--accent, #3d6b4f);
 		font-size: 0.85rem;
+	}
+
+	.open-slot {
+		display: block;
+		min-height: 1em;
 	}
 
 	.port-cli {
