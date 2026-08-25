@@ -176,6 +176,10 @@
 		line-height: 1.45;
 	}
 
+	li {
+		white-space: nowrap;
+	}
+
 	li + li {
 		margin-top: 0.25rem;
 	}

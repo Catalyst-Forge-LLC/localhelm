@@ -547,6 +547,14 @@
 				if (recipe) {
 					return [id, recipe, cwd ? `in ${cwd}` : ''].filter(Boolean).join('  ');
 				}
+				const skipAction = typeof row.action === 'string' ? row.action : '';
+				if (skipAction === 'skip') {
+					const why =
+						typeof row.reason === 'string'
+							? row.reason.replace(/\s+—\s+localberth recipe.*$/, '')
+							: 'nothing to do';
+					return `${id}  —  ${why}`;
+				}
 				const action = typeof row.action === 'string' ? row.action : '';
 				const reason = typeof row.reason === 'string' ? row.reason : typeof row.update === 'string' ? row.update : '';
 				const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
@@ -796,8 +804,8 @@
 		if (!applyIds.length) {
 			if (plugin === 'localberth') {
 				const reason = firstPlanReason(data);
-				if (reason.includes('no recipe')) {
-					return 'Start needs a recipe: the project folder and a command (default pnpm serve). No sibling folder matched this lease name.';
+				if (reason.includes('no recipe') || reason.includes('no matching folder')) {
+					return 'Start needs a folder and a command. API leases often share the package folder (dictawhisper-api → dictawhisper, pnpm start). No sibling matched this name.';
 				}
 				if (reason.includes('already listening')) return 'Already running on this lease.';
 				if (reason.includes('not running')) return 'Nothing is listening on this lease.';
