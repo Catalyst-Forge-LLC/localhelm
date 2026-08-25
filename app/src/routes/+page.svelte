@@ -1991,8 +1991,11 @@
 															href={row.href}
 															target="localberth-open"
 															rel="noopener"
-															title="Open the listening URL in a browser"
-														>Open</a>
+															title={`Open ${row.href}`}
+															aria-label={`Open ${row.label ?? row.id}`}
+														>
+															<Icon icon="lucide:square-arrow-out-up-right" />
+														</a>
 													{:else}
 														<span class="open-slot" aria-hidden="true"></span>
 													{/if}
@@ -2507,20 +2510,36 @@
 
 	.port-actions {
 		display: grid;
-		grid-template-columns: 2.75rem auto auto;
+		grid-template-columns: 2.15rem auto auto;
 		justify-content: end;
 		align-items: center;
 		gap: 0.25rem;
 	}
 
 	.open-link {
-		color: var(--accent, #3d6b4f);
-		font-size: 0.85rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.15rem;
+		height: 2.15rem;
+		border: 1px solid #5a5a64;
+		background: #3c3c44;
+		color: #ececef;
+		border-radius: 0.45rem;
+		font-size: 1.05rem;
+		text-decoration: none;
+	}
+
+	.open-link:hover {
+		border-color: #8b8b93;
+		background: #484850;
+		color: #fde68a;
 	}
 
 	.open-slot {
 		display: block;
-		min-height: 1em;
+		width: 2.15rem;
+		height: 2.15rem;
 	}
 
 	.port-cli {
