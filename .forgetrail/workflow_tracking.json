@@ -104,6 +104,10 @@
         {
           "timestamp": "2026-08-24T04:50:00Z",
           "text": "Ports Start/Stop (D35): LocalBerth owns process lifecycle; LocalHelm hosts plan/apply. ?leases= CSV."
+        },
+        {
+          "timestamp": "2026-08-25T16:00:00Z",
+          "text": "Confirm modal dismisses on Confirm. LocalBerth bridge exits after start/stop JSON so spawnSync returns."
         }
       ]
     },

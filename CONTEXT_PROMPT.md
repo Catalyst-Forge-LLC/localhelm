@@ -159,3 +159,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 15 — 2026-08-24
 
 - Ports Start/Stop: LocalBerth starts/stops a stored recipe (`pnpm serve` by default) detached. LocalHelm only hosts the plan/confirm buttons. Observed stays read-only. Claim/release stay on `localberth`. Checked leases persist as `?leases=`.
+- Confirm dismisses as soon as you say yes. The header keeps “Working…” while start/stop finishes. The dialog must not pin itself open just because a write is still in flight.

@@ -58,14 +58,13 @@
 	class="confirm"
 	aria-labelledby="confirm-title"
 	onclose={() => {
+		if (!open) return;
 		if (busy) {
 			dialogEl?.showModal();
 			return;
 		}
-		if (open) {
-			open = false;
-			oncancel?.();
-		}
+		open = false;
+		oncancel?.();
 	}}
 	onkeydown={(event) => {
 		if (event.key === 'Escape' && busy) event.preventDefault();

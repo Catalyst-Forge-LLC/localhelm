@@ -28,11 +28,12 @@
 	class="add"
 	aria-labelledby="add-projects-title"
 	onclose={() => {
+		if (!open) return;
 		if (busy) {
 			dialogEl?.showModal();
 			return;
 		}
-		if (open) open = false;
+		open = false;
 	}}
 	onkeydown={(event) => {
 		if (event.key === 'Escape' && busy) event.preventDefault();

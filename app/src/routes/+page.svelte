@@ -1025,14 +1025,18 @@
 	async function applyPluginJob(plugin: string, action: string, ids: string[]): Promise<void> {
 		const unit = plugin === 'localberth' ? 'lease' : 'site';
 		const scope = ids.length === 1 ? ids[0] : `${ids.length} ${unit}s`;
-		await run(`${plugin} ${action} ${scope}`, async () => {
-			const data = await call('/api/plugin', {
-				method: 'POST',
-				body: JSON.stringify({ id: plugin, action, ids, apply: true }),
-			});
-			note(`${plugin} ${action} --apply ${scope}`, data);
-			await refresh();
-		});
+		await run(
+			`${plugin} ${action} ${scope}`,
+			async () => {
+				const data = await call('/api/plugin', {
+					method: 'POST',
+					body: JSON.stringify({ id: plugin, action, ids, apply: true }),
+				});
+				note(`${plugin} ${action} --apply ${scope}`, data);
+				await refresh();
+			},
+			{ closeConfirm: false },
+		);
 	}
 
 	async function startLand(siteId: string): Promise<void> {
@@ -2197,7 +2201,10 @@
 	canApply={confirmCanApply}
 	items={confirmItems}
 	onconfirm={() => {
-		confirmRun?.();
+		const fn = confirmRun;
+		confirmOpen = false;
+		confirmRun = null;
+		fn?.();
 	}}
 >
 	{#if confirmShowOtp}
