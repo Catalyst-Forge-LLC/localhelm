@@ -45,3 +45,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Soft archive (hide, not unenroll, not delete) _(H3, 2026-08-25)_
 - [x] Family start/stop (plugin ids only) _(H4, 2026-08-25)_
 - [x] Save guess without start _(H5, 2026-08-25)_
+- [x] Quiet sites, cross-walk chips, copy, activity links, recipe health + guess-all, Tippy _(2026-08-25)_

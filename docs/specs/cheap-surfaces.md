@@ -206,3 +206,4 @@ No new cloud. No schema in a sibling database from this package.
 - `2026-08-25:` Draft after Ports start/stop, recipe guess (`-site`/`-api`, hyphen fold), and the dictawhisper `PORT` leak.
 - `2026-08-25:` H1 landed — family cards, look cards, `PORT`/`HOST` on Ports confirm. H2–H5 still unscheduled.
 - `2026-08-25:` H2–H5 landed — `brief`, archive hide/restore, family start/stop, save-guess. Today Ports is one column with titled Stacks / Down lists.
+- `2026-08-25:` C7 quiet, F2/F7/F9 cross-walk + copy + activity links, C3 guess-all. Tippy for labels and recipe/family facts.

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Icon from './Icon.svelte';
+	import Tooltip from './Tooltip.svelte';
 
 	let {
 		icon,
@@ -22,13 +23,13 @@
 	} = $props();
 </script>
 
+<Tooltip {title}>
 <button
 	type="button"
 	class="icon-btn"
 	class:pressed
 	class:hot
 	{disabled}
-	{title}
 	aria-label={label}
 	aria-pressed={pressed}
 	{onclick}
@@ -38,6 +39,7 @@
 		<span class="badge">{badge}</span>
 	{/if}
 </button>
+</Tooltip>
 
 <style>
 	.icon-btn {

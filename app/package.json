@@ -24,6 +24,7 @@
 	},
 	"dependencies": {
 		"@iconify-json/lucide": "^1.2.125",
-		"@iconify/svelte": "^5.2.2"
+		"@iconify/svelte": "^5.2.2",
+		"tippy.js": "^6.3.7"
 	}
 }

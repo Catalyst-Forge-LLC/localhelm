@@ -166,3 +166,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - H1: Today groups lease/fleet stacks (UI / API / site listen bits). Look cards are facts, not gold writes. Ports Start confirm prints `PORT` and `HOST`.
 - H2–H5: Copy brief / `localhelm brief`. Archive hides a fleet id (folder stays). Family start/stop and Save guess are Ports actions. Start is hidden when listening; Stop is hidden when quiet.
+- Quiet sites, cross-walk chips (Package / Site / Ports), copy path/URL, activity titles jump to a row, recipe health + Save all guesses. Tippy (Exec Foundry pattern) holds button labels and long facts.

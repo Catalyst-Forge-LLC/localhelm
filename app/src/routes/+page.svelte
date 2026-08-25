@@ -3,8 +3,12 @@
 	import { replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
+	import CrossChips from '$lib/CrossChips.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import IconButton from '$lib/IconButton.svelte';
+	import Tooltip from '$lib/Tooltip.svelte';
+	import { activityLinkedIds } from '$lib/activityLinks';
+	import { crosswalkChips } from '$lib/crosswalk';
 	import { formatPluginPlanLines, pluginPlanWriteIds } from '$lib/pluginPlan';
 	import { formatBrief } from '$lib/briefFormat';
 	import { familyMemberNames } from '$lib/family';
@@ -158,6 +162,7 @@
 	let showArchived = $state(false);
 	let showParked = $state(false);
 	let briefCopied = $state(false);
+	let copiedKey = $state('');
 
 	let entries = $state<LogEntry[]>([]);
 	let busy = $state('');
@@ -272,6 +277,17 @@
 			.map((row) => row.id),
 	);
 	const fleetIds = $derived(visibleProjects.map((row) => row.id));
+	const siteIds = $derived((filepressBoard?.rows ?? []).map((row) => row.id));
+	const leaseIds = $derived((leaseBoardAll?.rows ?? []).map((row) => row.id));
+	const knownIds = $derived([...new Set([...fleetIds, ...siteIds, ...leaseIds])]);
+	const quietSiteIds = $derived(
+		(leaseBoard?.rows ?? [])
+			.filter((row) => row.id.endsWith('-site') && row.cells.listening === 'yes')
+			.map((row) => row.id),
+	);
+	const guessRecipeIds = $derived(
+		(leaseBoard?.rows ?? []).filter((row) => !row.cells.recipe || row.cells.recipe === '—').map((row) => row.id),
+	);
 	const fleetAllChecked = $derived(fleetIds.length > 0 && fleetIds.every((id) => selectedIds[id]));
 	const fleetSomeChecked = $derived(checkedIds.length > 0 && !fleetAllChecked);
 	const checkedSiteIdList = $derived(selectionToIds(selectedSites));
@@ -584,6 +600,60 @@
 		setTab('ports');
 	}
 
+	function chipsFor(id: string, hide?: 'fleet' | 'sites' | 'ports') {
+		return crosswalkChips(id, { fleetIds, siteIds, leaseIds, hide });
+	}
+
+	function openCross(id: string, kind: 'fleet' | 'sites' | 'ports'): void {
+		if (kind === 'fleet') {
+			selectedIds = { ...selectedIds, [id]: true };
+			setTab('fleet');
+			return;
+		}
+		if (kind === 'sites') {
+			selectedSites = { ...selectedSites, [id]: true };
+			setTab('sites');
+			return;
+		}
+		openPortsFamily([id]);
+	}
+
+	function activityJump(id: string): void {
+		if (leaseIds.includes(id)) {
+			openPortsFamily([id]);
+			return;
+		}
+		if (siteIds.includes(id)) {
+			selectedSites = { ...selectedSites, [id]: true };
+			setTab('sites');
+			return;
+		}
+		selectedIds = { ...selectedIds, [id]: true };
+		setTab('fleet');
+	}
+
+	async function copyValue(key: string, value: string): Promise<void> {
+		try {
+			await navigator.clipboard.writeText(value);
+			copiedKey = key;
+			setTimeout(() => {
+				if (copiedKey === key) copiedKey = '';
+			}, 1500);
+		} catch (err) {
+			error = err instanceof Error ? err.message : String(err);
+		}
+	}
+
+	function healthTip(row: PluginBoard['rows'][number]): string {
+		const lines = [
+			row.cells.healthDetail,
+			row.cells.recipe && row.cells.recipe !== '—' ? `Recipe: ${row.cells.recipe}` : '',
+			row.cells.kind && row.cells.kind !== '—' ? `Kind: ${row.cells.kind}` : '',
+			row.href ? row.href : '',
+		].filter(Boolean);
+		return lines.join('\n') || 'No recipe facts yet.';
+	}
+
 	function currentBrief(): string {
 		return formatBrief({
 			projects: inventory?.projects ?? [],
@@ -850,6 +920,8 @@
 		if (act.id === 'park') return 'lucide:circle-parking';
 		if (act.id === 'unpark') return 'lucide:circle-parking-off';
 		if (act.id === 'recipe') return 'lucide:save';
+		if (act.id === 'quiet') return 'lucide:moon';
+		if (act.id === 'recipe-all') return 'lucide:save';
 		return null;
 	}
 
@@ -909,6 +981,8 @@
 				if (reason.includes('already listening')) return 'Already running on this lease.';
 				if (reason.includes('not running')) return 'Nothing is listening on this lease.';
 				if (reason.includes('park')) return 'Park hides the lease. The port stays yours. Unpark does not start.';
+				if (action === 'quiet') return 'No listening *-site leases. The dashboard is left alone.';
+				if (action === 'recipe-all') return 'Every lease already has a recipe, or no sibling folder matched.';
 				return reason || 'Nothing to start or stop.';
 			}
 			return writeIds ? 'Already current — nothing to write.' : 'The plan found nothing to do.';
@@ -923,8 +997,11 @@
 			if (action === 'unpark') {
 				return 'Shows the lease again. Does not start it.';
 			}
-			if (action === 'recipe') {
+			if (action === 'recipe' || action === 'recipe-all') {
 				return 'Saves the guessed folder and command. Does not start.';
+			}
+			if (action === 'quiet') {
+				return 'Stops listening *-site leases. The dashboard stays up. Not a release.';
 			}
 			const rows = data && typeof data === 'object' ? (data as { rows?: unknown }).rows : null;
 			const first = Array.isArray(rows) && rows[0] && typeof rows[0] === 'object' ? (rows[0] as Record<string, unknown>) : null;
@@ -1741,7 +1818,13 @@
 									<li class="need-card">
 										<div class="need-main">
 											<div class="id">{look.title}</div>
-											<div class="dim small">{look.detail}</div>
+											<Tooltip wide title={look.detail}>
+												<div class="dim small">{look.detail}</div>
+											</Tooltip>
+											<CrossChips
+												chips={chipsFor(look.title)}
+												onOpen={(kind) => openCross(look.title, kind)}
+											/>
 										</div>
 										<div class="need-actions">
 											<button
@@ -2008,6 +2091,12 @@
 										<td>
 											<div class="id">{row.id}</div>
 											<div class="dim small">{row.npm.name ?? row.path}</div>
+											<CrossChips chips={chipsFor(row.id, 'fleet')} onOpen={(kind) => openCross(row.id, kind)} />
+											<Tooltip title={copiedKey === `path:${row.id}` ? 'Copied' : `Copy path\n${row.path}`}>
+												<button type="button" class="btn btn-sm" onclick={() => void copyValue(`path:${row.id}`, row.path)}>
+													Copy path
+												</button>
+											</Tooltip>
 										</td>
 										<td class="mono">{row.localVersion ?? '—'}</td>
 										<td class="mono" class:ahead={row.unpublishedAhead}>{npmLabel(row)}</td>
@@ -2124,6 +2213,7 @@
 											{#if board.plugin === 'filepress' && enrolledIds.has(row.id)}
 												<div class="dim small">FilePress site — not the fleet package</div>
 											{/if}
+											<CrossChips chips={chipsFor(row.id, 'sites')} onOpen={(kind) => openCross(row.id, kind)} />
 										</td>
 										{#each board.columns as col (col.id)}
 											<td class="small">{row.cells[col.id] ?? '—'}</td>
@@ -2223,24 +2313,46 @@
 							</div>
 							{#if leaseActions}
 								<div class="group-buttons">
-									<button
-										class="btn btn-write"
-										disabled={Boolean(busy) || !familyIdsFromChecked().length}
-										onclick={() => startFamilyJob('start')}
-										title="Plans start for every unparked lease in the checked families."
-									>
-										<Icon icon="lucide:play" />
-										Start family
-									</button>
-									<button
-										class="btn btn-write"
-										disabled={Boolean(busy) || !familyIdsFromChecked().length}
-										onclick={() => startFamilyJob('stop')}
-										title="Plans stop for every unparked lease in the checked families."
-									>
-										<Icon icon="lucide:square" />
-										Stop family
-									</button>
+									<Tooltip title="Stops every listening *-site lease. The dashboard stays up. Confirm lists names.">
+										<button
+											class="btn btn-write"
+											disabled={Boolean(busy) || !quietSiteIds.length}
+											onclick={() => startPluginJob(board.plugin, 'quiet', quietSiteIds, 'Quiet sites')}
+										>
+											<Icon icon="lucide:moon" />
+											Quiet sites{quietSiteIds.length ? ` (${quietSiteIds.length})` : ''}
+										</button>
+									</Tooltip>
+									<Tooltip title="Saves a guessed folder and command for every lease that has none. Does not start.">
+										<button
+											class="btn btn-write"
+											disabled={Boolean(busy) || !guessRecipeIds.length}
+											onclick={() => startPluginJob(board.plugin, 'recipe-all', guessRecipeIds, 'Save all guesses')}
+										>
+											<Icon icon="lucide:save" />
+											Save all guesses{guessRecipeIds.length ? ` (${guessRecipeIds.length})` : ''}
+										</button>
+									</Tooltip>
+									<Tooltip title="Plans start for every unparked lease in the checked families.">
+										<button
+											class="btn btn-write"
+											disabled={Boolean(busy) || !familyIdsFromChecked().length}
+											onclick={() => startFamilyJob('start')}
+										>
+											<Icon icon="lucide:play" />
+											Start family
+										</button>
+									</Tooltip>
+									<Tooltip title="Plans stop for every unparked lease in the checked families.">
+										<button
+											class="btn btn-write"
+											disabled={Boolean(busy) || !familyIdsFromChecked().length}
+											onclick={() => startFamilyJob('stop')}
+										>
+											<Icon icon="lucide:square" />
+											Stop family
+										</button>
+									</Tooltip>
 									{#if parkedLeaseCount}
 										<button
 											type="button"
@@ -2270,15 +2382,15 @@
 							<ul class="family-strip">
 								{#each portFamilyCards as family (family.stem)}
 									<li>
-										<button
-											type="button"
-											class="family-chip"
-											onclick={() => openPortsFamily(family.leaseIds)}
-											title={family.members.map((m) => m.id).join(', ')}
+										<Tooltip
+											wide
+											title={`${family.label}\n${family.bits}\n${family.members.map((m) => m.id).join('\n')}`}
 										>
-											<span class="id">{family.label}</span>
-											<span class="dim small">{family.bits}</span>
-										</button>
+											<button type="button" class="family-chip" onclick={() => openPortsFamily(family.leaseIds)}>
+												<span class="id">{family.label}</span>
+												<span class="dim small">{family.bits}</span>
+											</button>
+										</Tooltip>
 									</li>
 								{/each}
 							</ul>
@@ -2313,38 +2425,54 @@
 													<input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedPorts[row.id]} />
 												</td>
 											{/if}
-											<td class="id">{row.label ?? row.id}</td>
+											<td class="id">
+												{row.label ?? row.id}
+												<CrossChips chips={chipsFor(row.id, 'ports')} onOpen={(kind) => openCross(row.id, kind)} />
+											</td>
 											{#each board.columns as col (col.id)}
-												<td class="small">{row.cells[col.id] ?? '—'}</td>
+												<td class="small">
+													{#if col.id === 'health' || col.id === 'recipe'}
+														<Tooltip wide title={healthTip(row)}>{row.cells[col.id] ?? '—'}</Tooltip>
+													{:else}
+														{row.cells[col.id] ?? '—'}
+													{/if}
+												</td>
 											{/each}
 											<td>
 												<div class="port-actions">
 													{#if row.href}
-														<a
-															class="open-link"
-															href={row.href}
-															target="localberth-open"
-															rel="noopener"
-															title={`Open ${row.href}`}
-															aria-label={`Open ${row.label ?? row.id}`}
-														>
-															<Icon icon="lucide:square-arrow-out-up-right" />
-														</a>
+														<Tooltip title={`Open ${row.href}`}>
+															<a
+																class="open-link"
+																href={row.href}
+																target="localberth-open"
+																rel="noopener"
+																aria-label={`Open ${row.label ?? row.id}`}
+															>
+																<Icon icon="lucide:square-arrow-out-up-right" />
+															</a>
+														</Tooltip>
+														<Tooltip title={copiedKey === `url:${row.id}` ? 'Copied' : `Copy ${row.href}`}>
+															<button type="button" class="btn btn-sm" onclick={() => void copyValue(`url:${row.id}`, row.href ?? '')}>
+																Copy
+															</button>
+														</Tooltip>
 													{:else}
 														<span class="open-slot" aria-hidden="true"></span>
 													{/if}
 													{#if leaseActions}
 														{#each row.actions as act (act.id)}
 															{@const icon = actionIcon(act)}
-															<button
-																class="btn btn-sm"
-																disabled={Boolean(busy)}
-																onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
-																title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}
-															>
-																{#if icon}<Icon {icon} />{/if}
-																{act.label}
-															</button>
+															<Tooltip title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}>
+																<button
+																	class="btn btn-sm"
+																	disabled={Boolean(busy)}
+																	onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
+																>
+																	{#if icon}<Icon {icon} />{/if}
+																	{act.label}
+																</button>
+															</Tooltip>
 														{/each}
 													{/if}
 												</div>
@@ -2397,7 +2525,21 @@
 					{#each entries as entry (entry.at + entry.title)}
 						<li>
 							<details>
-								<summary><span class="dim small">{entry.time}</span> {entry.title}</summary>
+								<summary>
+									<span class="dim small">{entry.time}</span>
+									{entry.title}
+									{#each activityLinkedIds(entry.title, knownIds) as id (id)}
+										<button
+											type="button"
+											class="xchip"
+											onclick={(event) => {
+												event.preventDefault();
+												event.stopPropagation();
+												activityJump(id);
+											}}
+										>{id}</button>
+									{/each}
+								</summary>
 								<pre>{entry.body}</pre>
 							</details>
 						</li>
@@ -3209,6 +3351,18 @@
 	}
 
 	.candidates,
+	.xchip {
+		margin-left: 0.35rem;
+		padding: 0.05rem 0.4rem;
+		border: 1px solid #5a5a64;
+		border-radius: 999px;
+		background: #32323a;
+		color: #d4d4d8;
+		font: inherit;
+		font-size: 0.68rem;
+		cursor: pointer;
+	}
+
 	.log {
 		list-style: none;
 		margin: 0.5rem 0;
