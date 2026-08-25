@@ -487,7 +487,7 @@
 				const plug = (await call('/api/plugins')) as { boards: PluginBoard[] };
 				pluginBoards = plug.boards;
 			} catch {
-				pluginBoards = [];
+				/* keep the last boards — do not flash "plugin not loaded" on a flaky refresh */
 			}
 			await loadActivity();
 		});
@@ -1936,11 +1936,20 @@
 			{:else}
 				<section class="panel">
 					<h2>Sites</h2>
-					<p class="hint">No site plugins loaded. Enroll the filepress checkout to expose <code>localhelm.plugin.mjs</code>.</p>
+					{#if !statusReady}
+						<p class="hint">Reading sites…</p>
+					{:else}
+						<p class="hint">No site plugins loaded. Enroll the filepress checkout to expose <code>localhelm.plugin.mjs</code>.</p>
+					{/if}
 				</section>
 			{/each}
 		{:else if tab === 'ports'}
-			{#if !portBoards.length}
+			{#if !statusReady && !portBoards.length}
+				<section class="panel">
+					<h2>Ports</h2>
+					<p class="hint">Reading ports…</p>
+				</section>
+			{:else if !portBoards.length}
 				<section class="panel">
 					<h2>Ports</h2>
 					<p class="hint">No Ports plugin loaded. Enroll the localberth checkout to expose <code>localhelm.plugin.mjs</code>.</p>
