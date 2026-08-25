@@ -542,6 +542,11 @@
 							: typeof row.path === 'string'
 								? row.path
 								: '?';
+				const recipe = typeof row.recipe === 'string' ? row.recipe.trim() : '';
+				const cwd = typeof row.proposedCwd === 'string' ? row.proposedCwd : '';
+				if (recipe) {
+					return [id, recipe, cwd ? `in ${cwd}` : ''].filter(Boolean).join('  ');
+				}
 				const action = typeof row.action === 'string' ? row.action : '';
 				const reason = typeof row.reason === 'string' ? row.reason : typeof row.update === 'string' ? row.update : '';
 				const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
@@ -551,7 +556,8 @@
 					typeof row.proposedCommand === 'string' && typeof row.proposedCwd === 'string'
 						? `${row.proposedCommand} in ${row.proposedCwd}`
 						: '';
-				return [id, action, range, reason, guess].filter(Boolean).join('  ');
+				const showAction = Boolean(action) && !reason.startsWith(action);
+				return [id, showAction ? action : '', range, reason, guess].filter(Boolean).join('  ');
 			});
 	}
 
