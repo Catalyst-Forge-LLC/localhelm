@@ -73,4 +73,23 @@ describe('plugins', () => {
 			],
 		);
 	});
+
+	it('does not print a start recipe on stop', () => {
+		assert.deepEqual(
+			formatPluginPlanLines({
+				rows: [
+					{
+						id: 'aibreze-site',
+						action: 'stop',
+						writes: true,
+						recipe: 'pnpm site:dev',
+						port: 5181,
+						host: '127.0.0.1',
+						reason: 'stop pid 48376',
+					},
+				],
+			}),
+			['aibreze-site  stop pid 48376'],
+		);
+	});
 });

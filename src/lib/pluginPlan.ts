@@ -17,7 +17,7 @@ function envBits(row: Record<string, unknown>): string {
 	return '';
 }
 
-/** Confirm lines for plugin plans. Recipe rows include the PORT/HOST start will inject. */
+/** Confirm lines for plugin plans. Start/recipe rows include PORT/HOST. Stop/park do not. */
 export function formatPluginPlanLines(data: unknown): string[] {
 	if (!data || typeof data !== 'object') return [];
 	const rows = (data as { rows?: unknown }).rows;
@@ -35,10 +35,12 @@ export function formatPluginPlanLines(data: unknown): string[] {
 							: '?';
 			const recipe = typeof row.recipe === 'string' ? row.recipe.trim() : '';
 			const cwd = typeof row.proposedCwd === 'string' ? row.proposedCwd : '';
-			if (recipe) {
+			const rowAction = typeof row.action === 'string' ? row.action : '';
+			const showStartRecipe = Boolean(recipe) && (!rowAction || rowAction === 'start' || rowAction === 'recipe');
+			if (showStartRecipe) {
 				return [id, recipe, envBits(row), cwd ? `in ${cwd}` : ''].filter(Boolean).join('  ');
 			}
-			const skipAction = typeof row.action === 'string' ? row.action : '';
+			const skipAction = rowAction;
 			if (skipAction === 'skip') {
 				const why =
 					typeof row.reason === 'string'
