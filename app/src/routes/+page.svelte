@@ -805,7 +805,7 @@
 			if (plugin === 'localberth') {
 				const reason = firstPlanReason(data);
 				if (reason.includes('no recipe') || reason.includes('no matching folder')) {
-					return 'Start needs a folder and a command. API leases often share the package folder (dictawhisper-api → dictawhisper, pnpm start). No sibling matched this name.';
+					return 'Start needs a folder and a command. The lease name may not match the checkout (temperpass-site → temper-pass, or dictawhisper-api → dictawhisper). No sibling matched this name.';
 				}
 				if (reason.includes('already listening')) return 'Already running on this lease.';
 				if (reason.includes('not running')) return 'Nothing is listening on this lease.';
