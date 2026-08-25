@@ -51,7 +51,7 @@
 			label?: string;
 			href?: string;
 			cells: Record<string, string>;
-			actions: { id: string; label: string; write: boolean }[];
+			actions: { id: string; label: string; write: boolean; icon?: string }[];
 		}[];
 	};
 	type Project = {
@@ -716,14 +716,24 @@
 		selectedIds = next;
 	}
 
-	function boardActions(board: PluginBoard): { id: string; label: string }[] {
-		const seen = new Map<string, { id: string; label: string }>();
+	function boardActions(board: PluginBoard): { id: string; label: string; icon?: string }[] {
+		const seen = new Map<string, { id: string; label: string; icon?: string }>();
 		for (const row of board.rows) {
 			for (const act of row.actions) {
-				if (!seen.has(act.id)) seen.set(act.id, { id: act.id, label: act.label });
+				if (!seen.has(act.id)) seen.set(act.id, { id: act.id, label: act.label, icon: act.icon });
 			}
 		}
 		return [...seen.values()];
+	}
+
+	function actionIcon(act: { id: string; icon?: string }): string | null {
+		if (act.icon) return act.icon;
+		if (act.id === 'sync') return 'lucide:refresh-cw';
+		if (act.id === 'push') return 'lucide:upload';
+		if (act.id === 'ship') return 'lucide:ship';
+		if (act.id === 'start') return 'lucide:play';
+		if (act.id === 'stop') return 'lucide:square';
+		return null;
 	}
 
 	function boardActionIds(board: PluginBoard, action: string): string[] {
@@ -1806,12 +1816,14 @@
 						</div>
 						<div class="group-buttons">
 							{#each boardActions(board) as act (act.id)}
+								{@const icon = actionIcon(act)}
 								<button
 									class="btn btn-write"
 									disabled={Boolean(busy) || checkedSiteIds(board, act.id).length === 0}
 									onclick={() => startPluginJob(board.plugin, act.id, checkedSiteIds(board, act.id), act.label)}
 									title={`Shows what ${act.label.toLowerCase()} would do for the checked sites. Confirm in the modal.`}
 								>
+									{#if icon}<Icon {icon} />{/if}
 									{act.label}{checkedSiteIds(board, act.id).length ? ` (${checkedSiteIds(board, act.id).length})` : ''}
 								</button>
 							{/each}
@@ -1866,12 +1878,14 @@
 													</button>
 												{/if}
 												{#each row.actions as act (act.id)}
+													{@const icon = actionIcon(act)}
 													<button
 														class="btn btn-sm"
 														disabled={Boolean(busy)}
 														onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
 														title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}
 													>
+														{#if icon}<Icon {icon} />{/if}
 														{act.label}
 													</button>
 												{/each}
@@ -1937,12 +1951,14 @@
 							{#if leaseActions}
 								<div class="group-buttons">
 									{#each boardActions(board) as act (act.id)}
+										{@const icon = actionIcon(act)}
 										<button
 											class="btn btn-write"
 											disabled={Boolean(busy) || checkedPortIds(board, act.id).length === 0}
 											onclick={() => startPluginJob(board.plugin, act.id, checkedPortIds(board, act.id), act.label)}
 											title={`Shows what ${act.label.toLowerCase()} would do for the checked leases. Confirm in the modal.`}
 										>
+											{#if icon}<Icon {icon} />{/if}
 											{act.label}{checkedPortIds(board, act.id).length ? ` (${checkedPortIds(board, act.id).length})` : ''}
 										</button>
 									{/each}
@@ -2001,12 +2017,14 @@
 													{/if}
 													{#if leaseActions}
 														{#each row.actions as act (act.id)}
+															{@const icon = actionIcon(act)}
 															<button
 																class="btn btn-sm"
 																disabled={Boolean(busy)}
 																onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
 																title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}
 															>
+																{#if icon}<Icon {icon} />{/if}
 																{act.label}
 															</button>
 														{/each}

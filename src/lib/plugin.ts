@@ -11,6 +11,8 @@ export type PluginAction = {
 	id: string;
 	label: string;
 	write: boolean;
+	/** Optional Lucide id, e.g. `lucide:play`. LocalHelm falls back by action id if omitted. */
+	icon?: string;
 };
 
 export type PluginTab = 'sites' | 'ports';
