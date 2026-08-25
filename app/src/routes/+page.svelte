@@ -2534,24 +2534,30 @@
 		gap: 0.25rem;
 	}
 
-	.open-link {
+	.open-link,
+	.open-link:visited {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		width: 2.15rem;
 		height: 2.15rem;
-		border: 1px solid #5a5a64;
-		background: #3c3c44;
-		color: #ececef;
+		border: 1px solid #c9a227;
+		background: #4a3a12;
+		color: #fde68a;
 		border-radius: 0.45rem;
 		font-size: 1.05rem;
 		text-decoration: none;
 	}
 
+	.open-link :global(svg) {
+		color: inherit;
+		stroke: currentColor;
+	}
+
 	.open-link:hover {
-		border-color: #8b8b93;
-		background: #484850;
-		color: #fde68a;
+		border-color: #e4c04a;
+		background: #5a4818;
+		color: #fff3b0;
 	}
 
 	.open-slot {
