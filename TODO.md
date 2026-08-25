@@ -35,3 +35,12 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 - [x] Optional publish action _(plan then named-id apply: bump+commit+push only if needed, then npm publish; never `--force`)_
 - [ ] FilePress `site/` + `/docs` on localhelm.dev
 - [ ] Tag on bump
+
+## Cheap surfaces (draft spec)
+
+See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md). Not scheduled until you pick a slice.
+
+- [ ] Family + look cards on Today; `PORT`/`HOST` on Ports confirm
+- [ ] `localhelm brief`
+- [ ] Soft archive (hide, not unenroll, not delete)
+- [ ] Family start/stop (plugin ids only)

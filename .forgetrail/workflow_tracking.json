@@ -108,6 +108,10 @@
         {
           "timestamp": "2026-08-25T16:00:00Z",
           "text": "Confirm modal dismisses on Confirm. LocalBerth bridge exits after start/stop JSON so spawnSync returns."
+        },
+        {
+          "timestamp": "2026-08-25T17:15:00Z",
+          "text": "Draft cheap-surfaces spec (docs/specs/cheap-surfaces.md). Twin in localberth. Not scheduled."
         }
       ]
     },
