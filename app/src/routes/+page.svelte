@@ -547,7 +547,11 @@
 				const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
 				const to = typeof row.to === 'string' ? row.to : typeof row.toSpec === 'string' ? row.toSpec : '';
 				const range = from && to ? `${from} → ${to}` : from || to;
-				return [id, action, range, reason].filter(Boolean).join('  ');
+				const guess =
+					typeof row.proposedCommand === 'string' && typeof row.proposedCwd === 'string'
+						? `${row.proposedCommand} in ${row.proposedCwd}`
+						: '';
+				return [id, action, range, reason, guess].filter(Boolean).join('  ');
 			});
 	}
 
@@ -787,7 +791,7 @@
 			if (plugin === 'localberth') {
 				const reason = firstPlanReason(data);
 				if (reason.includes('no recipe')) {
-					return 'Start needs a recipe: the project folder and a command (default pnpm serve). The plan line is the command to run once, then Start again.';
+					return 'Start needs a recipe: the project folder and a command (default pnpm serve). No sibling folder matched this lease name.';
 				}
 				if (reason.includes('already listening')) return 'Already running on this lease.';
 				if (reason.includes('not running')) return 'Nothing is listening on this lease.';
@@ -796,9 +800,15 @@
 			return writeIds ? 'Already current — nothing to write.' : 'The plan found nothing to do.';
 		}
 		if (plugin === 'localberth') {
-			return action === 'stop'
-				? 'LocalBerth stops the process tree on this lease. The lease stays. Observed-only rows are not killed.'
-				: 'LocalBerth starts the lease recipe (default pnpm serve) detached. Closing LocalHelm does not stop it.';
+			if (action === 'stop') {
+				return 'LocalBerth stops the process tree on this lease. The lease stays. Observed-only rows are not killed.';
+			}
+			const rows = data && typeof data === 'object' ? (data as { rows?: unknown }).rows : null;
+			const first = Array.isArray(rows) && rows[0] && typeof rows[0] === 'object' ? (rows[0] as Record<string, unknown>) : null;
+			if (typeof first?.proposedCwd === 'string') {
+				return 'No recipe stored yet. Confirm saves this guess (folder + command) and starts. You can change it later with localberth recipe.';
+			}
+			return 'LocalBerth starts the lease recipe (default pnpm serve) detached. Closing LocalHelm does not stop it.';
 		}
 		if (action === 'push') {
 			return 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.';
