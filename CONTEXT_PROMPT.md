@@ -183,4 +183,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Fleet table: one version column (npm note only when it differs). Project cell does not repeat the id as the package name.
 - Ports leases: hide listening / log / empty firewall; recipe cell holds command or “no recipe”; name cell is one line.
 - Cut version only when origin has commits after the last npm version (tag or package.json bump). Publish plan skips `nothing to cut`.
-- Today is a four-pane board (Needs you, Looks, Sites, Ports). Each pane scrolls. Refresh sits next to the project id.
+- Today is a four-pane board (Needs you, Looks, Sites, Ports). Each pane scrolls. Refresh sits next to the project id. Needs you is fleet writes; Looks is Ports facts. Needs you filters: All / Publish / Cut / Push (`?need=`).

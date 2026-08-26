@@ -160,6 +160,10 @@
         {
           "timestamp": "2026-08-26T21:15:00Z",
           "text": "Today pane board (d46): Needs you / Looks / Sites / Ports; section scroll; refresh next to id."
+        },
+        {
+          "timestamp": "2026-08-26T21:25:00Z",
+          "text": "Needs you filter All/Publish/Cut/Push via ?need= (d47)."
         }
       ]
     },
@@ -702,6 +706,16 @@
       "decision": "Today fills the remaining viewport as four panes: Needs you, Looks, Sites, Ports. Each pane scrolls. Looks is a sibling pane, not stacked under Needs you. Row refresh is always left of the project id. Writes stay on the row.",
       "rationale": "Operator 2026-08-26: refresh icon jumped, Looks was below the fold, and the whole tab scrolled.",
       "alternatives_considered": ["Keep Looks under Needs you with a jump link", "Tabs inside Today", "Cap lists at 8"],
+      "status": "active"
+    },
+    {
+      "id": "d47",
+      "timestamp": "2026-08-26T21:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 18,
+      "decision": "Needs you filter chips: All, Publish, Cut, Push. A row matches if it has that write (Cut extra on a Push row still matches Cut). Write pins and dirty-only stay on All. URL ?need= omitted for All.",
+      "rationale": "Operator 2026-08-26: asked what Needs you vs Looks means, and to filter Needs you to one write.",
+      "alternatives_considered": ["Filter on gold need only", "Add a Pins chip", "SessionStorage only"],
       "status": "active"
     }
   ],

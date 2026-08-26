@@ -136,10 +136,12 @@
 	type LogEntry = { at: string; time: string; title: string; body: string };
 	type TabId = 'today' | 'fleet' | 'sites' | 'ports';
 	type PortPane = 'leases' | 'observed';
+	type NeedFilter = 'all' | 'publish' | 'cut' | 'push';
 
 	let inventory = $state<Inventory | null>(null);
 	let tab = $state<TabId>('today');
 	let portPane = $state<PortPane>('leases');
+	let needFilter = $state<NeedFilter>('all');
 	let activityOpen = $state(false);
 	let activityUnseen = $state(false);
 	let urlSyncReady = $state(false);
@@ -269,6 +271,14 @@
 				(showArchived || !archivedSet.has(target.id)),
 		),
 	);
+	const filteredAttentionRows = $derived(attentionRows.filter((row) => rowHasNeed(row, needFilter)));
+	const filteredCascadeRows = $derived(needFilter === 'all' ? cascadeOnlyRows : []);
+	const needFilterCounts = $derived({
+		all: attentionRows.length + cascadeOnlyRows.length,
+		publish: attentionRows.filter((row) => rowHasNeed(row, 'publish')).length,
+		cut: attentionRows.filter((row) => rowHasNeed(row, 'cut')).length,
+		push: attentionRows.filter((row) => rowHasNeed(row, 'push')).length,
+	});
 	const todayCount = $derived(
 		attentionRows.length +
 			cascadeOnlyRows.length +
@@ -322,6 +332,18 @@
 	function parsePortPane(raw: string | null): PortPane | null {
 		if (raw === 'leases' || raw === 'observed') return raw;
 		return null;
+	}
+
+	function parseNeedFilter(raw: string | null): NeedFilter | null {
+		if (raw === 'all' || raw === 'publish' || raw === 'cut' || raw === 'push') return raw;
+		return null;
+	}
+
+	function rowHasNeed(row: Project, filter: NeedFilter): boolean {
+		if (filter === 'all') return true;
+		if (filter === 'publish') return Boolean(row.unpublishedAhead && canPublish(row));
+		if (filter === 'cut') return canCutVersion(row);
+		return canPush(row);
 	}
 
 	function setTab(next: TabId): void {
@@ -381,6 +403,8 @@
 		if (sitesParam !== null) selectedSites = idsToSelection(parseListParam(sitesParam));
 		const leasesParam = params.get('leases');
 		if (leasesParam !== null) selectedPorts = idsToSelection(parseListParam(leasesParam));
+		const needParam = parseNeedFilter(params.get('need'));
+		if (needParam) needFilter = needParam;
 	}
 
 	$effect(() => {
@@ -404,6 +428,9 @@
 		const leasesCsv = serializeListParam(checkedPortIdList);
 		if (leasesCsv) params.set('leases', leasesCsv);
 		else params.delete('leases');
+
+		if (needFilter === 'all') params.delete('need');
+		else params.set('need', needFilter);
 
 		const next = params.toString();
 		const current = typeof window !== 'undefined' ? window.location.search.slice(1) : '';
@@ -1843,12 +1870,29 @@
 							<p class="hint">
 								{#if !statusReady}
 									Reading fleet…
-								{:else if readyRows.length}
-									{readyRows.length} unpublished-ahead. Gold button is the matching write.
 								{:else}
-									Gold button is the matching write. Cut version only when origin has commits since the last npm version.
+									Fleet writes you can confirm. Looks, below, is Ports facts with no gold button.
 								{/if}
 							</p>
+							<div class="need-filters" role="group" aria-label="Needs you filter">
+								{#each [
+									{ id: 'all' as const, label: 'All' },
+									{ id: 'publish' as const, label: 'Publish' },
+									{ id: 'cut' as const, label: 'Cut' },
+									{ id: 'push' as const, label: 'Push' },
+								] as chip (chip.id)}
+									<button
+										type="button"
+										class="chip"
+										class:on={needFilter === chip.id}
+										aria-pressed={needFilter === chip.id}
+										onclick={() => (needFilter = chip.id)}
+									>
+										{chip.label}
+										{#if statusReady}<span class="count quiet">{needFilterCounts[chip.id]}</span>{/if}
+									</button>
+								{/each}
+							</div>
 						</div>
 						{#if unpublishedPublishIds.length > 0}
 							<button
@@ -1865,9 +1909,19 @@
 					<div class="panel-body">
 						{#if statusReady && attentionRows.length === 0 && cascadeOnlyRows.length === 0}
 							<p class="quiet-banner">All quiet on the fleet. Looks, Sites, and Ports stay in the other panes.</p>
+						{:else if statusReady && filteredAttentionRows.length === 0 && filteredCascadeRows.length === 0}
+							<p class="dim small">
+								{#if needFilter === 'publish'}
+									No version waiting on npm. All still shows dirty trees and Write pins.
+								{:else if needFilter === 'cut'}
+									No origin commits since the last npm version. All still shows Push and Publish.
+								{:else}
+									Nothing to push. All still shows Cut, Publish, and Write pins.
+								{/if}
+							</p>
 						{:else if statusReady}
 							<ul class="need-list">
-								{#each attentionRows as row (row.id)}
+								{#each filteredAttentionRows as row (row.id)}
 									{@const cascadeTarget = cascadeFor(row.id)}
 									{@const need = todayNeed(row)}
 									<li class="need-card">
@@ -1968,7 +2022,7 @@
 										</div>
 									</li>
 								{/each}
-								{#each cascadeOnlyRows as target (target.id)}
+								{#each filteredCascadeRows as target (target.id)}
 									<li class="need-card">
 										<div class="need-main">
 											<div class="need-id-row">
@@ -2008,9 +2062,9 @@
 							<h2>Looks</h2>
 							<p class="hint">
 								{#if portLookCards.length}
-									{portLookCards.length} fact{portLookCards.length === 1 ? '' : 's'}, not writes.
+									{portLookCards.length} Ports fact{portLookCards.length === 1 ? '' : 's'} — missing recipe, split stack, or enroll vs lease. No gold write here.
 								{:else}
-									Facts, not writes. Folder and port stay put.
+									Ports facts (recipe, stack, enroll), not fleet writes.
 								{/if}
 							</p>
 						</div>
@@ -3101,6 +3155,34 @@
 	.chip.bad {
 		border-color: #b45454;
 		color: #fca5a5;
+	}
+
+	.need-filters {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+		margin-top: 0.4rem;
+	}
+
+	.need-filters .chip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+	}
+
+	.need-filters .count {
+		font-size: 0.65rem;
+		border: 1px solid #8b8b93;
+		background: #3a3a42;
+		border-radius: 999px;
+		padding: 0 0.35rem;
+		color: #f4f4f5;
+	}
+
+	.chip.on {
+		border-color: #c9a227;
+		background: #4a3a12;
+		color: #fde68a;
 	}
 
 	.chip.quiet {
