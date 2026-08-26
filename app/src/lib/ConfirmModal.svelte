@@ -131,9 +131,11 @@
 	}
 
 	.panel {
-		width: min(32rem, 100%);
+		width: min(36rem, calc(100vw - 2rem));
+		max-width: 100%;
 		max-height: calc(100dvh - 2rem);
-		overflow: auto;
+		overflow-x: hidden;
+		overflow-y: auto;
 		border: 1px solid #3f3f46;
 		border-radius: 0.75rem;
 		background: #18181b;
@@ -166,7 +168,9 @@
 		margin: 0.75rem 0 0;
 		padding: 0.55rem 0.7rem;
 		max-height: 14rem;
-		overflow: auto;
+		min-width: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
 		list-style: none;
 		border: 1px solid #27272a;
 		border-radius: 0.45rem;
@@ -177,7 +181,9 @@
 	}
 
 	li {
-		white-space: nowrap;
+		min-width: 0;
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
 	}
 
 	li + li {
@@ -186,6 +192,8 @@
 
 	.extra {
 		margin-top: 0.75rem;
+		min-width: 0;
+		overflow-wrap: anywhere;
 	}
 
 	.actions {

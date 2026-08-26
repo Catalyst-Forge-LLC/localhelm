@@ -1055,7 +1055,7 @@
 	function pushItems(rows: GitRow[]): string[] {
 		return rows.map((row) => {
 			const n = row.ahead ?? '?';
-			return `${row.id}  ${row.branch ?? '?'}  ${n} commit(s)  →  ${row.origin ?? ''}`;
+			return `${row.id}  ${row.branch ?? '?'}  ${n} commit(s)\n→  ${row.origin ?? ''}`;
 		});
 	}
 
