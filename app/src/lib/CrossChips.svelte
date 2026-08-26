@@ -65,5 +65,6 @@
 
 	.chips.compact {
 		margin-top: 0;
+		flex-wrap: nowrap;
 	}
 </style>

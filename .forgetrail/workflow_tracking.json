@@ -148,6 +148,10 @@
         {
           "timestamp": "2026-08-26T20:05:00Z",
           "text": "Sites table: engine version + Sync engine <target> only when needed (d43). Site cell one line."
+        },
+        {
+          "timestamp": "2026-08-26T20:20:00Z",
+          "text": "Table cleanup (d44): Fleet local+npm → version; Ports hide listening/log/health/firewall; Sites hide headers/ship; one-line name cells."
         }
       ]
     },
@@ -660,6 +664,16 @@
       "decision": "FilePress Sites table hides pin/locked/update and shows one engine (locked) version. Row Sync engine <target> only when the site is behind or headers need merge. Site cell is one line (id + chips).",
       "rationale": "Operator 2026-08-26: three version columns plus a Sync button, and a three-line site cell.",
       "alternatives_considered": ["Keep all plugin columns", "Change FilePress plugin column list", "Always show Sync engine"],
+      "status": "active"
+    },
+    {
+      "id": "d44",
+      "timestamp": "2026-08-26T20:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 18,
+      "decision": "Same table density as Sites: Fleet shows one version (npm note only when it differs or is missing). Ports leases hide listening, log, health, and skipped firewall; recipe shows the command or no-recipe plus a firewall that needs work. Sites also hide headers and ship columns. Name cells stay one line (compact chips; no repeated npm name; no FilePress disclaimer on Today cards). Per-row Bump, Park, Push, and Ship stay — those writes are optional or lack a reliable 'needed' signal.",
+      "rationale": "Operator 2026-08-26: review the other tables for the same column collapse, one-line cells, and buttons only when they apply.",
+      "alternatives_considered": ["Hide per-row Bump and Park", "Change LocalBerth/FilePress plugin column lists", "Merge Fleet git into needs you"],
       "status": "active"
     }
   ],

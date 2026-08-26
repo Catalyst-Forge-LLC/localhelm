@@ -54,6 +54,8 @@ export {
 	siteSyncTarget,
 	siteTableColumns,
 } from './siteDisplay.js';
+export { fleetProjectMeta, fleetVersionLabel, fleetVersionNote } from './fleetDisplay.js';
+export { portCellValue, portRecipeLabel, portTableColumns } from './portDisplay.js';
 export { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds } from './git.js';
 export type { GitJobRow } from './git.js';
 export { IGNORE_FILE_NAME, loadScanIgnore } from './ignorefile.js';

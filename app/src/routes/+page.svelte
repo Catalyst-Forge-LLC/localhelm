@@ -16,6 +16,8 @@
 	import { portFamilies, portLooks } from '$lib/looks';
 	import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
+	import { fleetProjectMeta, fleetVersionLabel } from '$lib/fleetDisplay';
+	import { portCellValue, portTableColumns } from '$lib/portDisplay';
 	import { siteCellValue, siteNeedsEngineSync, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		idsToSelection,
@@ -1524,14 +1526,6 @@
 		return bits.join(', ');
 	}
 
-	function npmLabel(row: Project): string {
-		if (row.private) return 'private';
-		if (row.npm.status === 'ok') return row.npm.latest ?? '—';
-		if (row.npm.status === 'none') return 'not published';
-		if (row.npm.status === 'error') return 'lookup failed';
-		return row.npm.status;
-	}
-
 	type Badge = { text: string; tone: 'ship' | 'warn' | 'bad' | 'info'; title?: string };
 
 	function badges(row: Project): Badge[] {
@@ -1640,7 +1634,7 @@
 		if (board.plugin === 'filepress') {
 			bits.push(
 				'Site names can match a fleet package and still be a different checkout.',
-				'Engine is the locked getfilepress version. Sync engine <version> appears only when that site is behind or headers need a merge.',
+				'Engine is the locked getfilepress version. Sync engine <version> appears only when that site is behind or headers need a merge. Headers and ship stay on the job buttons, not extra columns.',
 				'Land does needed engine/package writes, then Sync → Push → Ship for the site.',
 				'Push is git push origin <branch> only — never --force.',
 			);
@@ -2066,9 +2060,6 @@
 									<li class="need-card">
 										<div class="need-main">
 											<div class="id">{site.id}</div>
-											{#if enrolledIds.has(site.id)}
-												<div class="dim small">FilePress site — not the fleet package</div>
-											{/if}
 											<div class="dim small">{siteNeedReason(site.cells)}</div>
 										</div>
 										<div class="need-actions">
@@ -2268,8 +2259,7 @@
 										/>
 									</th>
 									<th>project</th>
-									<th>local</th>
-									<th>on npm</th>
+									<th>version</th>
 									<th>git</th>
 									<th>fleet pins</th>
 									<th>needs you</th>
@@ -2278,12 +2268,15 @@
 							</thead>
 							<tbody>
 								{#each visibleProjects as row (row.id)}
+									{@const projectMeta = fleetProjectMeta(row.id, row.npm.name, row.path)}
 									<tr>
 										<td class="tick"><input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedIds[row.id]} /></td>
 										<td>
 											<div class="project-cell">
 												<span class="id">{row.id}</span>
-												<span class="dim small">{row.npm.name ?? row.path}</span>
+												{#if projectMeta}
+													<span class="dim small">{projectMeta}</span>
+												{/if}
 												<CrossChips compact chips={chipsFor(row.id, 'fleet')} onOpen={(kind) => openCross(row.id, kind)} />
 												<IconButton
 													compact
@@ -2302,8 +2295,7 @@
 												/>
 											</div>
 										</td>
-										<td class="mono">{row.localVersion ?? '—'}</td>
-										<td class="mono" class:ahead={row.unpublishedAhead}>{npmLabel(row)}</td>
+										<td class="mono" class:ahead={row.unpublishedAhead}>{fleetVersionLabel(row)}</td>
 										<td class="small">{gitSummary(row)}</td>
 										<td>
 											{#if row.pins.length}
@@ -2359,7 +2351,7 @@
 									</tr>
 								{/each}
 								{#if !inventory?.projects.length}
-									<tr><td class="empty" colspan="8">Nothing enrolled yet. Open Add projects, scan a folder, tick the ones you ship, then write.</td></tr>
+									<tr><td class="empty" colspan="7">Nothing enrolled yet. Open Add projects, scan a folder, tick the ones you ship, then write.</td></tr>
 								{/if}
 							</tbody>
 						</table>
@@ -2533,6 +2525,7 @@
 				{#if visiblePortBoard}
 					{@const board = visiblePortBoard}
 					{@const leaseActions = portPane === 'leases'}
+					{@const portCols = portTableColumns(board.plugin, portPane, board.columns)}
 					<section class="panel plugin-board" id="pane-ports" role="tabpanel" aria-labelledby={portPane === 'observed' ? 'tab-observed' : 'tab-leases'}>
 						<div class="section-head">
 							<div>
@@ -2645,7 +2638,7 @@
 											</th>
 										{/if}
 										<th>{board.rowLabel ?? 'name'}</th>
-										{#each board.columns as col (col.id)}
+										{#each portCols as col (col.id)}
 											<th>{col.label}</th>
 										{/each}
 										<th></th>
@@ -2659,16 +2652,18 @@
 													<input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedPorts[row.id]} />
 												</td>
 											{/if}
-											<td class="id">
-												{row.label ?? row.id}
-												<CrossChips chips={chipsFor(row.id, 'ports')} onOpen={(kind) => openCross(row.id, kind)} />
+											<td>
+												<div class="project-cell">
+													<span class="id">{row.label ?? row.id}</span>
+													<CrossChips compact chips={chipsFor(row.id, 'ports')} onOpen={(kind) => openCross(row.id, kind)} />
+												</div>
 											</td>
-											{#each board.columns as col (col.id)}
-												<td class="small">
-													{#if col.id === 'health' || col.id === 'recipe'}
-														<Tooltip wide title={healthTip(row)}>{row.cells[col.id] ?? '—'}</Tooltip>
+											{#each portCols as col (col.id)}
+												<td class="small" class:mono={col.id === 'port'}>
+													{#if col.id === 'recipe'}
+														<Tooltip wide title={healthTip(row)}>{portCellValue(col.id, row.cells)}</Tooltip>
 													{:else}
-														{row.cells[col.id] ?? '—'}
+														{portCellValue(col.id, row.cells)}
 													{/if}
 												</td>
 											{/each}
@@ -2714,7 +2709,7 @@
 										</tr>
 									{/each}
 									{#if !board.rows.length}
-										<tr><td class="empty" colspan={board.columns.length + (leaseActions ? 3 : 2)}>Nothing here.</td></tr>
+										<tr><td class="empty" colspan={portCols.length + (leaseActions ? 3 : 2)}>Nothing here.</td></tr>
 									{/if}
 								</tbody>
 							</table>
@@ -3383,9 +3378,10 @@
 
 	.project-cell {
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		align-items: center;
 		gap: 0.2rem 0.45rem;
+		white-space: nowrap;
 	}
 
 	.project-cell .id {

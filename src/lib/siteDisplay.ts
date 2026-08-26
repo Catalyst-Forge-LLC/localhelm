@@ -1,4 +1,4 @@
-const HIDDEN_FILEPRESS_COLS = new Set(['pin', 'locked', 'update']);
+const HIDDEN_FILEPRESS_COLS = new Set(['pin', 'locked', 'update', 'headers', 'ship']);
 
 export type BoardColumn = { id: string; label: string };
 

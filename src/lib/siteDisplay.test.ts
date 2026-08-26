@@ -16,10 +16,13 @@ describe('siteDisplay', () => {
 			{ id: 'locked', label: 'locked' },
 			{ id: 'update', label: 'update' },
 			{ id: 'headers', label: 'headers' },
+			{ id: 'ship', label: 'ship' },
+			{ id: 'git', label: 'git' },
+			{ id: 'live', label: 'live' },
 		]);
 		assert.deepEqual(
 			cols.map((col) => col.id),
-			['engine', 'headers'],
+			['engine', 'git', 'live'],
 		);
 		assert.deepEqual(siteTableColumns('other', [{ id: 'pin', label: 'pin' }]), [{ id: 'pin', label: 'pin' }]);
 	});
