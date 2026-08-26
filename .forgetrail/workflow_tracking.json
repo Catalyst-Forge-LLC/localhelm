@@ -156,6 +156,10 @@
         {
           "timestamp": "2026-08-26T21:05:00Z",
           "text": "Cut version gated on origin commits since last npm version (d45)."
+        },
+        {
+          "timestamp": "2026-08-26T21:15:00Z",
+          "text": "Today pane board (d46): Needs you / Looks / Sites / Ports; section scroll; refresh next to id."
         }
       ]
     },
@@ -688,6 +692,16 @@
       "decision": "Cut version (and a publish plan that would bump) only when origin has commits after the last published version. Count is git rev-list from v-tag or the last package.json version bump to origin/<branch>. 0 → skip 'nothing to cut'. Unknown (null) does not skip. Unpublished-ahead still publishes without this gate.",
       "rationale": "Operator 2026-08-26: keep Cut version only when there is actually a version to cut — pushed work since the last publish.",
       "alternatives_considered": ["npm view time vs git date", "Count local HEAD not origin", "Always show Cut"],
+      "status": "active"
+    },
+    {
+      "id": "d46",
+      "timestamp": "2026-08-26T21:15:00Z",
+      "phase": "2-scaffolding",
+      "session": 18,
+      "decision": "Today fills the remaining viewport as four panes: Needs you, Looks, Sites, Ports. Each pane scrolls. Looks is a sibling pane, not stacked under Needs you. Row refresh is always left of the project id. Writes stay on the row.",
+      "rationale": "Operator 2026-08-26: refresh icon jumped, Looks was below the fold, and the whole tab scrolled.",
+      "alternatives_considered": ["Keep Looks under Needs you with a jump link", "Tabs inside Today", "Cap lists at 8"],
       "status": "active"
     }
   ],

@@ -1833,347 +1833,368 @@
 	</nav>
 
 	<div class="workspace">
-	<main>
+	<main class:fill-pane={tab === 'today'}>
 		{#if tab === 'today'}
-			<div class="today-grid">
-				<section class="panel">
+			<div class="today-board">
+				<section class="panel fill today-needs">
 					<div class="section-head">
 						<div>
 							<h2>Needs you</h2>
-							{#if statusReady}
 							<p class="hint">
-								{#if readyRows.length}
+								{#if !statusReady}
+									Reading fleet…
+								{:else if readyRows.length}
 									{readyRows.length} unpublished-ahead. Gold button is the matching write.
 								{:else}
 									Gold button is the matching write. Cut version only when origin has commits since the last npm version.
 								{/if}
 							</p>
-							{/if}
 						</div>
-						<div class="group-buttons">
+						{#if unpublishedPublishIds.length > 0}
 							<button
-								class="btn"
-								disabled={!statusReady}
-								onclick={() => void copyBrief()}
-								title="Copies a markdown brief of needs-you, Ports, and recent activity."
+								class="btn btn-write"
+								disabled={Boolean(busy)}
+								onclick={() => startPublish(unpublishedPublishIds)}
+								title="Shows bump, push, and npm publish for unpublished-ahead packages the plan would actually publish."
 							>
-								<Icon icon="lucide:clipboard" />
-								{briefCopied ? 'Copied brief' : 'Copy brief'}
+								<Icon icon="lucide:package-up" />
+								Publish unpublished
 							</button>
-							{#if unpublishedPublishIds.length > 0}
-								<button
-									class="btn btn-write"
-									disabled={Boolean(busy)}
-									onclick={() => startPublish(unpublishedPublishIds)}
-									title="Shows bump, push, and npm publish for unpublished-ahead packages the plan would actually publish."
-								>
-									<Icon icon="lucide:package-up" />
-									Publish unpublished
-								</button>
-							{/if}
+						{/if}
+					</div>
+					<div class="panel-body">
+						{#if statusReady && attentionRows.length === 0 && cascadeOnlyRows.length === 0}
+							<p class="quiet-banner">All quiet on the fleet. Looks, Sites, and Ports stay in the other panes.</p>
+						{:else if statusReady}
+							<ul class="need-list">
+								{#each attentionRows as row (row.id)}
+									{@const cascadeTarget = cascadeFor(row.id)}
+									{@const need = todayNeed(row)}
+									<li class="need-card">
+										<div class="need-main">
+											<div class="need-id-row">
+												<IconButton
+													compact
+													icon="lucide:refresh-cw"
+													label={`Refresh ${row.id}`}
+													title="Re-read this row only."
+													disabled={Boolean(busy)}
+													onclick={() => void refreshRows([row.id])}
+												/>
+												<span class="id">{row.id}</span>
+											</div>
+											<div class="dim small">
+												{row.npm.name ?? row.path} · {gitSummary(row)}
+												{#if cascadeTarget}
+													· dependents {cascadeTarget.behind ? `${cascadeTarget.behind} behind` : ''}{cascadeTarget.behind && cascadeTarget.linked ? ', ' : ''}{cascadeTarget.linked ? `${cascadeTarget.linked} local link` : ''}
+												{/if}
+											</div>
+										</div>
+										<div class="need-tools">
+											<div class="badges">
+												{#each todayBadges(row) as badge (badge.text)}
+													<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
+												{/each}
+											</div>
+											<div class="need-actions">
+												{#if need === 'publish'}
+													<button
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy)}
+														onclick={() => startPublish([row.id])}
+														title="Shows bump, push, and npm publish steps. Confirm in the modal."
+													>
+														Publish
+													</button>
+												{:else if need === 'cut'}
+													<button
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy)}
+														onclick={() => startPublish([row.id])}
+														title={`Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`}
+													>
+														Cut version{row.commitsSinceNpm ? ` ${row.commitsSinceNpm}` : ''}
+													</button>
+												{:else if need === 'push'}
+													<button
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy)}
+														onclick={() => startPush([row.id])}
+														title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
+													>
+														Push{row.git.ahead ? ` ${row.git.ahead}` : ''}
+													</button>
+												{:else if need === 'pins' && cascadeTarget}
+													<button
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy)}
+														onclick={() => startCascade(row.id)}
+														title="Shows which dependents would get the new pin. Confirm in the modal to write."
+													>
+														Write pins
+													</button>
+												{/if}
+												{#if need !== 'publish' && need !== 'cut' && canPublish(row)}
+													<button
+														class="btn btn-sm"
+														disabled={Boolean(busy)}
+														onclick={() => startPublish([row.id])}
+														title={`Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`}
+													>
+														Cut version{row.commitsSinceNpm ? ` ${row.commitsSinceNpm}` : ''}
+													</button>
+												{/if}
+												{#if need !== 'push' && canPush(row)}
+													<button
+														class="btn btn-sm"
+														disabled={Boolean(busy)}
+														onclick={() => startPush([row.id])}
+														title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
+													>
+														Push{row.git.ahead ? ` ${row.git.ahead}` : ''}
+													</button>
+												{/if}
+												{#if need !== 'pins' && cascadeTarget && cascadeTarget.writable > 0}
+													<button
+														class="btn btn-sm"
+														disabled={Boolean(busy)}
+														onclick={() => startCascade(row.id)}
+														title="Shows which dependents would get the new pin. Confirm in the modal to write."
+													>
+														Write pins
+													</button>
+												{/if}
+											</div>
+										</div>
+									</li>
+								{/each}
+								{#each cascadeOnlyRows as target (target.id)}
+									<li class="need-card">
+										<div class="need-main">
+											<div class="need-id-row">
+												<span class="need-refresh-slot" aria-hidden="true"></span>
+												<span class="id">{target.id}</span>
+											</div>
+											<div class="dim small">
+												{target.npm}{target.latest ? `@${target.latest}` : ''} is published — dependents still need the pin
+											</div>
+										</div>
+										<div class="need-tools">
+											<div class="badges">
+												{#if target.behind}<span class="badge warn">{target.behind} pin(s) behind</span>{/if}
+												{#if target.linked}<span class="badge info">{target.linked} local link</span>{/if}
+											</div>
+											<div class="need-actions">
+												<button
+													class="btn btn-sm btn-write"
+													disabled={Boolean(busy)}
+													onclick={() => startCascade(target.id)}
+													title="Shows which dependents would get the new pin. Confirm in the modal to write."
+												>
+													Write pins
+												</button>
+											</div>
+										</div>
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+				</section>
+
+				<section class="panel fill today-looks">
+					<div class="section-head">
+						<div>
+							<h2>Looks</h2>
+							<p class="hint">
+								{#if portLookCards.length}
+									{portLookCards.length} fact{portLookCards.length === 1 ? '' : 's'}, not writes.
+								{:else}
+									Facts, not writes. Folder and port stay put.
+								{/if}
+							</p>
 						</div>
 					</div>
-
-					{#if statusReady && attentionRows.length === 0 && cascadeOnlyRows.length === 0 && portLookCards.length === 0}
-						<p class="quiet-banner">All quiet on the fleet. Open Fleet for the full table, Sites for FilePress, or Ports for leases.</p>
-					{:else if statusReady && (attentionRows.length > 0 || cascadeOnlyRows.length > 0)}
-						<ul class="need-list">
-							{#each attentionRows as row (row.id)}
-								{@const cascadeTarget = cascadeFor(row.id)}
-								{@const need = todayNeed(row)}
-								<li class="need-card">
-									<div class="need-main">
-										<div class="id">{row.id}</div>
-										<div class="dim small">
-											{row.npm.name ?? row.path} · {gitSummary(row)}
-											{#if cascadeTarget}
-												· dependents {cascadeTarget.behind ? `${cascadeTarget.behind} behind` : ''}{cascadeTarget.behind && cascadeTarget.linked ? ', ' : ''}{cascadeTarget.linked ? `${cascadeTarget.linked} local link` : ''}
-											{/if}
-										</div>
-									</div>
-									<div class="badges">
-										{#each todayBadges(row) as badge (badge.text)}
-											<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
-										{/each}
-									</div>
-									<div class="need-actions">
-										<IconButton
-											compact
-											icon="lucide:refresh-cw"
-											label={`Refresh ${row.id}`}
-											title="Re-read this row only."
-											disabled={Boolean(busy)}
-											onclick={() => void refreshRows([row.id])}
-										/>
-										{#if need === 'publish'}
-											<button
-												class="btn btn-sm btn-write"
-												disabled={Boolean(busy)}
-												onclick={() => startPublish([row.id])}
-												title="Shows bump, push, and npm publish steps. Confirm in the modal."
-											>
-												Publish
-											</button>
-										{:else if need === 'cut'}
-											<button
-												class="btn btn-sm btn-write"
-												disabled={Boolean(busy)}
-												onclick={() => startPublish([row.id])}
-												title={`Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`}
-											>
-												Cut version{row.commitsSinceNpm ? ` ${row.commitsSinceNpm}` : ''}
-											</button>
-										{:else if need === 'push'}
-											<button
-												class="btn btn-sm btn-write"
-												disabled={Boolean(busy)}
-												onclick={() => startPush([row.id])}
-												title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
-											>
-												Push{row.git.ahead ? ` ${row.git.ahead}` : ''}
-											</button>
-										{:else if need === 'pins' && cascadeTarget}
-											<button
-												class="btn btn-sm btn-write"
-												disabled={Boolean(busy)}
-												onclick={() => startCascade(row.id)}
-												title="Shows which dependents would get the new pin. Confirm in the modal to write."
-											>
-												Write pins
-											</button>
-										{/if}
-										{#if need !== 'publish' && need !== 'cut' && canPublish(row)}
-											<button
-												class="btn btn-sm"
-												disabled={Boolean(busy)}
-												onclick={() => startPublish([row.id])}
-												title={`Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`}
-											>
-												Cut version{row.commitsSinceNpm ? ` ${row.commitsSinceNpm}` : ''}
-											</button>
-										{/if}
-										{#if need !== 'push' && canPush(row)}
-											<button
-												class="btn btn-sm"
-												disabled={Boolean(busy)}
-												onclick={() => startPush([row.id])}
-												title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
-											>
-												Push{row.git.ahead ? ` ${row.git.ahead}` : ''}
-											</button>
-										{/if}
-										{#if need !== 'pins' && cascadeTarget && cascadeTarget.writable > 0}
-											<button
-												class="btn btn-sm"
-												disabled={Boolean(busy)}
-												onclick={() => startCascade(row.id)}
-												title="Shows which dependents would get the new pin. Confirm in the modal to write."
-											>
-												Write pins
-											</button>
-										{/if}
-									</div>
-								</li>
-							{/each}
-							{#each cascadeOnlyRows as target (target.id)}
-								<li class="need-card">
-									<div class="need-main">
-										<div class="id">{target.id}</div>
-										<div class="dim small">
-											{target.npm}{target.latest ? `@${target.latest}` : ''} is published — dependents still need the pin
-										</div>
-									</div>
-									<div class="badges">
-										{#if target.behind}<span class="badge warn">{target.behind} pin(s) behind</span>{/if}
-										{#if target.linked}<span class="badge info">{target.linked} local link</span>{/if}
-									</div>
-									<div class="need-actions">
-										<button
-											class="btn btn-sm btn-write"
-											disabled={Boolean(busy)}
-											onclick={() => startCascade(target.id)}
-											title="Shows which dependents would get the new pin. Confirm in the modal to write."
-										>
-											Write pins
-										</button>
-									</div>
-								</li>
-							{/each}
-						</ul>
-					{/if}
-					{#if statusReady && portLookCards.length}
-						<div class="looks-block">
-							<h3 class="looks-head">Looks</h3>
-							<p class="hint">Facts, not writes. Folder and port stay put.</p>
+					<div class="panel-body">
+						{#if !statusReady}
+							<p class="dim small">Reading looks…</p>
+						{:else if !portLookCards.length}
+							<p class="dim small">Nothing to look at. Stacks and down leases stay on Ports.</p>
+						{:else}
 							<ul class="need-list">
 								{#each portLookCards as look (look.id)}
 									<li class="need-card">
 										<div class="need-main">
-											<div class="id">{look.title}</div>
+											<div class="need-id-row">
+												<span class="id">{look.title}</span>
+												<CrossChips compact chips={chipsFor(look.title)} onOpen={(kind) => openCross(look.title, kind)} />
+											</div>
 											<Tooltip wide title={look.detail}>
 												<div class="dim small">{look.detail}</div>
 											</Tooltip>
-											<CrossChips
-												chips={chipsFor(look.title)}
-												onOpen={(kind) => openCross(look.title, kind)}
-											/>
 										</div>
-										<div class="need-actions">
-											<button
-												type="button"
-												class="btn btn-sm"
-												onclick={() => openPortsFamily(look.leaseIds)}
-												title="Opens Ports with these leases checked."
-											>
-												Open Ports
-											</button>
+										<div class="need-tools">
+											<div class="need-actions">
+												<button
+													type="button"
+													class="btn btn-sm"
+													onclick={() => openPortsFamily(look.leaseIds)}
+													title="Opens Ports with these leases checked."
+												>
+													Open Ports
+												</button>
+											</div>
 										</div>
 									</li>
 								{/each}
 							</ul>
-						</div>
-					{/if}
+						{/if}
+					</div>
 				</section>
 
-				{#if statusReady}
 				<div class="today-side">
-				<section class="panel">
-					<div class="section-head">
-						<div>
-							<h2>FilePress sites</h2>
-							<p class="hint">Content sites, not npm packages.</p>
-						</div>
-						<button type="button" class="btn btn-sm" onclick={() => setTab('sites')}><Icon icon="lucide:arrow-right" /> Open Sites</button>
-					</div>
-					{#if !filepressBoard}
-						<p class="dim small">No FilePress plugin loaded. Enroll the filepress checkout to see sites here.</p>
-					{:else}
-						<p class="dim small">
-							{filepressBoard.rows.length} sites
-							{#if sitesNeedingYou.length}
-								· {sitesNeedingYou.length} need an engine sync or header merge
-							{:else}
-								· none waiting on an engine sync
-							{/if}
-						</p>
-						{#if filepressSyncIds.length}
-							<div class="group-buttons">
-								<button
-									class="btn btn-write"
-									disabled={Boolean(busy)}
-									onclick={() => startPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, 'Sync engine')}
-									title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
-								>
-									<Icon icon="lucide:refresh-cw" />
-									Sync engine
-								</button>
+					<section class="panel fill">
+						<div class="section-head">
+							<div>
+								<h2>FilePress sites</h2>
+								<p class="hint">
+									{#if !statusReady}
+										Reading sites…
+									{:else if !filepressBoard}
+										No FilePress plugin loaded.
+									{:else if sitesNeedingYou.length}
+										{sitesNeedingYou.length} of {filepressBoard.rows.length} need an engine sync.
+									{:else}
+										{filepressBoard.rows.length} sites · none waiting on an engine sync.
+									{/if}
+								</p>
 							</div>
-						{/if}
-						{#if sitesNeedingYou.length}
-							<ul class="need-list compact">
-								{#each sitesNeedingYou.slice(0, 8) as site (site.id)}
-									<li class="need-card">
-										<div class="need-main">
-											<div class="id">{site.id}</div>
-											<div class="dim small">{siteNeedReason(site.cells)}</div>
-										</div>
-										<div class="need-actions">
-											<button
-												class="btn btn-sm btn-write"
-												disabled={Boolean(busy)}
-												onclick={() => startLand(site.id)}
-												title="Plans engine package, matching fleet package, then Sync → Push → Ship for this site. Confirm in the modal."
-											>
-												<Icon icon="lucide:plane-landing" />
-												Land
-											</button>
-										</div>
-									</li>
-								{/each}
-							</ul>
-							{#if sitesNeedingYou.length > 8}
-								<p class="dim small">{sitesNeedingYou.length - 8} more on the Sites tab.</p>
-							{/if}
-						{/if}
-					{/if}
-				</section>
-				<section class="panel">
-					<div class="section-head">
-						<div>
-							<h2>Ports</h2>
-							<p class="hint">Named LocalBerth leases.</p>
+							<div class="group-buttons">
+								{#if filepressSyncIds.length}
+									<button
+										class="btn btn-write btn-sm"
+										disabled={Boolean(busy)}
+										onclick={() => startPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, 'Sync engine')}
+										title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
+									>
+										<Icon icon="lucide:refresh-cw" />
+										Sync engine
+									</button>
+								{/if}
+								<button type="button" class="btn btn-sm" onclick={() => setTab('sites')}><Icon icon="lucide:arrow-right" /> Sites</button>
+							</div>
 						</div>
-						<button type="button" class="btn btn-sm" onclick={() => setTab('ports')}><Icon icon="lucide:arrow-right" /> Open Ports</button>
-					</div>
-					{#if !leaseBoard}
-						<p class="dim small">No Ports plugin loaded. Enroll the localberth checkout to see leases here.</p>
-					{:else}
-						<p class="dim small">
-							{leaseBoard.rows.length} lease{leaseBoard.rows.length === 1 ? '' : 's'}
-							{#if portFamilyCards.length}
-								· {portFamilyCards.length} stack{portFamilyCards.length === 1 ? '' : 's'}
-							{/if}
-							{#if portsNeedingYou.length}
-								· {portsNeedingYou.length} down, conflicted, or need a firewall
-							{:else}
-								· all listening
-							{/if}
-						</p>
-						<div class="ports-snapshot">
-							{#if portFamilyCards.length}
-								<div>
-									<h3 class="looks-head">Stacks</h3>
-									<p class="hint">One line per family. Open checks those leases on Ports.</p>
-									<ul class="need-list">
-										{#each portFamilyCards.slice(0, 8) as family (family.stem)}
-											<li class="need-card">
-												<div class="need-main">
-													<div class="id">{family.label}</div>
-													<div class="dim small">{family.bits}</div>
-												</div>
+						<div class="panel-body">
+							{#if statusReady && filepressBoard && sitesNeedingYou.length}
+								<ul class="need-list">
+									{#each sitesNeedingYou as site (site.id)}
+										<li class="need-card">
+											<div class="need-main">
+												<div class="id">{site.id}</div>
+												<div class="dim small">{siteNeedReason(site.cells)}</div>
+											</div>
+											<div class="need-tools">
 												<div class="need-actions">
 													<button
-														type="button"
-														class="btn btn-sm"
-														onclick={() => openPortsFamily(family.leaseIds)}
-														title="Opens Ports with this stack checked."
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy)}
+														onclick={() => startLand(site.id)}
+														title="Plans engine package, matching fleet package, then Sync → Push → Ship for this site. Confirm in the modal."
 													>
-														Open
+														<Icon icon="lucide:plane-landing" />
+														Land
 													</button>
 												</div>
-											</li>
-										{/each}
-									</ul>
-									{#if portFamilyCards.length > 8}
-										<p class="dim small">{portFamilyCards.length - 8} more on the Ports tab.</p>
-									{/if}
-								</div>
-							{/if}
-							{#if portsNeedingYou.length}
-								<div>
-									<h3 class="looks-head">Down or conflicted</h3>
-									<p class="hint">Single leases that are down, conflicted, or need a firewall.</p>
-									<ul class="need-list">
-										{#each portsNeedingYou.slice(0, 8) as row (row.id)}
-											<li class="need-card">
-												<div class="id">{row.label ?? row.id}</div>
-												<div class="dim small">
-													{row.cells.port ?? '—'}
-													· {row.cells.listening === 'no' ? 'not listening' : row.cells.conflict === 'yes' ? 'conflict' : row.cells.firewall}
-												</div>
-											</li>
-										{/each}
-									</ul>
-									{#if portsNeedingYou.length > 8}
-										<p class="dim small">{portsNeedingYou.length - 8} more on the Ports tab.</p>
-									{/if}
-								</div>
+											</div>
+										</li>
+									{/each}
+								</ul>
+							{:else if statusReady && filepressBoard}
+								<p class="dim small">Open Sites for the full board.</p>
+							{:else if statusReady}
+								<p class="dim small">Enroll the filepress checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 							{/if}
 						</div>
-					{/if}
-				</section>
+					</section>
+					<section class="panel fill">
+						<div class="section-head">
+							<div>
+								<h2>Ports</h2>
+								<p class="hint">
+									{#if !statusReady}
+										Reading ports…
+									{:else if !leaseBoard}
+										No Ports plugin loaded.
+									{:else}
+										{leaseBoard.rows.length} lease{leaseBoard.rows.length === 1 ? '' : 's'}
+										{#if portFamilyCards.length}
+											· {portFamilyCards.length} stack{portFamilyCards.length === 1 ? '' : 's'}
+										{/if}
+										{#if portsNeedingYou.length}
+											· {portsNeedingYou.length} down or conflicted
+										{:else}
+											· all listening
+										{/if}
+									{/if}
+								</p>
+							</div>
+							<button type="button" class="btn btn-sm" onclick={() => setTab('ports')}><Icon icon="lucide:arrow-right" /> Ports</button>
+						</div>
+						<div class="panel-body">
+							{#if statusReady && leaseBoard}
+								<div class="ports-snapshot">
+									{#if portFamilyCards.length}
+										<div>
+											<h3 class="looks-head">Stacks</h3>
+											<ul class="need-list">
+												{#each portFamilyCards as family (family.stem)}
+													<li class="need-card">
+														<div class="need-main">
+															<div class="id">{family.label}</div>
+															<div class="dim small">{family.bits}</div>
+														</div>
+														<div class="need-tools">
+															<div class="need-actions">
+																<button
+																	type="button"
+																	class="btn btn-sm"
+																	onclick={() => openPortsFamily(family.leaseIds)}
+																	title="Opens Ports with this stack checked."
+																>
+																	Open
+																</button>
+															</div>
+														</div>
+													</li>
+												{/each}
+											</ul>
+										</div>
+									{/if}
+									{#if portsNeedingYou.length}
+										<div>
+											<h3 class="looks-head">Down or conflicted</h3>
+											<ul class="need-list">
+												{#each portsNeedingYou as row (row.id)}
+													<li class="need-card">
+														<div class="need-main">
+															<div class="id">{row.label ?? row.id}</div>
+															<div class="dim small">
+																{row.cells.port ?? '—'}
+																· {row.cells.listening === 'no' ? 'not listening' : row.cells.conflict === 'yes' ? 'conflict' : row.cells.firewall}
+															</div>
+														</div>
+													</li>
+												{/each}
+											</ul>
+										</div>
+									{/if}
+								</div>
+							{:else if statusReady}
+								<p class="dim small">Enroll the localberth checkout to expose <code>localhelm.plugin.mjs</code>.</p>
+							{/if}
+						</div>
+					</section>
 				</div>
-				{/if}
 			</div>
 		{:else if tab === 'fleet'}
 			<div class="fleet-layout">
@@ -3178,6 +3199,10 @@
 		padding: 1.1rem 1.5rem 1.5rem;
 	}
 
+	main.fill-pane {
+		overflow: hidden;
+	}
+
 	.drawer-backdrop {
 		display: none;
 	}
@@ -3222,15 +3247,22 @@
 		}
 	}
 
-	.today-grid,
+	.today-board,
 	.fleet-layout {
 		display: grid;
-		gap: 1rem;
+		gap: 0.75rem;
+	}
+
+	.today-board {
+		flex: 1;
+		min-height: 0;
+		grid-template-columns: 1fr;
 	}
 
 	.today-side {
 		display: grid;
-		gap: 1rem;
+		gap: 0.75rem;
+		min-height: 0;
 	}
 
 	.port-actions {
@@ -3317,13 +3349,44 @@
 	}
 
 	@media (min-width: 1100px) {
-		.today-grid {
-			grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.85fr);
-			align-items: start;
+		.today-board {
+			grid-template-columns: minmax(0, 1.45fr) minmax(20rem, 0.9fr);
+			grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr);
+			grid-template-areas:
+				'needs side'
+				'looks side';
+		}
+
+		.today-needs {
+			grid-area: needs;
+		}
+
+		.today-looks {
+			grid-area: looks;
+		}
+
+		.today-side {
+			grid-area: side;
+			grid-template-rows: auto minmax(0, 1fr);
+		}
+
+		.today-side > .panel.fill:first-child {
+			max-height: 42%;
 		}
 
 		.fleet-layout {
 			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	@media (max-width: 1099px) {
+		main.fill-pane {
+			overflow: auto;
+		}
+
+		.today-needs .panel-body,
+		.today-looks .panel-body {
+			max-height: 22rem;
 		}
 	}
 
@@ -3481,6 +3544,24 @@
 		box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04);
 	}
 
+	.panel.fill {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.panel.fill .section-head {
+		flex-shrink: 0;
+		margin-bottom: 0.4rem;
+	}
+
+	.panel-body {
+		flex: 1;
+		min-height: 0;
+		overflow: auto;
+	}
+
 	.quiet-banner {
 		background: #2f3d32;
 		border: 1px solid #3f6b4a;
@@ -3509,13 +3590,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.9rem;
-		margin-top: 0.45rem;
-	}
-
-	.looks-block {
-		margin-top: 1.15rem;
-		padding-top: 1rem;
-		border-top: 1px solid #3d3d44;
 	}
 
 	.looks-head {
@@ -3559,9 +3633,9 @@
 
 	.need-card {
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		align-items: center;
-		gap: 0.4rem 0.65rem;
+		gap: 0.5rem 0.65rem;
 		background: #3d3d46;
 		border: 1px solid #585860;
 		border-radius: 0.45rem;
@@ -3569,8 +3643,31 @@
 	}
 
 	.need-main {
-		min-width: 11rem;
-		flex: 1 1 11rem;
+		min-width: 0;
+		flex: 1 1 auto;
+	}
+
+	.need-id-row {
+		display: flex;
+		align-items: center;
+		gap: 0.35rem;
+		min-width: 0;
+	}
+
+	.need-refresh-slot {
+		display: inline-block;
+		width: 1.35rem;
+		height: 1.35rem;
+		flex-shrink: 0;
+	}
+
+	.need-tools {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.3rem;
+		flex: 0 1 auto;
 	}
 
 	.need-card .badges {
@@ -3619,7 +3716,7 @@
 	}
 
 	.need-actions {
-		margin-left: auto;
+		margin-left: 0;
 	}
 
 	.need-actions:empty {
