@@ -16,6 +16,7 @@
 	import { portFamilies, portLooks } from '$lib/looks';
 	import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
+	import { siteCellValue, siteNeedsEngineSync, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		idsToSelection,
 		parseListParam,
@@ -413,10 +414,7 @@
 	}
 
 	function siteNeedsYou(cells: Record<string, string>): boolean {
-		const update = (cells.update ?? '').trim().toLowerCase();
-		const headers = (cells.headers ?? '').trim().toLowerCase();
-		const updateStale = Boolean(update) && update !== '—' && !update.startsWith('already') && !update.startsWith('skip');
-		return updateStale || headers.startsWith('merge');
+		return siteNeedsEngineSync(cells);
 	}
 
 	function siteNeedReason(cells: Record<string, string>): string {
@@ -1642,6 +1640,7 @@
 		if (board.plugin === 'filepress') {
 			bits.push(
 				'Site names can match a fleet package and still be a different checkout.',
+				'Engine is the locked getfilepress version. Sync engine <version> appears only when that site is behind or headers need a merge.',
 				'Land does needed engine/package writes, then Sync → Push → Ship for the site.',
 				'Push is git push origin <branch> only — never --force.',
 			);
@@ -2374,6 +2373,7 @@
 			</div>
 		{:else if tab === 'sites'}
 			{#each siteBoards as board (board.plugin + board.title)}
+				{@const siteCols = siteTableColumns(board.plugin, board.columns)}
 				<section class="panel plugin-board">
 					<div class="section-head">
 						<div>
@@ -2414,7 +2414,7 @@
 										/>
 									</th>
 									<th>{board.rowLabel ?? 'site'}</th>
-									{#each board.columns as col (col.id)}
+									{#each siteCols as col (col.id)}
 										<th>{col.label}</th>
 									{/each}
 									<th>plugin jobs</th>
@@ -2426,15 +2426,14 @@
 										<td class="tick">
 											<input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedSites[row.id]} />
 										</td>
-										<td class="id">
-											{row.label ?? row.id}
-											{#if board.plugin === 'filepress' && enrolledIds.has(row.id)}
-												<div class="dim small">FilePress site — not the fleet package</div>
-											{/if}
-											<CrossChips chips={chipsFor(row.id, 'sites')} onOpen={(kind) => openCross(row.id, kind)} />
+										<td>
+											<div class="project-cell">
+												<span class="id">{row.label ?? row.id}</span>
+												<CrossChips compact chips={chipsFor(row.id, 'sites')} onOpen={(kind) => openCross(row.id, kind)} />
+											</div>
 										</td>
-										{#each board.columns as col (col.id)}
-											<td class="small">{row.cells[col.id] ?? '—'}</td>
+										{#each siteCols as col (col.id)}
+											<td class="small" class:mono={col.id === 'engine'}>{siteCellValue(col.id, row.cells)}</td>
 										{/each}
 										<td>
 											<div class="bump">
@@ -2449,7 +2448,18 @@
 														Land
 													</button>
 												{/if}
-												{#each row.actions as act (act.id)}
+												{#if board.plugin === 'filepress' && siteNeedsEngineSync(row.cells)}
+													<button
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy)}
+														onclick={() => startPluginJob(board.plugin, 'sync', [row.id], siteSyncLabel(row.cells))}
+														title="Retargets getfilepress and merges headers if needed. Confirm in the modal."
+													>
+														<Icon icon="lucide:refresh-cw" />
+														{siteSyncLabel(row.cells)}
+													</button>
+												{/if}
+												{#each row.actions.filter((act) => board.plugin !== 'filepress' || act.id !== 'sync') as act (act.id)}
 													{@const icon = actionIcon(act)}
 													<button
 														class="btn btn-sm"
@@ -2466,7 +2476,7 @@
 									</tr>
 								{/each}
 								{#if !board.rows.length}
-									<tr><td class="empty" colspan={board.columns.length + 3}>No rows from this plugin.</td></tr>
+									<tr><td class="empty" colspan={siteCols.length + 3}>No rows from this plugin.</td></tr>
 								{/if}
 							</tbody>
 						</table>

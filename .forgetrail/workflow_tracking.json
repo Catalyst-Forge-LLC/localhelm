@@ -144,6 +144,10 @@
         {
           "timestamp": "2026-08-26T19:45:00Z",
           "text": "Bulk apply shows N of M · id (d42). Plugin/push/publish/pull/fetch run one row at a time."
+        },
+        {
+          "timestamp": "2026-08-26T20:05:00Z",
+          "text": "Sites table: engine version + Sync engine <target> only when needed (d43). Site cell one line."
         }
       ]
     },
@@ -646,6 +650,16 @@
       "decision": "Bulk writes apply one id at a time and set busy to 'verb N of M · id'. Confirm stays open and shows the same label. Covers plugin jobs (Sync engine / selection), bump, push, publish, pull, and fetch remotes.",
       "rationale": "Operator 2026-08-26: 18-site engine sync looked stuck because one request had no progress.",
       "alternatives_considered": ["SSE/stream from one locked apply", "Spinner only", "Progress only on Sites sync"],
+      "status": "active"
+    },
+    {
+      "id": "d43",
+      "timestamp": "2026-08-26T20:05:00Z",
+      "phase": "2-scaffolding",
+      "session": 18,
+      "decision": "FilePress Sites table hides pin/locked/update and shows one engine (locked) version. Row Sync engine <target> only when the site is behind or headers need merge. Site cell is one line (id + chips).",
+      "rationale": "Operator 2026-08-26: three version columns plus a Sync button, and a three-line site cell.",
+      "alternatives_considered": ["Keep all plugin columns", "Change FilePress plugin column list", "Always show Sync engine"],
       "status": "active"
     }
   ],

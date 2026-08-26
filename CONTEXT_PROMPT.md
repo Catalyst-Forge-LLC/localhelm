@@ -179,3 +179,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Row refresh: `/api/status?ids=` merges into the current table. Header Refresh still reads the whole fleet + Sites/Ports. Bump/push/publish/cascade reload only the rows they wrote.
 - Publish confirm hides the `localhelm auth` setup paragraph when `npm whoami` already works. Logged-in line + optional OTP stay.
 - Bulk apply (Sites/Ports, bump, push, publish, pull, fetch remotes) reports `3 of 18 · id` in the header and on the confirm button so a long job is not mistaken for a hang.
+- Sites table: one engine version instead of pin/locked/update. Sync engine <target> only when that site needs it. Site cell is one line.
