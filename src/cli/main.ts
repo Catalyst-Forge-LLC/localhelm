@@ -26,7 +26,7 @@ Usage:
   localhelm scan [dir...] [--json] [--max-depth N]
   localhelm enroll <path>... [--npm name] [--group name] [--apply]
   localhelm unenroll <id>... [--apply]
-  localhelm status [--json] [--fetch]
+  localhelm status [id...] [--json] [--fetch]
   localhelm deps [id] [--json]
   localhelm bump <id> patch|minor|major [--apply]
   localhelm fetch
@@ -245,9 +245,14 @@ async function main(): Promise<void> {
 	if (cmd === 'status') {
 		const json = takeFlag(argv, '--json');
 		const fetchRemotes = takeFlag(argv, '--fetch');
-		if (argv.length) fail('usage: localhelm status [--json] [--fetch]');
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		const onlyIds = argv.filter((a) => !a.startsWith('-'));
 		const loaded = await requireManifest();
-		const inventory = await fleetStatus(loaded, { fetch: fetchRemotes });
+		const inventory = await fleetStatus(loaded, {
+			fetch: fetchRemotes,
+			onlyIds: onlyIds.length ? onlyIds : undefined,
+		});
 		if (json) printJson(inventory);
 		else process.stdout.write(formatStatus(inventory));
 		return;

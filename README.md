@@ -16,6 +16,7 @@ pnpm install && pnpm build
 localhelm scan ..
 localhelm enroll ../filepress ../ollanet --apply
 localhelm status
+localhelm status filepress              # one project only
 localhelm status --json
 localhelm deps
 localhelm bump filepress patch          # plan: write package.json + commit that file; --apply to write

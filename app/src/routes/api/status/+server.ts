@@ -35,8 +35,9 @@ export const GET: RequestHandler = async ({ url }) => {
 			});
 		}
 		const fetchRemotes = url.searchParams.get('fetch') === '1';
+		const onlyIds = url.searchParams.get('ids')?.split(',').map((id) => id.trim()).filter(Boolean);
 		const [inventory, npmUser] = await Promise.all([
-			fleetStatus(loaded, { fetch: fetchRemotes }),
+			fleetStatus(loaded, { fetch: fetchRemotes, onlyIds: onlyIds?.length ? onlyIds : undefined }),
 			npmUserP,
 		]);
 		return json({

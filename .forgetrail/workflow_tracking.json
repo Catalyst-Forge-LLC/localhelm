@@ -132,6 +132,10 @@
         {
           "timestamp": "2026-08-26T19:15:00Z",
           "text": "Bump apply commits package.json (d39). Fleet project cell is one line."
+        },
+        {
+          "timestamp": "2026-08-26T19:25:00Z",
+          "text": "Scoped status refresh (d40): row/checked ids via ?ids=; write jobs reload only those rows."
         }
       ]
     },
@@ -604,6 +608,16 @@
       "decision": "Bump apply writes package.json and commits that file (Helm: bump <pkg> to <ver>.). Other dirty files stay local. No tag, no push, no publish. Push stays its own confirm.",
       "rationale": "Operator 2026-08-26: Fleet Bump left filepress dirty and required extra steps.",
       "alternatives_considered": ["Keep write-only bump", "Bump then auto-push", "Refuse bump when dirty"],
+      "status": "active"
+    },
+    {
+      "id": "d40",
+      "timestamp": "2026-08-26T19:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 18,
+      "decision": "Status can refresh a subset of fleet ids (API ?ids=, CLI argv, dashboard row/checked). Scoped runs skip Sites/Ports/activity/archive. Bump/push/publish/cascade reload only written ids. Header Refresh remains the full fleet.",
+      "rationale": "Operator 2026-08-26: waiting on a whole-fleet refresh after a single-row write is too slow.",
+      "alternatives_considered": ["Always full refresh", "Background full refresh after scoped", "Also fetch remotes on row refresh"],
       "status": "active"
     }
   ],

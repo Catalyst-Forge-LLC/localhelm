@@ -3,7 +3,7 @@ import type { LoadedManifest } from './manifest.js';
 import { clearNpmCache, liftLatestIfVersionExists, npmLatest } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pinsFromPkg } from './pins.js';
-import { pathExists, readPkg, rootPkgPath, sitePkgPath, type PkgJson } from './pkg.js';
+import { collectDeps, pathExists, readPkg, rootPkgPath, sitePkgPath, type PkgJson } from './pkg.js';
 import { compareSemver } from './semver.js';
 import type { FleetDigest, FleetInventory, PinEdge, ProjectStatus } from './types.js';
 
@@ -72,6 +72,20 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			rootError,
 			sitePkg,
 		});
+	}
+
+	if (only) {
+		const fleetNames = new Set(
+			loaded.manifest.projects.map((project) => project.npm).filter((name): name is string => Boolean(name)),
+		);
+		for (const row of prepared) {
+			for (const pkg of [row.rootPkg, row.sitePkg]) {
+				if (!pkg) continue;
+				for (const name of Object.keys(collectDeps(pkg))) {
+					if (fleetNames.has(name)) names.add(name);
+				}
+			}
+		}
 	}
 
 	const latestByName = new Map<string, string>();

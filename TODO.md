@@ -47,3 +47,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Save guess without start _(H5, 2026-08-25)_
 - [x] Quiet sites, cross-walk chips, copy, activity links, recipe health + guess-all, Tippy _(2026-08-25)_
 - [x] Attention UX: row writes on Fleet needs you; Sites/Ports notes in ? tip; Ports actions one line; labeled stacks _(2026-08-25)_
+- [x] Scoped status refresh (row / checked / `status [id…]`) so bump/push do not wait on the whole fleet _(2026-08-26)_

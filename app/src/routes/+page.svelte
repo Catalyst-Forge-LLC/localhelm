@@ -527,35 +527,69 @@
 		}
 	}
 
-	async function refresh(fetchRemotes = false): Promise<void> {
-		await run(fetchRemotes ? 'fetching remotes, then reading status' : 'reading status', async () => {
-			const data = (await call(`/api/status${fetchRemotes ? '?fetch=1' : ''}`)) as {
-				inventory: Inventory | null;
-				scanRoot: string;
-				cwd: string;
-				port: string | null;
-				portSource: string | null;
-				npmUser?: string | null;
-			};
-			inventory = data.inventory;
-			cwd = data.cwd;
-			port = data.port;
-			portSource = data.portSource;
-			if (data.npmUser) {
-				npmUser = data.npmUser;
-				persistNpmUser(data.npmUser);
-			}
-			if (fetchRemotes) fetchedAt = new Date().toLocaleTimeString();
-			if (!candidates.length) scanRoot = data.scanRoot;
-			const kinds = { ...bumpKind };
-			for (const row of data.inventory?.projects ?? []) kinds[row.id] ??= 'patch';
-			bumpKind = kinds;
-			try {
-				const plug = (await call('/api/plugins')) as { boards: PluginBoard[] };
-				pluginBoards = plug.boards;
-			} catch {
-				/* keep the last boards — do not flash "plugin not loaded" on a flaky refresh */
-			}
+	function inventoryDigest(projects: Project[]): Inventory['digest'] {
+		return {
+			projects: projects.length,
+			dirty: projects.filter((row) => row.git.dirty).length,
+			unpublishedAhead: projects.filter((row) => row.unpublishedAhead).length,
+			cascadeBehind: projects.filter((row) => row.cascadeBehind > 0).length,
+			missing: projects.filter((row) => row.missing).length,
+			npmErrors: projects.filter((row) => row.npm.status === 'error').length,
+		};
+	}
+
+	function mergeInventory(prev: Inventory, next: Inventory): Inventory {
+		const byId = new Map(prev.projects.map((row) => [row.id, row]));
+		for (const row of next.projects) byId.set(row.id, row);
+		const order = prev.projects.map((row) => row.id);
+		const projects = [
+			...order.map((id) => byId.get(id)).filter((row): row is Project => Boolean(row)),
+			...next.projects.filter((row) => !order.includes(row.id)),
+		];
+		return { ...prev, projects, digest: inventoryDigest(projects) };
+	}
+
+	async function loadPluginBoards(): Promise<void> {
+		try {
+			const plug = (await call('/api/plugins')) as { boards: PluginBoard[] };
+			pluginBoards = plug.boards;
+		} catch {
+			/* keep the last boards */
+		}
+	}
+
+	async function loadStatus(opts: { fetchRemotes?: boolean; ids?: string[]; extras?: boolean } = {}): Promise<void> {
+		const ids = opts.ids?.filter(Boolean) ?? [];
+		const scoped = ids.length > 0;
+		const query = new URLSearchParams();
+		if (opts.fetchRemotes) query.set('fetch', '1');
+		const csv = scoped ? serializeListParam(ids) : null;
+		if (csv) query.set('ids', csv);
+		const suffix = query.toString() ? `?${query}` : '';
+		const data = (await call(`/api/status${suffix}`)) as {
+			inventory: Inventory | null;
+			scanRoot: string;
+			cwd: string;
+			port: string | null;
+			portSource: string | null;
+			npmUser?: string | null;
+		};
+		if (scoped && inventory && data.inventory) inventory = mergeInventory(inventory, data.inventory);
+		else inventory = data.inventory;
+		cwd = data.cwd;
+		port = data.port;
+		portSource = data.portSource;
+		if (data.npmUser) {
+			npmUser = data.npmUser;
+			persistNpmUser(data.npmUser);
+		}
+		if (opts.fetchRemotes && !scoped) fetchedAt = new Date().toLocaleTimeString();
+		if (!candidates.length) scanRoot = data.scanRoot;
+		const kinds = { ...bumpKind };
+		for (const row of data.inventory?.projects ?? []) kinds[row.id] ??= 'patch';
+		bumpKind = kinds;
+		if (opts.extras !== false && !scoped) {
+			await loadPluginBoards();
 			await loadActivity();
 			try {
 				const archived = (await call('/api/archive')) as { ids?: string[] };
@@ -563,8 +597,27 @@
 			} catch {
 				/* keep the last archive list */
 			}
-		});
+		}
 		statusReady = true;
+	}
+
+	async function refresh(fetchRemotes = false): Promise<void> {
+		await run(fetchRemotes ? 'fetching remotes, then reading status' : 'reading status', async () => {
+			await loadStatus({ fetchRemotes, extras: true });
+		});
+	}
+
+	async function refreshRows(ids: string[], fetchRemotes = false): Promise<void> {
+		const named = ids.filter(Boolean);
+		if (!named.length) {
+			await refresh(fetchRemotes);
+			return;
+		}
+		const label =
+			named.length === 1 ? `reading ${named[0]}` : `reading ${named.length} projects`;
+		await run(fetchRemotes ? `fetching remotes, then ${label}` : label, async () => {
+			await loadStatus({ fetchRemotes, ids: named, extras: false });
+		});
 	}
 
 	async function scan(): Promise<void> {
@@ -907,7 +960,7 @@
 					plan,
 				);
 			}
-			await refresh();
+			await loadStatus({ ids: jobs.map((job) => job.id) });
 		});
 	}
 
@@ -1118,7 +1171,7 @@
 					: `push --apply — ${ok} pushed`,
 				data,
 			);
-			await refresh();
+			await loadStatus({ ids });
 			if (failed.length) {
 				error = failed.map((r) => `${r.id}: ${r.reason ?? 'push failed'}`).join(' · ');
 			}
@@ -1205,7 +1258,7 @@
 			const published = data.rows.filter((r) => r.reason?.startsWith('published ')).length;
 			note(`publish --apply — ${published} published`, { rows: data.rows });
 			publishOtp = '';
-			await refresh();
+			await loadStatus({ ids });
 		});
 	}
 
@@ -1250,7 +1303,7 @@
 					body: JSON.stringify({ id: plugin, action, ids, apply: true }),
 				});
 				note(`${plugin} ${action} --apply ${scope}`, data);
-				await refresh();
+				await loadPluginBoards();
 			},
 			{ closeConfirm: false },
 		);
@@ -1327,7 +1380,8 @@
 				data,
 			);
 			publishOtp = '';
-			await refresh();
+			await loadPluginBoards();
+			await loadStatus({ ids: [siteId] });
 			if (!data.result.ok) {
 				error = failed.map((s) => `${s.label}: ${s.reason}`).join(' · ') || data.result.stoppedAt || 'land failed';
 			}
@@ -1364,9 +1418,10 @@
 			const data = (await call('/api/cascade', {
 				method: 'POST',
 				body: JSON.stringify({ id, apply: true }),
-			})) as { to: string; npm: string; rows: { action: string; writes?: boolean }[]; note: string };
+			})) as { to: string; npm: string; rows: { action: string; writes?: boolean; fromId: string }[]; note: string };
 			note(`cascade ${data.npm}@${data.to} — wrote ${data.rows.filter((r) => r.writes).length} pin(s)`, data);
-			await refresh();
+			const wrote = data.rows.filter((row) => row.writes).map((row) => row.fromId);
+			await loadStatus({ ids: [...new Set([id, ...wrote])] });
 		});
 	}
 
@@ -1606,7 +1661,7 @@
 				<div class="group">
 					<span class="group-label">Read</span>
 					<div class="group-buttons">
-						<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()} title="Re-read package.json, git, and npm latest.">
+						<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()} title="Re-read every enrolled project, plus Sites and Ports. For one row, use the refresh icon on that row.">
 							<Icon icon="lucide:refresh-cw" />
 							Refresh
 						</button>
@@ -1799,6 +1854,14 @@
 										{/each}
 									</div>
 									<div class="need-actions">
+										<IconButton
+											compact
+											icon="lucide:refresh-cw"
+											label={`Refresh ${row.id}`}
+											title="Re-read this row only."
+											disabled={Boolean(busy)}
+											onclick={() => void refreshRows([row.id])}
+										/>
 										{#if need === 'publish'}
 											<button
 												class="btn btn-sm btn-write"
@@ -2069,9 +2132,18 @@
 					<div class="section-head">
 						<div>
 							<h2>Fleet</h2>
-							<p class="hint">Needs you is the write for that row. Check rows for bulk bump, push, publish, or remove. Removing never deletes a folder. Bump writes package.json and commits that file.</p>
+							<p class="hint">Needs you is the write for that row. The refresh icon re-reads that row only. Check rows for bulk refresh, bump, push, publish, or remove. Removing never deletes a folder. Bump writes package.json and commits that file.</p>
 						</div>
 						<div class="group-buttons">
+							<button
+								class="btn"
+								disabled={Boolean(busy) || !checkedIds.length}
+								onclick={() => void refreshRows(checkedIds)}
+								title="Re-read package.json, git, and npm for the checked rows only. Does not fetch remotes or reload Sites/Ports."
+							>
+								<Icon icon="lucide:refresh-cw" />
+								Refresh{checkedIds.length ? ` (${checkedIds.length})` : ''}
+							</button>
 							<button
 								class="btn"
 								disabled={Boolean(busy)}
@@ -2170,6 +2242,14 @@
 												<span class="id">{row.id}</span>
 												<span class="dim small">{row.npm.name ?? row.path}</span>
 												<CrossChips compact chips={chipsFor(row.id, 'fleet')} onOpen={(kind) => openCross(row.id, kind)} />
+												<IconButton
+													compact
+													icon="lucide:refresh-cw"
+													label={`Refresh ${row.id}`}
+													title="Re-read this row (package.json, git, npm). Does not fetch remotes or reload Sites/Ports."
+													disabled={Boolean(busy)}
+													onclick={() => void refreshRows([row.id])}
+												/>
 												<IconButton
 													compact
 													icon="lucide:clipboard"
