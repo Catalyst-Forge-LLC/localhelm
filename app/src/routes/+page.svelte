@@ -73,6 +73,7 @@
 		private: boolean;
 		missing: boolean;
 		unpublishedAhead: boolean;
+		commitsSinceNpm?: number | null;
 		cascadeBehind: number;
 		error?: string;
 		npm: { name?: string; status: string; latest?: string; error?: string };
@@ -411,8 +412,12 @@
 		}
 	});
 
+	function canCutVersion(row: Project): boolean {
+		return !row.unpublishedAhead && canPublish(row);
+	}
+
 	function rowNeedsYou(row: Project): boolean {
-		return badges(row).some((badge) => badge.text !== 'nothing to do');
+		return badges(row).some((badge) => badge.text !== 'nothing to do') || canCutVersion(row);
 	}
 
 	function siteNeedsYou(cells: Record<string, string>): boolean {
@@ -448,10 +453,11 @@
 		return cascadeTargets.find((row) => row.id === id);
 	}
 
-	function todayNeed(row: Project): 'publish' | 'push' | 'pins' | 'look' {
+	function todayNeed(row: Project): 'publish' | 'push' | 'pins' | 'cut' | 'look' {
 		if (row.unpublishedAhead && canPublish(row)) return 'publish';
 		if (canPush(row)) return 'push';
 		if ((cascadeFor(row.id)?.writable ?? 0) > 0) return 'pins';
+		if (canCutVersion(row)) return 'cut';
 		return 'look';
 	}
 
@@ -1839,7 +1845,7 @@
 								{#if readyRows.length}
 									{readyRows.length} unpublished-ahead. Gold button is the matching write.
 								{:else}
-									Gold button is the matching write. Cut version is the extra.
+									Gold button is the matching write. Cut version only when origin has commits since the last npm version.
 								{/if}
 							</p>
 							{/if}
@@ -1908,6 +1914,15 @@
 											>
 												Publish
 											</button>
+										{:else if need === 'cut'}
+											<button
+												class="btn btn-sm btn-write"
+												disabled={Boolean(busy)}
+												onclick={() => startPublish([row.id])}
+												title={`Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`}
+											>
+												Cut version{row.commitsSinceNpm ? ` ${row.commitsSinceNpm}` : ''}
+											</button>
 										{:else if need === 'push'}
 											<button
 												class="btn btn-sm btn-write"
@@ -1927,14 +1942,14 @@
 												Write pins
 											</button>
 										{/if}
-										{#if need !== 'publish' && canPublish(row)}
+										{#if need !== 'publish' && need !== 'cut' && canPublish(row)}
 											<button
 												class="btn btn-sm"
 												disabled={Boolean(busy)}
 												onclick={() => startPublish([row.id])}
-												title="Cuts a patch if local already matches npm, then publishes. Confirm in the modal. Use Fleet to pick minor or major."
+												title={`Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`}
 											>
-												Cut version
+												Cut version{row.commitsSinceNpm ? ` ${row.commitsSinceNpm}` : ''}
 											</button>
 										{/if}
 										{#if need !== 'push' && canPush(row)}

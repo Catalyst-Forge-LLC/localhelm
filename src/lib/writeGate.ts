@@ -20,6 +20,8 @@ export type PublishGateRow = {
 	localVersion: string | null;
 	npm: { name?: string; latest?: string; status: string; error?: string };
 	git: GateGit;
+	/** Origin commits after the published version. 0 means Cut would bump with no new work. */
+	commitsSinceNpm?: number | null;
 };
 
 /** Short line for fetch/push stderr. Keep the raw text in stderr / titles. */
@@ -68,6 +70,7 @@ export function whyNotPublish(row: PublishGateRow, kind: BumpKind = 'patch'): st
 
 	const needsBump = !neverPublished && !row.unpublishedAhead;
 	if (needsBump) {
+		if (row.commitsSinceNpm === 0) return 'nothing to cut';
 		try {
 			bumpTriple(row.localVersion, kind);
 		} catch (err) {

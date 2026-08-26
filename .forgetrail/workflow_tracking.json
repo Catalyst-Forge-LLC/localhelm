@@ -152,6 +152,10 @@
         {
           "timestamp": "2026-08-26T20:20:00Z",
           "text": "Table cleanup (d44): Fleet local+npm → version; Ports hide listening/log/health/firewall; Sites hide headers/ship; one-line name cells."
+        },
+        {
+          "timestamp": "2026-08-26T21:05:00Z",
+          "text": "Cut version gated on origin commits since last npm version (d45)."
         }
       ]
     },
@@ -674,6 +678,16 @@
       "decision": "Same table density as Sites: Fleet shows one version (npm note only when it differs or is missing). Ports leases hide listening, log, health, and skipped firewall; recipe shows the command or no-recipe plus a firewall that needs work. Sites also hide headers and ship columns. Name cells stay one line (compact chips; no repeated npm name; no FilePress disclaimer on Today cards). Per-row Bump, Park, Push, and Ship stay — those writes are optional or lack a reliable 'needed' signal.",
       "rationale": "Operator 2026-08-26: review the other tables for the same column collapse, one-line cells, and buttons only when they apply.",
       "alternatives_considered": ["Hide per-row Bump and Park", "Change LocalBerth/FilePress plugin column lists", "Merge Fleet git into needs you"],
+      "status": "active"
+    },
+    {
+      "id": "d45",
+      "timestamp": "2026-08-26T21:05:00Z",
+      "phase": "2-scaffolding",
+      "session": 18,
+      "decision": "Cut version (and a publish plan that would bump) only when origin has commits after the last published version. Count is git rev-list from v-tag or the last package.json version bump to origin/<branch>. 0 → skip 'nothing to cut'. Unknown (null) does not skip. Unpublished-ahead still publishes without this gate.",
+      "rationale": "Operator 2026-08-26: keep Cut version only when there is actually a version to cut — pushed work since the last publish.",
+      "alternatives_considered": ["npm view time vs git date", "Count local HEAD not origin", "Always show Cut"],
       "status": "active"
     }
   ],

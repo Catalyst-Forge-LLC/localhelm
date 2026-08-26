@@ -70,6 +70,8 @@ export type ProjectStatus = {
 	pins: PinEdge[];
 	cascadeBehind: number;
 	unpublishedAhead: boolean;
+	/** Commits on origin after the last local/npm version bump (or v-tag). Null if we cannot tell. */
+	commitsSinceNpm?: number | null;
 	error?: string;
 };
 

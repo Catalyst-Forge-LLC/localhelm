@@ -1,4 +1,4 @@
-import { readGit } from './git.js';
+import { countCommitsSinceVersion, readGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
 import { clearNpmCache, liftLatestIfVersionExists, npmLatest } from './npm.js';
 import { joinRoot } from './paths.js';
@@ -139,6 +139,9 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			unpublishedAhead = true;
 		}
 
+		const git = readGit(row.absPath, options.fetch === true);
+		const publishedVersion =
+			!row.privatePkg && npm.status === 'ok' && npm.latest ? npm.latest : row.localVersion;
 		const status: ProjectStatus = {
 			id: row.id,
 			path: row.path,
@@ -147,10 +150,14 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			localVersion: row.localVersion,
 			private: row.privatePkg,
 			npm,
-			git: readGit(row.absPath, options.fetch === true),
+			git,
 			pins,
 			cascadeBehind: pins.filter((pin) => pin.kind === 'registry' && pin.onLatest === false).length,
 			unpublishedAhead,
+			commitsSinceNpm:
+				publishedVersion && git.repo && git.branch
+					? countCommitsSinceVersion(row.absPath, publishedVersion, git.branch)
+					: null,
 		};
 		if (row.rootError) status.error = row.rootError;
 		projects.push(status);

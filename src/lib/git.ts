@@ -113,6 +113,39 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 	};
 }
 
+function resolveVersionCommit(cwd: string, version: string): string | null {
+	for (const ref of [`v${version}`, version]) {
+		const tag = runGit(cwd, ['rev-parse', '--verify', `${ref}^{commit}`]);
+		if (tag.ok) {
+			const hash = tag.stdout.trim();
+			if (hash) return hash;
+		}
+	}
+	for (const needle of [`"version": "${version}"`, `"version":"${version}"`]) {
+		const found = runGit(cwd, ['log', '-1', '--format=%H', '-S', needle, '--', 'package.json']);
+		if (found.ok) {
+			const hash = found.stdout.trim();
+			if (hash) return hash;
+		}
+	}
+	return null;
+}
+
+/** Commits on origin/<branch> after the last bump of this version (or v-tag). Null if unknown. */
+export function countCommitsSinceVersion(cwd: string, version: string, branch?: string): number | null {
+	const ver = version.trim();
+	if (!ver || !branch) return null;
+	const base = resolveVersionCommit(cwd, ver);
+	if (!base) return null;
+	const tipRef = `origin/${branch}`;
+	const tip = runGit(cwd, ['rev-parse', '--verify', tipRef]);
+	if (!tip.ok) return null;
+	const counted = runGit(cwd, ['rev-list', '--count', `${base}..${tipRef}`]);
+	if (!counted.ok) return null;
+	const n = Number(counted.stdout.trim());
+	return Number.isFinite(n) ? n : null;
+}
+
 export type GitJobRow = {
 	id: string;
 	path: string;

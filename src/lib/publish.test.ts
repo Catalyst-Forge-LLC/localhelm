@@ -85,8 +85,22 @@ describe('publish plan', () => {
 		assert.equal(rows.find((r) => r.id === 'diverged')?.reason, 'diverged');
 	});
 
+	it('skips a cut when origin has no commits since the last npm version', () => {
+		const [row] = planPublishFromInventory(
+			inventory([project({ id: 'widget', commitsSinceNpm: 0 })]),
+			['widget'],
+			'patch',
+		);
+		assert.equal(row?.action, 'skip');
+		assert.equal(row?.reason, 'nothing to cut');
+	});
+
 	it('plans bump+commit+push+publish when local matches npm', () => {
-		const [row] = planPublishFromInventory(inventory([project({ id: 'widget' })]), ['widget'], 'patch');
+		const [row] = planPublishFromInventory(
+			inventory([project({ id: 'widget', commitsSinceNpm: 2 })]),
+			['widget'],
+			'patch',
+		);
 		assert.equal(row?.action, 'publish');
 		assert.equal(row?.version, '1.0.1');
 		assert.deepEqual(

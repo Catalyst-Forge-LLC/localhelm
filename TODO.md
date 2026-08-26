@@ -52,3 +52,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Bulk apply progress `N of M · id` on header and confirm _(2026-08-26)_
 - [x] Sites: engine version + Sync engine only when behind; one-line site cell _(2026-08-26)_
 - [x] Table cleanup: Fleet one version column; Ports drop listening/log/firewall noise; Sites hide headers/ship columns _(2026-08-26)_
+- [x] Cut version only when origin has commits since the last npm version _(2026-08-26)_

@@ -182,3 +182,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Sites table: one engine version instead of pin/locked/update. Sync engine <target> only when that site needs it. Site cell is one line. Headers and ship stay off the table (jobs cover them).
 - Fleet table: one version column (npm note only when it differs). Project cell does not repeat the id as the package name.
 - Ports leases: hide listening / log / empty firewall; recipe cell holds command or “no recipe”; name cell is one line.
+- Cut version only when origin has commits after the last npm version (tag or package.json bump). Publish plan skips `nothing to cut`.

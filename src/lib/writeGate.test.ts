@@ -66,6 +66,12 @@ describe('whyNotPublish', () => {
 	it('allows unpublished-ahead with a clean tree and no extra push', () => {
 		assert.equal(whyNotPublish(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), undefined);
 	});
+
+	it('skips a cut when origin has nothing since the last npm version', () => {
+		assert.equal(whyNotPublish(row({ commitsSinceNpm: 0 })), 'nothing to cut');
+		assert.equal(whyNotPublish(row({ commitsSinceNpm: 3 })), undefined);
+		assert.equal(whyNotPublish(row({ unpublishedAhead: true, commitsSinceNpm: 0 })), undefined);
+	});
 });
 
 describe('writableCascadeCount', () => {

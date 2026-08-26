@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
-import { applyPush, planFetch, planPull, planPush, readGit, requirePushIds, runGit } from './git.js';
+import { applyPush, countCommitsSinceVersion, planFetch, planPull, planPush, readGit, requirePushIds, runGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
 
 async function gitRepo(dir: string): Promise<void> {
@@ -111,5 +111,31 @@ describe('git jobs', () => {
 		const applied = applyPush(root, planned[0]!);
 		assert.equal(applied.reason, 'pushed');
 		assert.equal((await planPush(loaded))[0]?.reason, 'not ahead');
+	});
+
+	it('counts origin commits after the last package.json version bump', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-since-npm-'));
+		const bare = path.join(root, 'origin.git');
+		await mkdir(bare);
+		assert.equal(runGit(bare, ['init', '--bare']).ok, true);
+		const pkgDir = path.join(root, 'widget');
+		await mkdir(pkgDir);
+		assert.equal(runGit(pkgDir, ['init']).ok, true);
+		assert.equal(runGit(pkgDir, ['config', 'user.email', 'localhelm@test']).ok, true);
+		assert.equal(runGit(pkgDir, ['config', 'user.name', 'LocalHelm Test']).ok, true);
+		await writeFile(path.join(pkgDir, 'package.json'), '{\n  "name": "widget",\n  "version": "1.0.0"\n}\n');
+		assert.equal(runGit(pkgDir, ['add', 'package.json']).ok, true);
+		assert.equal(runGit(pkgDir, ['commit', '-m', 'v1.0.0']).ok, true);
+		assert.equal(runGit(pkgDir, ['remote', 'add', 'origin', bare]).ok, true);
+		assert.equal(runGit(pkgDir, ['push', '-u', 'origin', 'HEAD']).ok, true);
+		const branch = runGit(pkgDir, ['branch', '--show-current']).stdout.trim();
+		assert.equal(countCommitsSinceVersion(pkgDir, '1.0.0', branch), 0);
+
+		await writeFile(path.join(pkgDir, 'note.txt'), 'work\n');
+		assert.equal(runGit(pkgDir, ['add', 'note.txt']).ok, true);
+		assert.equal(runGit(pkgDir, ['commit', '-m', 'work']).ok, true);
+		assert.equal(countCommitsSinceVersion(pkgDir, '1.0.0', branch), 0);
+		assert.equal(runGit(pkgDir, ['push']).ok, true);
+		assert.equal(countCommitsSinceVersion(pkgDir, '1.0.0', branch), 1);
 	});
 });
