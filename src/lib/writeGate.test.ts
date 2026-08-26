@@ -1,6 +1,15 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount, type PublishGateRow } from './writeGate.js';
+import {
+	canCutVersion,
+	fleetWriteIds,
+	fleetWriteLabel,
+	plainGitError,
+	whyNotPublish,
+	whyNotPush,
+	writableCascadeCount,
+	type PublishGateRow,
+} from './writeGate.js';
 
 function git(partial: Partial<PublishGateRow['git']> = {}): PublishGateRow['git'] {
 	return {
@@ -71,6 +80,23 @@ describe('whyNotPublish', () => {
 		assert.equal(whyNotPublish(row({ commitsSinceNpm: 0 })), 'nothing to cut');
 		assert.equal(whyNotPublish(row({ commitsSinceNpm: 3 })), undefined);
 		assert.equal(whyNotPublish(row({ unpublishedAhead: true, commitsSinceNpm: 0 })), undefined);
+	});
+});
+
+describe('fleetWriteIds', () => {
+	it('offers Cut when Today would, not nothing-to-do', () => {
+		const cut = row({ commitsSinceNpm: 4 });
+		assert.equal(canCutVersion(cut), true);
+		assert.deepEqual(fleetWriteIds(cut), ['cut']);
+		assert.equal(fleetWriteLabel('cut', cut), 'Cut version 4');
+		assert.deepEqual(fleetWriteIds(row({ commitsSinceNpm: 0 })), []);
+		assert.equal(canCutVersion(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), false);
+		assert.deepEqual(fleetWriteIds(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), ['publish']);
+	});
+
+	it('keeps Push and Cut together when both apply', () => {
+		const both = row({ commitsSinceNpm: 2, git: git({ ahead: 3 }) });
+		assert.deepEqual(fleetWriteIds(both), ['push', 'cut']);
 	});
 });
 

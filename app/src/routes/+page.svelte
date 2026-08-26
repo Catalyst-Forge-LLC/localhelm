@@ -14,7 +14,16 @@
 	import { formatBrief } from '$lib/briefFormat';
 	import { familyMemberNames } from '$lib/family';
 	import { portFamilies, portLooks } from '$lib/looks';
-	import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
+	import {
+		canCutVersion,
+		fleetWriteIds,
+		fleetWriteLabel,
+		plainGitError,
+		whyNotPublish,
+		whyNotPush,
+		writableCascadeCount,
+		type FleetWriteId,
+	} from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { fleetProjectMeta, fleetVersionLabel } from '$lib/fleetDisplay';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
@@ -439,12 +448,8 @@
 		}
 	});
 
-	function canCutVersion(row: Project): boolean {
-		return !row.unpublishedAhead && canPublish(row);
-	}
-
 	function rowNeedsYou(row: Project): boolean {
-		return badges(row).some((badge) => badge.text !== 'nothing to do') || canCutVersion(row);
+		return badges(row).some((badge) => badge.text !== 'nothing to do') || writesFor(row).length > 0;
 	}
 
 	function siteNeedsYou(cells: Record<string, string>): boolean {
@@ -480,12 +485,8 @@
 		return cascadeTargets.find((row) => row.id === id);
 	}
 
-	function todayNeed(row: Project): 'publish' | 'push' | 'pins' | 'cut' | 'look' {
-		if (row.unpublishedAhead && canPublish(row)) return 'publish';
-		if (canPush(row)) return 'push';
-		if ((cascadeFor(row.id)?.writable ?? 0) > 0) return 'pins';
-		if (canCutVersion(row)) return 'cut';
-		return 'look';
+	function writesFor(row: Project): FleetWriteId[] {
+		return fleetWriteIds(row, cascadeFor(row.id)?.writable ?? 0);
 	}
 
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
@@ -1620,35 +1621,26 @@
 		return pin.onLatest === false ? 'pin-behind' : 'pin-ok';
 	}
 
-	type NeedAction = { id: 'publish' | 'push' | 'pins'; label: string; title: string; run: () => void };
+	type NeedAction = { id: FleetWriteId; label: string; title: string; run: () => void };
+
+	function needActionTitle(id: FleetWriteId, row: Project): string {
+		if (id === 'publish') return 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.';
+		if (id === 'push') return 'Shows the origin URL and commit count. Confirm in the modal. Never --force.';
+		if (id === 'pins') return 'Shows which dependents would get the new pin. Confirm in the modal.';
+		return `Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`;
+	}
 
 	function needActions(row: Project): NeedAction[] {
-		const acts: NeedAction[] = [];
-		if (row.unpublishedAhead && canPublish(row)) {
-			acts.push({
-				id: 'publish',
-				label: `Publish ${row.localVersion ?? ''}`.trim(),
-				title: 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.',
-				run: () => startPublish([row.id]),
-			});
-		}
-		if ((row.git.ahead ?? 0) > 0 && canPush(row)) {
-			acts.push({
-				id: 'push',
-				label: `Push ${row.git.ahead}`,
-				title: 'Shows the origin URL and commit count. Confirm in the modal. Never --force.',
-				run: () => startPush([row.id]),
-			});
-		}
-		if ((cascadeFor(row.id)?.writable ?? 0) > 0) {
-			acts.push({
-				id: 'pins',
-				label: 'Write pins',
-				title: 'Shows which dependents would get the new pin. Confirm in the modal.',
-				run: () => startCascade(row.id),
-			});
-		}
-		return acts;
+		return writesFor(row).map((id) => ({
+			id,
+			label: fleetWriteLabel(id, row),
+			title: needActionTitle(id, row),
+			run: () => {
+				if (id === 'publish' || id === 'cut') startPublish([row.id]);
+				else if (id === 'push') startPush([row.id]);
+				else startCascade(row.id);
+			},
+		}));
 	}
 
 	function leftoverBadges(row: Project): Badge[] {
@@ -1923,7 +1915,7 @@
 							<ul class="need-list">
 								{#each filteredAttentionRows as row (row.id)}
 									{@const cascadeTarget = cascadeFor(row.id)}
-									{@const need = todayNeed(row)}
+									{@const acts = needActions(row)}
 									<li class="need-card">
 										<div class="need-main">
 											<div class="need-id-row">
@@ -1951,73 +1943,17 @@
 												{/each}
 											</div>
 											<div class="need-actions">
-												{#if need === 'publish'}
-													<button
-														class="btn btn-sm btn-write"
-														disabled={Boolean(busy)}
-														onclick={() => startPublish([row.id])}
-														title="Shows bump, push, and npm publish steps. Confirm in the modal."
-													>
-														Publish
-													</button>
-												{:else if need === 'cut'}
-													<button
-														class="btn btn-sm btn-write"
-														disabled={Boolean(busy)}
-														onclick={() => startPublish([row.id])}
-														title={`Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`}
-													>
-														Cut version{row.commitsSinceNpm ? ` ${row.commitsSinceNpm}` : ''}
-													</button>
-												{:else if need === 'push'}
-													<button
-														class="btn btn-sm btn-write"
-														disabled={Boolean(busy)}
-														onclick={() => startPush([row.id])}
-														title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
-													>
-														Push{row.git.ahead ? ` ${row.git.ahead}` : ''}
-													</button>
-												{:else if need === 'pins' && cascadeTarget}
-													<button
-														class="btn btn-sm btn-write"
-														disabled={Boolean(busy)}
-														onclick={() => startCascade(row.id)}
-														title="Shows which dependents would get the new pin. Confirm in the modal to write."
-													>
-														Write pins
-													</button>
-												{/if}
-												{#if need !== 'publish' && need !== 'cut' && canPublish(row)}
+												{#each acts as act, i (act.id)}
 													<button
 														class="btn btn-sm"
+														class:btn-write={i === 0}
 														disabled={Boolean(busy)}
-														onclick={() => startPublish([row.id])}
-														title={`Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`}
+														onclick={act.run}
+														title={act.title}
 													>
-														Cut version{row.commitsSinceNpm ? ` ${row.commitsSinceNpm}` : ''}
+														{act.label}
 													</button>
-												{/if}
-												{#if need !== 'push' && canPush(row)}
-													<button
-														class="btn btn-sm"
-														disabled={Boolean(busy)}
-														onclick={() => startPush([row.id])}
-														title="Shows the origin URL and commit count. Confirm in the modal. Never --force."
-													>
-														Push{row.git.ahead ? ` ${row.git.ahead}` : ''}
-													</button>
-												{/if}
-												{#if need !== 'pins' && cascadeTarget && cascadeTarget.writable > 0}
-													<button
-														class="btn btn-sm"
-														disabled={Boolean(busy)}
-														onclick={() => startCascade(row.id)}
-														title="Shows which dependents would get the new pin. Confirm in the modal to write."
-													>
-														Write pins
-													</button>
-												{/if}
+												{/each}
 											</div>
 										</div>
 									</li>

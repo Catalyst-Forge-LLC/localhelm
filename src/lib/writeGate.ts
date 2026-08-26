@@ -88,6 +88,32 @@ export function whyNotPublish(row: PublishGateRow, kind: BumpKind = 'patch'): st
 	return undefined;
 }
 
+/** Local already matches npm; publish would cut a new version. Same gate as the plan. */
+export function canCutVersion(row: PublishGateRow): boolean {
+	return !row.unpublishedAhead && !whyNotPublish(row);
+}
+
+export const FLEET_WRITE_ORDER = ['publish', 'push', 'pins', 'cut'] as const;
+export type FleetWriteId = (typeof FLEET_WRITE_ORDER)[number];
+
+/** Writes Today and Fleet both offer. Order is the gold-write priority. */
+export function fleetWriteIds(row: PublishGateRow, writablePins = 0): FleetWriteId[] {
+	const ids: FleetWriteId[] = [];
+	if (row.unpublishedAhead && !whyNotPublish(row)) ids.push('publish');
+	if ((row.git.ahead ?? 0) > 0 && !whyNotPush(row.git)) ids.push('push');
+	if (writablePins > 0) ids.push('pins');
+	if (canCutVersion(row)) ids.push('cut');
+	return ids;
+}
+
+export function fleetWriteLabel(id: FleetWriteId, row: PublishGateRow): string {
+	if (id === 'publish') return `Publish ${row.localVersion ?? ''}`.trim();
+	if (id === 'push') return `Push ${row.git.ahead ?? ''}`.trim();
+	if (id === 'pins') return 'Write pins';
+	const n = row.commitsSinceNpm;
+	return typeof n === 'number' && n > 0 ? `Cut version ${n}` : 'Cut version';
+}
+
 type CascadeConsumer = {
 	id: string;
 	missing: boolean;
