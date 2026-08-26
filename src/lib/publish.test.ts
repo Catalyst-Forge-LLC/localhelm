@@ -6,7 +6,7 @@ import { describe, it } from 'node:test';
 import { helmBumpMessage } from './commit.js';
 import { runGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, planPublishFromInventory, requirePublishIds } from './publish.js';
+import { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, planPublishFromInventory, publishAuthHintFor, requirePublishIds } from './publish.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
 
 function gitRepo(dir: string): void {
@@ -48,6 +48,9 @@ describe('publish plan', () => {
 
 	it('points publish auth at localhelm auth, not a browser login', () => {
 		assert.match(NPM_PUBLISH_AUTH_HINT, /localhelm auth/);
+		assert.equal(publishAuthHintFor(null), NPM_PUBLISH_AUTH_HINT);
+		assert.equal(publishAuthHintFor(undefined), NPM_PUBLISH_AUTH_HINT);
+		assert.equal(publishAuthHintFor('acmegeek'), undefined);
 		assert.equal(
 			extractNpmAuthUrl('Authenticate at:\nhttps://www.npmjs.com/auth/cli/6547e76d-1a34-40be-92bd-a25953b08062\nPress ENTER'),
 			'https://www.npmjs.com/auth/cli/6547e76d-1a34-40be-92bd-a25953b08062',

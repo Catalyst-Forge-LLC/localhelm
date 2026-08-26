@@ -34,6 +34,11 @@ export type PublishRunner = (cwd: string, args: string[]) => PublishResult | Pro
 export const NPM_PUBLISH_AUTH_HINT =
 	'Run localhelm auth and put a granular automation token (Bypass 2FA) in your user ~/.npmrc before you publish. LocalHelm never stores the token.';
 
+/** Setup copy only when whoami failed. A working user token is already in ~/.npmrc. */
+export function publishAuthHintFor(npmUser: string | null | undefined): string | undefined {
+	return npmUser ? undefined : NPM_PUBLISH_AUTH_HINT;
+}
+
 const NPM_AUTH_URL = /https:\/\/www\.npmjs\.com\/auth\/cli\/[0-9a-f-]+/i;
 
 export function extractNpmAuthUrl(text: string): string | null {

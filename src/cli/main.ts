@@ -7,7 +7,7 @@ import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { applyExport, planExport } from '../lib/export.js';
 import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
-import { applyPublish, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, requirePublishIds, type PublishRow } from '../lib/publish.js';
+import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublishIds, type PublishRow } from '../lib/publish.js';
 import { archiveIds, readArchive, restoreIds } from '../lib/archive.js';
 import { buildBrief } from '../lib/brief.js';
 import { applyLand, planLand, requireLandSiteId } from '../lib/land.js';
@@ -524,7 +524,8 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 						? `npm is logged in as ${npmUser}.\n`
 						: 'npm whoami failed. Run localhelm auth and set a granular automation token before --apply.\n',
 				);
-				process.stdout.write(`${NPM_PUBLISH_AUTH_HINT}\n`);
+				const authHint = publishAuthHintFor(npmUser);
+				if (authHint) process.stdout.write(`${authHint}\n`);
 				process.stdout.write(
 					'Nothing written. Re-run with the same id(s) and --apply to bump (if needed), push (if needed), and npm publish. Never --force.\n',
 				);

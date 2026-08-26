@@ -2,9 +2,9 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import {
 	applyLand,
-	NPM_PUBLISH_AUTH_HINT,
 	npmWhoami,
 	planLand,
+	publishAuthHintFor,
 	requireLandSiteId,
 } from '../../../../../src/lib/index.js';
 import { errJson, loadRequired, withLockAt } from '$lib/server/helm';
@@ -20,11 +20,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		const loaded = await loadRequired();
 		const plan = await planLand(loaded, siteId);
 		if (!body.apply) {
+			const npmUser = plan.needsPublish ? npmWhoami() : undefined;
 			return json({
 				plan,
 				writes: false,
-				npmUser: plan.needsPublish ? npmWhoami() : undefined,
-				authHint: plan.needsPublish ? NPM_PUBLISH_AUTH_HINT : undefined,
+				npmUser,
+				authHint: plan.needsPublish ? publishAuthHintFor(npmUser) : undefined,
 			});
 		}
 		const result = await withLockAt(loaded.workspaceRoot, () =>

@@ -177,3 +177,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Confirm plan lines wrap; push remotes sit on the next line. No horizontal scrollbar.
 - Bump apply commits `package.json` only (same `Helm: bump` message as publish). Fleet project cell is one line: id, name, chips, copy.
 - Row refresh: `/api/status?ids=` merges into the current table. Header Refresh still reads the whole fleet + Sites/Ports. Bump/push/publish/cascade reload only the rows they wrote.
+- Publish confirm hides the `localhelm auth` setup paragraph when `npm whoami` already works. Logged-in line + optional OTP stay.

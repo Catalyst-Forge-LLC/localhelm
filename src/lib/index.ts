@@ -11,7 +11,7 @@ export { clearNpmCache, liftLatestIfVersionExists, npmHasVersion, npmLatest, wit
 export { retargetSpecifier } from './pinwrite.js';
 export { fleetReady } from './ready.js';
 export type { ReadyView } from './ready.js';
-export { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, planPublishFromInventory, requirePublishIds } from './publish.js';
+export { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, planPublishFromInventory, publishAuthHintFor, requirePublishIds } from './publish.js';
 export type { PublishRow, PublishStep } from './publish.js';
 export {
 	applyLand,

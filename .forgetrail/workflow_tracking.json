@@ -136,6 +136,10 @@
         {
           "timestamp": "2026-08-26T19:25:00Z",
           "text": "Scoped status refresh (d40): row/checked ids via ?ids=; write jobs reload only those rows."
+        },
+        {
+          "timestamp": "2026-08-26T19:30:00Z",
+          "text": "Publish confirm omits auth setup copy when npm whoami works (d41)."
         }
       ]
     },
@@ -618,6 +622,16 @@
       "decision": "Status can refresh a subset of fleet ids (API ?ids=, CLI argv, dashboard row/checked). Scoped runs skip Sites/Ports/activity/archive. Bump/push/publish/cascade reload only written ids. Header Refresh remains the full fleet.",
       "rationale": "Operator 2026-08-26: waiting on a whole-fleet refresh after a single-row write is too slow.",
       "alternatives_considered": ["Always full refresh", "Background full refresh after scoped", "Also fetch remotes on row refresh"],
+      "status": "active"
+    },
+    {
+      "id": "d41",
+      "timestamp": "2026-08-26T19:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 18,
+      "decision": "Publish/land confirm shows the localhelm auth setup paragraph only when npm whoami fails. A working user is already authenticated via ~/.npmrc; keep the logged-in line and optional OTP.",
+      "rationale": "Operator 2026-08-26: already set a local auth token; the setup lecture on Publish getfilepress@0.1.10 was noise.",
+      "alternatives_considered": ["Always show setup hint", "Inspect token type in ~/.npmrc", "Hide OTP when whoami works"],
       "status": "active"
     }
   ],

@@ -155,9 +155,7 @@
 	let pluginBoards = $state<PluginBoard[]>([]);
 	let publishOtp = $state('');
 	let npmUser = $state<string | null>(null);
-	let publishAuthHint = $state(
-		'Run localhelm auth and put a granular automation token (Bypass 2FA) in your user ~/.npmrc before you publish. LocalHelm never stores the token.',
-	);
+	let publishAuthHint = $state('');
 	let confirmOpen = $state(false);
 	let confirmTitle = $state('');
 	let confirmHint = $state('');
@@ -1208,14 +1206,19 @@
 						kind: ids.length === 1 ? (bumpKind[ids[0] ?? ''] ?? 'patch') : 'patch',
 					}),
 				})) as { rows: PublishRow[]; npmUser?: string | null; authHint?: string };
-				if (data.authHint) publishAuthHint = data.authHint;
+				publishAuthHint = data.authHint ?? '';
 				if (data.npmUser) {
 					npmUser = data.npmUser;
 					persistNpmUser(data.npmUser);
+				} else if (data.authHint) {
+					npmUser = null;
 				}
 				const eligible = data.rows.filter((r) => r.action === 'publish');
 				const cuttingNew = eligible.some((row) => row.steps.some((step) => step.kind === 'bump'));
 				note(`publish plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
+				const cutNote = cuttingNew
+					? 'The current local version is already on npm. Confirming cuts a new version.'
+					: '';
 				offerConfirm({
 					title: eligible.length === 1
 						? cuttingNew
@@ -1225,9 +1228,7 @@
 							? `Publish ${eligible.length} packages?`
 							: 'Nothing to publish',
 					hint: eligible.length
-						? cuttingNew
-							? `${publishAuthHint} The current local version is already on npm. Confirming cuts a new version.`
-							: publishAuthHint
+						? [publishAuthHint, cutNote].filter(Boolean).join(' ')
 						: ids.length === 1
 							? `${ids[0]}: ${data.rows[0]?.reason ?? 'cannot publish'}`
 							: 'No listed package is ready to publish.',
@@ -1328,7 +1329,7 @@
 					npmUser?: string | null;
 					authHint?: string;
 				};
-				if (data.authHint) publishAuthHint = data.authHint;
+				publishAuthHint = data.authHint ?? '';
 				if (data.npmUser) {
 					npmUser = data.npmUser;
 					persistNpmUser(data.npmUser);
@@ -1339,7 +1340,7 @@
 				offerConfirm({
 					title: steps.length ? `Land ${siteId}?` : `Nothing to land for ${siteId}`,
 					hint: steps.length
-						? `${data.plan.note}${companion}${data.plan.needsPublish ? ` ${publishAuthHint}` : ''}`
+						? `${data.plan.note}${companion}${data.plan.needsPublish && publishAuthHint ? ` ${publishAuthHint}` : ''}`
 						: data.plan.note,
 					items: steps.length
 						? steps.map((step, i) => `${i + 1}. ${step.label}`)
@@ -1754,7 +1755,7 @@
 				{#if npmUser}
 					<span class="chip quiet" title="npm whoami">npm {npmUser}</span>
 				{:else if statusReady}
-					<span class="chip" title={publishAuthHint}>npm not signed in</span>
+					<span class="chip" title="Run localhelm auth and put a granular automation token in your user ~/.npmrc">npm not signed in</span>
 				{/if}
 			</div>
 		{/if}
