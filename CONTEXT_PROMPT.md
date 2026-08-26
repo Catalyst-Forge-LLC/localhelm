@@ -185,3 +185,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Cut version only when origin has commits after the last npm version (tag or package.json bump). Publish plan skips `nothing to cut`.
 - Today is a four-pane board (Needs you, Looks, Sites, Ports). Each pane scrolls. Refresh sits next to the project id. Needs you is fleet writes; Looks is Ports facts. Needs you filters: All / Publish / Cut / Push (`?need=`).
 - Sites tab: a FilePress `live` http(s) URL makes the site name and live cell open in a new tab. `—` and non-http values stay plain text.
+- Plugin confirm lines use the job only. Ship shows `pnpm ship in …`, not leftover `pnpm update getfilepress`. Push uses its git reason. Sync still shows the engine update.

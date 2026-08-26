@@ -92,4 +92,53 @@ describe('plugins', () => {
 			['aibreze-site  stop pid 48376'],
 		);
 	});
+
+	it('does not leak FilePress engine update onto ship or push lines', () => {
+		assert.deepEqual(
+			formatPluginPlanLines({
+				action: 'ship',
+				rows: [
+					{
+						id: 'localberth',
+						action: 'ship',
+						writes: true,
+						update: 'pnpm update getfilepress  (0.1.10 → 0.1.11)',
+						headers: { action: 'ok' },
+						ship: 'pnpm ship in sites/localberth',
+					},
+				],
+			}),
+			['localberth  pnpm ship in sites/localberth'],
+		);
+		assert.deepEqual(
+			formatPluginPlanLines({
+				action: 'push',
+				rows: [
+					{
+						id: 'localberth',
+						action: 'push',
+						writes: true,
+						update: 'pnpm update getfilepress  (0.1.10 → 0.1.11)',
+						reason: '2 on main → https://github.com/example/localberth.git',
+					},
+				],
+			}),
+			['localberth  push  2 on main → https://github.com/example/localberth.git'],
+		);
+		assert.deepEqual(
+			formatPluginPlanLines({
+				action: 'sync',
+				rows: [
+					{
+						id: 'localberth',
+						action: 'sync',
+						writes: true,
+						update: 'pnpm update getfilepress  (0.1.10 → 0.1.11)',
+						ship: 'skipped',
+					},
+				],
+			}),
+			['localberth  sync  pnpm update getfilepress  (0.1.10 → 0.1.11)'],
+		);
+	});
 });

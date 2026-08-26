@@ -17,6 +17,24 @@ function envBits(row: Record<string, unknown>): string {
 	return '';
 }
 
+function textField(row: Record<string, unknown>, key: string): string {
+	const value = row[key];
+	return typeof value === 'string' ? value.trim() : '';
+}
+
+/** Job detail only — never FilePress leftover cells (update / headers) on ship or push. */
+function jobDetail(row: Record<string, unknown>, action: string): string {
+	const reason = textField(row, 'reason');
+	if (reason) return reason;
+	if (action === 'sync') return textField(row, 'update');
+	if (action === 'ship') {
+		const ship = textField(row, 'ship');
+		if (ship && ship !== 'skipped' && ship !== 'yes' && ship !== 'no') return ship;
+		return 'pnpm ship';
+	}
+	return '';
+}
+
 /** Confirm lines for plugin plans. Start/recipe rows include PORT/HOST. Stop/park do not. */
 export function formatPluginPlanLines(data: unknown): string[] {
 	if (!data || typeof data !== 'object') return [];
@@ -40,16 +58,14 @@ export function formatPluginPlanLines(data: unknown): string[] {
 			if (showStartRecipe) {
 				return [id, recipe, envBits(row), cwd ? `in ${cwd}` : ''].filter(Boolean).join('  ');
 			}
-			const skipAction = rowAction;
-			if (skipAction === 'skip') {
+			if (rowAction === 'skip') {
 				const why =
 					typeof row.reason === 'string'
 						? row.reason.replace(/\s+—\s+localberth recipe.*$/, '')
 						: 'nothing to do';
 				return `${id}  —  ${why}`;
 			}
-			const action = typeof row.action === 'string' ? row.action : '';
-			const reason = typeof row.reason === 'string' ? row.reason : typeof row.update === 'string' ? row.update : '';
+			const detail = jobDetail(row, rowAction);
 			const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
 			const to = typeof row.to === 'string' ? row.to : typeof row.toSpec === 'string' ? row.toSpec : '';
 			const range = from && to ? `${from} → ${to}` : from || to;
@@ -57,8 +73,8 @@ export function formatPluginPlanLines(data: unknown): string[] {
 				typeof row.proposedCommand === 'string' && typeof row.proposedCwd === 'string'
 					? `${row.proposedCommand} in ${row.proposedCwd}`
 					: '';
-			const showAction = Boolean(action) && !reason.startsWith(action);
-			return [id, showAction ? action : '', range, reason, guess].filter(Boolean).join('  ');
+			const showAction = Boolean(rowAction) && rowAction !== 'ship' && !detail.startsWith(rowAction);
+			return [id, showAction ? rowAction : '', range, detail, guess].filter(Boolean).join('  ');
 		});
 }
 
