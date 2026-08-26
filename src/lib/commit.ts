@@ -21,7 +21,7 @@ export function commitPaths(
 	}
 	const added = runGit(repoRoot, ['add', '--', ...rels]);
 	if (!added.ok) return { ok: false, error: added.stderr };
-	const committed = runGit(repoRoot, ['commit', '-m', message]);
+	const committed = runGit(repoRoot, ['commit', '-m', message, '--', ...rels]);
 	if (!committed.ok) return { ok: false, error: committed.stderr };
 	return { ok: true };
 }

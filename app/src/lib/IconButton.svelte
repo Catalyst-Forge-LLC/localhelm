@@ -10,6 +10,7 @@
 		hot = false,
 		disabled = false,
 		badge = '',
+		compact = false,
 		onclick,
 	}: {
 		icon: string;
@@ -19,6 +20,7 @@
 		hot?: boolean;
 		disabled?: boolean;
 		badge?: string | number;
+		compact?: boolean;
 		onclick: () => void;
 	} = $props();
 </script>
@@ -29,6 +31,7 @@
 	class="icon-btn"
 	class:pressed
 	class:hot
+	class:compact
 	{disabled}
 	aria-label={label}
 	aria-pressed={pressed}
@@ -77,6 +80,12 @@
 	.icon-btn:disabled {
 		opacity: 0.42;
 		cursor: not-allowed;
+	}
+
+	.icon-btn.compact {
+		width: 1.35rem;
+		height: 1.35rem;
+		font-size: 0.8rem;
 	}
 
 	.badge {

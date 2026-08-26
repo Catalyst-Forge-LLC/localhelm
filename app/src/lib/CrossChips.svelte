@@ -5,9 +5,11 @@
 	let {
 		chips,
 		onOpen,
+		compact = false,
 	}: {
 		chips: CrossChip[];
 		onOpen: (kind: CrossChip['kind']) => void;
+		compact?: boolean;
 	} = $props();
 
 	function chipTip(kind: CrossChip['kind']): string {
@@ -18,8 +20,10 @@
 </script>
 
 {#if chips.length}
-	<div class="chips">
-		<span class="also">also on</span>
+	<div class="chips" class:compact>
+		{#if !compact}
+			<span class="also">also on</span>
+		{/if}
 		{#each chips as chip (chip.kind)}
 			<Tooltip title={chipTip(chip.kind)}>
 				<button type="button" class="xchip" onclick={() => onOpen(chip.kind)}>{chip.label}</button>
@@ -57,5 +61,9 @@
 	.xchip:hover {
 		border-color: #c9a227;
 		color: #fde68a;
+	}
+
+	.chips.compact {
+		margin-top: 0;
 	}
 </style>

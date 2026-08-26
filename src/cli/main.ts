@@ -301,7 +301,13 @@ async function main(): Promise<void> {
 		if (json) printJson({ ...plan, writes: apply && plan.action === 'bump' });
 		else {
 			const line = plan.action === 'bump' ? `${plan.id}\t${plan.from} → ${plan.to}\t${plan.file}` : `${plan.id}\tskip\t${plan.reason ?? ''}`;
-			const footer = apply && plan.action === 'bump' ? 'Wrote package.json' : apply ? '' : 'Nothing written. Re-run with --apply to write.';
+			const footer = apply && plan.action === 'bump'
+				? plan.commit === 'commit'
+					? 'Wrote package.json and committed that file. No tag, no push, no publish.'
+					: `Wrote package.json. Commit skipped (${plan.commitReason ?? 'no git'}).`
+				: apply
+					? ''
+					: 'Nothing written. Re-run with --apply to write package.json and commit that file.';
 			process.stdout.write(`${line}${footer ? `\n${footer}` : ''}\n`);
 		}
 		return;

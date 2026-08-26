@@ -239,7 +239,7 @@ export async function applyPublish(
 			if (bump.action !== 'bump' || bump.to !== step.to) {
 				return { ...row, action: 'skip', reason: bump.reason ?? `bump drifted (planned ${step.to})` };
 			}
-			await applyBump(bump);
+			await applyBump({ ...bump, commit: 'skip' });
 		} else if (step.kind === 'commit') {
 			const file = rootPkgPath(abs);
 			const committed = commitPaths(abs, [file], step.message);

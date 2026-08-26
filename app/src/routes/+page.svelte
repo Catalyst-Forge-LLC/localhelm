@@ -118,7 +118,16 @@
 		branch?: string;
 		ahead?: number | null;
 	};
-	type BumpPlan = { id: string; from: string | null; to: string | null; action: string; reason?: string };
+	type BumpPlan = {
+		id: string;
+		from: string | null;
+		to: string | null;
+		action: string;
+		reason?: string;
+		commit?: 'commit' | 'skip';
+		commitMessage?: string;
+		commitReason?: string;
+	};
 	type LogEntry = { at: string; time: string; title: string; body: string };
 	type TabId = 'today' | 'fleet' | 'sites' | 'ports';
 	type PortPane = 'leases' | 'observed';
@@ -859,14 +868,16 @@
 							? `Bump ${can.length} projects?`
 							: 'Nothing to bump',
 					hint: can.length
-						? 'Writes package.json only. No tag, no publish. Each row uses its own patch/minor/major.'
+						? 'Writes package.json and commits that file. Other dirty files stay local. No tag, no push, no publish. Each row uses its own patch/minor/major.'
 						: plans[0]?.reason ?? 'cannot bump',
 					items: plans.map((plan) =>
 						plan.action === 'bump' && plan.to
-							? `${plan.id}  ${plan.from ?? '?'} → ${plan.to}`
+							? plan.commit === 'commit'
+								? `${plan.id}  ${plan.from ?? '?'} → ${plan.to}\n${plan.commitMessage}`
+								: `${plan.id}  ${plan.from ?? '?'} → ${plan.to}\nno commit — ${plan.commitReason ?? 'skipped'}`
 							: `${plan.id}  ${plan.reason ?? 'skipped'}`,
 					),
-					confirmLabel: can.length === 1 ? `Write ${can[0]?.to}` : `Write ${can.length}`,
+					confirmLabel: can.length === 1 ? `Bump and commit ${can[0]?.to}` : `Bump and commit ${can.length}`,
 					canApply: can.length > 0,
 					run: () =>
 						void applyBumps(
@@ -889,7 +900,12 @@
 					method: 'POST',
 					body: JSON.stringify({ id: job.id, kind: job.kind, apply: true }),
 				})) as BumpPlan;
-				note(`bumped ${job.id} to ${plan.to}`, plan);
+				note(
+					plan.commit === 'commit'
+						? `bumped ${job.id} to ${plan.to} and committed`
+						: `bumped ${job.id} to ${plan.to}${plan.commitReason ? ` (no commit — ${plan.commitReason})` : ''}`,
+					plan,
+				);
 			}
 			await refresh();
 		});
@@ -2053,7 +2069,7 @@
 					<div class="section-head">
 						<div>
 							<h2>Fleet</h2>
-							<p class="hint">Needs you is the write for that row. Check rows for bulk bump, push, publish, or remove. Removing never deletes a folder. Per-row Bump only writes package.json.</p>
+							<p class="hint">Needs you is the write for that row. Check rows for bulk bump, push, publish, or remove. Removing never deletes a folder. Bump writes package.json and commits that file.</p>
 						</div>
 						<div class="group-buttons">
 							<button
@@ -2069,7 +2085,7 @@
 								class="btn btn-write"
 								disabled={Boolean(busy) || !checkedIds.length}
 								onclick={() => startBump(checkedIds)}
-								title="Shows the next version for each checked row. Confirm in the modal. No tag, no publish."
+								title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish."
 							>
 								<Icon icon="lucide:chevrons-up" />
 								Bump{checkedIds.length ? ` (${checkedIds.length})` : ''}
@@ -2150,14 +2166,18 @@
 									<tr>
 										<td class="tick"><input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedIds[row.id]} /></td>
 										<td>
-											<div class="id">{row.id}</div>
-											<div class="dim small">{row.npm.name ?? row.path}</div>
-											<CrossChips chips={chipsFor(row.id, 'fleet')} onOpen={(kind) => openCross(row.id, kind)} />
-											<Tooltip title={copiedKey === `path:${row.id}` ? 'Copied' : `Copy path\n${row.path}`}>
-												<button type="button" class="btn btn-sm" onclick={() => void copyValue(`path:${row.id}`, row.path)}>
-													Copy path
-												</button>
-											</Tooltip>
+											<div class="project-cell">
+												<span class="id">{row.id}</span>
+												<span class="dim small">{row.npm.name ?? row.path}</span>
+												<CrossChips compact chips={chipsFor(row.id, 'fleet')} onOpen={(kind) => openCross(row.id, kind)} />
+												<IconButton
+													compact
+													icon="lucide:clipboard"
+													label={`Copy path for ${row.id}`}
+													title={copiedKey === `path:${row.id}` ? 'Copied' : `Copy path\n${row.path}`}
+													onclick={() => void copyValue(`path:${row.id}`, row.path)}
+												/>
+											</div>
 										</td>
 										<td class="mono">{row.localVersion ?? '—'}</td>
 										<td class="mono" class:ahead={row.unpublishedAhead}>{npmLabel(row)}</td>
@@ -2207,7 +2227,7 @@
 													class="btn btn-sm btn-write"
 													disabled={Boolean(busy)}
 													onclick={() => startBump([row.id])}
-													title="Shows the next version. Confirm in the modal to write package.json. No tag, no publish."
+													title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish."
 												>
 													Bump
 												</button>
@@ -3225,6 +3245,17 @@
 
 	.id {
 		font-weight: 600;
+	}
+
+	.project-cell {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.2rem 0.45rem;
+	}
+
+	.project-cell .id {
+		margin: 0;
 	}
 
 	.ahead {

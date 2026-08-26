@@ -11,7 +11,7 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 
 ## M2 — Safe writes + dashboard
 
-- [x] `bump`
+- [x] `bump` _(apply writes package.json and commits that file; no tag, no push)_
 - [x] `fetch` / `pull` (clean + behind only)
 - [x] Optional write of the JSON export file
 - [x] SvelteKit `app/` dashboard (`localhelm serve`) with scan/enroll checkboxes

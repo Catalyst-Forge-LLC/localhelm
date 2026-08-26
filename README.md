@@ -18,7 +18,7 @@ localhelm enroll ../filepress ../ollanet --apply
 localhelm status
 localhelm status --json
 localhelm deps
-localhelm bump filepress patch          # plan
+localhelm bump filepress patch          # plan: write package.json + commit that file; --apply to write
 localhelm fetch
 localhelm pull                          # plan; add --apply for ff-only
 localhelm push                          # plan every enrolled origin
