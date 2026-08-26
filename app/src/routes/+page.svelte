@@ -18,7 +18,7 @@
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { fleetProjectMeta, fleetVersionLabel } from '$lib/fleetDisplay';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
-	import { siteCellValue, siteNeedsEngineSync, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
+	import { siteCellValue, siteLiveHref, siteNeedsEngineSync, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		idsToSelection,
 		parseListParam,
@@ -2504,18 +2504,35 @@
 							</thead>
 							<tbody>
 								{#each board.rows as row (row.id)}
+									{@const liveHref = siteLiveHref(row.cells)}
 									<tr>
 										<td class="tick">
 											<input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedSites[row.id]} />
 										</td>
 										<td>
 											<div class="project-cell">
-												<span class="id">{row.label ?? row.id}</span>
+												{#if liveHref}
+													<a
+														class="id live-link"
+														href={liveHref}
+														target="_blank"
+														rel="noopener noreferrer"
+														title={`Open ${liveHref} in a new tab`}
+													>{row.label ?? row.id}</a>
+												{:else}
+													<span class="id">{row.label ?? row.id}</span>
+												{/if}
 												<CrossChips compact chips={chipsFor(row.id, 'sites')} onOpen={(kind) => openCross(row.id, kind)} />
 											</div>
 										</td>
 										{#each siteCols as col (col.id)}
-											<td class="small" class:mono={col.id === 'engine'}>{siteCellValue(col.id, row.cells)}</td>
+											<td class="small" class:mono={col.id === 'engine'}>
+												{#if col.id === 'live' && liveHref}
+													<a class="live-link" href={liveHref} target="_blank" rel="noopener noreferrer">{siteCellValue(col.id, row.cells)}</a>
+												{:else}
+													{siteCellValue(col.id, row.cells)}
+												{/if}
+											</td>
 										{/each}
 										<td>
 											<div class="bump">
@@ -3546,6 +3563,17 @@
 
 	.project-cell .id {
 		margin: 0;
+	}
+
+	.live-link,
+	.live-link:visited {
+		color: #fde68a;
+		text-decoration: underline;
+		text-underline-offset: 0.12em;
+	}
+
+	.live-link:hover {
+		color: #fff3b0;
 	}
 
 	.ahead {

@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import {
 	siteCellValue,
 	siteEngineVersion,
+	siteLiveHref,
 	siteNeedsEngineSync,
 	siteSyncLabel,
 	siteSyncTarget,
@@ -45,5 +46,13 @@ describe('siteDisplay', () => {
 		const cells = { pin: 'npm ^0.1.10', locked: '0.1.10', update: 'already ^0.1.10', headers: 'ok' };
 		assert.equal(siteNeedsEngineSync(cells), false);
 		assert.equal(siteSyncLabel(cells), 'Sync engine');
+	});
+
+	it('treats only http(s) live cells as openable', () => {
+		assert.equal(siteLiveHref({ live: 'https://localhelm.dev' }), 'https://localhelm.dev/');
+		assert.equal(siteLiveHref({ live: 'http://127.0.0.1:4173/' }), 'http://127.0.0.1:4173/');
+		assert.equal(siteLiveHref({ live: '—' }), null);
+		assert.equal(siteLiveHref({ live: 'javascript:alert(1)' }), null);
+		assert.equal(siteLiveHref({}), null);
 	});
 });

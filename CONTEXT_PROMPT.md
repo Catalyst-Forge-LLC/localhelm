@@ -184,3 +184,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Ports leases: hide listening / log / empty firewall; recipe cell holds command or “no recipe”; name cell is one line.
 - Cut version only when origin has commits after the last npm version (tag or package.json bump). Publish plan skips `nothing to cut`.
 - Today is a four-pane board (Needs you, Looks, Sites, Ports). Each pane scrolls. Refresh sits next to the project id. Needs you is fleet writes; Looks is Ports facts. Needs you filters: All / Publish / Cut / Push (`?need=`).
+- Sites tab: a FilePress `live` http(s) URL makes the site name and live cell open in a new tab. `—` and non-http values stay plain text.

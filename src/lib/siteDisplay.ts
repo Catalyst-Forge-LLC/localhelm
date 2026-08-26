@@ -38,3 +38,16 @@ export function siteCellValue(colId: string, cells: Record<string, string>): str
 	if (colId === 'engine') return siteEngineVersion(cells);
 	return cells[colId] ?? '—';
 }
+
+/** FilePress `live` is a public URL or "—". Only http(s) becomes a link. */
+export function siteLiveHref(cells: Record<string, string>): string | null {
+	const raw = (cells.live ?? '').trim();
+	if (!raw || raw === '—') return null;
+	try {
+		const url = new URL(raw);
+		if (url.protocol === 'http:' || url.protocol === 'https:') return url.href;
+	} catch {
+		return null;
+	}
+	return null;
+}
