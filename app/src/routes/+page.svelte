@@ -15,6 +15,7 @@
 	import { familyMemberNames } from '$lib/family';
 	import { portFamilies, portLooks } from '$lib/looks';
 	import { plainGitError, whyNotPublish, whyNotPush, writableCascadeCount } from '$lib/writeGate';
+	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import {
 		idsToSelection,
 		parseListParam,
@@ -525,6 +526,15 @@
 		}
 	}
 
+	async function eachNamed(verb: string, names: string[], fn: (name: string) => Promise<void>): Promise<void> {
+		for (let i = 0; i < names.length; i++) {
+			const name = names[i];
+			if (!name) continue;
+			busy = bulkProgressLabel(verb, i + 1, names.length, name);
+			await fn(name);
+		}
+	}
+
 	function inventoryDigest(projects: Project[]): Inventory['digest'] {
 		return {
 			projects: projects.length,
@@ -601,6 +611,16 @@
 
 	async function refresh(fetchRemotes = false): Promise<void> {
 		await run(fetchRemotes ? 'fetching remotes, then reading status' : 'reading status', async () => {
+			const fleet = inventory?.projects.map((row) => row.id) ?? [];
+			if (fetchRemotes && fleet.length) {
+				await eachNamed('fetching remotes', fleet, async (id) => {
+					await call('/api/fetch', { method: 'POST', body: JSON.stringify({ ids: [id] }) });
+				});
+				fetchedAt = new Date().toLocaleTimeString();
+				busy = 'reading status';
+				await loadStatus({ extras: true });
+				return;
+			}
 			await loadStatus({ fetchRemotes, extras: true });
 		});
 	}
@@ -783,7 +803,8 @@
 	}
 
 	async function applyArchive(ids: string[], restore: boolean, parkIds: string[]): Promise<void> {
-		await run(restore ? 'restoring on Today' : 'hiding on Today', async () => {
+		const verb = restore ? 'restoring' : 'hiding';
+		await run(bulkProgressLabel(verb, 1, ids.length, ids[0]), async () => {
 			const data = (await call('/api/archive', {
 				method: 'POST',
 				body: JSON.stringify({ ids, restore }),
@@ -791,7 +812,7 @@
 			archivedIds = Array.isArray(data.ids) ? data.ids : [];
 			note(restore ? `restore ${ids.join(', ')}` : `archive ${ids.join(', ')}`, data);
 			if (parkIds.length && leaseBoardAll) {
-				await applyPluginJob(leaseBoardAll.plugin, 'park', parkIds);
+				await applyPluginItems(leaseBoardAll.plugin, 'park', parkIds);
 			}
 		});
 	}
@@ -829,7 +850,7 @@
 	}
 
 	async function applyEnroll(paths: string[]): Promise<void> {
-		await run('enrolling', async () => {
+		await run(paths.length === 1 ? 'enrolling' : `enrolling ${paths.length} projects`, async () => {
 			const plan = await call('/api/enroll', {
 				method: 'POST',
 				body: JSON.stringify({ paths, apply: true }),
@@ -876,7 +897,7 @@
 	}
 
 	async function applyUnenroll(ids: string[]): Promise<void> {
-		await run('removing from fleet', async () => {
+		await run(ids.length === 1 ? 'removing from fleet' : `removing ${ids.length} from fleet`, async () => {
 			const plan = await call('/api/unenroll', {
 				method: 'POST',
 				body: JSON.stringify({ ids, apply: true }),
@@ -898,7 +919,10 @@
 			`planning bump for ${scope}`,
 			async () => {
 				const plans: BumpPlan[] = [];
-				for (const job of jobs) {
+				for (let i = 0; i < jobs.length; i++) {
+					const job = jobs[i];
+					if (!job) continue;
+					busy = bulkProgressLabel('planning bump', i + 1, jobs.length, job.id);
 					const plan = (await call('/api/bump', {
 						method: 'POST',
 						body: JSON.stringify({ id: job.id, kind: job.kind, apply: false }),
@@ -944,9 +968,11 @@
 	}
 
 	async function applyBumps(jobs: { id: string; kind: BumpKind }[]): Promise<void> {
-		const scope = jobs.length === 1 ? jobs[0]?.id : `${jobs.length} projects`;
-		await run(`bumping ${scope}`, async () => {
-			for (const job of jobs) {
+		await run(bulkProgressLabel('bumping', 1, jobs.length, jobs[0]?.id), async () => {
+			for (let i = 0; i < jobs.length; i++) {
+				const job = jobs[i];
+				if (!job) continue;
+				busy = bulkProgressLabel('bumping', i + 1, jobs.length, job.id);
 				const plan = (await call('/api/bump', {
 					method: 'POST',
 					body: JSON.stringify({ id: job.id, kind: job.kind, apply: true }),
@@ -1101,21 +1127,26 @@
 					items: eligible.length ? eligible.map((row) => `${row.id}  ${row.branch ?? '?'}  ${row.reason ?? 'pull'}`) : ['Nothing to pull.'],
 					confirmLabel: eligible.length === 1 ? `Pull ${eligible[0]?.id}` : `Pull ${eligible.length} repos`,
 					canApply: eligible.length > 0,
-					run: () => void applyPull(),
+					run: () => void applyPull(eligible.map((row) => row.id)),
 				});
 			},
 			{ closeConfirm: false },
 		);
 	}
 
-	async function applyPull(): Promise<void> {
-		await run('pulling (fast-forward only)', async () => {
-			const data = (await call('/api/pull', { method: 'POST', body: JSON.stringify({ apply: true }) })) as {
-				rows: GitRow[];
-			};
-			const eligible = data.rows.filter((r) => r.action === 'pull');
-			note(`pull --apply — ${eligible.length} repo(s) fast-forwarded`, data);
-			await refresh();
+	async function applyPull(ids: string[]): Promise<void> {
+		await run(bulkProgressLabel('pulling', 1, ids.length, ids[0]), async () => {
+			const rows: GitRow[] = [];
+			await eachNamed('pulling', ids, async (id) => {
+				const data = (await call('/api/pull', {
+					method: 'POST',
+					body: JSON.stringify({ apply: true, ids: [id] }),
+				})) as { rows: GitRow[] };
+				rows.push(...data.rows);
+			});
+			const eligible = rows.filter((r) => r.action === 'pull');
+			note(`pull --apply — ${eligible.length} repo(s) fast-forwarded`, { rows });
+			await loadStatus({ ids });
 		});
 	}
 
@@ -1155,19 +1186,23 @@
 	}
 
 	async function applyPush(ids: string[]): Promise<void> {
-		const scope = ids.length === 1 ? ids[0] : `${ids.length} repos`;
-		await run(`pushing ${scope}`, async () => {
-			const data = (await call('/api/push', { method: 'POST', body: JSON.stringify({ apply: true, ids }) })) as {
-				rows: GitRow[];
-			};
-			const eligible = data.rows.filter((r) => r.action === 'push');
+		await run(bulkProgressLabel('pushing', 1, ids.length, ids[0]), async () => {
+			const rows: GitRow[] = [];
+			await eachNamed('pushing', ids, async (id) => {
+				const data = (await call('/api/push', {
+					method: 'POST',
+					body: JSON.stringify({ apply: true, ids: [id] }),
+				})) as { rows: GitRow[] };
+				rows.push(...data.rows);
+			});
+			const eligible = rows.filter((r) => r.action === 'push');
 			const failed = eligible.filter((r) => r.reason !== 'pushed');
 			const ok = eligible.length - failed.length;
 			note(
 				failed.length
 					? `push --apply — ${ok} pushed, ${failed.length} failed: ${failed.map((r) => `${r.id}: ${r.reason ?? 'push failed'}`).join(' · ')}`
 					: `push --apply — ${ok} pushed`,
-				data,
+				{ rows },
 			);
 			await loadStatus({ ids });
 			if (failed.length) {
@@ -1245,19 +1280,23 @@
 	}
 
 	async function applyPublish(ids: string[]): Promise<void> {
-		const label = ids.length === 1 ? ids[0] : `${ids.length} packages`;
-		await run(`publishing ${label}`, async () => {
-			const data = (await call('/api/publish', {
-				method: 'POST',
-				body: JSON.stringify({
-					apply: true,
-					ids,
-					kind: ids.length === 1 ? (bumpKind[ids[0] ?? ''] ?? 'patch') : 'patch',
-					otp: publishOtp.trim() ? publishOtp.trim() : undefined,
-				}),
-			})) as { rows: PublishRow[] };
-			const published = data.rows.filter((r) => r.reason?.startsWith('published ')).length;
-			note(`publish --apply — ${published} published`, { rows: data.rows });
+		await run(bulkProgressLabel('publishing', 1, ids.length, ids[0]), async () => {
+			const rows: PublishRow[] = [];
+			const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
+			await eachNamed('publishing', ids, async (id) => {
+				const data = (await call('/api/publish', {
+					method: 'POST',
+					body: JSON.stringify({
+						apply: true,
+						ids: [id],
+						kind: bumpKind[id] ?? 'patch',
+						otp,
+					}),
+				})) as { rows: PublishRow[] };
+				rows.push(...data.rows);
+			});
+			const published = rows.filter((r) => r.reason?.startsWith('published ')).length;
+			note(`publish --apply — ${published} published`, { rows });
 			publishOtp = '';
 			await loadStatus({ ids });
 		});
@@ -1268,7 +1307,7 @@
 		const unit = plugin === 'localberth' ? 'lease' : 'site';
 		const scope = ids.length === 1 ? ids[0] : `${ids.length} ${unit}s`;
 		await run(
-			`planning ${plugin} ${action} ${scope}`,
+			ids.length === 1 ? `planning ${action} ${ids[0]}` : `planning ${action} for ${ids.length} ${unit}s`,
 			async () => {
 				const data = await call('/api/plugin', {
 					method: 'POST',
@@ -1293,21 +1332,25 @@
 		);
 	}
 
+	async function applyPluginItems(plugin: string, action: string, ids: string[]): Promise<void> {
+		const verb = `${plugin} ${action}`;
+		await eachNamed(verb, ids, async (id) => {
+			const data = await call('/api/plugin', {
+				method: 'POST',
+				body: JSON.stringify({ id: plugin, action, ids: [id], apply: true }),
+			});
+			note(`${verb} --apply ${id}`, data);
+		});
+	}
+
 	async function applyPluginJob(plugin: string, action: string, ids: string[]): Promise<void> {
-		const unit = plugin === 'localberth' ? 'lease' : 'site';
-		const scope = ids.length === 1 ? ids[0] : `${ids.length} ${unit}s`;
-		await run(
-			`${plugin} ${action} ${scope}`,
-			async () => {
-				const data = await call('/api/plugin', {
-					method: 'POST',
-					body: JSON.stringify({ id: plugin, action, ids, apply: true }),
-				});
-				note(`${plugin} ${action} --apply ${scope}`, data);
+		await run(bulkProgressLabel(`${plugin} ${action}`, 1, ids.length, ids[0]), async () => {
+			try {
+				await applyPluginItems(plugin, action, ids);
+			} finally {
 				await loadPluginBoards();
-			},
-			{ closeConfirm: false },
-		);
+			}
+		});
 	}
 
 	async function startLand(siteId: string): Promise<void> {
@@ -2793,11 +2836,11 @@
 	confirmLabel={confirmLabel}
 	variant={confirmVariant}
 	busy={Boolean(busy)}
+	busyLabel={busy}
 	canApply={confirmCanApply}
 	items={confirmItems}
 	onconfirm={() => {
 		const fn = confirmRun;
-		confirmOpen = false;
 		confirmRun = null;
 		fn?.();
 	}}

@@ -178,3 +178,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Bump apply commits `package.json` only (same `Helm: bump` message as publish). Fleet project cell is one line: id, name, chips, copy.
 - Row refresh: `/api/status?ids=` merges into the current table. Header Refresh still reads the whole fleet + Sites/Ports. Bump/push/publish/cascade reload only the rows they wrote.
 - Publish confirm hides the `localhelm auth` setup paragraph when `npm whoami` already works. Logged-in line + optional OTP stay.
+- Bulk apply (Sites/Ports, bump, push, publish, pull, fetch remotes) reports `3 of 18 · id` in the header and on the confirm button so a long job is not mistaken for a hang.

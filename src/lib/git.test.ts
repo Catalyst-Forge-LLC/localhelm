@@ -16,6 +16,26 @@ async function gitRepo(dir: string): Promise<void> {
 }
 
 describe('git jobs', () => {
+	it('plans fetch for named ids only', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-fetch-ids-'));
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: {
+				workspaceRoot: '.',
+				projects: [
+					{ id: 'alpha', path: 'alpha' },
+					{ id: 'beta', path: 'beta' },
+				],
+			},
+		};
+		const rows = await planFetch(loaded, ['beta']);
+		assert.deepEqual(
+			rows.map((row) => row.id),
+			['beta'],
+		);
+	});
+
 	it('skips fetch and pull without origin', async () => {
 		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-git-'));
 		const pkgDir = path.join(root, 'widget');

@@ -49,3 +49,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Attention UX: row writes on Fleet needs you; Sites/Ports notes in ? tip; Ports actions one line; labeled stacks _(2026-08-25)_
 - [x] Scoped status refresh (row / checked / `status [id…]`) so bump/push do not wait on the whole fleet _(2026-08-26)_
 - [x] Hide publish auth setup copy when `npm whoami` already works _(2026-08-26)_
+- [x] Bulk apply progress `N of M · id` on header and confirm _(2026-08-26)_

@@ -9,6 +9,7 @@
 		cancelLabel?: string;
 		variant?: 'write' | 'danger';
 		busy?: boolean;
+		busyLabel?: string;
 		canApply?: boolean;
 		items?: string[];
 		children?: Snippet;
@@ -24,6 +25,7 @@
 		cancelLabel = 'Cancel',
 		variant = 'write',
 		busy = false,
+		busyLabel = '',
 		canApply = true,
 		items = [],
 		children,
@@ -97,7 +99,7 @@
 					disabled={busy}
 					onclick={confirm}
 				>
-					{busy ? 'Working…' : confirmLabel}
+					{busy ? busyLabel || 'Working…' : confirmLabel}
 				</button>
 			{/if}
 		</div>
@@ -212,6 +214,9 @@
 		padding: 0.35rem 0.7rem;
 		font-size: 0.82rem;
 		cursor: pointer;
+		max-width: 100%;
+		white-space: normal;
+		text-align: right;
 	}
 
 	.btn:disabled {

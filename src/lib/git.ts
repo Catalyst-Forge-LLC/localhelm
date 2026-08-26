@@ -134,9 +134,11 @@ export function requirePushIds(ids: string[]): string[] {
 	return named;
 }
 
-export async function planFetch(loaded: LoadedManifest): Promise<GitJobRow[]> {
+export async function planFetch(loaded: LoadedManifest, onlyIds?: string[]): Promise<GitJobRow[]> {
+	const only = onlyIds?.length ? new Set(onlyIds) : null;
 	const rows: GitJobRow[] = [];
 	for (const project of loaded.manifest.projects) {
+		if (only && !only.has(project.id)) continue;
 		const abs = joinRoot(loaded.workspaceRoot, project.path);
 		if (!(await pathExists(abs))) {
 			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'missing' });
@@ -163,9 +165,11 @@ export function applyFetch(workspaceRoot: string, row: GitJobRow): GitJobRow {
 	return { ...row, stdout: result.stdout.trim(), stderr: result.stderr, reason: result.ok ? 'fetched' : result.stderr };
 }
 
-export async function planPull(loaded: LoadedManifest): Promise<GitJobRow[]> {
+export async function planPull(loaded: LoadedManifest, onlyIds?: string[]): Promise<GitJobRow[]> {
+	const only = onlyIds?.length ? new Set(onlyIds) : null;
 	const rows: GitJobRow[] = [];
 	for (const project of loaded.manifest.projects) {
+		if (only && !only.has(project.id)) continue;
 		const abs = joinRoot(loaded.workspaceRoot, project.path);
 		if (!(await pathExists(abs))) {
 			rows.push({ id: project.id, path: project.path, action: 'skip', reason: 'missing' });

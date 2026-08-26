@@ -140,6 +140,10 @@
         {
           "timestamp": "2026-08-26T19:30:00Z",
           "text": "Publish confirm omits auth setup copy when npm whoami works (d41)."
+        },
+        {
+          "timestamp": "2026-08-26T19:45:00Z",
+          "text": "Bulk apply shows N of M · id (d42). Plugin/push/publish/pull/fetch run one row at a time."
         }
       ]
     },
@@ -632,6 +636,16 @@
       "decision": "Publish/land confirm shows the localhelm auth setup paragraph only when npm whoami fails. A working user is already authenticated via ~/.npmrc; keep the logged-in line and optional OTP.",
       "rationale": "Operator 2026-08-26: already set a local auth token; the setup lecture on Publish getfilepress@0.1.10 was noise.",
       "alternatives_considered": ["Always show setup hint", "Inspect token type in ~/.npmrc", "Hide OTP when whoami works"],
+      "status": "active"
+    },
+    {
+      "id": "d42",
+      "timestamp": "2026-08-26T19:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 18,
+      "decision": "Bulk writes apply one id at a time and set busy to 'verb N of M · id'. Confirm stays open and shows the same label. Covers plugin jobs (Sync engine / selection), bump, push, publish, pull, and fetch remotes.",
+      "rationale": "Operator 2026-08-26: 18-site engine sync looked stuck because one request had no progress.",
+      "alternatives_considered": ["SSE/stream from one locked apply", "Spinner only", "Progress only on Sites sync"],
       "status": "active"
     }
   ],
