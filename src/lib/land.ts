@@ -4,7 +4,7 @@ import { loadPlugins, requirePlugin, type HelmPlugin } from './plugin.js';
 import { applyPublish, planPublishFromInventory, type PublishRow } from './publish.js';
 import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
-import { plainGitError, whyNotPublish, whyNotPush } from './writeGate.js';
+import { commitCountLabel, plainGitError, whyNotPublish, whyNotPush } from './writeGate.js';
 import { readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 
 export const LAND_ENGINE_ID = 'filepress';
@@ -109,7 +109,7 @@ function pushFromStatus(row: ProjectStatus): GitJobRow | null {
 		branch: row.git.branch,
 		ahead: row.git.ahead,
 		remote: 'origin',
-		reason: `${row.git.ahead} on ${row.git.branch} → ${row.git.origin}${dirt}`,
+		reason: `${commitCountLabel(row.git.ahead) || row.git.ahead} on ${row.git.branch} → ${row.git.origin}${dirt}`,
 	};
 }
 

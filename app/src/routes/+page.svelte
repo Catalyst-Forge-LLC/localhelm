@@ -16,6 +16,7 @@
 	import { portFamilies, portLooks, type PortFamily } from '$lib/looks';
 	import {
 		canCutVersion,
+		commitCountLabel,
 		fleetWriteIds,
 		fleetWriteLabel,
 		nextCutVersion,
@@ -1579,7 +1580,7 @@
 		return badges(row).filter((badge) => {
 			if (badge.text === 'nothing to do') return false;
 			if (row.unpublishedAhead && (badge.text.includes('unpublished') || badge.text.includes('never published'))) return false;
-			if (canPush(row) && badge.text.endsWith(' to push')) return false;
+			if ((row.git.ahead ?? 0) > 0 && badge.text.includes('to push')) return false;
 			return true;
 		});
 	}
@@ -1611,7 +1612,7 @@
 		if ((row.git.ahead ?? 0) > 0) {
 			const blocked = whyNotPush(row.git);
 			out.push({
-				text: `${row.git.ahead} to push`,
+				text: `${commitCountLabel(row.git.ahead) || row.git.ahead} to push`,
 				tone: blocked ? 'warn' : 'ship',
 				title: blocked
 					? `Local commits look ahead, but push is blocked (${blocked}).`
@@ -1662,7 +1663,12 @@
 
 	function needActionTitle(id: FleetWriteId, row: Project): string {
 		if (id === 'publish') return 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.';
-		if (id === 'push') return 'Shows the origin URL and commit count. Confirm in the modal. Never --force.';
+		if (id === 'push') {
+			const commits = commitCountLabel(row.git.ahead);
+			return commits
+				? `${commits} ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.`
+				: 'Shows the origin URL and commit count. Confirm in the modal. Never --force.';
+		}
 		if (id === 'pins') return 'Shows which dependents would get the new pin. Confirm in the modal.';
 		const n = row.commitsSinceNpm ?? 0;
 		const next = nextCutVersion(row, rowBumpKind(row));
@@ -1679,10 +1685,17 @@
 		return needActionTitle('publish', row);
 	}
 
+	function blockedPushTitle(row: Project): string {
+		const blocked = whyNotPush(row.git);
+		if (blocked) return `Push is blocked (${blocked}). Fix that, then this button turns on.`;
+		return needActionTitle('push', row);
+	}
+
 	function needActions(row: Project): NeedAction[] {
+		const pins = cascadeFor(row.id)?.writable ?? 0;
 		const acts: NeedAction[] = writesFor(row).map((id) => ({
 			id,
-			label: fleetWriteLabel(id, row, rowBumpKind(row)),
+			label: fleetWriteLabel(id, row, rowBumpKind(row), pins),
 			title: needActionTitle(id, row),
 			run: () => {
 				if (id === 'publish' || id === 'cut') startPublish([row.id]);
@@ -1698,6 +1711,18 @@
 				run: () => {},
 				disabled: true,
 			});
+		}
+		if ((row.git.ahead ?? 0) > 0 && !acts.some((act) => act.id === 'push')) {
+			const pushAct: NeedAction = {
+				id: 'push',
+				label: fleetWriteLabel('push', row),
+				title: blockedPushTitle(row),
+				run: () => {},
+				disabled: true,
+			};
+			const afterPub = acts.findIndex((act) => act.id === 'publish');
+			if (afterPub >= 0) acts.splice(afterPub + 1, 0, pushAct);
+			else acts.unshift(pushAct);
 		}
 		return acts;
 	}
@@ -1794,7 +1819,7 @@
 							class="btn"
 							disabled={Boolean(busy)}
 							onclick={() => refresh(true)}
-							title="git fetch origin in each repo, then re-read. Updates the to push / to pull counts."
+							title="git fetch origin in each repo, then re-read. Updates ahead and behind commit counts."
 						>
 							<Icon icon="lucide:cloud-download" />
 							Fetch remotes
@@ -1818,7 +1843,7 @@
 							class="btn btn-write"
 							disabled={Boolean(busy)}
 							onclick={() => startPush()}
-							title="Shows which clean, ahead repos would push to origin. Confirm in the modal. Never --force."
+							title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local."
 						>
 							<Icon icon="lucide:upload" />
 							Push
@@ -1856,7 +1881,7 @@
 					{inventory.digest.dirty} dirty
 				</button>
 				<button type="button" class="chip" class:warm={inventory.digest.cascadeBehind > 0} onclick={() => setTab('today')}>
-					{inventory.digest.cascadeBehind} pins behind
+					{inventory.digest.cascadeBehind} {inventory.digest.cascadeBehind === 1 ? 'pin behind' : 'pins behind'}
 				</button>
 				<button type="button" class="chip" class:bad={inventory.digest.missing > 0} onclick={() => setTab('today')}>
 					{inventory.digest.missing} missing
@@ -1878,7 +1903,7 @@
 		{#if busy}<p class="line busy">Working: {busy}…</p>{/if}
 		{#if error}<p class="line err">{error}</p>{/if}
 		{#if !busy && !error && staleRemotes}
-			<p class="line info">Some remotes could not be read, so “to push / to pull” may be stale. Local state below is accurate.</p>
+			<p class="line info">Some remotes could not be read, so ahead and behind counts may be stale. Local state below is accurate.</p>
 		{/if}
 	</header>
 
@@ -2025,7 +2050,7 @@
 										</div>
 										<div class="need-tools">
 											<div class="badges">
-												{#if target.behind}<span class="badge warn">{target.behind} pin(s) behind</span>{/if}
+												{#if target.behind}<span class="badge warn">{target.behind} {target.behind === 1 ? 'pin behind' : 'pins behind'}</span>{/if}
 												{#if target.linked}<span class="badge info">{target.linked} local link</span>{/if}
 											</div>
 											<div class="need-actions">
@@ -2035,7 +2060,7 @@
 													onclick={() => startCascade(target.id)}
 													title="Shows which dependents would get the new pin. Confirm in the modal to write."
 												>
-													Write pins
+													{target.writable === 1 ? 'Write 1 pin' : `Write ${target.writable} pins`}
 												</button>
 											</div>
 										</div>
@@ -2107,7 +2132,7 @@
 									{:else if !filepressBoard}
 										No FilePress plugin loaded.
 									{:else if sitesNeedingYou.length}
-										{sitesNeedingYou.length} of {filepressBoard.rows.length} need an engine sync.
+										{sitesNeedingYou.length} of {filepressBoard.rows.length} need an engine write. Land does Sync, then Push and Ship.
 									{:else}
 										{filepressBoard.rows.length} sites · none waiting on an engine sync.
 									{/if}
@@ -2349,6 +2374,7 @@
 							<tbody>
 								{#each visibleProjects as row (row.id)}
 									{@const projectMeta = fleetProjectMeta(row.id, row.npm.name, row.path)}
+									{@const bumpTo = nextCutVersion(row, rowBumpKind(row))}
 									<tr>
 										<td class="tick"><input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedIds[row.id]} /></td>
 										<td>
@@ -2424,7 +2450,7 @@
 													onclick={() => startBump([row.id])}
 													title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish."
 												>
-													Bump
+													{bumpTo ? `Bump ${bumpTo}` : 'Bump'}
 												</button>
 											</div>
 										</td>

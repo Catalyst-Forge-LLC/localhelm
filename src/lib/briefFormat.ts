@@ -1,4 +1,4 @@
-import { whyNotPublish, whyNotPush } from './writeGate.js';
+import { commitCountLabel, whyNotPublish, whyNotPush } from './writeGate.js';
 
 export type BriefProject = {
 	id: string;
@@ -44,7 +44,7 @@ export function formatBrief(input: {
 		for (const row of unpublished) lines.push(`- publish ${row.id}${row.localVersion ? ` ${row.localVersion}` : ''}`);
 		for (const row of pushable) {
 			if (unpublished.some((other) => other.id === row.id)) continue;
-			lines.push(`- push ${row.id}${row.git.ahead ? ` (${row.git.ahead})` : ''}`);
+			lines.push(`- push ${row.id}${row.git.ahead ? ` (${commitCountLabel(row.git.ahead)})` : ''}`);
 		}
 		for (const row of dirty) {
 			if (unpublished.some((other) => other.id === row.id) || pushable.some((other) => other.id === row.id)) continue;

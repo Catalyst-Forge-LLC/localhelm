@@ -17,6 +17,7 @@ localhelm publish ollanet --apply --otp 123456
 | --- | --- |
 | **Publish 0.1.2** | Local version is already ahead of npm |
 | **Cut 0.1.3 · 4 commits** | Local already matches npm (0.1.2). Origin has 4 commits since that version. The button is the next patch, not a version number. |
+| **Push 4 commits** | Branch is 4 commits ahead of origin. Uncommitted files stay local. A bare `(4)` on a toolbar button is selected rows, not commits. |
 
 Cut is a patch by default. Use Fleet to pick minor or major before you confirm.
 

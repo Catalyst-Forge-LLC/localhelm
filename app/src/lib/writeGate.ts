@@ -1,5 +1,6 @@
 export {
 	canCutVersion,
+	commitCountLabel,
 	fleetWriteIds,
 	fleetWriteLabel,
 	nextCutVersion,

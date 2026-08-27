@@ -777,6 +777,16 @@
       "rationale": "Operator 2026-08-27: Cut version 1 / 31 did not tie to 0.1.16.",
       "alternatives_considered": ["Only show commit count", "Only show next version"],
       "status": "active"
+    },
+    {
+      "id": "d54",
+      "timestamp": "2026-08-27T22:05:00Z",
+      "phase": "2-scaffolding",
+      "session": 20,
+      "decision": "Same number grammar on every surface: semver, `N commits`, or `(N)` selected rows. Push and leftover badges say commits. Blocked Push is a disabled button. Bump and Write pins name the version or pin count.",
+      "rationale": "Operator 2026-08-27: pass for other Cut-version-style unclear or inconsistent labels.",
+      "alternatives_considered": ["Leave Push 11", "Hide blocked Push"],
+      "status": "active"
     }
   ],
   "gotchas": [

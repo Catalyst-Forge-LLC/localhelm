@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
 	canCutVersion,
+	commitCountLabel,
 	fleetWriteIds,
 	fleetWriteLabel,
 	plainGitError,
@@ -91,6 +92,12 @@ describe('fleetWriteIds', () => {
 		assert.equal(fleetWriteLabel('cut', cut), 'Cut 1.0.1 · 4 commits');
 		assert.equal(fleetWriteLabel('cut', cut, 'minor'), 'Cut 1.1.0 · 4 commits');
 		assert.equal(fleetWriteLabel('cut', row({ commitsSinceNpm: 1 })), 'Cut 1.0.1 · 1 commit');
+		assert.equal(fleetWriteLabel('push', row({ git: git({ ahead: 3 }) })), 'Push 3 commits');
+		assert.equal(fleetWriteLabel('push', row({ git: git({ ahead: 1 }) })), 'Push 1 commit');
+		assert.equal(fleetWriteLabel('pins', cut, 'patch', 1), 'Write 1 pin');
+		assert.equal(fleetWriteLabel('pins', cut, 'patch', 2), 'Write 2 pins');
+		assert.equal(commitCountLabel(1), '1 commit');
+		assert.equal(commitCountLabel(11), '11 commits');
 		assert.deepEqual(fleetWriteIds(row({ commitsSinceNpm: 0 })), []);
 		assert.equal(canCutVersion(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), false);
 		assert.deepEqual(fleetWriteIds(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), ['publish']);

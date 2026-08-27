@@ -190,4 +190,5 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Today and Fleet share `fleetWriteIds`. Cut version appears in Fleet **needs you** (not “nothing to do”) whenever Today would offer it.
 - Unpublished-ahead always shows **Publish** on the row. Dirty/diverged/no-origin disable it with the skip reason; they do not replace it with an unpublished pill.
 - Cut is labeled `Cut 0.1.17 · 4 commits` (next version + origin commits since the last npm version). Never `Cut version 4` — that read as a semver.
+- Write numbers: semver is `0.1.17`; commit counts say `commits` (`Push 4 commits`, `4 commits to push`); selected-row counts stay in parentheses (`Push (4)`). Blocked Push stays on the row, disabled, like Publish. Fleet Bump is `Bump 0.1.17`. Write pins says how many. Header Push does not require a clean tree.
 - FilePress site at `site/` (modeled on LocalBerth): pages + `/docs` mount, FilePress id `localhelm`, lease `localhelm-site` on **5201**, `pnpm ship` → Cloudflare Pages project `localhelm`. Logo already in `site/static/`.

@@ -45,6 +45,7 @@ export { applyExport, defaultExportPath, planExport } from './export.js';
 export type { ExportPlan } from './export.js';
 export {
 	canCutVersion,
+	commitCountLabel,
 	fleetWriteIds,
 	fleetWriteLabel,
 	nextCutVersion,

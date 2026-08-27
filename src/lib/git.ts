@@ -3,7 +3,7 @@ import type { LoadedManifest } from './manifest.js';
 import { joinRoot } from './paths.js';
 import { pathExists } from './pkg.js';
 import type { GitCell } from './types.js';
-import { plainGitError, whyNotPush } from './writeGate.js';
+import { commitCountLabel, plainGitError, whyNotPush } from './writeGate.js';
 
 export function runGit(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr: string } {
 	const result = spawnSync('git', ['-C', cwd, ...args], {
@@ -271,7 +271,7 @@ function planPushOne(id: string, relPath: string, abs: string): GitJobRow {
 	return {
 		...base,
 		action: 'push',
-		reason: `${git.ahead} on ${git.branch} → ${git.origin}${dirt}`,
+		reason: `${commitCountLabel(git.ahead) || git.ahead} on ${git.branch} → ${git.origin}${dirt}`,
 	};
 }
 

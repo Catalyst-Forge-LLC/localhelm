@@ -115,13 +115,30 @@ export function nextCutVersion(row: PublishGateRow, kind: BumpKind = 'patch'): s
 	}
 }
 
-export function fleetWriteLabel(id: FleetWriteId, row: PublishGateRow, kind: BumpKind = 'patch'): string {
+/** Bare integers on writes are commit counts. Selected-row counts stay in parentheses. */
+export function commitCountLabel(n: number | null | undefined): string {
+	if (typeof n !== 'number' || !Number.isFinite(n) || n < 0) return '';
+	return `${n} commit${n === 1 ? '' : 's'}`;
+}
+
+export function fleetWriteLabel(
+	id: FleetWriteId,
+	row: PublishGateRow,
+	kind: BumpKind = 'patch',
+	writablePins = 0,
+): string {
 	if (id === 'publish') return `Publish ${row.localVersion ?? ''}`.trim();
-	if (id === 'push') return `Push ${row.git.ahead ?? ''}`.trim();
-	if (id === 'pins') return 'Write pins';
+	if (id === 'push') {
+		const commits = commitCountLabel(row.git.ahead);
+		return commits ? `Push ${commits}` : 'Push';
+	}
+	if (id === 'pins') {
+		if (writablePins === 1) return 'Write 1 pin';
+		if (writablePins > 1) return `Write ${writablePins} pins`;
+		return 'Write pins';
+	}
 	const next = nextCutVersion(row, kind);
-	const n = row.commitsSinceNpm;
-	const commits = typeof n === 'number' && n > 0 ? `${n} commit${n === 1 ? '' : 's'}` : '';
+	const commits = commitCountLabel(row.commitsSinceNpm);
 	if (next && commits) return `Cut ${next} · ${commits}`;
 	if (next) return `Cut ${next}`;
 	if (commits) return `Cut version · ${commits}`;
