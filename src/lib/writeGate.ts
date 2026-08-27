@@ -106,12 +106,26 @@ export function fleetWriteIds(row: PublishGateRow, writablePins = 0): FleetWrite
 	return ids;
 }
 
-export function fleetWriteLabel(id: FleetWriteId, row: PublishGateRow): string {
+export function nextCutVersion(row: PublishGateRow, kind: BumpKind = 'patch'): string | undefined {
+	if (!row.localVersion) return undefined;
+	try {
+		return bumpTriple(row.localVersion, kind);
+	} catch {
+		return undefined;
+	}
+}
+
+export function fleetWriteLabel(id: FleetWriteId, row: PublishGateRow, kind: BumpKind = 'patch'): string {
 	if (id === 'publish') return `Publish ${row.localVersion ?? ''}`.trim();
 	if (id === 'push') return `Push ${row.git.ahead ?? ''}`.trim();
 	if (id === 'pins') return 'Write pins';
+	const next = nextCutVersion(row, kind);
 	const n = row.commitsSinceNpm;
-	return typeof n === 'number' && n > 0 ? `Cut version ${n}` : 'Cut version';
+	const commits = typeof n === 'number' && n > 0 ? `${n} commit${n === 1 ? '' : 's'}` : '';
+	if (next && commits) return `Cut ${next} · ${commits}`;
+	if (next) return `Cut ${next}`;
+	if (commits) return `Cut version · ${commits}`;
+	return 'Cut version';
 }
 
 type CascadeConsumer = {

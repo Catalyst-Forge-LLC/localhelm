@@ -18,6 +18,7 @@
 		canCutVersion,
 		fleetWriteIds,
 		fleetWriteLabel,
+		nextCutVersion,
 		plainGitError,
 		whyNotPublish,
 		whyNotPush,
@@ -1655,11 +1656,18 @@
 
 	type NeedAction = { id: FleetWriteId; label: string; title: string; run: () => void; disabled?: boolean };
 
+	function rowBumpKind(row: Project): BumpKind {
+		return bumpKind[row.id] ?? 'patch';
+	}
+
 	function needActionTitle(id: FleetWriteId, row: Project): string {
 		if (id === 'publish') return 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.';
 		if (id === 'push') return 'Shows the origin URL and commit count. Confirm in the modal. Never --force.';
 		if (id === 'pins') return 'Shows which dependents would get the new pin. Confirm in the modal.';
-		return `Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`;
+		const n = row.commitsSinceNpm ?? 0;
+		const next = nextCutVersion(row, rowBumpKind(row));
+		const current = row.npm.latest ?? row.localVersion ?? 'this version';
+		return `Origin has ${n} commit${n === 1 ? '' : 's'} since npm ${current}. Confirm bumps to ${next ?? 'the next version'} (${rowBumpKind(row)}) and publishes. Use Fleet to pick minor or major.`;
 	}
 
 	function blockedPublishTitle(row: Project): string {
@@ -1674,7 +1682,7 @@
 	function needActions(row: Project): NeedAction[] {
 		const acts: NeedAction[] = writesFor(row).map((id) => ({
 			id,
-			label: fleetWriteLabel(id, row),
+			label: fleetWriteLabel(id, row, rowBumpKind(row)),
 			title: needActionTitle(id, row),
 			run: () => {
 				if (id === 'publish' || id === 'cut') startPublish([row.id]);

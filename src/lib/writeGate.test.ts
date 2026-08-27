@@ -88,7 +88,9 @@ describe('fleetWriteIds', () => {
 		const cut = row({ commitsSinceNpm: 4 });
 		assert.equal(canCutVersion(cut), true);
 		assert.deepEqual(fleetWriteIds(cut), ['cut']);
-		assert.equal(fleetWriteLabel('cut', cut), 'Cut version 4');
+		assert.equal(fleetWriteLabel('cut', cut), 'Cut 1.0.1 · 4 commits');
+		assert.equal(fleetWriteLabel('cut', cut, 'minor'), 'Cut 1.1.0 · 4 commits');
+		assert.equal(fleetWriteLabel('cut', row({ commitsSinceNpm: 1 })), 'Cut 1.0.1 · 1 commit');
 		assert.deepEqual(fleetWriteIds(row({ commitsSinceNpm: 0 })), []);
 		assert.equal(canCutVersion(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), false);
 		assert.deepEqual(fleetWriteIds(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), ['publish']);

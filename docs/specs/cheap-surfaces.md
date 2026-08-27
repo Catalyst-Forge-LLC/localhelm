@@ -79,7 +79,7 @@ Cost: **Free** = format or filter existing JSON. **Cheap** = one extra local com
 - Family split: one sibling listening, another not.
 - Fleet id with no lease (and the reverse: lease with no fleet row) — **diff enroll vs slips**.
 
-**F4. Publish confirm: commits since last npm.** We already have local version + `git`. `git log --oneline` from the tag or `v$local`..HEAD (skip if no tag). Stops “what am I shipping?” The confirm modal already lists rows. **Cut version** uses the same count on origin (status `commitsSinceNpm`); hide the button and skip the plan when the count is 0.
+**F4. Publish confirm: commits since last npm.** We already have local version + `git`. `git log --oneline` from the tag or `v$local`..HEAD (skip if no tag). Stops “what am I shipping?” The confirm modal already lists rows. **Cut** uses the same count on origin (status `commitsSinceNpm`) and labels the next version (`Cut 0.1.17 · 4 commits`); hide the button and skip the plan when the count is 0.
 
 **F5. Last commit age.** One `git log -1 --format=%cs` per enrolled path (or parse from existing `git status` porcelain if we add `-z` later). Badge: “90 days since a commit” is a look, not a write.
 

@@ -767,6 +767,16 @@
       "rationale": "Operator 2026-08-27: Fleet showed only an unpublished pill; the Publish button was gone because the tree was dirty.",
       "alternatives_considered": ["Keep the unpublished pill only", "Open a skip plan on click"],
       "status": "active"
+    },
+    {
+      "id": "d53",
+      "timestamp": "2026-08-27T21:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 20,
+      "decision": "Cut button label is the next version plus origin commit count (`Cut 0.1.17 · 4 commits`). The old `Cut version N` used commitsSinceNpm and looked like a semver.",
+      "rationale": "Operator 2026-08-27: Cut version 1 / 31 did not tie to 0.1.16.",
+      "alternatives_considered": ["Only show commit count", "Only show next version"],
+      "status": "active"
     }
   ],
   "gotchas": [

@@ -189,4 +189,5 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Plugin confirm lines use the job only. Ship shows `pnpm ship in …`, not leftover `pnpm update getfilepress`. Push uses its git reason. Sync still shows the engine update.
 - Today and Fleet share `fleetWriteIds`. Cut version appears in Fleet **needs you** (not “nothing to do”) whenever Today would offer it.
 - Unpublished-ahead always shows **Publish** on the row. Dirty/diverged/no-origin disable it with the skip reason; they do not replace it with an unpublished pill.
+- Cut is labeled `Cut 0.1.17 · 4 commits` (next version + origin commits since the last npm version). Never `Cut version 4` — that read as a semver.
 - FilePress site at `site/` (modeled on LocalBerth): pages + `/docs` mount, FilePress id `localhelm`, lease `localhelm-site` on **5201**, `pnpm ship` → Cloudflare Pages project `localhelm`. Logo already in `site/static/`.

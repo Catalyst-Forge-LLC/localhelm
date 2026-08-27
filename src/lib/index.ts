@@ -47,6 +47,7 @@ export {
 	canCutVersion,
 	fleetWriteIds,
 	fleetWriteLabel,
+	nextCutVersion,
 	plainGitError,
 	whyNotPublish,
 	whyNotPush,
