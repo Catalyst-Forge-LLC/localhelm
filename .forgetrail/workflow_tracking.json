@@ -787,6 +787,21 @@
       "rationale": "Operator 2026-08-27: pass for other Cut-version-style unclear or inconsistent labels.",
       "alternatives_considered": ["Leave Push 11", "Hide blocked Push"],
       "status": "active"
+    },
+    {
+      "id": "d55",
+      "timestamp": "2026-08-27T23:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 20,
+      "decision": "Do not fold LocalBerth into LocalHelm. Keep two products and two dashboards. Rename LocalBerth → LocalSlip (npm localslip, localslip.com / .dev). Pairing: LocalSlip is the slip (local DNS for ports); LocalHelm is the wheel / control panel. Rejected LocalDock (collision with localdock.dev), LocalFleet (fights Helm’s Fleet tab), and LocalMarina. Lease store may stay ~/.localberth until a data migration pass.",
+      "rationale": "Operator 2026-08-27: berth is the wrong word (sounds like birth). Staked localslip on npm and grabbed .com/.dev. OK keeping two dashboards.",
+      "alternatives_considered": [
+        "Fold A/B/C into LocalHelm",
+        "LocalDock",
+        "LocalMarina",
+        "LocalFleet"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

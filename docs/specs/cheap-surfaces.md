@@ -5,7 +5,7 @@
 **Related:** `docs/PHASE_1_BRIEF.md` §10–11, `TODO.md` M4, `.forgetrail/IDEAS.md`, sibling [`localberth/docs/specs/cheap-surfaces.md`](../../../localberth/docs/specs/cheap-surfaces.md)  
 **Surfaces:** Today / Fleet / Ports host, CLI `status` / export, activity log
 
-Pairing: **LocalBerth is the slip. LocalHelm is the wheel.** This spec is what the wheel can show or host. Port lifecycle, logs, and park stay on LocalBerth.
+Pairing: **LocalSlip is the slip (local DNS for ports). LocalHelm is the wheel.** This spec is what the wheel can show or host. Port lifecycle, logs, and park stay on LocalSlip (née LocalBerth until that rename lands).
 
 ---
 
