@@ -16,7 +16,7 @@ Default bind is loopback on **4321**. The checkout dashboard (`app/`) calls the 
 | Today | Needs you (writes), Looks (Ports facts), Sites and Ports snapshots |
 | Fleet | Enrolled repos: version, git, pins, the same writes as Today |
 | Sites | FilePress jobs if the filepress checkout is enrolled |
-| Ports | LocalBerth leases if the localberth checkout is enrolled |
+| Ports | LocalSlip leases if the localslip checkout is enrolled |
 
 The same product can appear on three tabs. **Also on** chips jump and check that id.
 

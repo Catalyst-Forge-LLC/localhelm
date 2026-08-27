@@ -6,7 +6,7 @@ export default defineFilepressConfig({
 	url: 'https://localhelm.dev',
 	author: 'Catalyst Forge, LLC',
 	tagline: 'Status for the products you ship',
-	lede: 'A named fleet of local repos: git, npm, and dependents. LocalBerth is the slip; LocalHelm is the wheel.',
+	lede: 'A named fleet of local repos: git, npm, and dependents. LocalSlip is the slip; LocalHelm is the wheel.',
 	logo: '/logo.png',
 	ogImage: '/logo.png',
 	homePage: 'home',

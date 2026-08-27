@@ -2,13 +2,13 @@ export type BoardColumn = { id: string; label: string };
 
 const HIDDEN_LEASE_COLS = new Set(['listening', 'health', 'log', 'firewall']);
 
-/** LocalBerth already sent listening / health / log / firewall. Helm keeps port, bind, process, recipe. */
+/** LocalSlip already sent listening / health / log / firewall. Helm keeps port, bind, process, recipe. */
 export function portTableColumns(
 	plugin: string,
 	pane: 'leases' | 'observed',
 	columns: readonly BoardColumn[],
 ): BoardColumn[] {
-	if (plugin !== 'localberth' || pane !== 'leases') return [...columns];
+	if (plugin !== 'localslip' || pane !== 'leases') return [...columns];
 	return columns.filter((col) => !HIDDEN_LEASE_COLS.has(col.id));
 }
 

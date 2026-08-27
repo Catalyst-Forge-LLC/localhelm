@@ -802,6 +802,20 @@
         "LocalFleet"
       ],
       "status": "active"
+    },
+    {
+      "id": "d56",
+      "timestamp": "2026-08-27T23:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 20,
+      "decision": "LocalSlip hard cutover: primary site localslip.dev; plugin id localslip; Helm copy and serve lease lookup use localslip (localberth bin is a fallback). Data lives in ~/.localslip. GitHub repo rename to localslip is operator-side. Do not fold Slip into Helm.",
+      "rationale": "Operator 2026-08-27: localberth goes away; .dev matches localhelm.dev; no migration ceremony needed locally.",
+      "alternatives_considered": [
+        "localslip.com as primary",
+        "Keep plugin id localberth",
+        "Keep ~/.localberth"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

@@ -36,7 +36,7 @@ export type PortLook = {
 	kind: PortLookKind;
 };
 
-const SKIP_LEASE_WITHOUT_FLEET = new Set(['localberth']);
+const SKIP_LEASE_WITHOUT_FLEET = new Set(['localslip', 'localberth']);
 
 function listeningOf(cells: Record<string, string>): boolean | null {
 	if (cells.listening === 'yes') return true;

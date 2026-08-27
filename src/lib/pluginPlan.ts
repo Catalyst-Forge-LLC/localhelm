@@ -61,7 +61,7 @@ export function formatPluginPlanLines(data: unknown): string[] {
 			if (rowAction === 'skip') {
 				const why =
 					typeof row.reason === 'string'
-						? row.reason.replace(/\s+—\s+localberth recipe.*$/, '')
+						? row.reason.replace(/\s+—\s+(localslip|localberth) recipe.*$/, '')
 						: 'nothing to do';
 				return `${id}  —  ${why}`;
 			}

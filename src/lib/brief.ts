@@ -12,7 +12,7 @@ export async function buildBrief(loaded: LoadedManifest): Promise<string> {
 	const plugins = await loadPlugins(loaded);
 	const leases: BriefLease[] = [];
 	for (const plug of plugins) {
-		if (plug.id !== 'localberth') continue;
+		if (plug.id !== 'localslip') continue;
 		for (const board of asPluginBoards(await plug.plugin.board())) {
 			if (board.tab !== 'ports' || board.title === 'Observed') continue;
 			for (const row of board.rows) {

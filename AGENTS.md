@@ -24,7 +24,7 @@ This repository uses **ForgeTrail Lite**. Full protocol: `.forgetrail/FORGETRAIL
 
 - Package manager: **pnpm**. Language: **TypeScript ESM**. Node **22+**. License **Apache-2.0**.
 - Public name **LocalHelm**. CLI and npm package **`localhelm`**. Never ship a binary named `helm`.
-- Pairing: **LocalSlip** is the slip (local DNS for ports); **LocalHelm** is the wheel / control panel. (Formerly LocalBerth — rename in flight; lease CLI/plugin may still say `localberth` until that checkout finishes.)
+- Pairing: **LocalSlip** is the slip (local DNS for ports); **LocalHelm** is the wheel / control panel. (Formerly LocalBerth.)
 - Compose with IngotVault, LocalSlip (née LocalBerth), and FilePress siblings. Do not reimplement them.
 - **No shop-specific shelf.** Do not read or write `catalyst-forge/src/lib/projects.js` or bake Catalyst Forge (or any other catalog) into this package. Export generic JSON; consumers adapt.
 

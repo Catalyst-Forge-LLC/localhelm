@@ -1,6 +1,6 @@
 export type PortFirewallFilter = 'applied' | 'needs-elevation' | 'skipped' | 'wanted';
 
-/** Same chip groups as the LocalBerth dashboard FilterBar. */
+/** Same chip groups as the LocalSlip dashboard FilterBar. */
 export type PortBoardFilters = {
 	listening?: boolean;
 	/** true = not loopback; false = loopback. */

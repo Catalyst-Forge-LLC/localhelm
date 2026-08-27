@@ -6,7 +6,7 @@
 
 **Status for the products you ship.**
 
-A named fleet of local repos: git, npm, and dependents, in one place. Pairing: **LocalBerth** is the slip; **LocalHelm** is the wheel.
+A named fleet of local repos: git, npm, and dependents, in one place. Pairing: **LocalSlip** is the slip; **LocalHelm** is the wheel.
 
 ```bash
 pnpm add -g localhelm

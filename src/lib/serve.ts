@@ -9,8 +9,8 @@ function packageRoot(): string {
 	return path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 }
 
-function tryLocalBerthPort(): number | null {
-	const result = spawnSync('localberth', ['get', 'localhelm'], {
+function tryLeasePort(bin: string): number | null {
+	const result = spawnSync(bin, ['get', 'localhelm'], {
 		encoding: 'utf8',
 		windowsHide: true,
 		shell: process.platform === 'win32',
@@ -20,12 +20,12 @@ function tryLocalBerthPort(): number | null {
 	return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-export type PortSource = 'flag' | 'localberth' | 'default';
+export type PortSource = 'flag' | 'localslip' | 'default';
 
 function choosePort(requested?: number): { port: number; source: PortSource } {
 	if (requested) return { port: requested, source: 'flag' };
-	const leased = tryLocalBerthPort();
-	if (leased) return { port: leased, source: 'localberth' };
+	const leased = tryLeasePort('localslip') ?? tryLeasePort('localberth');
+	if (leased) return { port: leased, source: 'localslip' };
 	return { port: DEFAULT_DASHBOARD_PORT, source: 'default' };
 }
 
@@ -54,7 +54,7 @@ export async function serveDashboard(opts: { host?: string; port?: number } = {}
 			},
 		},
 	);
-	const how = source === 'localberth' ? ' (LocalBerth lease)' : source === 'flag' ? ' (--port)' : '';
+	const how = source === 'localslip' ? ' (LocalSlip lease)' : source === 'flag' ? ' (--port)' : '';
 	console.error(`localhelm serve  http://${host}:${port}${how}`);
 	await new Promise<void>((resolve, reject) => {
 		child.on('exit', (code) => {

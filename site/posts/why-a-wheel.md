@@ -9,4 +9,4 @@ tags: [notes]
 
 A name holds the checkout still. You scan a parent folder, check the ones you ship, and read git, npm, and pins in one place. Writes print a plan. `--apply` is the confirm. Never `--force`.
 
-**LocalBerth** is the slip — a name for a port you still type. **LocalHelm** is the wheel — a name for a product you still publish.
+**LocalSlip** is the slip — a name for a port you still type. **LocalHelm** is the wheel — a name for a product you still publish.

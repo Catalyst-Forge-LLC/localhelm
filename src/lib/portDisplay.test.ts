@@ -16,11 +16,11 @@ const leaseCols = [
 describe('portDisplay', () => {
 	it('drops listening, health, log, and firewall on lease boards', () => {
 		assert.deepEqual(
-			portTableColumns('localberth', 'leases', leaseCols).map((col) => col.id),
+			portTableColumns('localslip', 'leases', leaseCols).map((col) => col.id),
 			['port', 'bind', 'process', 'recipe'],
 		);
 		assert.deepEqual(
-			portTableColumns('localberth', 'observed', [{ id: 'bind', label: 'bind' }]),
+			portTableColumns('localslip', 'observed', [{ id: 'bind', label: 'bind' }]),
 			[{ id: 'bind', label: 'bind' }],
 		);
 	});

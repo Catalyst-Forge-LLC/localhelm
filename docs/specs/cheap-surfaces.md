@@ -5,13 +5,13 @@
 **Related:** `docs/PHASE_1_BRIEF.md` §10–11, `TODO.md` M4, `.forgetrail/IDEAS.md`, sibling [`localberth/docs/specs/cheap-surfaces.md`](../../../localberth/docs/specs/cheap-surfaces.md)  
 **Surfaces:** Today / Fleet / Ports host, CLI `status` / export, activity log
 
-Pairing: **LocalSlip is the slip (local DNS for ports). LocalHelm is the wheel.** This spec is what the wheel can show or host. Port lifecycle, logs, and park stay on LocalSlip (née LocalBerth until that rename lands).
+Pairing: **LocalSlip is the slip (local DNS for ports). LocalHelm is the wheel.** This spec is what the wheel can show or host. Port lifecycle, logs, and park stay on LocalSlip.
 
 ---
 
 ## 1. Problem
 
-The board already walks git, npm, pins, FilePress, and LocalBerth. Most of the next value is **already on disk** and not on the glass. The operator still opens a folder, a log, or a second CLI to answer questions the dashboard just computed.
+The board already walks git, npm, pins, FilePress, and LocalSlip. Most of the next value is **already on disk** and not on the glass. The operator still opens a folder, a log, or a second CLI to answer questions the dashboard just computed.
 
 This week proved the pattern: a missing recipe, a hyphenated folder, and a leaked `PORT` were all **facts we had or could have shown**. The expensive part was not knowing.
 
@@ -55,7 +55,7 @@ This week proved the pattern: a missing recipe, a hyphenated folder, and a leake
 | Term | Meaning |
 | ---- | ------- |
 | **Family** | Lease / fleet ids that share a stem (`dictawhisper`, `dictawhisper-api`, `dictawhisper-site`). Hyphens fold. |
-| **Park** | LocalBerth: stop + hide + **keep the port**. See the sibling spec. |
+| **Park** | LocalSlip: stop + hide + **keep the port**. See the sibling spec. |
 | **Archive** | LocalHelm: hide from Today (and optionally Fleet) **without** unenroll-delete. Path stays. Restore is one confirm. |
 | **Brief** | Markdown of Today + listening Ports, for a human or an agent session start. |
 | **Look** | A Today card that is not a gold write — recipe missing, park candidate, family split (UI up, API down). |
@@ -89,7 +89,7 @@ Cost: **Free** = format or filter existing JSON. **Cheap** = one extra local com
 
 **F8. Env the start will inject.** Ports confirm already shows the recipe. Add `PORT=<lease> HOST=<bind>` on the same line. That is how the 7777→8008 leak becomes visible **before** confirm.
 
-**F9. Activity → row.** Activity JSON already has titles like `localberth start dictawhisper`. Link the id if it matches a fleet or lease.
+**F9. Activity → row.** Activity JSON already has titles like `localslip start dictawhisper`. Link the id if it matches a fleet or lease.
 
 **F10. Site vs package already labeled.** Keep. Do not add a third name.
 
@@ -100,10 +100,10 @@ Cost: **Free** = format or filter existing JSON. **Cheap** = one extra local com
 - **Not** `unenroll` (that drops the row). **Not** delete. **Not** `release` (that frees the port).
 - Persist `.localhelm/archive.json` (gitignored, next to activity): `{ ids: string[], archivedAt }`.
 - Today and default Fleet omit archived ids. A small “Archived (N)” toggle or Fleet filter shows them. Restore confirms and removes the id.
-- Optional confirm extra: “Also park LocalBerth leases in this family” — **plan only**; apply calls the LocalBerth plugin `park` (sibling spec). LocalHelm does not stop processes itself.
+- Optional confirm extra: “Also park LocalSlip leases in this family” — **plan only**; apply calls the LocalSlip plugin `park` (sibling spec). LocalHelm does not stop processes itself.
 - **Not in this slice:** moving the folder to workspace `__ARCHIVE/`. The machine already has that folder as a human habit. A later plan can propose `git` + move with a harsh confirm. v1 archive is visibility.
 
-**C2. Save recipe without start.** Ports confirm today saves on Start. A “Save guess” that applies `recipe` only (`writes: true`, no spawn) is a LocalBerth plugin action. LocalHelm hosts the button.
+**C2. Save recipe without start.** Ports confirm today saves on Start. A “Save guess” that applies `recipe` only (`writes: true`, no spawn) is a LocalSlip plugin action. LocalHelm hosts the button.
 
 **C3. Guess all missing recipes.** One plan: every lease with no cwd. Confirm writes recipes only. Start stays per row or family.
 
@@ -111,9 +111,9 @@ Cost: **Free** = format or filter existing JSON. **Cheap** = one extra local com
 
 **C5. npm progress.** Status fan-out already exists. A header “checking 8 / 15 names…” is a busy label, not a new API.
 
-**C6. Family start/stop.** Toolbar on Ports: Start family / Stop family. Plan lists each lease LocalBerth would write. Same plugin apply, multiple ids. We already have bulk lease checks (`?leases=`).
+**C6. Family start/stop.** Toolbar on Ports: Start family / Stop family. Plan lists each lease LocalSlip would write. Same plugin apply, multiple ids. We already have bulk lease checks (`?leases=`).
 
-**C7. Quiet sites.** Stop every `*-site` lease that is listening, minus `always` kinds if LocalBerth exposes `kind`. Confirm lists names. Night / meeting button.
+**C7. Quiet sites.** Stop every `*-site` lease that is listening, minus `always` kinds if LocalSlip exposes `kind`. Confirm lists names. Night / meeting button.
 
 ### 5.3 Later / dear (parked here so we do not pretend they are cheap)
 
@@ -133,7 +133,7 @@ Cost: **Free** = format or filter existing JSON. **Cheap** = one extra local com
 | `localhelm.fleet.json` | Enrollment. Unchanged by archive. |
 | `.localhelm/archive.json` | Hidden ids. Gitignored. |
 | `.localhelm/activity.json` | Brief + F9. Already shipped. |
-| Plugin boards | Recipes, listen, family. Source of truth on LocalBerth / FilePress. |
+| Plugin boards | Recipes, listen, family. Source of truth on LocalSlip / FilePress. |
 
 No new cloud. No schema in a sibling database from this package.
 

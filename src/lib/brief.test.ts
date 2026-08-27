@@ -36,11 +36,11 @@ describe('formatBrief', () => {
 				{ id: 'dictawhisper', listening: true, recipe: 'pnpm serve' },
 				{ id: 'dictawhisper-site', listening: false, recipe: 'pnpm site:dev' },
 			],
-			activityTitles: ['localberth start dictawhisper'],
+			activityTitles: ['localslip start dictawhisper'],
 		});
 		assert.match(md, /publish gui4cli 0.0.1/);
 		assert.match(md, /dirty localhelm|push localhelm/);
 		assert.match(md, /down with recipe dictawhisper-site/);
-		assert.match(md, /localberth start dictawhisper/);
+		assert.match(md, /localslip start dictawhisper/);
 	});
 });

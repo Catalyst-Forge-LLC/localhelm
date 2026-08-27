@@ -18,7 +18,7 @@ localhelm status
 localhelm serve
 ```
 
-**LocalBerth** is the slip; **LocalHelm** is the wheel.
+**LocalSlip** is the slip; **LocalHelm** is the wheel.
 
 After you install, `localhelm serve` opens the dashboard at `http://127.0.0.1:4321`.
 

@@ -837,7 +837,7 @@
 	function startFamilyJob(action: 'start' | 'stop', seeds?: string[]): void {
 		const ids = seeds?.length ? familyJobIds(seeds) : familyIdsFromChecked();
 		if (!ids.length) return;
-		void startPluginJob(leaseBoard?.plugin ?? 'localberth', action, ids, action === 'start' ? 'Start family' : 'Stop family');
+		void startPluginJob(leaseBoard?.plugin ?? 'localslip', action, ids, action === 'start' ? 'Start family' : 'Stop family');
 	}
 
 	function startArchive(ids: string[], restore: boolean): void {
@@ -1134,7 +1134,7 @@
 		data?: unknown,
 	): string {
 		if (!applyIds.length) {
-			if (plugin === 'localberth') {
+			if (plugin === 'localslip') {
 				const reason = firstPlanReason(data);
 				if (reason.includes('no recipe') || reason.includes('no matching folder')) {
 					return 'Start needs a folder and a command. The lease name may not match the checkout (temperpass-site → temper-pass, or dictawhisper-api → dictawhisper). No sibling matched this name.';
@@ -1148,9 +1148,9 @@
 			}
 			return writeIds ? 'Already current — nothing to write.' : 'The plan found nothing to do.';
 		}
-		if (plugin === 'localberth') {
+		if (plugin === 'localslip') {
 			if (action === 'stop') {
-				return 'LocalBerth stops the process tree on this lease. The lease stays. Observed-only rows are not killed.';
+				return 'LocalSlip stops the process tree on this lease. The lease stays. Observed-only rows are not killed.';
 			}
 			if (action === 'park') {
 				return 'Stops if we started it, then hides the lease. The port stays yours. Not a release.';
@@ -1167,9 +1167,9 @@
 			const rows = data && typeof data === 'object' ? (data as { rows?: unknown }).rows : null;
 			const first = Array.isArray(rows) && rows[0] && typeof rows[0] === 'object' ? (rows[0] as Record<string, unknown>) : null;
 			if (typeof first?.proposedCwd === 'string') {
-				return 'No recipe stored yet. Confirm saves this guess (folder + command) and starts. You can change it later with localberth recipe.';
+				return 'No recipe stored yet. Confirm saves this guess (folder + command) and starts. You can change it later with localslip recipe.';
 			}
-			return 'LocalBerth starts the lease recipe (default pnpm serve) detached. Closing LocalHelm does not stop it.';
+			return 'LocalSlip starts the lease recipe (default pnpm serve) detached. Closing LocalHelm does not stop it.';
 		}
 		if (action === 'push') {
 			return 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.';
@@ -1371,7 +1371,7 @@
 
 	async function startPluginJob(plugin: string, action: string, ids: string[], label: string): Promise<void> {
 		if (ids.length === 0) return;
-		const unit = plugin === 'localberth' ? 'lease' : 'site';
+		const unit = plugin === 'localslip' ? 'lease' : 'site';
 		const scope = ids.length === 1 ? ids[0] : `${ids.length} ${unit}s`;
 		await run(
 			ids.length === 1 ? `planning ${action} ${ids[0]}` : `planning ${action} for ${ids.length} ${unit}s`,
@@ -1787,8 +1787,8 @@
 					{/if}
 					{#if port}
 						<span class="dim">
-							· serving 127.0.0.1:{port}{portSource === 'localberth'
-								? ' (port leased from LocalBerth)'
+							· serving 127.0.0.1:{port}{portSource === 'localslip'
+								? ' (port leased from LocalSlip)'
 								: portSource === 'flag'
 									? ' (--port)'
 									: ''}
@@ -2259,7 +2259,7 @@
 									{/if}
 								</div>
 							{:else if statusReady}
-								<p class="dim small">Enroll the localberth checkout to expose <code>localhelm.plugin.mjs</code>.</p>
+								<p class="dim small">Enroll the localslip checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 							{/if}
 						</div>
 					</section>
@@ -2558,7 +2558,7 @@
 														<a
 															class="open-link"
 															href={localHref}
-															target="localberth-open"
+															target="localslip-open"
 															rel="noopener"
 															aria-label={`Open ${row.label ?? row.id} locally`}
 														>
@@ -2630,7 +2630,7 @@
 			{:else if !portBoards.length}
 				<section class="panel">
 					<h2>Ports</h2>
-					<p class="hint">No Ports plugin loaded. Enroll the localberth checkout to expose <code>localhelm.plugin.mjs</code>.</p>
+					<p class="hint">No Ports plugin loaded. Enroll the localslip checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 				</section>
 			{:else}
 				<div class="subtabs" role="tablist" aria-label="Port views">
@@ -2678,7 +2678,7 @@
 								<h2>Stacks</h2>
 								<InfoHint
 									summary="One row per family. Start and Stop run that family’s leases."
-									detail="A stack is fleet + lease ids that share a stem (hyphens fold; -site and -api strip). Each button plans first, then confirm. Claim and release stay on the localberth CLI."
+									detail="A stack is fleet + lease ids that share a stem (hyphens fold; -site and -api strip). Each button plans first, then confirm. Claim and release stay on the localslip CLI."
 								/>
 							</div>
 						</div>
@@ -2748,7 +2748,7 @@
 								<InfoHint
 									summary={leaseActions
 										? 'Named leases. Start and Stop run the recipe detached. Stacks live on the Stacks subtab.'
-										: 'Observed listeners only. Claim and release stay on the localberth CLI.'}
+										: 'Observed listeners only. Claim and release stay on the localslip CLI.'}
 									detail={board.note}
 								/>
 							</div>
@@ -2876,7 +2876,7 @@
 															<a
 																class="open-link"
 																href={row.href}
-																target="localberth-open"
+																target="localslip-open"
 																rel="noopener"
 																aria-label={`Open ${row.label ?? row.id}`}
 															>
@@ -2923,13 +2923,13 @@
 					</section>
 				{/if}
 				<p class="dim small port-cli">
-					<code>localberth recipe name --cwd PATH</code>
+					<code>localslip recipe name --cwd PATH</code>
 					·
-					<code>localberth start name</code>
+					<code>localslip start name</code>
 					·
-					<code>localberth stop name</code>
+					<code>localslip stop name</code>
 					·
-					<code>localberth claim name --port N</code>
+					<code>localslip claim name --port N</code>
 				</p>
 			{/if}
 		{/if}

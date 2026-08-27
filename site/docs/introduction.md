@@ -4,7 +4,7 @@ title: Introduction
 
 **LocalHelm** is status for the products you ship. A named fleet of local repos: git, npm, and dependents.
 
-**LocalBerth** is the slip; **LocalHelm** is the wheel.
+**LocalSlip** is the slip; **LocalHelm** is the wheel.
 
 You have a folder of repos. `git status` in one of them answers that repo. After a morning of publishes, the scarce resource is knowing which products are dirty, unpublished, or still pinned to last week’s package.
 
