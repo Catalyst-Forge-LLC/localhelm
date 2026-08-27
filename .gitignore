@@ -3,6 +3,8 @@ node_modules/
 .pnpm-store/
 /build/
 /dist/
+site/docs/dist/
+site/build/
 .svelte-kit/
 *.log
 .DS_Store

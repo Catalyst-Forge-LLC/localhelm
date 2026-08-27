@@ -4,12 +4,12 @@ _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking
 
 ## Tech Stack
 
-- **App:** TypeScript ESM CLI (`src/`) + SvelteKit dashboard (`app/`) + later FilePress site (`site/` + `/docs`)
+- **App:** TypeScript ESM CLI (`src/`) + SvelteKit dashboard (`app/`) + FilePress site (`site/` + `/docs`)
 - **Language:** TypeScript strict, Node 22+
 - **Package manager:** pnpm
 - **Storage:** `localhelm.fleet.json` (`workspaceRoot: "."`) + `.localhelmignore` (scan) + `.localhelm/job.lock` + `.localhelm/activity.json` (dashboard log, gitignored). No PocketBase, no accounts, no telemetry.
 - **AI/LLM:** none
-- **Deploy:** npm `localhelm` (operator publishes). Site later at localhelm.dev
+- **Deploy:** npm `localhelm` (operator publishes). FilePress site at **localhelm.dev** (`pnpm ship` from `site/`; not in the npm tarball)
 - **Key dependencies:** Node built-ins + TypeScript. No catalog adapter.
 
 ## Project Structure
@@ -19,7 +19,7 @@ src/lib/     fleet, scan, git, npm, pins, status, deps, bump, export, lock, casc
 src/cli/     localhelm commands
 bin/         localhelm.mjs → dist
 app/         SvelteKit dashboard (checkout only; localhelm serve)
-site/        (later) FilePress + /docs
+site/        FilePress explainer + /docs (localhelm.dev; not in the npm tarball)
 ```
 
 ## Data Model
@@ -187,3 +187,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Sites tab: a FilePress `live` http(s) URL makes the site name and live cell open in a new tab. `—` and non-http values stay plain text.
 - Plugin confirm lines use the job only. Ship shows `pnpm ship in …`, not leftover `pnpm update getfilepress`. Push uses its git reason. Sync still shows the engine update.
 - Today and Fleet share `fleetWriteIds`. Cut version appears in Fleet **needs you** (not “nothing to do”) whenever Today would offer it.
+- FilePress site at `site/` (modeled on LocalBerth): pages + `/docs` mount, `localhelm-site` on **5188**, `pnpm ship` → Cloudflare Pages project `localhelm`. Logo already in `site/static/`.

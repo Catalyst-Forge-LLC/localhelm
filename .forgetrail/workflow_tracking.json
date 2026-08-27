@@ -717,6 +717,16 @@
       "rationale": "Operator 2026-08-26: asked what Needs you vs Looks means, and to filter Needs you to one write.",
       "alternatives_considered": ["Filter on gold need only", "Add a Pins chip", "SessionStorage only"],
       "status": "active"
+    },
+    {
+      "id": "d48",
+      "timestamp": "2026-08-27T12:22:00Z",
+      "phase": "2-scaffolding",
+      "session": 19,
+      "decision": "FilePress explainer lives in this repo at site/ (pages + /docs mount), modeled on LocalBerth. Site id localhelm, lease localhelm-site on 5188, Cloudflare Pages project localhelm. Not in the npm tarball except site/static/logo.png.",
+      "rationale": "Operator 2026-08-27: we don't have a FilePress site for localhelm itself; model it after LocalBerth.",
+      "alternatives_considered": ["Hold until first npm cut", "Host docs only on GitHub", "Different IA than LocalBerth"],
+      "status": "active"
     }
   ],
   "gotchas": [

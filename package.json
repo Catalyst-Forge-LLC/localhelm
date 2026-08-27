@@ -48,7 +48,12 @@
     "cli": "tsx src/cli/main.ts",
     "serve": "tsx src/cli/main.ts serve",
     "test": "tsx --test src/lib/*.test.ts",
-    "prepublishOnly": "tsc -p tsconfig.json"
+    "prepublishOnly": "tsc -p tsconfig.json",
+    "site:dev": "pnpm --dir site dev",
+    "site:build": "pnpm --dir site build",
+    "site:check": "pnpm --dir site check",
+    "site:deploy": "pnpm --dir site run ship",
+    "ship": "pnpm --dir site run ship"
   },
   "publishConfig": {
     "access": "public"

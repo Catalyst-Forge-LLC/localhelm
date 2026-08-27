@@ -1,0 +1,24 @@
+{
+	"sections": [
+		{
+			"title": "Getting started",
+			"items": [
+				{ "id": "introduction", "title": "Introduction" },
+				{ "id": "install", "title": "Install" },
+				{ "id": "quick-start", "title": "Quick start" }
+			]
+		},
+		{
+			"title": "Using LocalHelm",
+			"items": [
+				{ "id": "enroll", "title": "Enroll" },
+				{ "id": "dashboard", "title": "Dashboard" },
+				{ "id": "publish", "title": "Publish" }
+			]
+		},
+		{
+			"title": "Reference",
+			"items": [{ "id": "commands", "title": "Commands" }]
+		}
+	]
+}

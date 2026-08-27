@@ -33,7 +33,7 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 
 - [x] Selected `origin` push with harsh confirm _(named ids + confirm copy; never `--force`)_
 - [x] Optional publish action _(plan then named-id apply: bump+commit+push only if needed, then npm publish; never `--force`)_
-- [ ] FilePress `site/` + `/docs` on localhelm.dev
+- [x] FilePress `site/` + `/docs` on localhelm.dev _(modeled on LocalBerth, 2026-08-27)_
 - [ ] Tag on bump
 
 ## Cheap surfaces (draft spec)
