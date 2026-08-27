@@ -1577,6 +1577,7 @@
 	function todayBadges(row: Project): Badge[] {
 		return badges(row).filter((badge) => {
 			if (badge.text === 'nothing to do') return false;
+			if (row.unpublishedAhead && (badge.text.includes('unpublished') || badge.text.includes('never published'))) return false;
 			if (canPush(row) && badge.text.endsWith(' to push')) return false;
 			return true;
 		});
@@ -1652,7 +1653,7 @@
 		return pin.onLatest === false ? 'pin-behind' : 'pin-ok';
 	}
 
-	type NeedAction = { id: FleetWriteId; label: string; title: string; run: () => void };
+	type NeedAction = { id: FleetWriteId; label: string; title: string; run: () => void; disabled?: boolean };
 
 	function needActionTitle(id: FleetWriteId, row: Project): string {
 		if (id === 'publish') return 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.';
@@ -1661,8 +1662,17 @@
 		return `Origin has ${row.commitsSinceNpm ?? 0} commit${row.commitsSinceNpm === 1 ? '' : 's'} since npm ${row.npm.latest ?? row.localVersion}. Cuts a patch, then publishes. Confirm in the modal. Use Fleet to pick minor or major.`;
 	}
 
+	function blockedPublishTitle(row: Project): string {
+		const blocked = whyNotPublish(row);
+		if (blocked === 'dirty') {
+			return 'Commit or stash leftover files first. Publish skips a dirty tree so the npm tarball does not include them.';
+		}
+		if (blocked) return `Publish is blocked (${blocked}). Fix that, then this button turns on.`;
+		return needActionTitle('publish', row);
+	}
+
 	function needActions(row: Project): NeedAction[] {
-		return writesFor(row).map((id) => ({
+		const acts: NeedAction[] = writesFor(row).map((id) => ({
 			id,
 			label: fleetWriteLabel(id, row),
 			title: needActionTitle(id, row),
@@ -1672,6 +1682,16 @@
 				else startCascade(row.id);
 			},
 		}));
+		if (row.unpublishedAhead && !acts.some((act) => act.id === 'publish')) {
+			acts.unshift({
+				id: 'publish',
+				label: fleetWriteLabel('publish', row),
+				title: blockedPublishTitle(row),
+				run: () => {},
+				disabled: true,
+			});
+		}
+		return acts;
 	}
 
 	function leftoverBadges(row: Project): Badge[] {
@@ -1972,8 +1992,8 @@
 												{#each acts as act, i (act.id)}
 													<button
 														class="btn btn-sm"
-														class:btn-write={i === 0}
-														disabled={Boolean(busy)}
+														class:btn-write={i === 0 && !act.disabled}
+														disabled={Boolean(busy) || Boolean(act.disabled)}
 														onclick={act.run}
 														title={act.title}
 													>
@@ -2369,7 +2389,7 @@
 														<button
 															type="button"
 															class="btn btn-sm btn-write"
-															disabled={Boolean(busy)}
+															disabled={Boolean(busy) || Boolean(act.disabled)}
 															onclick={act.run}
 														>
 															{act.label}

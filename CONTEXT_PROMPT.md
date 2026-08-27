@@ -148,7 +148,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 13 — 2026-08-23
 
 - Push of commits that are already ahead no longer waits for a clean tree. Dirty files stay local. Pull / publish / cascade still skip dirty.
-- Today / Fleet write buttons share the same skip reasons as the plan (`whyNotPush` / `whyNotPublish`). Gold Publish is hidden when dirty, diverged, or missing origin/upstream. Write pins is hidden when the only dependents are local links or dirty.
+- Today / Fleet write buttons share the same skip reasons as the plan (`whyNotPush` / `whyNotPublish`). Unpublished-ahead still shows **Publish** when dirty/diverged/no origin — the button is disabled with the skip reason. Apply stays off. Write pins is hidden when the only dependents are local links or dirty.
 - Today does not repeat the ahead count in the subtitle and badge when a Push button already has it. A failed push puts a short reason on the banner (SSH publickey → "origin rejected the SSH key"). Operator 2026-08-23: set fleet `origin` remotes to HTTPS (`github.com` and `github-acmegeek` aliases). Backup/archive remotes unchanged. anticonfab still has no origin.
 - **Land** (Sites + Today site cards, CLI `localhelm land <site-id>`): one confirm for needed engine package writes (`filepress`), matching fleet package (`aibreze-site` → `aibreze`), then FilePress Sync → Push → Ship. Only already-needed writes. Stop on first failure. Publish OTP when a publish step is included. Never `--force`. Ship is skipped when the site tree fingerprint matches `.localhelm/land-ships.json` (recorded after a successful Land or Sites Ship). Land plan uses a one-pass FilePress `land` plan and status only for the engine/companion ids.
 
@@ -188,4 +188,5 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Ports: Leases / Stacks / Observed. Lease filters copy LocalBerth (Listening/Quiet, LAN/Loopback, Conflict/Ephemeral, firewall). Stacks is one row per family with its own Start/Stop. Observed only gets Bind. `?ports=stacks` or `observed`.
 - Plugin confirm lines use the job only. Ship shows `pnpm ship in …`, not leftover `pnpm update getfilepress`. Push uses its git reason. Sync still shows the engine update.
 - Today and Fleet share `fleetWriteIds`. Cut version appears in Fleet **needs you** (not “nothing to do”) whenever Today would offer it.
+- Unpublished-ahead always shows **Publish** on the row. Dirty/diverged/no-origin disable it with the skip reason; they do not replace it with an unpublished pill.
 - FilePress site at `site/` (modeled on LocalBerth): pages + `/docs` mount, FilePress id `localhelm`, lease `localhelm-site` on **5201**, `pnpm ship` → Cloudflare Pages project `localhelm`. Logo already in `site/static/`.

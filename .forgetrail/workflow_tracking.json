@@ -757,6 +757,16 @@
       "rationale": "Operator 2026-08-27: select a chip then press a button is too awkward.",
       "alternatives_considered": ["Keep chips plus toolbar", "Only Start on down stacks"],
       "status": "active"
+    },
+    {
+      "id": "d52",
+      "timestamp": "2026-08-27T21:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 20,
+      "decision": "Unpublished-ahead always shows a Publish button on Today and Fleet. When whyNotPublish blocks (dirty, diverged, no origin), the button is disabled with that reason. Apply still skips. The unpublished leftover pill is hidden once Publish is on the row.",
+      "rationale": "Operator 2026-08-27: Fleet showed only an unpublished pill; the Publish button was gone because the tree was dirty.",
+      "alternatives_considered": ["Keep the unpublished pill only", "Open a skip plan on click"],
+      "status": "active"
     }
   ],
   "gotchas": [
