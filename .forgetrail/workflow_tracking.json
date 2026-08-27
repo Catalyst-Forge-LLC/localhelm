@@ -737,6 +737,16 @@
       "rationale": "Operator 2026-08-27: open locally from Sites, not only Ports. 5188 was already docupuncture-site so the first claim never landed.",
       "alternatives_considered": ["Link the exact-id lease (would open the dashboard)", "Have FilePress set href from leasePort", "Reuse 5188"],
       "status": "active"
+    },
+    {
+      "id": "d50",
+      "timestamp": "2026-08-27T17:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 20,
+      "decision": "Ports subtabs are Leases / Stacks / Observed. Lease and Observed filter chips match the LocalBerth dashboard (Listen, Bind, Lease, Firewall). Stacks is its own pane; a chip checks that family without leaving Stacks. Today still jumps to Leases with the family checked.",
+      "rationale": "Operator 2026-08-27: Stacks sat in a strange place on Leases; wanted LocalBerth-style lease filters.",
+      "alternatives_considered": ["Keep stacks above the lease table", "Only add Listening/Quiet", "Persist filters in the URL"],
+      "status": "active"
     }
   ],
   "gotchas": [

@@ -66,6 +66,12 @@ export {
 } from './siteDisplay.js';
 export { fleetProjectMeta, fleetVersionLabel, fleetVersionNote } from './fleetDisplay.js';
 export { portCellValue, portRecipeLabel, portTableColumns } from './portDisplay.js';
+export {
+	bindIsLan,
+	portFiltersActive,
+	rowMatchesPortFilters,
+} from './portFilters.js';
+export type { PortBoardFilters, PortFirewallFilter } from './portFilters.js';
 export { applyFetch, applyPull, applyPush, countCommitsSinceVersion, planFetch, planPull, planPush, requirePushIds } from './git.js';
 export type { GitJobRow } from './git.js';
 export { IGNORE_FILE_NAME, loadScanIgnore } from './ignorefile.js';

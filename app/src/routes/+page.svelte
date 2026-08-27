@@ -26,7 +26,9 @@
 	} from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { fleetProjectMeta, fleetVersionLabel } from '$lib/fleetDisplay';
+	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
+	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
 	import { siteCellValue, siteLiveHref, siteLocalHref, siteNeedsEngineSync, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		idsToSelection,
@@ -144,7 +146,7 @@
 	};
 	type LogEntry = { at: string; time: string; title: string; body: string };
 	type TabId = 'today' | 'fleet' | 'sites' | 'ports';
-	type PortPane = 'leases' | 'observed';
+	type PortPane = 'leases' | 'stacks' | 'observed';
 	type NeedFilter = 'all' | 'publish' | 'cut' | 'push';
 
 	let inventory = $state<Inventory | null>(null);
@@ -166,6 +168,8 @@
 	let selectedIds = $state<Record<string, boolean>>({});
 	let selectedSites = $state<Record<string, boolean>>({});
 	let selectedPorts = $state<Record<string, boolean>>({});
+	let leaseFilters = $state<PortBoardFilters>({});
+	let observedFilters = $state<PortBoardFilters>({});
 	let bumpKind = $state<Record<string, BumpKind>>({});
 
 	let pluginBoards = $state<PluginBoard[]>([]);
@@ -259,6 +263,12 @@
 	);
 	const observedBoard = $derived(portBoards.find((board) => board.title === 'Observed') ?? null);
 	const visiblePortBoard = $derived(portPane === 'observed' ? observedBoard : leaseBoard);
+	const leaseViewRows = $derived(
+		(leaseBoard?.rows ?? []).filter((row) => rowMatchesPortFilters(row.cells, leaseFilters, 'leases')),
+	);
+	const observedViewRows = $derived(
+		(observedBoard?.rows ?? []).filter((row) => rowMatchesPortFilters(row.cells, observedFilters, 'observed')),
+	);
 	const portsNeedingYou = $derived((leaseBoard?.rows ?? []).filter((row) => portNeedsYou(row.cells)));
 	const portFamilyCards = $derived(
 		portFamilies({
@@ -339,7 +349,7 @@
 	}
 
 	function parsePortPane(raw: string | null): PortPane | null {
-		if (raw === 'leases' || raw === 'observed') return raw;
+		if (raw === 'leases' || raw === 'stacks' || raw === 'observed') return raw;
 		return null;
 	}
 
@@ -709,10 +719,18 @@
 		return formatPluginPlanLines(data);
 	}
 
-	function openPortsFamily(ids: string[]): void {
+	function checkPortsFamily(ids: string[]): void {
 		selectedPorts = idsToSelection(ids);
+	}
+
+	function openPortsFamily(ids: string[]): void {
+		checkPortsFamily(ids);
 		portPane = 'leases';
 		setTab('ports');
+	}
+
+	function stackIsChecked(ids: string[]): boolean {
+		return ids.length > 0 && ids.every((id) => selectedPorts[id]);
 	}
 
 	function chipsFor(id: string, hide?: 'fleet' | 'sites' | 'ports') {
@@ -1075,13 +1093,13 @@
 		return boardActionIds(board, action).filter((id) => selectedPorts[id]);
 	}
 
-	function portAllChecked(board: PluginBoard): boolean {
-		return board.rows.length > 0 && board.rows.every((row) => selectedPorts[row.id]);
+	function portAllChecked(rows: { id: string }[]): boolean {
+		return rows.length > 0 && rows.every((row) => selectedPorts[row.id]);
 	}
 
-	function togglePortAll(board: PluginBoard, on: boolean): void {
+	function togglePortAll(rows: { id: string }[], on: boolean): void {
 		const next = { ...selectedPorts };
-		for (const row of board.rows) next[row.id] = on;
+		for (const row of rows) next[row.id] = on;
 		selectedPorts = next;
 	}
 
@@ -2569,6 +2587,18 @@
 					<button
 						type="button"
 						role="tab"
+						id="tab-stacks"
+						aria-controls="pane-ports"
+						aria-selected={portPane === 'stacks'}
+						class:active={portPane === 'stacks'}
+						onclick={() => setPortPane('stacks')}
+					>
+						Stacks
+						{#if portFamilyCards.length}<span class="count quiet">{portFamilyCards.length}</span>{/if}
+					</button>
+					<button
+						type="button"
+						role="tab"
 						id="tab-observed"
 						aria-controls="pane-ports"
 						aria-selected={portPane === 'observed'}
@@ -2579,17 +2609,73 @@
 						{#if observedBoard}<span class="count quiet">{observedBoard.rows.length}</span>{/if}
 					</button>
 				</div>
-				{#if visiblePortBoard}
+				{#if portPane === 'stacks'}
+					<section class="panel plugin-board" id="pane-ports" aria-labelledby="tab-stacks">
+						<div class="section-head">
+							<div>
+								<h2>Stacks</h2>
+								<InfoHint
+									summary="One chip per family. Click to check those leases, then Start family or Stop family."
+									detail="A stack is fleet + lease ids that share a stem (hyphens fold; -site and -api strip). Start and Stop run the LocalBerth recipe for every unparked member. Claim and release stay on the localberth CLI."
+								/>
+							</div>
+							<div class="group-buttons">
+								<Tooltip title="Plans start for every unparked lease in the checked families.">
+									<button
+										class="btn btn-write"
+										disabled={Boolean(busy) || !familyIdsFromChecked().length}
+										onclick={() => startFamilyJob('start')}
+									>
+										<Icon icon="lucide:play" />
+										Start family
+									</button>
+								</Tooltip>
+								<Tooltip title="Plans stop for every unparked lease in the checked families.">
+									<button
+										class="btn btn-write"
+										disabled={Boolean(busy) || !familyIdsFromChecked().length}
+										onclick={() => startFamilyJob('stop')}
+									>
+										<Icon icon="lucide:square" />
+										Stop family
+									</button>
+								</Tooltip>
+							</div>
+						</div>
+						{#if portFamilyCards.length}
+							<ul class="family-strip">
+								{#each portFamilyCards as family (family.stem)}
+									<li>
+										<Tooltip wide title={familyChipTip(family)}>
+											<button
+												type="button"
+												class="family-chip"
+												class:on={stackIsChecked(family.leaseIds)}
+												onclick={() => checkPortsFamily(family.leaseIds)}
+											>
+												<span class="id">{family.label}</span>
+												<span class="dim small">{family.bits}</span>
+											</button>
+										</Tooltip>
+									</li>
+								{/each}
+							</ul>
+						{:else if statusReady}
+							<p class="dim small">No stacks yet. A family appears when a fleet row and a lease share a stem.</p>
+						{/if}
+					</section>
+				{:else if visiblePortBoard}
 					{@const board = visiblePortBoard}
 					{@const leaseActions = portPane === 'leases'}
 					{@const portCols = portTableColumns(board.plugin, portPane, board.columns)}
-					<section class="panel plugin-board" id="pane-ports" role="tabpanel" aria-labelledby={portPane === 'observed' ? 'tab-observed' : 'tab-leases'}>
+					{@const viewRows = portPane === 'observed' ? observedViewRows : leaseViewRows}
+					<section class="panel plugin-board" id="pane-ports" aria-labelledby={portPane === 'observed' ? 'tab-observed' : 'tab-leases'}>
 						<div class="section-head">
 							<div>
 								<h2>{board.title}</h2>
 								<InfoHint
 									summary={leaseActions
-										? 'Named leases. Start and Stop run the recipe detached. Click a stack to check that family.'
+										? 'Named leases. Start and Stop run the recipe detached. Stacks live on the Stacks subtab.'
 										: 'Observed listeners only. Claim and release stay on the localberth CLI.'}
 									detail={board.note}
 								/>
@@ -2661,23 +2747,10 @@
 								</div>
 							{/if}
 						</div>
-						{#if leaseActions && portFamilyCards.length}
-							<div class="family-block">
-								<h3 class="looks-head">Stacks</h3>
-								<p class="hint">Click a stack to check those leases, then Start family or Stop family.</p>
-								<ul class="family-strip">
-									{#each portFamilyCards as family (family.stem)}
-										<li>
-											<Tooltip wide title={familyChipTip(family)}>
-												<button type="button" class="family-chip" onclick={() => openPortsFamily(family.leaseIds)}>
-													<span class="id">{family.label}</span>
-													<span class="dim small">{family.bits}</span>
-												</button>
-											</Tooltip>
-										</li>
-									{/each}
-								</ul>
-							</div>
+						{#if leaseActions}
+							<PortFilterBar variant="leases" bind:filters={leaseFilters} shown={viewRows.length} total={board.rows.length} />
+						{:else}
+							<PortFilterBar variant="observed" bind:filters={observedFilters} shown={viewRows.length} total={board.rows.length} />
 						{/if}
 						<div class="table-wrap">
 							<table>
@@ -2685,13 +2758,13 @@
 									<tr>
 										{#if leaseActions}
 											<th class="tick">
-												<input
-													type="checkbox"
-													aria-label={`Select all ${board.title} rows`}
-													checked={portAllChecked(board)}
-													indeterminate={board.rows.some((row) => selectedPorts[row.id]) && !portAllChecked(board)}
-													onchange={(event) => togglePortAll(board, event.currentTarget.checked)}
-												/>
+										<input
+											type="checkbox"
+											aria-label={`Select all ${board.title} rows`}
+											checked={portAllChecked(viewRows)}
+											indeterminate={viewRows.some((row) => selectedPorts[row.id]) && !portAllChecked(viewRows)}
+											onchange={(event) => togglePortAll(viewRows, event.currentTarget.checked)}
+										/>
 											</th>
 										{/if}
 										<th>{board.rowLabel ?? 'name'}</th>
@@ -2702,7 +2775,7 @@
 									</tr>
 								</thead>
 								<tbody>
-									{#each board.rows as row (row.id)}
+									{#each viewRows as row (row.id)}
 										<tr>
 											{#if leaseActions}
 												<td class="tick">
@@ -2765,8 +2838,12 @@
 											</td>
 										</tr>
 									{/each}
-									{#if !board.rows.length}
-										<tr><td class="empty" colspan={portCols.length + (leaseActions ? 3 : 2)}>Nothing here.</td></tr>
+									{#if !viewRows.length}
+										<tr>
+											<td class="empty" colspan={portCols.length + (leaseActions ? 3 : 2)}>
+												{board.rows.length ? (leaseActions ? 'No leases match.' : 'Nothing matches.') : 'Nothing here.'}
+											</td>
+										</tr>
 									{/if}
 								</tbody>
 							</table>
@@ -3657,14 +3734,6 @@
 		font-size: 1rem;
 	}
 
-	.family-block {
-		margin: 0 0 0.85rem;
-	}
-
-	.family-block .hint {
-		margin: 0 0 0.4rem;
-	}
-
 	.family-strip {
 		list-style: none;
 		margin: 0;
@@ -3689,6 +3758,11 @@
 	.family-chip:hover {
 		border-color: #6b6b74;
 		background: #333338;
+	}
+
+	.family-chip.on {
+		border-color: #c9a227;
+		background: #4a3a12;
 	}
 
 	.need-card {
