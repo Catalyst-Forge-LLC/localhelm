@@ -4,6 +4,7 @@ import {
 	siteCellValue,
 	siteEngineVersion,
 	siteLiveHref,
+	siteLocalHref,
 	siteNeedsEngineSync,
 	siteSyncLabel,
 	siteSyncTarget,
@@ -54,5 +55,16 @@ describe('siteDisplay', () => {
 		assert.equal(siteLiveHref({ live: '—' }), null);
 		assert.equal(siteLiveHref({ live: 'javascript:alert(1)' }), null);
 		assert.equal(siteLiveHref({}), null);
+	});
+
+	it('opens the *-site lease, not the dashboard lease', () => {
+		const leases = [
+			{ id: 'localhelm', href: 'http://127.0.0.1:4321/' },
+			{ id: 'localhelm-site', href: 'http://127.0.0.1:5201/' },
+		];
+		assert.equal(siteLocalHref('localhelm', leases), 'http://127.0.0.1:5201/');
+		assert.equal(siteLocalHref('localhelm', [{ id: 'localhelm', href: 'http://127.0.0.1:4321/' }]), null);
+		assert.equal(siteLocalHref('aibreze', [{ id: 'aibreze-site', href: 'http://127.0.0.1:5181/' }]), 'http://127.0.0.1:5181/');
+		assert.equal(siteLocalHref('localhelm-site', [{ id: 'localhelm-site' }]), null);
 	});
 });

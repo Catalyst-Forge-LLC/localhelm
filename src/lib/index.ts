@@ -57,6 +57,8 @@ export { bulkProgressLabel } from './bulkProgress.js';
 export {
 	siteCellValue,
 	siteEngineVersion,
+	siteLiveHref,
+	siteLocalHref,
 	siteNeedsEngineSync,
 	siteSyncLabel,
 	siteSyncTarget,

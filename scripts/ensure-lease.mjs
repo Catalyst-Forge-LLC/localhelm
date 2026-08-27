@@ -17,7 +17,11 @@ const got = spawnSync('localberth', ['get', name], { ...opt, stdio: ['ignore', '
 if (got.status === 0 && String(got.stdout || '').trim()) {
 	process.exit(0);
 }
-const claim = spawnSync('localberth', ['claim', name, '--port', port], { ...opt, stdio: 'inherit' });
+const claim = spawnSync('localberth', ['claim', name, '--port', port, '--or-next'], {
+	...opt,
+	stdio: 'inherit',
+});
 if (claim.error || claim.status !== 0) {
-	console.warn(`localberth: skip claim ${name} (install the CLI to pin this port to ${port})`);
+	const why = claim.error?.message || `exit ${claim.status}`;
+	console.warn(`localberth: skip claim ${name} on ${port} (${why}; install the CLI or pick a free port)`);
 }

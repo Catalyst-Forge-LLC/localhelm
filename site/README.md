@@ -11,7 +11,7 @@ pnpm build         # → build/ (includes /docs mount)
 
 Docs source: `docs/*.md` + `_nav.json`. FilePress mounts `docs/dist` at `/docs` via `paths` in `filepress.config.ts` (requires getfilepress **≥ 0.1.8** for Docs clicks in `filepress dev`).
 
-If LocalBerth is installed, this explainer stays on **5188** as `localhelm-site` (not the dashboard on 4321).
+If LocalBerth is installed, this explainer stays on **5201** as `localhelm-site` (not the dashboard on 4321). 5188 was already `docupuncture-site`.
 
 Optional: add `theme.css` next to `filepress.config.ts` to override the default Essay theme.
 

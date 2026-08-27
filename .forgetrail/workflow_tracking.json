@@ -727,6 +727,16 @@
       "rationale": "Operator 2026-08-27: we don't have a FilePress site for localhelm itself; model it after LocalBerth.",
       "alternatives_considered": ["Hold until first npm cut", "Host docs only on GitHub", "Different IA than LocalBerth"],
       "status": "active"
+    },
+    {
+      "id": "d49",
+      "timestamp": "2026-08-27T17:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 20,
+      "decision": "Sites open-local icon uses the family *-site lease href from the Ports board when that lease is listening. Never the dashboard / UI lease. FilePress id stays the repo folder (localhelm); the lease is localhelm-site on 5201.",
+      "rationale": "Operator 2026-08-27: open locally from Sites, not only Ports. 5188 was already docupuncture-site so the first claim never landed.",
+      "alternatives_considered": ["Link the exact-id lease (would open the dashboard)", "Have FilePress set href from leasePort", "Reuse 5188"],
+      "status": "active"
     }
   ],
   "gotchas": [
@@ -769,6 +779,14 @@
       "issue": "npmjs.com resolves README images from the published tarball. A logo at site/static/logo.png 404s unless that path is in package.json files.",
       "resolution": "Ship site/static/logo.png in files, same pattern as LocalBerth.",
       "category": "tooling"
+    },
+    {
+      "timestamp": "2026-08-27T17:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 20,
+      "issue": "ensure-lease localhelm-site --port 5188 failed: that port is already leased by docupuncture-site. FilePress still listed the site as localhelm (repo folder). Ports never showed localhelm-site.",
+      "resolution": "Claim 5201. ensure-lease now passes --or-next. Sites open icon joins the listening *-site lease.",
+      "category": "integration"
     }
   ],
   "sessions": [

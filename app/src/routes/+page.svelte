@@ -27,7 +27,7 @@
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { fleetProjectMeta, fleetVersionLabel } from '$lib/fleetDisplay';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
-	import { siteCellValue, siteLiveHref, siteNeedsEngineSync, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
+	import { siteCellValue, siteLiveHref, siteLocalHref, siteNeedsEngineSync, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		idsToSelection,
 		parseListParam,
@@ -2441,6 +2441,7 @@
 							<tbody>
 								{#each board.rows as row (row.id)}
 									{@const liveHref = siteLiveHref(row.cells)}
+									{@const localHref = siteLocalHref(row.id, leaseBoardAll?.rows ?? [])}
 									<tr>
 										<td class="tick">
 											<input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedSites[row.id]} />
@@ -2472,6 +2473,19 @@
 										{/each}
 										<td>
 											<div class="bump">
+												{#if localHref}
+													<Tooltip title={`Open ${localHref}`}>
+														<a
+															class="open-link"
+															href={localHref}
+															target="localberth-open"
+															rel="noopener"
+															aria-label={`Open ${row.label ?? row.id} locally`}
+														>
+															<Icon icon="lucide:square-arrow-out-up-right" />
+														</a>
+													</Tooltip>
+												{/if}
 												{#if board.plugin === 'filepress'}
 													<button
 														class="btn btn-sm btn-write"

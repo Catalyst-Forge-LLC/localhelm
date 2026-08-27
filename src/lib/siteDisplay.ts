@@ -1,3 +1,5 @@
+import { familyRole, familyStem } from './family.js';
+
 const HIDDEN_FILEPRESS_COLS = new Set(['pin', 'locked', 'update', 'headers', 'ship']);
 
 export type BoardColumn = { id: string; label: string };
@@ -50,4 +52,20 @@ export function siteLiveHref(cells: Record<string, string>): string | null {
 		return null;
 	}
 	return null;
+}
+
+export type SiteLeaseRef = { id: string; href?: string };
+
+/**
+ * Local preview URL from the Ports board. FilePress names the repo folder (`localhelm`);
+ * the lease is usually `*-site`. Never use the dashboard / UI lease.
+ */
+export function siteLocalHref(siteId: string, leases: readonly SiteLeaseRef[]): string | null {
+	const stem = familyStem(siteId);
+	if (!stem) return null;
+	const hits = leases.filter((row) => row.href && familyStem(row.id) === stem);
+	const siteRole = hits.find((row) => familyRole(row.id) === 'site');
+	if (siteRole?.href) return siteRole.href;
+	if (familyRole(siteId) !== 'site') return null;
+	return hits.find((row) => row.id === siteId)?.href ?? null;
 }
