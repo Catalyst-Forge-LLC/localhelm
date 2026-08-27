@@ -747,6 +747,16 @@
       "rationale": "Operator 2026-08-27: Stacks sat in a strange place on Leases; wanted LocalBerth-style lease filters.",
       "alternatives_considered": ["Keep stacks above the lease table", "Only add Listening/Quiet", "Persist filters in the URL"],
       "status": "active"
+    },
+    {
+      "id": "d51",
+      "timestamp": "2026-08-27T17:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 20,
+      "decision": "Stacks is a table: one row per family with its own Start/Stop. No chip-then-toolbar select. Start is offered when a member is down; Stop when a member is up. Leases still has bulk Start/Stop family for checked rows.",
+      "rationale": "Operator 2026-08-27: select a chip then press a button is too awkward.",
+      "alternatives_considered": ["Keep chips plus toolbar", "Only Start on down stacks"],
+      "status": "active"
     }
   ],
   "gotchas": [

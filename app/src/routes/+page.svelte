@@ -13,7 +13,7 @@
 	import { formatPluginPlanLines, pluginPlanWriteIds } from '$lib/pluginPlan';
 	import { formatBrief } from '$lib/briefFormat';
 	import { familyMemberNames } from '$lib/family';
-	import { portFamilies, portLooks } from '$lib/looks';
+	import { portFamilies, portLooks, type PortFamily } from '$lib/looks';
 	import {
 		canCutVersion,
 		fleetWriteIds,
@@ -729,8 +729,22 @@
 		setTab('ports');
 	}
 
-	function stackIsChecked(ids: string[]): boolean {
-		return ids.length > 0 && ids.every((id) => selectedPorts[id]);
+	function openPortsStacks(): void {
+		portPane = 'stacks';
+		setTab('ports');
+	}
+
+	function familyJobIds(seeds: string[]): string[] {
+		const names = (leaseBoard?.rows ?? []).map((row) => row.id);
+		return [...new Set(seeds.flatMap((seed) => familyMemberNames(seed, names)))];
+	}
+
+	function stackCanStart(family: PortFamily): boolean {
+		return family.members.some((member) => member.hasLease && member.listening === false);
+	}
+
+	function stackCanStop(family: PortFamily): boolean {
+		return family.members.some((member) => member.hasLease && member.listening === true);
 	}
 
 	function chipsFor(id: string, hide?: 'fleet' | 'sites' | 'ports') {
@@ -815,12 +829,11 @@
 	}
 
 	function familyIdsFromChecked(): string[] {
-		const names = (leaseBoard?.rows ?? []).map((row) => row.id);
-		return [...new Set(checkedPortIdList.flatMap((seed) => familyMemberNames(seed, names)))];
+		return familyJobIds(checkedPortIdList);
 	}
 
-	function startFamilyJob(action: 'start' | 'stop'): void {
-		const ids = familyIdsFromChecked();
+	function startFamilyJob(action: 'start' | 'stop', seeds?: string[]): void {
+		const ids = seeds?.length ? familyJobIds(seeds) : familyIdsFromChecked();
 		if (!ids.length) return;
 		void startPluginJob(leaseBoard?.plugin ?? 'localberth', action, ids, action === 'start' ? 'Start family' : 'Stop family');
 	}
@@ -1686,11 +1699,6 @@
 		return bits.filter(Boolean).join('\n\n');
 	}
 
-	function familyChipTip(family: { bits: string; members: { id: string }[] }): string {
-		const ids = family.members.map((member) => member.id).join(', ');
-		return `Checks ${ids}. Then use Start family or Stop family.\n${family.bits}`;
-	}
-
 	onMount(() => {
 		const params = new URLSearchParams(window.location.search);
 		restoreUrlState(params);
@@ -2166,8 +2174,8 @@
 																<button
 																	type="button"
 																	class="btn btn-sm"
-																	onclick={() => openPortsFamily(family.leaseIds)}
-																	title="Opens Ports with this stack checked."
+																	onclick={() => openPortsStacks()}
+																	title="Opens the Stacks table. Start and Stop live on each row."
 																>
 																	Open
 																</button>
@@ -2615,51 +2623,61 @@
 							<div>
 								<h2>Stacks</h2>
 								<InfoHint
-									summary="One chip per family. Click to check those leases, then Start family or Stop family."
-									detail="A stack is fleet + lease ids that share a stem (hyphens fold; -site and -api strip). Start and Stop run the LocalBerth recipe for every unparked member. Claim and release stay on the localberth CLI."
+									summary="One row per family. Start and Stop run that family’s leases."
+									detail="A stack is fleet + lease ids that share a stem (hyphens fold; -site and -api strip). Each button plans first, then confirm. Claim and release stay on the localberth CLI."
 								/>
-							</div>
-							<div class="group-buttons">
-								<Tooltip title="Plans start for every unparked lease in the checked families.">
-									<button
-										class="btn btn-write"
-										disabled={Boolean(busy) || !familyIdsFromChecked().length}
-										onclick={() => startFamilyJob('start')}
-									>
-										<Icon icon="lucide:play" />
-										Start family
-									</button>
-								</Tooltip>
-								<Tooltip title="Plans stop for every unparked lease in the checked families.">
-									<button
-										class="btn btn-write"
-										disabled={Boolean(busy) || !familyIdsFromChecked().length}
-										onclick={() => startFamilyJob('stop')}
-									>
-										<Icon icon="lucide:square" />
-										Stop family
-									</button>
-								</Tooltip>
 							</div>
 						</div>
 						{#if portFamilyCards.length}
-							<ul class="family-strip">
-								{#each portFamilyCards as family (family.stem)}
-									<li>
-										<Tooltip wide title={familyChipTip(family)}>
-											<button
-												type="button"
-												class="family-chip"
-												class:on={stackIsChecked(family.leaseIds)}
-												onclick={() => checkPortsFamily(family.leaseIds)}
-											>
-												<span class="id">{family.label}</span>
-												<span class="dim small">{family.bits}</span>
-											</button>
-										</Tooltip>
-									</li>
-								{/each}
-							</ul>
+							<div class="table-wrap">
+								<table>
+									<thead>
+										<tr>
+											<th>stack</th>
+											<th>status</th>
+											<th>leases</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{#each portFamilyCards as family (family.stem)}
+											<tr>
+												<td>
+													<div class="project-cell">
+														<span class="id">{family.label}</span>
+													</div>
+												</td>
+												<td class="small">{family.bits}</td>
+												<td class="small dim">{family.leaseIds.join(' · ') || '—'}</td>
+												<td>
+													<div class="port-actions">
+														<Tooltip title="Plans start for every unparked lease in this family. Confirm in the modal.">
+															<button
+																class="btn btn-sm btn-write"
+																disabled={Boolean(busy) || !stackCanStart(family)}
+																onclick={() => startFamilyJob('start', family.leaseIds)}
+															>
+																<Icon icon="lucide:play" />
+																Start
+															</button>
+														</Tooltip>
+														<Tooltip title="Plans stop for every unparked lease in this family. Confirm in the modal.">
+															<button
+																class="btn btn-sm btn-write"
+																disabled={Boolean(busy) || !stackCanStop(family)}
+																onclick={() => startFamilyJob('stop', family.leaseIds)}
+															>
+																<Icon icon="lucide:square" />
+																Stop
+															</button>
+														</Tooltip>
+													</div>
+												</td>
+											</tr>
+										{/each}
+									</tbody>
+								</table>
+							</div>
 						{:else if statusReady}
 							<p class="dim small">No stacks yet. A family appears when a fleet row and a lease share a stem.</p>
 						{/if}
@@ -3732,37 +3750,6 @@
 	.looks-head {
 		margin: 0 0 0.2rem;
 		font-size: 1rem;
-	}
-
-	.family-strip {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.45rem;
-	}
-
-	.family-chip {
-		border: 1px solid #4c4c54;
-		background: #2c2c32;
-		color: inherit;
-		border-radius: 0.45rem;
-		padding: 0.35rem 0.65rem;
-		display: grid;
-		gap: 0.1rem;
-		text-align: left;
-		cursor: pointer;
-	}
-
-	.family-chip:hover {
-		border-color: #6b6b74;
-		background: #333338;
-	}
-
-	.family-chip.on {
-		border-color: #c9a227;
-		background: #4a3a12;
 	}
 
 	.need-card {
