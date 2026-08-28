@@ -961,6 +961,19 @@
         "Generate skill cards with an LLM"
       ],
       "status": "active"
+    },
+    {
+      "id": "d68",
+      "timestamp": "2026-08-28T22:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "A multi-skill product lists each skill package. Discovery, SkillFacts docs/site, and product README/footers do not collapse to one SkillFacts link.",
+      "rationale": "Operator 2026-08-28 chose track B. One file per playbook was already the spec; product pointers had been hiding the rest.",
+      "alternatives_considered": [
+        "Keep one public SkillFacts link and list the rest only on Helm",
+        "Invent a product-level SkillFacts file"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
