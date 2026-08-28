@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": false,
   "type": "module",
-  "description": "Status for the products you ship. A named fleet of local repos: git, npm, and dependents.",
+  "description": "Control panel for local development. Fleet, sites, and ports — including tools that never ship.",
   "license": "Apache-2.0",
   "author": "Catalyst Forge, LLC",
   "bin": {

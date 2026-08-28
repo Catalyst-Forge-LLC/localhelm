@@ -4,9 +4,9 @@
 
 # LocalHelm
 
-**Status for the products you ship.**
+**Control panel for local development.**
 
-A named fleet of local repos: git, npm, and dependents, in one place. Pairing: **LocalSlip** is the slip; **LocalHelm** is the wheel.
+Fleet, sites, and ports in one place — including tools that never ship. Pairing: **LocalSlip** is the slip; **LocalHelm** is the wheel.
 
 ```bash
 pnpm add -g localhelm

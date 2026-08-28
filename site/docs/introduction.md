@@ -2,13 +2,13 @@
 title: Introduction
 ---
 
-**LocalHelm** is status for the products you ship. A named fleet of local repos: git, npm, and dependents.
+**LocalHelm** is the control panel for local development. Fleet, sites, and ports — including tools that never ship.
 
 **LocalSlip** is the slip; **LocalHelm** is the wheel.
 
-You have a folder of repos. `git status` in one of them answers that repo. After a morning of publishes, the scarce resource is knowing which products are dirty, unpublished, or still pinned to last week’s package.
+You have a folder of repos. `git status` in one of them answers that repo. The board is also for local tools that never publish: sites, ports, and the phone tile grid.
 
-Name the fleet so that does not happen. Scan a folder, check the ones you ship, then read every ship surface in one place.
+Name the fleet. Scan a folder, check the ones you keep, then read git, npm, dependents, and listening leases in one place.
 
 ## What it is
 
@@ -17,7 +17,7 @@ Name the fleet so that does not happen. Scan a folder, check the ones you ship, 
 - Writes print a plan; `--apply` is the confirm. Never `--force`
 - A dashboard on **4321** (`localhelm serve`) that calls the same library
 
-It is **not** a process manager. It does not claim ports. It does not bake in a shop catalog.
+It is **not** a lease kernel. It does not claim ports. Start/stop on the board asks LocalSlip. It does not bake in a shop catalog.
 
 ## Two surfaces
 

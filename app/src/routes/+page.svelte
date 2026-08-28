@@ -1786,7 +1786,7 @@
 				<img class="mark" src="/logo.png" alt="" width="96" height="64" />
 				<div>
 				<p class="eyebrow">LocalHelm</p>
-				<h1>Status for the products you ship</h1>
+				<h1>Control panel for local development</h1>
 				<p class="sub">
 					{#if inventory}
 						Fleet <code>{inventory.manifestPath}</code>

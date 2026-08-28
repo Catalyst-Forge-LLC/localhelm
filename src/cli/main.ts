@@ -20,7 +20,7 @@ import { fleetStatus } from '../lib/status.js';
 import type { EnrollPlan, FleetInventory, ScanCandidate } from '../lib/types.js';
 
 function usage(): string {
-	return `localhelm — status for the products you ship
+	return `localhelm — control panel for local development
 
 Usage:
   localhelm scan [dir...] [--json] [--max-depth N]
