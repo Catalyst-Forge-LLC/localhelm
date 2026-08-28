@@ -19,8 +19,11 @@
 		commitCountLabel,
 		fleetWriteIds,
 		fleetWriteLabel,
+		isPublishedReason,
 		nextCutVersion,
 		plainGitError,
+		publishApplyTitle,
+		publishResultLine,
 		whyNotPublish,
 		whyNotPush,
 		writableCascadeCount,
@@ -1360,26 +1363,59 @@
 		);
 	}
 
+	function slimPublishRows(rows: PublishRow[]): unknown[] {
+		return rows.map((row) => ({
+			id: row.id,
+			action: row.action,
+			version: row.version,
+			reason: row.reason,
+			stderr: isPublishedReason(row.reason) ? undefined : row.stderr?.slice(0, 2500),
+		}));
+	}
+
 	async function applyPublish(ids: string[]): Promise<void> {
-		await run(bulkProgressLabel('publishing', 1, ids.length, ids[0]), async () => {
-			const rows: PublishRow[] = [];
-			const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
-			await eachNamed('publishing', ids, async (id) => {
-				const data = (await call('/api/publish', {
-					method: 'POST',
-					body: JSON.stringify({
-						apply: true,
-						ids: [id],
-						kind: bumpKind[id] ?? 'patch',
-						otp,
-					}),
-				})) as { rows: PublishRow[] };
-				rows.push(...data.rows);
-			});
-			const published = rows.filter((r) => r.reason?.startsWith('published ')).length;
-			note(`publish --apply — ${published} published`, { rows });
-			publishOtp = '';
-			await loadStatus({ ids });
+		const rows: PublishRow[] = [];
+		await run(
+			bulkProgressLabel('publishing', 1, ids.length, ids[0]),
+			async () => {
+				const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
+				await eachNamed('publishing', ids, async (id) => {
+					const data = (await call('/api/publish', {
+						method: 'POST',
+						body: JSON.stringify({
+							apply: true,
+							ids: [id],
+							kind: bumpKind[id] ?? 'patch',
+							otp,
+						}),
+					})) as { rows: PublishRow[] };
+					rows.push(...data.rows);
+				});
+				note(publishApplyTitle(rows), { rows: slimPublishRows(rows) });
+				publishOtp = '';
+				await loadStatus({ ids });
+			},
+			{ closeConfirm: false },
+		);
+		if (!rows.length) {
+			confirmOpen = false;
+			return;
+		}
+		const failed = rows.filter((row) => !isPublishedReason(row.reason));
+		offerConfirm({
+			title: failed.length
+				? failed.length === rows.length
+					? 'Nothing reached npm'
+					: `${failed.length} of ${rows.length} did not reach npm`
+				: rows.length === 1
+					? `Published ${rows[0]?.reason?.replace(/^published /, '') ?? rows[0]?.id}`
+					: `Published ${rows.length} packages`,
+			hint: failed.length
+				? 'Those packages did not reach npm. Fix the line below, then publish those ids again.'
+				: 'All listed packages reached npm.',
+			items: rows.map(publishResultLine),
+			confirmLabel: 'OK',
+			canApply: false,
 		});
 	}
 

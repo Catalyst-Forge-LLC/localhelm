@@ -215,4 +215,44 @@ describe('publish apply', () => {
 		assert.equal(runGit(pkgDir, ['status', '--porcelain']).stdout.trim(), '');
 		assert.match(runGit(pkgDir, ['log', '-1', '--pretty=%s']).stdout, /Helm: bump widget to 1\.0\.1/);
 	});
+
+	it('keeps a short reason when npm prints env warnings plus a gate', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-pub-fail-'));
+		const pkgDir = path.join(root, 'widget');
+		await mkdir(pkgDir);
+		gitRepo(pkgDir);
+		await writeFile(path.join(pkgDir, 'package.json'), '{\n  "name": "widget",\n  "version": "1.0.1"\n}\n');
+		assert.equal(runGit(pkgDir, ['add', 'package.json']).ok, true);
+		assert.equal(runGit(pkgDir, ['commit', '-m', 'init']).ok, true);
+
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: { workspaceRoot: '.', projects: [{ id: 'widget', path: 'widget' }] },
+		};
+		const planned = planPublishFromInventory(
+			inventory([
+				project({
+					id: 'widget',
+					path: 'widget',
+					absPath: pkgDir,
+					localVersion: '1.0.1',
+					unpublishedAhead: true,
+					npm: { name: 'widget', latest: '1.0.0', status: 'ok' },
+				}),
+			]),
+			['widget'],
+			'patch',
+		);
+		const stderr = [
+			'npm warn Unknown env config "auto-install-peers". This will error in a future major version of npm.',
+			'Provenance only works in GitHub Actions (OIDC). A laptop publish fails with: Automatic provenance generation not supported for provider: null.',
+		].join('\n');
+		const applied = await applyPublish(loaded, planned[0]!, {
+			run: () => ({ ok: false, stdout: '', stderr }),
+		});
+		assert.match(applied.reason ?? '', /Provenance only works in GitHub Actions/);
+		assert.equal(applied.reason?.includes('auto-install-peers'), false);
+		assert.match(applied.stderr ?? '', /auto-install-peers/);
+	});
 });

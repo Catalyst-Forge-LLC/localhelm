@@ -24,6 +24,59 @@ export type PublishGateRow = {
 	commitsSinceNpm?: number | null;
 };
 
+const PUBLISH_NOISE =
+	/^(npm warn Unknown |npm warn publish |npm notice |npm error A complete log|npm error code \d|Waiting for the debugger)/i;
+
+/** Short line for npm publish stderr. Keep the raw dump in stderr / Activity. */
+export function plainPublishError(raw: string): string {
+	const text = raw.trim();
+	if (!text) return 'npm publish failed';
+	if (/ENEEDAUTH|need auth|not logged in/i.test(text)) return 'npm rejected the publish (auth)';
+	if (/EPUBLISHCONFLICT|cannot publish over the previously published/i.test(text)) {
+		return 'that version is already on npm';
+	}
+
+	const provenance = /Provenance only works[^\n]+/i.exec(text);
+	if (provenance?.[0]) return provenance[0].replace(/\s+/g, ' ').slice(0, 160);
+
+	const shipCi = /Ship [^\n]+ from CI[^\n]*/i.exec(text);
+	if (shipCi?.[0]) return shipCi[0].replace(/\s+/g, ' ').slice(0, 160);
+
+	const expected = /regular expression \/version: "([^"]+)"\//.exec(text);
+	const actual = /\nversion: "([^"]+)"/.exec(text);
+	if (expected?.[1] && actual?.[1] && expected[1] !== actual[1]) {
+		return `skill facts still ${actual[1]} (package ${expected[1]})`;
+	}
+
+	const assertion = /AssertionError[^\n]+/.exec(text);
+	if (assertion?.[0]) return assertion[0].replace(/\s+/g, ' ').slice(0, 160);
+
+	const cmd = /npm error command (?!failed$)(.+)/.exec(text);
+	if (cmd?.[1]) return `prepublish failed: ${cmd[1].slice(0, 120)}`;
+
+	const first = text
+		.split(/\r?\n/)
+		.map((line) => line.trim())
+		.find((line) => line.length > 0 && !PUBLISH_NOISE.test(line));
+	return (first ?? 'npm publish failed').slice(0, 160);
+}
+
+export function isPublishedReason(reason: string | undefined): boolean {
+	return Boolean(reason?.startsWith('published '));
+}
+
+export function publishApplyTitle(rows: ReadonlyArray<{ id: string; reason?: string }>): string {
+	const published = rows.filter((row) => isPublishedReason(row.reason)).length;
+	const failed = rows.filter((row) => !isPublishedReason(row.reason));
+	const ok = `${published} published`;
+	if (failed.length === 0) return `publish --apply — ${ok}`;
+	return `publish --apply — ${ok}, ${failed.length} failed: ${failed.map((row) => row.id).join(', ')}`;
+}
+
+export function publishResultLine(row: { id: string; reason?: string }): string {
+	return `${row.id}  ${row.reason ?? 'no result'}`;
+}
+
 /** Short line for fetch/push stderr. Keep the raw text in stderr / titles. */
 export function plainGitError(raw: string): string {
 	if (/permission denied \(publickey\)/i.test(raw)) return 'origin rejected the SSH key';

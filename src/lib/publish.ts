@@ -8,7 +8,7 @@ import { rootPkgPath } from './pkg.js';
 import { bumpTriple, type BumpKind } from './semver.js';
 import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
-import { whyNotPublish } from './writeGate.js';
+import { plainPublishError, whyNotPublish } from './writeGate.js';
 
 export type PublishStep =
 	| { kind: 'bump'; from: string; to: string; bumpKind: BumpKind }
@@ -270,11 +270,12 @@ export async function applyPublish(
 			const run = opts.run ?? defaultPublishRunner;
 			const result = await Promise.resolve(run(abs, args));
 			if (!result.ok) {
+				const stderr = result.stderr.trim();
 				return {
 					...row,
 					stdout: result.stdout.trim() || undefined,
-					stderr: result.stderr,
-					reason: result.stderr || 'npm publish failed',
+					stderr: stderr || undefined,
+					reason: plainPublishError(stderr || 'npm publish failed'),
 				};
 			}
 			return {

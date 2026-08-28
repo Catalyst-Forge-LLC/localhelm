@@ -4,7 +4,7 @@ import { loadPlugins, requirePlugin, type HelmPlugin } from './plugin.js';
 import { applyPublish, planPublishFromInventory, type PublishRow } from './publish.js';
 import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
-import { commitCountLabel, plainGitError, whyNotPublish, whyNotPush } from './writeGate.js';
+import { commitCountLabel, plainGitError, plainPublishError, whyNotPublish, whyNotPush } from './writeGate.js';
 import { readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 
 export const LAND_ENGINE_ID = 'filepress';
@@ -327,7 +327,7 @@ export async function applyLand(
 			out.steps.push({
 				...step,
 				ok,
-				reason: ok ? next.reason! : plainGitError(next.reason ?? next.stderr ?? 'publish failed'),
+				reason: ok ? next.reason! : plainPublishError(next.reason ?? next.stderr ?? 'publish failed'),
 			});
 			if (!ok) {
 				out.ok = false;

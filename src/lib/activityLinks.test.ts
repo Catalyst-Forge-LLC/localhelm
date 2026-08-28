@@ -10,5 +10,14 @@ describe('activityLinkedIds', () => {
 		);
 		assert.deepEqual(activityLinkedIds('archive filepress', ['file', 'filepress']), ['filepress']);
 		assert.deepEqual(activityLinkedIds('nothing here', ['aibreze']), []);
+		assert.deepEqual(
+			activityLinkedIds('publish --apply — 11 published, 3 failed: aibreze, finetuna, ollanet', [
+				'aibreze',
+				'finetuna',
+				'ollanet',
+				'coldeye',
+			]),
+			['aibreze', 'finetuna', 'ollanet'],
+		);
 	});
 });

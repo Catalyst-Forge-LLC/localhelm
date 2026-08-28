@@ -909,6 +909,19 @@
         "Keep both buttons and explain the difference"
       ],
       "status": "active"
+    },
+    {
+      "id": "d64",
+      "timestamp": "2026-08-28T18:35:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "After publish apply, show a per-id result list and store a short reason. Activity title names failed ids. Do not add a last-action column on Fleet/Sites.",
+      "rationale": "Operator 2026-08-28 chose track B. npm dumps hid provenance and skill-facts gates. Activity already has the history; a per-row last-action store would go stale.",
+      "alternatives_considered": [
+        "Persist last action on every fleet/site row",
+        "Leave the operator to open Activity JSON"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

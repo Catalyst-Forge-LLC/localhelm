@@ -6,6 +6,9 @@ import {
 	fleetWriteIds,
 	fleetWriteLabel,
 	plainGitError,
+	plainPublishError,
+	publishApplyTitle,
+	publishResultLine,
 	whyNotPublish,
 	whyNotPush,
 	writableCascadeCount,
@@ -41,6 +44,43 @@ describe('plainGitError', () => {
 		assert.equal(
 			plainGitError('git@github.com: Permission denied (publickey).\r\nfatal: Could not read from remote repository.'),
 			'origin rejected the SSH key',
+		);
+	});
+});
+
+describe('plainPublishError', () => {
+	it('skips npmrc warnings and keeps the provenance gate', () => {
+		const raw = [
+			'npm warn Unknown env config "auto-install-peers". This will error in a future major version of npm.',
+			'Provenance only works in GitHub Actions (OIDC). A laptop publish fails with: Automatic provenance generation not supported for provider: null.',
+			'Ship 1.1.4 from CI: push, then cut GitHub Release v1.1.4.',
+		].join('\n');
+		assert.match(plainPublishError(raw), /Provenance only works in GitHub Actions/);
+	});
+
+	it('names a skill-facts version miss', () => {
+		const raw = [
+			'npm warn Unknown env config "python".',
+			'AssertionError [ERR_ASSERTION]: The input did not match the regular expression /version: "0.1.10"/. Input:',
+			'',
+			'---',
+			'version: "0.1.9"',
+		].join('\n');
+		assert.equal(plainPublishError(raw), 'skill facts still 0.1.9 (package 0.1.10)');
+	});
+});
+
+describe('publishApplyTitle', () => {
+	it('names failed ids so Activity chips can jump', () => {
+		const title = publishApplyTitle([
+			{ id: 'coldeye', reason: 'published coldeye@0.1.1' },
+			{ id: 'aibreze', reason: 'skill facts still 0.1.9 (package 0.1.10)' },
+			{ id: 'finetuna', reason: 'Provenance only works in GitHub Actions (OIDC).' },
+		]);
+		assert.equal(title, 'publish --apply — 1 published, 2 failed: aibreze, finetuna');
+		assert.equal(
+			publishResultLine({ id: 'aibreze', reason: 'skill facts still 0.1.9 (package 0.1.10)' }),
+			'aibreze  skill facts still 0.1.9 (package 0.1.10)',
 		);
 	});
 });
