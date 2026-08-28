@@ -34,6 +34,7 @@ localhelm cascade my-lib                # plan pin updates; --apply writes
 localhelm plugins
 localhelm plugin filepress              # FilePress plugin, if present
 localhelm plugin filepress sync
+localhelm plugin xfacts                 # xFacts labels board, if enrolled
 localhelm serve                         # :4321 on all interfaces
 ```
 
@@ -44,3 +45,10 @@ localhelm serve                         # :4321 on all interfaces
 Skip folders with `.localhelmignore` at the workspace, or `~/.localhelm/ignore`.
 
 Requires Node 22+. License Apache-2.0. Site: [localhelm.dev](https://localhelm.dev).
+
+<!-- xfacts-nutrition-label -->
+
+## Nutrition label
+
+- **AppFacts:** [viewer](https://appfacts.dev/v#af1.eNpNUUFOwzAQ_Irlc5oAx56KIiEBFZciLggh19km2zq2ZW_SRlX_zjqmhZOl2ZnZ2fFZjnJ5X0irepBLaZxWpgPTy0LS5BNUr58FOWcYiaRoiIwpTTgCIwY12Jhoj17pDhYP5V0m6oNcnqVRth1UmwjvbLfRAT0VYjOCISjEixpVxlgUBks4p3hzDZT7yNgucK6jC2wms-gVaV4wGbRtslVojmgbUW82KTQnzYMPTBu89b28FLIBz8E_z9LyaBVnq32sDrObZ-wIW3HbJnYuiEbFbutUaFifdRRPv-zUTZyDCziBHgidnUXc1h8dvZ_yHUmDliDk5uZCeSy0672zYCneVCvUzuJuqnLIq5hBEadIwOd8FXI7oGlSw1z7gQv-7pXlJzD1enLnevC5-47Ix2VV3b63bGBMlYN3EcmF6R-pReqGbcnRqlqRMrx08eRCC4v1uv6zkJcfq5PB9g) · [raw](https://github.com/Catalyst-Forge-LLC/localhelm/blob/main/APP_FACTS.md)
+
