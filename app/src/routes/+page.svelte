@@ -202,7 +202,9 @@
 	const enrolledIds = $derived(new Set((inventory?.projects ?? []).map((p) => p.id)));
 	const archivedSet = $derived(new Set(archivedIds));
 	const visibleProjects = $derived(
-		(inventory?.projects ?? []).filter((row) => showArchived || !archivedSet.has(row.id)),
+		(inventory?.projects ?? [])
+			.filter((row) => showArchived || !archivedSet.has(row.id))
+			.toSorted((a, b) => a.id.localeCompare(b.id, undefined, { sensitivity: 'base' })),
 	);
 	const checkedScan = $derived(
 		Object.entries(selectedScan)
