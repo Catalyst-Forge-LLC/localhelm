@@ -75,6 +75,7 @@ export {
 	siteCellValue,
 	siteEngineVersion,
 	pluginCellHref,
+	pluginCellLinks,
 	pluginRowOpenHref,
 	siteLiveHref,
 	siteLocalHref,

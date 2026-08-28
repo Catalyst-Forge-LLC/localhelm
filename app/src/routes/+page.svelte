@@ -35,7 +35,7 @@
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
 	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
-	import { pluginCellHref, pluginRowOpenHref, siteCellValue, siteLocalHref, siteNeedsEngineSync, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
+	import { pluginCellLinks, pluginRowOpenHref, siteCellValue, siteLocalHref, siteNeedsEngineSync, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		canonicalizeTab,
 		isPortsPluginTab,
@@ -88,6 +88,7 @@
 			label?: string;
 			href?: string;
 			links?: Record<string, string>;
+			linkGroups?: Record<string, { label: string; href?: string }[]>;
 			cells: Record<string, string>;
 			actions: { id: string; label: string; write: boolean; icon?: string }[];
 		}[];
@@ -2635,12 +2636,20 @@
 											</div>
 										</td>
 										{#each siteCols as col (col.id)}
-											{@const colHref = pluginCellHref(row.links?.[col.id]) ?? pluginCellHref(row.cells[col.id])}
+											{@const cellLabel = siteCellValue(col.id, row.cells)}
+											{@const cellLinks = pluginCellLinks(row, col.id, cellLabel)}
 											<td class="small" class:mono={col.id === 'engine'}>
-												{#if colHref}
-													<a class="live-link" href={colHref} target="_blank" rel="noopener noreferrer" title={`Open ${colHref}`}>{siteCellValue(col.id, row.cells)}</a>
+												{#if cellLinks.length}
+													{#each cellLinks as item, i (`${col.id}:${item.label}:${i}`)}
+														{#if i > 0}<span class="dim"> · </span>{/if}
+														{#if item.href}
+															<a class="live-link" href={item.href} target="_blank" rel="noopener noreferrer" title={`Open ${item.href}`}>{item.label}</a>
+														{:else}
+															<span>{item.label}</span>
+														{/if}
+													{/each}
 												{:else}
-													{siteCellValue(col.id, row.cells)}
+													{cellLabel}
 												{/if}
 											</td>
 										{/each}

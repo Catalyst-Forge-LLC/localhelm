@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
 	pluginCellHref,
+	pluginCellLinks,
 	pluginRowOpenHref,
 	siteCellValue,
 	siteEngineVersion,
@@ -73,6 +74,36 @@ describe('siteDisplay', () => {
 				cells: { live: '—' },
 			}),
 			'https://appfacts.dev/v#af1.x',
+		);
+		assert.deepEqual(
+			pluginCellLinks(
+				{
+					cells: { skill: '3' },
+					linkGroups: {
+						skill: [
+							{ label: 'core', href: 'https://skillfacts.dev/v#sf1.a' },
+							{ label: 'audit' },
+						],
+					},
+				},
+				'skill',
+				'3',
+			),
+			[
+				{ label: 'core', href: 'https://skillfacts.dev/v#sf1.a' },
+				{ label: 'audit', href: null },
+			],
+		);
+		assert.deepEqual(
+			pluginCellLinks(
+				{
+					cells: { app: 'ok' },
+					links: { app: 'https://appfacts.dev/v#af1.x' },
+				},
+				'app',
+				'ok',
+			),
+			[{ label: 'ok', href: 'https://appfacts.dev/v#af1.x' }],
 		);
 	});
 

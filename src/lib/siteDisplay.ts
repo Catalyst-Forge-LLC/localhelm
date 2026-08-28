@@ -76,6 +76,30 @@ export function pluginRowOpenHref(row: {
 	return pluginCellHref(row.href) ?? pluginCellHref(row.links?.app) ?? siteLiveHref(row.cells);
 }
 
+export type PluginCellLink = { label: string; href: string | null };
+
+/** Named links for one column. A group wins over a single `links` URL. */
+export function pluginCellLinks(
+	row: {
+		links?: Record<string, string>;
+		linkGroups?: Record<string, { label: string; href?: string }[]>;
+		cells: Record<string, string>;
+	},
+	colId: string,
+	fallbackLabel: string,
+): PluginCellLink[] {
+	const group = row.linkGroups?.[colId];
+	if (group?.length) {
+		return group.map((item) => ({
+			label: item.label.trim() || fallbackLabel,
+			href: pluginCellHref(item.href),
+		}));
+	}
+	const href = pluginCellHref(row.links?.[colId]) ?? pluginCellHref(row.cells[colId]);
+	if (!href) return [];
+	return [{ label: fallbackLabel, href }];
+}
+
 export type SiteLeaseRef = { id: string; href?: string };
 
 /**

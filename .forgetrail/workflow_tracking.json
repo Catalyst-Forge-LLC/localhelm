@@ -935,6 +935,19 @@
         "Add a last-action column instead of more tabs"
       ],
       "status": "active"
+    },
+    {
+      "id": "d66",
+      "timestamp": "2026-08-28T22:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "xFacts drops the viewer column (same URL as app). Skill and tool cells send linkGroups so each named facts file is its own /v link.",
+      "rationale": "Operator 2026-08-28: viewer duplicated app. A count or first /v hid extra skills and tools.",
+      "alternatives_considered": [
+        "Keep viewer and add a count tooltip",
+        "One repo-level /v for every skill"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
