@@ -987,6 +987,20 @@
         "Keep a status column of ok"
       ],
       "status": "active"
+    },
+    {
+      "id": "d70",
+      "timestamp": "2026-08-28T23:05:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "Header chrome is brand, need-only chips, Refresh/Pull/Push, activity, and a menu. Fleet path, serve line, npm whoami, remotes, Visitor, Copy brief, Fetch remotes, and Write inventory JSON live in the menu. Progress uses a reserved status rail so Working… does not shift the page.",
+      "rationale": "Operator 2026-08-28: header no longer matched how the board is used; zero pills and session meta were noise; progress shoved the tabs down.",
+      "alternatives_considered": [
+        "Keep Read/Write button groups in the header",
+        "Show every digest count including zeros",
+        "Insert Working… between chips and tabs"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

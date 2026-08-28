@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { fleetProjectMeta, fleetVersionLabel, fleetVersionNote } from './fleetDisplay.js';
+import { fleetProjectMeta, fleetVersionLabel, fleetVersionNote, headerNeedChips } from './fleetDisplay.js';
 
 describe('fleetDisplay', () => {
 	it('hides the npm name when it matches the fleet id', () => {
@@ -32,6 +32,32 @@ describe('fleetDisplay', () => {
 		assert.equal(
 			fleetVersionLabel({ localVersion: '1.0.0', private: false, npm: { status: 'none' } }),
 			'1.0.0 · not published',
+		);
+	});
+
+	it('only lists header chips that need work', () => {
+		assert.deepEqual(
+			headerNeedChips({
+				unpublishedAhead: 0,
+				dirty: 0,
+				cascadeBehind: 0,
+				missing: 0,
+				npmErrors: 0,
+			}),
+			[],
+		);
+		assert.deepEqual(
+			headerNeedChips({
+				unpublishedAhead: 2,
+				dirty: 1,
+				cascadeBehind: 0,
+				missing: 0,
+				npmErrors: 0,
+			}),
+			[
+				{ id: 'unpublished', label: '2 unpublished', tone: 'hot', tab: 'today' },
+				{ id: 'dirty', label: '1 dirty', tone: 'warm', tab: 'today' },
+			],
 		);
 	});
 });

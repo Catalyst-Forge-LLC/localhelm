@@ -94,7 +94,8 @@ export {
 	siteSyncTarget,
 	siteTableColumns,
 } from './siteDisplay.js';
-export { fleetProjectMeta, fleetVersionLabel, fleetVersionNote } from './fleetDisplay.js';
+export { fleetProjectMeta, fleetVersionLabel, fleetVersionNote, headerNeedChips } from './fleetDisplay.js';
+export type { HeaderNeedChip } from './fleetDisplay.js';
 export { portCellValue, portRecipeLabel, portTableColumns } from './portDisplay.js';
 export {
 	bindIsLan,

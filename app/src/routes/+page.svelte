@@ -31,7 +31,7 @@
 	} from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
-	import { fleetProjectMeta, fleetVersionLabel } from '$lib/fleetDisplay';
+	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
 	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
@@ -236,6 +236,21 @@
 	const staleRemotes = $derived(
 		(inventory?.projects ?? []).some((p) => p.git.repo && Boolean(p.git.fetchError)),
 	);
+	const serveLine = $derived.by(() => {
+		if (!port) return '';
+		const where =
+			host && host !== '0.0.0.0' && host !== '::'
+				? `serving ${host}:${port}`
+				: `serving :${port} on all interfaces`;
+		const lease =
+			portSource === 'localslip'
+				? ' (port leased from LocalSlip)'
+				: portSource === 'flag'
+					? ' (--port)'
+					: '';
+		return `${where}${lease}`;
+	});
+	const needChips = $derived(inventory ? headerNeedChips(inventory.digest) : []);
 	const readyRows = $derived(
 		(inventory?.projects ?? [])
 			.filter((row) => row.unpublishedAhead && !whyNotPublish(row))
@@ -1893,95 +1908,56 @@
 		<div class="head-row">
 			<div class="brand">
 				<img class="mark" src="/logo.png" alt="" width="96" height="64" />
-				<div>
-				<p class="eyebrow">LocalHelm</p>
-				<h1>Control panel for local development</h1>
-				<p class="sub">
-					{#if inventory}
-						Fleet <code>{inventory.manifestPath}</code>
-					{:else if statusReady}
-						No fleet yet — open the Fleet tab, scan a folder, then enroll.
+				<div class="brand-copy">
+					<h1>LocalHelm</h1>
+					{#if needChips.length}
+						<div class="chips">
+							{#each needChips as chip (chip.id)}
+								<button
+									type="button"
+									class="chip"
+									class:hot={chip.tone === 'hot'}
+									class:warm={chip.tone === 'warm'}
+									class:bad={chip.tone === 'bad'}
+									title="Open Today"
+									onclick={() => setTab(chip.tab)}
+								>
+									{chip.label}
+								</button>
+							{/each}
+						</div>
 					{/if}
-					{#if port}
-						<span class="dim">
-							· {host && host !== '0.0.0.0' && host !== '::'
-								? `serving ${host}:${port}`
-								: `serving :${port} on all interfaces`}{portSource === 'localslip'
-								? ' (port leased from LocalSlip)'
-								: portSource === 'flag'
-									? ' (--port)'
-									: ''}
-						</span>
-					{/if}
-				</p>
 				</div>
 			</div>
 
 			<div class="actions">
-				<div class="group">
-					<span class="group-label">Read</span>
-					<div class="group-buttons">
-						<button class="btn" disabled={Boolean(busy)} onclick={() => refresh()} title="Re-read every enrolled project, plus Sites and Ports. For one row, use the refresh icon on that row.">
-							<Icon icon="lucide:refresh-cw" />
-							Refresh
-						</button>
-						<button
-							class="btn"
-							disabled={!statusReady}
-							onclick={() => void copyBrief()}
-							title="Copies a markdown brief of Today, Ports, and recent activity."
-						>
-							<Icon icon="lucide:clipboard" />
-							{briefCopied ? 'Copied brief' : 'Copy brief'}
-						</button>
-						<a class="btn" href="/visitor" title="Phone tile grid. Same page visitors get.">
-							<Icon icon="lucide:layout-grid" />
-							Visitor
-						</a>
-						<button
-							class="btn"
-							disabled={Boolean(busy)}
-							onclick={() => refresh(true)}
-							title="git fetch origin in each repo, then re-read. Updates ahead and behind commit counts."
-						>
-							<Icon icon="lucide:cloud-download" />
-							Fetch remotes
-						</button>
-					</div>
-				</div>
-
-				<div class="group group-write">
-					<span class="group-label">Write — confirm first</span>
-					<div class="group-buttons">
-						<button
-							class="btn btn-write"
-							disabled={Boolean(busy)}
-							onclick={() => startPull()}
-							title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull."
-						>
-							<Icon icon="lucide:git-pull-request" />
-							Pull
-						</button>
-						<button
-							class="btn btn-write"
-							disabled={Boolean(busy)}
-							onclick={() => startPush()}
-							title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local."
-						>
-							<Icon icon="lucide:upload" />
-							Push
-						</button>
-						<button
-							class="btn btn-write"
-							disabled={Boolean(busy)}
-							onclick={() => startExport()}
-							title="Shows the inventory JSON path. Confirm in the modal to write it."
-						>
-							<Icon icon="lucide:file-json" />
-							Write JSON
-						</button>
-					</div>
-				</div>
+				<button
+					class="btn"
+					disabled={Boolean(busy)}
+					onclick={() => refresh()}
+					title="Re-read every enrolled project, plus Sites and Ports. For one row, use the refresh icon on that row."
+				>
+					<Icon icon="lucide:refresh-cw" />
+					Refresh
+				</button>
+				<button
+					class="btn btn-write"
+					disabled={Boolean(busy)}
+					onclick={() => startPull()}
+					title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull."
+				>
+					<Icon icon="lucide:git-pull-request" />
+					Pull
+				</button>
+				<button
+					class="btn btn-write"
+					disabled={Boolean(busy)}
+					onclick={() => startPush()}
+					title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local."
+				>
+					<Icon icon="lucide:upload" />
+					Push
+				</button>
 				<IconButton
 					icon="lucide:scroll-text"
 					label={activityOpen ? 'Close activity log' : 'Open activity log'}
@@ -1991,44 +1967,33 @@
 					badge={activityUnseen ? 'new' : entries.length || ''}
 					onclick={() => setActivityOpen(!activityOpen)}
 				/>
-				<HelmMenu plugins={pluginMetas} busy={Boolean(busy)} onToggle={(id, enabled) => void setPluginOn(id, enabled)} />
+				<HelmMenu
+					plugins={pluginMetas}
+					busy={Boolean(busy)}
+					fleetPath={inventory?.manifestPath ?? ''}
+					{serveLine}
+					{npmUser}
+					{fetchedAt}
+					{statusReady}
+					{briefCopied}
+					onToggle={(id, enabled) => void setPluginOn(id, enabled)}
+					onCopyBrief={() => void copyBrief()}
+					onFetchRemotes={() => refresh(true)}
+					onExport={() => void startExport()}
+				/>
 			</div>
 		</div>
-
-		{#if inventory}
-			<div class="chips">
-				<button type="button" class="chip" onclick={() => setTab('fleet')}>{inventory.digest.projects} enrolled</button>
-				<button type="button" class="chip" class:hot={inventory.digest.unpublishedAhead > 0} onclick={() => setTab('today')}>
-					{inventory.digest.unpublishedAhead} unpublished
-				</button>
-				<button type="button" class="chip" class:warm={inventory.digest.dirty > 0} onclick={() => setTab('today')}>
-					{inventory.digest.dirty} dirty
-				</button>
-				<button type="button" class="chip" class:warm={inventory.digest.cascadeBehind > 0} onclick={() => setTab('today')}>
-					{inventory.digest.cascadeBehind} {inventory.digest.cascadeBehind === 1 ? 'pin behind' : 'pins behind'}
-				</button>
-				<button type="button" class="chip" class:bad={inventory.digest.missing > 0} onclick={() => setTab('today')}>
-					{inventory.digest.missing} missing
-				</button>
-				<button type="button" class="chip" class:bad={inventory.digest.npmErrors > 0} onclick={() => setTab('today')}>
-					{inventory.digest.npmErrors} npm errors
-				</button>
-				<span class="chip quiet">
-					{fetchedAt ? `remotes fetched ${fetchedAt}` : 'remotes not fetched this session'}
-				</span>
-				{#if npmUser}
-					<span class="chip quiet" title="npm whoami">npm {npmUser}</span>
-				{:else if statusReady}
-					<span class="chip" title="Run localhelm auth and put a granular automation token in your user ~/.npmrc">npm not signed in</span>
-				{/if}
-			</div>
-		{/if}
-
-		{#if busy}<p class="line busy">Working: {busy}…</p>{/if}
-		{#if error}<p class="line err">{error}</p>{/if}
-		{#if !busy && !error && staleRemotes}
-			<p class="line info">Some remotes could not be read, so ahead and behind counts may be stale. Local state below is accurate.</p>
-		{/if}
+		<div class="status-rail" aria-live="polite">
+			{#if busy}
+				<p class="line busy">Working: {busy}…</p>
+			{:else if error}
+				<p class="line err">{error}</p>
+			{:else if staleRemotes}
+				<p class="line info">Some remotes could not be read, so ahead and behind counts may be stale. Local state below is accurate.</p>
+			{:else}
+				<p class="line idle" aria-hidden="true">&nbsp;</p>
+			{/if}
+		</div>
 	</header>
 
 	<nav class="tabs" aria-label="Dashboard views">
@@ -3239,7 +3204,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
-		align-items: flex-start;
+		align-items: center;
 		gap: 1.25rem;
 	}
 
@@ -3247,6 +3212,11 @@
 		display: flex;
 		align-items: center;
 		gap: 0.85rem;
+		min-width: 0;
+	}
+
+	.brand-copy {
+		min-width: 0;
 	}
 
 	.mark {
@@ -3255,17 +3225,10 @@
 		flex-shrink: 0;
 	}
 
-	.eyebrow {
-		font-size: 0.68rem;
-		letter-spacing: 0.2em;
-		text-transform: uppercase;
-		color: #9b9ba3;
-	}
-
 	h1 {
 		font-size: 1.45rem;
 		font-weight: 600;
-		margin: 0.15rem 0;
+		margin: 0;
 	}
 
 	h2 {
@@ -3274,11 +3237,6 @@
 		font-size: 1.02rem;
 		font-weight: 600;
 		margin: 0;
-	}
-
-	.sub {
-		font-size: 0.82rem;
-		color: #c4c4cc;
 	}
 
 	.hint {
@@ -3304,33 +3262,12 @@
 	.actions {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: flex-end;
-		gap: 1rem;
+		align-items: center;
+		gap: 0.45rem;
 	}
 
 	h2 :global(.icon) {
 		margin-right: 0.35rem;
-	}
-
-	.group {
-		border: 1px solid #4a4a52;
-		background: #323238;
-		border-radius: 0.6rem;
-		padding: 0.45rem 0.6rem 0.55rem;
-	}
-
-	.group-write {
-		border-color: #8a6d1f;
-		background: #3d3420;
-	}
-
-	.group-label {
-		display: block;
-		font-size: 0.66rem;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: #b4b4bc;
-		margin-bottom: 0.35rem;
 	}
 
 	.group-buttons {
@@ -3378,8 +3315,8 @@
 	.chips {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
-		margin-top: 0.55rem;
+		gap: 0.35rem;
+		margin-top: 0.35rem;
 	}
 
 	.chip {
@@ -3388,13 +3325,10 @@
 		border-radius: 999px;
 		padding: 0.12rem 0.6rem;
 		font-size: 0.72rem;
+		line-height: 1.35;
 		color: #c4c4cc;
-		font: inherit;
+		font-family: inherit;
 		cursor: pointer;
-	}
-
-	button.chip {
-		font-size: 0.72rem;
 	}
 
 	.chip.hot {
@@ -3445,9 +3379,22 @@
 		cursor: default;
 	}
 
+	.status-rail {
+		display: flex;
+		align-items: center;
+		min-height: 1.4rem;
+		margin-top: 0.25rem;
+	}
+
 	.line {
-		margin-top: 0.7rem;
+		margin: 0;
 		font-size: 0.8rem;
+		line-height: 1.35;
+	}
+
+	.line.idle {
+		visibility: hidden;
+		user-select: none;
 	}
 
 	.busy {

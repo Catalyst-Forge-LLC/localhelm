@@ -22,6 +22,52 @@ export function fleetVersionNote(row: FleetVersionRow): string | null {
 	return null;
 }
 
+export type FleetDigestCounts = {
+	unpublishedAhead: number;
+	dirty: number;
+	cascadeBehind: number;
+	missing: number;
+	npmErrors: number;
+};
+
+export type HeaderNeedChip = {
+	id: string;
+	label: string;
+	tone: 'hot' | 'warm' | 'bad';
+	tab: 'today' | 'fleet';
+};
+
+/** Header only shows work. Zero counts stay off the chrome. */
+export function headerNeedChips(digest: FleetDigestCounts): HeaderNeedChip[] {
+	const chips: HeaderNeedChip[] = [];
+	if (digest.unpublishedAhead > 0) {
+		chips.push({
+			id: 'unpublished',
+			label: `${digest.unpublishedAhead} unpublished`,
+			tone: 'hot',
+			tab: 'today',
+		});
+	}
+	if (digest.dirty > 0) {
+		chips.push({ id: 'dirty', label: `${digest.dirty} dirty`, tone: 'warm', tab: 'today' });
+	}
+	if (digest.cascadeBehind > 0) {
+		chips.push({
+			id: 'pins',
+			label: digest.cascadeBehind === 1 ? '1 pin behind' : `${digest.cascadeBehind} pins behind`,
+			tone: 'warm',
+			tab: 'today',
+		});
+	}
+	if (digest.missing > 0) {
+		chips.push({ id: 'missing', label: `${digest.missing} missing`, tone: 'bad', tab: 'today' });
+	}
+	if (digest.npmErrors > 0) {
+		chips.push({ id: 'npm', label: `${digest.npmErrors} npm errors`, tone: 'bad', tab: 'today' });
+	}
+	return chips;
+}
+
 export function fleetVersionLabel(row: FleetVersionRow): string {
 	const local = (row.localVersion ?? '').trim() || '—';
 	const note = fleetVersionNote(row);
