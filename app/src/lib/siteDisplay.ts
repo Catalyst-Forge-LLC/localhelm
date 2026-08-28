@@ -1,4 +1,6 @@
 export {
+	pluginCellHref,
+	pluginRowOpenHref,
 	siteCellValue,
 	siteEngineVersion,
 	siteLiveHref,

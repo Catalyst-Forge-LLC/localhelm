@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
+	pluginCellHref,
+	pluginRowOpenHref,
 	siteCellValue,
 	siteEngineVersion,
 	siteLiveHref,
@@ -63,6 +65,15 @@ describe('siteDisplay', () => {
 		assert.equal(siteLiveHref({ live: '—' }), null);
 		assert.equal(siteLiveHref({ live: 'javascript:alert(1)' }), null);
 		assert.equal(siteLiveHref({}), null);
+		assert.equal(pluginCellHref('ok https://skillfacts.dev/v#sf1.abc'), 'https://skillfacts.dev/v#sf1.abc');
+		assert.equal(pluginCellHref('ok'), null);
+		assert.equal(
+			pluginRowOpenHref({
+				href: 'https://appfacts.dev/v#af1.x',
+				cells: { live: '—' },
+			}),
+			'https://appfacts.dev/v#af1.x',
+		);
 	});
 
 	it('opens the *-site lease, not the dashboard lease', () => {

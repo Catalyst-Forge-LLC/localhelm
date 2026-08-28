@@ -21,6 +21,8 @@ export type PluginRow = {
 	id: string;
 	label?: string;
 	href?: string;
+	/** Column id → http(s) URL. Helm turns that cell into a link and keeps the cell text. */
+	links?: Record<string, string>;
 	cells: Record<string, string>;
 	actions: PluginAction[];
 };

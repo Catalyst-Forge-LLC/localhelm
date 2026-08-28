@@ -48,17 +48,32 @@ export function siteCellValue(colId: string, cells: Record<string, string>): str
 	return cells[colId] ?? '—';
 }
 
-/** FilePress `live` is a public URL or "—". Only http(s) becomes a link. */
-export function siteLiveHref(cells: Record<string, string>): string | null {
-	const raw = (cells.live ?? '').trim();
-	if (!raw || raw === '—') return null;
+/** Only http(s) becomes a link. Cells may be a URL or contain one. */
+export function pluginCellHref(raw: string | undefined | null): string | null {
+	const text = (raw ?? '').trim();
+	if (!text || text === '—') return null;
+	const match = /https?:\/\/[^\s)\]>]+/.exec(text);
+	const candidate = match?.[0] ?? text;
 	try {
-		const url = new URL(raw);
+		const url = new URL(candidate);
 		if (url.protocol === 'http:' || url.protocol === 'https:') return url.href;
 	} catch {
 		return null;
 	}
 	return null;
+}
+
+/** FilePress `live` is a public URL or "—". Only http(s) becomes a link. */
+export function siteLiveHref(cells: Record<string, string>): string | null {
+	return pluginCellHref(cells.live);
+}
+
+export function pluginRowOpenHref(row: {
+	href?: string;
+	links?: Record<string, string>;
+	cells: Record<string, string>;
+}): string | null {
+	return pluginCellHref(row.href) ?? pluginCellHref(row.links?.app) ?? siteLiveHref(row.cells);
 }
 
 export type SiteLeaseRef = { id: string; href?: string };

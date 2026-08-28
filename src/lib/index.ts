@@ -74,6 +74,8 @@ export { plainFetchError } from './fetchError.js';
 export {
 	siteCellValue,
 	siteEngineVersion,
+	pluginCellHref,
+	pluginRowOpenHref,
 	siteLiveHref,
 	siteLocalHref,
 	siteNeedsEngineSync,

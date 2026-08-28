@@ -35,7 +35,7 @@
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
 	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
-	import { siteCellValue, siteLiveHref, siteLocalHref, siteNeedsEngineSync, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
+	import { pluginCellHref, pluginRowOpenHref, siteCellValue, siteLocalHref, siteNeedsEngineSync, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		canonicalizeTab,
 		isPortsPluginTab,
@@ -87,6 +87,7 @@
 			id: string;
 			label?: string;
 			href?: string;
+			links?: Record<string, string>;
 			cells: Record<string, string>;
 			actions: { id: string; label: string; write: boolean; icon?: string }[];
 		}[];
@@ -2611,7 +2612,7 @@
 							</thead>
 							<tbody>
 								{#each board.rows as row (row.id)}
-									{@const liveHref = siteLiveHref(row.cells)}
+									{@const liveHref = pluginRowOpenHref(row)}
 									{@const localHref = siteLocalHref(row.id, leaseBoardAll?.rows ?? [])}
 									<tr>
 										<td class="tick">
@@ -2634,9 +2635,10 @@
 											</div>
 										</td>
 										{#each siteCols as col (col.id)}
+											{@const colHref = pluginCellHref(row.links?.[col.id]) ?? pluginCellHref(row.cells[col.id])}
 											<td class="small" class:mono={col.id === 'engine'}>
-												{#if col.id === 'live' && liveHref}
-													<a class="live-link" href={liveHref} target="_blank" rel="noopener noreferrer">{siteCellValue(col.id, row.cells)}</a>
+												{#if colHref}
+													<a class="live-link" href={colHref} target="_blank" rel="noopener noreferrer" title={`Open ${colHref}`}>{siteCellValue(col.id, row.cells)}</a>
 												{:else}
 													{siteCellValue(col.id, row.cells)}
 												{/if}
