@@ -67,7 +67,8 @@ export function visitorMachineCard(): { hostname: string; addresses: string[] } 
 		if (SKIP_IFACE.test(name)) continue;
 		for (const row of addrs ?? []) {
 			if (row.internal) continue;
-			if (row.family !== 'IPv4' && row.family !== 4) continue;
+			const family = String(row.family);
+			if (family !== 'IPv4' && family !== '4') continue;
 			if (row.address.startsWith('127.') || row.address.startsWith('169.254.')) continue;
 			found.push(row.address);
 		}

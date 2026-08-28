@@ -14,6 +14,7 @@ function currentNpmUser(): string | null {
 
 function listen(): { port: string | null; portSource: string | null } {
 	return {
+		host: process.env.LOCALHELM_HOST ?? null,
 		port: process.env.LOCALHELM_PORT ?? null,
 		portSource: process.env.LOCALHELM_PORT_SOURCE ?? null,
 	};

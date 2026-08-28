@@ -830,6 +830,19 @@
         "Reimplement peekHttp in Helm"
       ],
       "status": "active"
+    },
+    {
+      "id": "d58",
+      "timestamp": "2026-08-28T03:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 21,
+      "decision": "localhelm serve defaults to 0.0.0.0. --host / --hosts with no address means all interfaces (Vite-style). --host 127.0.0.1 stays loopback-only. Write APIs remain loopback-only.",
+      "rationale": "Operator 2026-08-27: serve needed --host / --hosts to reach the phone. Visitor tiles only work if Helm is on the LAN.",
+      "alternatives_considered": [
+        "Keep loopback default and require --host 0.0.0.0",
+        "Accept --hosts as a required address only"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

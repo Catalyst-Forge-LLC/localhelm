@@ -83,7 +83,7 @@ export { scanFolders } from './scan.js';
 export { isOperatorFace, isLoopbackClient, visitorHttpUrl, visitorPageHost } from './loopback.js';
 export { visitorSnapshotFromBoards, visitorTilesFromBoards } from './visitorTiles.js';
 export type { VisitorSnapshot, VisitorTile } from './visitorTiles.js';
-export { DEFAULT_DASHBOARD_PORT, serveDashboard } from './serve.js';
+export { DEFAULT_DASHBOARD_HOST, DEFAULT_DASHBOARD_PORT, serveDashboard } from './serve.js';
 export { fleetStatus } from './status.js';
 export { operatorCwd } from './workspace.js';
 export type { BumpKind } from './semver.js';

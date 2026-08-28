@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 export const DEFAULT_DASHBOARD_PORT = 4321;
+export const DEFAULT_DASHBOARD_HOST = '0.0.0.0';
 
 function packageRoot(): string {
 	return path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -30,10 +31,7 @@ function choosePort(requested?: number): { port: number; source: PortSource } {
 }
 
 export async function serveDashboard(opts: { host?: string; port?: number } = {}): Promise<void> {
-	const host = opts.host ?? '127.0.0.1';
-	if (host !== '127.0.0.1' && host !== 'localhost') {
-		console.error(`warning: binding ${host} is opt-in; dashboard has no auth`);
-	}
+	const host = opts.host ?? DEFAULT_DASHBOARD_HOST;
 	const { port, source } = choosePort(opts.port);
 	const appDir = path.join(packageRoot(), 'app');
 	if (!existsSync(path.join(appDir, 'package.json'))) {
@@ -49,13 +47,18 @@ export async function serveDashboard(opts: { host?: string; port?: number } = {}
 			env: {
 				...process.env,
 				LOCALHELM_CWD: process.cwd(),
+				LOCALHELM_HOST: host,
 				LOCALHELM_PORT: String(port),
 				LOCALHELM_PORT_SOURCE: source,
 			},
 		},
 	);
 	const how = source === 'localslip' ? ' (LocalSlip lease)' : source === 'flag' ? ' (--port)' : '';
-	console.error(`localhelm serve  http://${host}:${port}${how}`);
+	const where =
+		host === '0.0.0.0' || host === '::'
+			? `http://127.0.0.1:${port}${how}  (all interfaces)`
+			: `http://${host}:${port}${how}`;
+	console.error(`localhelm serve  ${where}`);
 	await new Promise<void>((resolve, reject) => {
 		child.on('exit', (code) => {
 			if (code === 0 || code === null) resolve();

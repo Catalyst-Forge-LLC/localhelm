@@ -34,7 +34,7 @@ localhelm cascade ollanet               # plan pin updates to ^npm; --apply writ
 localhelm plugins                       # FilePress (and later others) if the enrolled project has localhelm.plugin.mjs
 localhelm plugin filepress              # content sites: headers, link→npm, ship
 localhelm plugin filepress sync         # plan engine sync for every FilePress site
-localhelm serve                         # dashboard on 127.0.0.1:4321
+localhelm serve                         # dashboard on all interfaces :4321 (operator: 127.0.0.1)
 ```
 
 `scan` never writes. Mutating commands print a plan; pass `--apply` to write. `publish` requires named project ids; it bumps and pushes only when needed, then `npm publish`. Never `--force`. One job at a time (`.localhelm/job.lock`).

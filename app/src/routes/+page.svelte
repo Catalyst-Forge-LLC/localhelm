@@ -167,6 +167,7 @@
 	let activityUnseen = $state(false);
 	let urlSyncReady = $state(false);
 	let cwd = $state('');
+	let host = $state<string | null>(null);
 	let port = $state<string | null>(null);
 	let portSource = $state<string | null>(null);
 	let fetchedAt = $state<string | null>(null);
@@ -632,6 +633,7 @@
 			inventory: Inventory | null;
 			scanRoot: string;
 			cwd: string;
+			host?: string | null;
 			port: string | null;
 			portSource: string | null;
 			npmUser?: string | null;
@@ -639,6 +641,7 @@
 		if (scoped && inventory && data.inventory) inventory = mergeInventory(inventory, data.inventory);
 		else inventory = data.inventory;
 		cwd = data.cwd;
+		host = data.host ?? null;
 		port = data.port;
 		portSource = data.portSource;
 		if (data.npmUser) {
@@ -1809,7 +1812,9 @@
 					{/if}
 					{#if port}
 						<span class="dim">
-							· serving 127.0.0.1:{port}{portSource === 'localslip'
+							· {host && host !== '0.0.0.0' && host !== '::'
+								? `serving ${host}:${port}`
+								: `serving :${port} on all interfaces`}{portSource === 'localslip'
 								? ' (port leased from LocalSlip)'
 								: portSource === 'flag'
 									? ' (--port)'

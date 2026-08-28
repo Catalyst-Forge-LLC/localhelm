@@ -14,7 +14,7 @@ import { applyLand, planLand, requireLandSiteId } from '../lib/land.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
-import { serveDashboard } from '../lib/serve.js';
+import { DEFAULT_DASHBOARD_HOST, serveDashboard } from '../lib/serve.js';
 import type { BumpKind } from '../lib/semver.js';
 import { fleetStatus } from '../lib/status.js';
 import type { EnrollPlan, FleetInventory, ScanCandidate } from '../lib/types.js';
@@ -44,7 +44,7 @@ Usage:
   localhelm archive [id...] [--apply] [--restore]
   localhelm plugins
   localhelm plugin <id> [action] [name...] [--apply] [--no-commit]
-  localhelm serve [--host ADDR] [--port N]
+  localhelm serve [--host ADDR] [--port N]   default 0.0.0.0 (all interfaces)
 
 scan never writes. Mutating commands print a plan; pass --apply to write.
 Scan also reads .localhelmignore (and ~/.localhelm/ignore).
@@ -70,6 +70,22 @@ function takeOpt(args: string[], name: string): string | undefined {
 	if (!value || value.startsWith('-')) fail(`missing value for ${name}`);
 	args.splice(i, 2);
 	return value;
+}
+
+/** `--host` / `--hosts` alone (Vite-style) means all interfaces. */
+function takeHostFlag(args: string[]): string | undefined {
+	for (const name of ['--host', '--hosts']) {
+		const i = args.indexOf(name);
+		if (i < 0) continue;
+		const next = args[i + 1];
+		if (!next || next.startsWith('-')) {
+			args.splice(i, 1);
+			return DEFAULT_DASHBOARD_HOST;
+		}
+		args.splice(i, 2);
+		return next;
+	}
+	return undefined;
 }
 
 function printJson(value: unknown): void {
@@ -746,7 +762,7 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 	}
 
 	if (cmd === 'serve') {
-		const host = takeOpt(argv, '--host');
+		const host = takeHostFlag(argv);
 		const portRaw = takeOpt(argv, '--port');
 		const leftovers = argv.filter((a) => a.startsWith('-'));
 		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);

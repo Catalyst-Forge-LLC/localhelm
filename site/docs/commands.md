@@ -23,7 +23,7 @@ title: Commands
 | `localhelm archive [id…] [--apply]` | Hide on Today; folder stays |
 | `localhelm plugins` | Loaded `localhelm.plugin.mjs` hosts |
 | `localhelm plugin <id> [action] [name…] [--apply]` | Plan/apply a plugin job |
-| `localhelm serve [--host ADDR] [--port N]` | Dashboard on **4321** |
+| `localhelm serve [--host ADDR] [--port N]` | Dashboard on **4321**, all interfaces (`--host 127.0.0.1` for loopback) |
 
 ```bash
 localhelm --help
