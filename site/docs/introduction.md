@@ -2,11 +2,11 @@
 title: Introduction
 ---
 
-**LocalHelm** is the control panel for local development. Fleet, sites, and ports, including tools that never publish.
+**LocalHelm** is the control panel for local development. The local fleet is the apps and sites you keep, including tools that never publish. Ports sit on the same board.
 
 [LocalSlip](https://localslip.dev) is the slip; LocalHelm is the wheel.
 
-You have a folder of repos. `git status` in one of them answers that repo. The board also covers local tools that never publish: sites, ports, and the phone tile grid.
+You have a folder of repos. `git status` in one of them answers that repo. The board also shows listening leases and the phone tile grid.
 
 Scan a folder, check which ones to keep, then read git, npm, dependents, and listening leases in one place.
 
@@ -26,7 +26,7 @@ It does not claim ports. Start and stop on the board ask [LocalSlip](https://loc
 | [localhelm.dev](https://localhelm.dev) | This site: what it is and how to use it |
 | npm `localhelm` | The CLI and dashboard, on your machine |
 
-The domain never serves your fleet.
+The domain never serves your apps or sites.
 
 ## Next
 

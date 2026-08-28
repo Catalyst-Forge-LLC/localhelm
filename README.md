@@ -6,7 +6,7 @@
 
 **Control panel for local development.**
 
-One board for fleet, sites, and ports, including tools that never publish. [LocalSlip](https://localslip.dev) is the slip; LocalHelm is the wheel.
+Your local fleet is the apps and sites you keep, including tools that never publish. Ports sit on the same board. [LocalSlip](https://localslip.dev) is the slip; LocalHelm is the wheel.
 
 ```bash
 pnpm add -g localhelm

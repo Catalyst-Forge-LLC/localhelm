@@ -7,7 +7,7 @@ description: Control panel for local development.
 <p><strong>helm</strong> <span class="pos">n.</span> the wheel by which a ship is steered.</p>
 </aside>
 
-You have a folder of repos. `git status` in one of them answers that repo. The board also covers local tools that never publish: sites, ports, and the phone tile grid.
+You have a folder of repos. `git status` in one of them answers that repo. The local fleet is the apps and sites you keep, including tools that never publish. The board also shows ports and the phone tile grid.
 
 Scan a folder, check which ones to keep, then read git, npm, dependents, and listening leases in one place.
 

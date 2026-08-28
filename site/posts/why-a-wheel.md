@@ -1,7 +1,7 @@
 ---
 title: Why a wheel
 date: 2026-08-27
-description: git status answers one repo. The scarce resource is the fleet.
+description: git status answers one repo. The scarce resource is the apps and sites.
 tags: [notes]
 ---
 

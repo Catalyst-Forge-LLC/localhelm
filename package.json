@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "private": false,
   "type": "module",
-  "description": "Control panel for local development. Fleet, sites, and ports — including tools that never ship.",
+  "description": "Control panel for local development. The local fleet is the apps and sites you keep, plus the ports they listen on.",
   "license": "Apache-2.0",
   "author": "Catalyst Forge, LLC",
   "bin": {

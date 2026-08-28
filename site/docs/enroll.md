@@ -2,7 +2,7 @@
 title: Enroll
 ---
 
-The fleet is chosen, not auto-enrolled.
+Which apps and sites join the fleet is chosen, not auto-enrolled.
 
 ```bash
 localhelm scan ..

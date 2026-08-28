@@ -2,7 +2,7 @@
   "project": {
     "name": "LocalHelm",
     "created": "2026-08-20",
-    "description": "Control panel for local development. Fleet, sites, and ports — including tools that never ship. Generic JSON export; no shop-specific shelf.",
+    "description": "Control panel for local development. The local fleet is the apps and sites you keep, plus the ports they listen on. Generic JSON export; no shop-specific shelf.",
     "archetype": "product",
     "status": "active"
   },

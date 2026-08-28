@@ -6,7 +6,7 @@ export default defineFilepressConfig({
 	url: 'https://localhelm.dev',
 	author: 'Catalyst Forge, LLC',
 	tagline: 'Control panel for local development',
-	lede: 'One board for fleet, sites, and ports, including tools that never publish.',
+	lede: 'Your local fleet is the apps and sites you keep, plus the ports they listen on.',
 	logo: '/logo.png',
 	ogImage: '/logo.png',
 	homePage: 'home',
