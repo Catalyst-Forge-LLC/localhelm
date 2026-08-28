@@ -34,8 +34,17 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 
 **Project pointer:** LocalHelm `README.md`.
 
+### 4. Vite-hosted plugin jobs must not `spawnSync` a long deploy
+
+**What went wrong:** Sites → Ship runs `pnpm ship` (Vite build + wrangler Pages). The FilePress plugin used `spawnSync`, which freezes the Vite event loop for minutes. The browser then shows `Failed to fetch` with no HTTP body. Activity never logs the apply. A 1MB `maxBuffer` can also kill wrangler mid-upload.
+
+**Suggested Lite change:** Near dashboard / plugin notes (§4.2): long write jobs hosted by `vite dev` must be async (`spawn`, not `spawnSync`) so HMR and keep-alives stay alive. Disable the HTTP server socket timeout (`setTimeout(0)`) for jobs that write no bytes until they finish. Map browser `Failed to fetch` to “serve may have stopped / check the terminal.” Raise `maxBuffer` (or inherit stdio) when capturing deploy logs.
+
+**Project pointer:** LocalHelm `app/vite.config.ts` + `src/lib/fetchError.ts`; FilePress `localhelm.plugin.mjs`.
+
 | Topic | Lite § to patch |
 | --- | --- |
 | Node builtins in Svelte client graph | §4.2 / anti-patterns |
 | Vite allowedHosts vs Tailscale `*.ts.net` | §4.2 / anti-patterns |
 | Private GitHub README images on npmjs | npm / README |
+| Long Vite plugin jobs / Failed to fetch | §4.2 / anti-patterns |

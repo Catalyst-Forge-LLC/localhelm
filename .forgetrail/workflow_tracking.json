@@ -900,6 +900,14 @@
   ],
   "gotchas": [
     {
+      "timestamp": "2026-08-28T16:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "issue": "Sites → Ship getfilepress showed Failed to fetch. No activity row. Serve was down on :4321. Plugin spawnSync froze Vite for the whole wrangler deploy; a dead serve looks the same in the browser.",
+      "resolution": "plainFetchError maps Failed to fetch. Vite httpServer setTimeout(0). FilePress plugin bridge is async; ship maxBuffer 32MB.",
+      "category": "tooling"
+    },
+    {
       "timestamp": "2026-08-28T04:28:00Z",
       "phase": "2-scaffolding",
       "session": 21,

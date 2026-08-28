@@ -56,6 +56,7 @@ export {
 } from './writeGate.js';
 export type { FleetWriteId, GateGit, PublishGateRow } from './writeGate.js';
 export { bulkProgressLabel } from './bulkProgress.js';
+export { plainFetchError } from './fetchError.js';
 export {
 	siteCellValue,
 	siteEngineVersion,

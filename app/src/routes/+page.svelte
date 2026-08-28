@@ -27,6 +27,7 @@
 		type FleetWriteId,
 	} from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
+	import { plainFetchError } from '$lib/fetchError';
 	import { fleetProjectMeta, fleetVersionLabel } from '$lib/fleetDisplay';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
@@ -502,11 +503,25 @@
 	}
 
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
-		const res = await fetch(url, {
-			...init,
-			headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
-		});
-		const data = (await res.json()) as { error?: string };
+		let res: Response;
+		try {
+			res = await fetch(url, {
+				...init,
+				headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
+			});
+		} catch (err) {
+			throw new Error(plainFetchError(err));
+		}
+		let data: { error?: string };
+		try {
+			data = (await res.json()) as { error?: string };
+		} catch {
+			throw new Error(
+				res.ok
+					? 'Dashboard returned a non-JSON response.'
+					: `Dashboard request failed (${res.status} ${res.statusText}).`,
+			);
+		}
 		if (!res.ok) throw new Error(data.error ?? res.statusText);
 		return data;
 	}

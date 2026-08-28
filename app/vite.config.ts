@@ -9,6 +9,17 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'
 
 export default defineConfig({
 	plugins: [
+		{
+			name: 'localhelm-long-jobs',
+			configureServer(server) {
+				// Ship (build + wrangler) can sit minutes with no bytes. Default socket timeouts drop the browser fetch.
+				const disable = (): void => {
+					server.httpServer?.setTimeout(0);
+				};
+				disable();
+				server.httpServer?.on('listening', disable);
+			},
+		},
 		tailwindcss(),
 		sveltekit({
 			compilerOptions: {
