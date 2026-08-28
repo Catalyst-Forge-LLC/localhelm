@@ -2,7 +2,7 @@
 
 **Spec kind:** Delivery  
 **Status:** Draft (2026-08-25) — H1–H5 landed  
-**Related:** `docs/PHASE_1_BRIEF.md` §10–11, `TODO.md` M4, `.forgetrail/IDEAS.md`, sibling [`localberth/docs/specs/cheap-surfaces.md`](../../../localberth/docs/specs/cheap-surfaces.md)  
+**Related:** `docs/PHASE_1_BRIEF.md` §10–11, `TODO.md` M4, `.forgetrail/IDEAS.md`, sibling [`localslip/docs/specs/cheap-surfaces.md`](../../../localslip/docs/specs/cheap-surfaces.md)  
 **Surfaces:** Today / Fleet / Ports host, CLI `status` / export, activity log
 
 Pairing: **LocalSlip is the slip (local DNS for ports). LocalHelm is the wheel.** This spec is what the wheel can show or host. Port lifecycle, logs, and park stay on LocalSlip.
