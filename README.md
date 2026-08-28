@@ -14,27 +14,27 @@ pnpm add -g localhelm
 pnpm install && pnpm build
 
 localhelm scan ..
-localhelm enroll ../filepress ../ollanet --apply
+localhelm enroll ../my-cli ../my-lib --apply
 localhelm status
-localhelm status filepress              # one project only
+localhelm status my-cli                 # one enrolled id
 localhelm status --json
 localhelm deps
-localhelm bump filepress patch          # plan: write package.json + commit that file; --apply to write
+localhelm bump my-cli patch             # plan; --apply writes
 localhelm fetch
-localhelm pull                          # plan; add --apply for ff-only
+localhelm pull                          # plan; --apply is ff-only
 localhelm push                          # plan every enrolled origin
-localhelm push localhelm filepress --apply   # origin only; name ids; never --force
-localhelm export                        # plan; add --apply to write localhelm.status.json
+localhelm push my-cli my-lib --apply    # named ids; never --force
+localhelm export                        # plan; --apply writes JSON
 localhelm ready                         # already unpublished-ahead
-localhelm publish ollanet               # plan: bump/push only if needed, then npm publish
-localhelm auth                          # npm whoami + how to set an automation token
-localhelm publish ollanet --apply       # opens npm’s login URL if the token still requires a passkey
-localhelm publish ollanet --apply --otp 123456   # only if npm asks for a numeric authenticator code
-localhelm cascade ollanet               # plan pin updates to ^npm; --apply writes + commits
-localhelm plugins                       # FilePress (and later others) if the enrolled project has localhelm.plugin.mjs
-localhelm plugin filepress              # content sites: headers, link→npm, ship
-localhelm plugin filepress sync         # plan engine sync for every FilePress site
-localhelm serve                         # dashboard on all interfaces :4321 (operator: 127.0.0.1)
+localhelm publish my-lib                # plan
+localhelm auth                          # npm whoami + token hint
+localhelm publish my-lib --apply
+localhelm publish my-lib --apply --otp 123456
+localhelm cascade my-lib                # plan pin updates; --apply writes
+localhelm plugins
+localhelm plugin filepress              # FilePress plugin, if present
+localhelm plugin filepress sync
+localhelm serve                         # :4321 on all interfaces
 ```
 
 `scan` never writes. Mutating commands print a plan; pass `--apply` to write. `publish` requires named project ids; it bumps and pushes only when needed, then `npm publish`. Never `--force`. One job at a time (`.localhelm/job.lock`).

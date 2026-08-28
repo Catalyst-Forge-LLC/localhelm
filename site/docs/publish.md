@@ -4,9 +4,9 @@ title: Publish
 
 ```bash
 localhelm auth
-localhelm publish ollanet
-localhelm publish ollanet --apply
-localhelm publish ollanet --apply --otp 123456
+localhelm publish my-lib
+localhelm publish my-lib --apply
+localhelm publish my-lib --apply --otp 123456
 ```
 
 `publish` requires named project ids. It bumps and pushes only when needed, then `npm publish --access public`. Never `--force`.

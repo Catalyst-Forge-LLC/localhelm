@@ -16,7 +16,7 @@ Then:
 
 ```bash
 localhelm scan ..
-localhelm enroll ../filepress --apply
+localhelm enroll ../my-cli --apply
 localhelm serve
 ```
 

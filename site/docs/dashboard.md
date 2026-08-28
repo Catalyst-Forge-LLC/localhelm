@@ -17,8 +17,8 @@ The phone on a LAN or Tailscale Host (`*.ts.net` or a Tailscale IP) is redirecte
 | --- | --- |
 | Today | Needs you (writes), Looks (Ports facts), Sites and Ports snapshots |
 | Fleet | Enrolled repos: version, git, pins, the same writes as Today |
-| Sites | FilePress jobs if the filepress checkout is enrolled |
-| Ports | LocalSlip leases if the localslip checkout is enrolled |
+| Sites | FilePress jobs, if a FilePress site is enrolled |
+| Ports | LocalSlip leases, if LocalSlip is enrolled |
 
 The same product can appear on three tabs. **Also on** chips jump and check that id.
 

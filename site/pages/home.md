@@ -13,7 +13,7 @@ Name the fleet. Scan a folder, check the ones you keep, then read git, npm, depe
 
 ```text
 localhelm scan ..
-localhelm enroll ../filepress ../ollanet --apply
+localhelm enroll ../my-cli ../my-lib --apply
 localhelm status
 localhelm serve
 ```

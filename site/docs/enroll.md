@@ -6,7 +6,7 @@ The fleet is chosen, not auto-enrolled.
 
 ```bash
 localhelm scan ..
-localhelm enroll ../filepress ../ollanet --apply
+localhelm enroll ../my-cli ../my-lib --apply
 localhelm unenroll old-name --apply
 ```
 

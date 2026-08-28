@@ -6,7 +6,7 @@ title: Quick start
 
 ```bash
 localhelm scan ..
-localhelm enroll ../filepress ../ollanet --apply
+localhelm enroll ../my-cli ../my-lib --apply
 localhelm status
 ```
 
@@ -25,8 +25,8 @@ Then visit `http://127.0.0.1:4321` for the operator board. **Visitor** (or `http
 ## A write is a plan
 
 ```bash
-localhelm bump filepress patch
-localhelm bump filepress patch --apply
+localhelm bump my-cli patch
+localhelm bump my-cli patch --apply
 ```
 
 Mutating commands print what they would do. Pass `--apply` to write. `publish` and `push` require named project ids. Never `--force`.
