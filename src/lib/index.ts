@@ -26,7 +26,15 @@ export {
 export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from './land.js';
 export { landShipsPath, readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 export type { LandShipRecord } from './landShips.js';
-export { asPluginBoards, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
+export { asPluginBoards, loadPluginDashboard, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
+export type { PluginListing } from './plugin.js';
+export {
+	isPluginEnabled,
+	pluginPrefsPath,
+	readPluginPrefs,
+	setPluginEnabled,
+} from './pluginPrefs.js';
+export type { PluginPrefs } from './pluginPrefs.js';
 export {
 	canonicalizeTab,
 	isCoreTab,
@@ -76,6 +84,7 @@ export {
 	siteEngineVersion,
 	pluginCellHref,
 	pluginCellLinks,
+	pluginRowNote,
 	pluginRowOpenHref,
 	siteLiveHref,
 	siteLocalHref,

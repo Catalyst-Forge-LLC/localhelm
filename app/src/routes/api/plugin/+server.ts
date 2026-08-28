@@ -1,8 +1,10 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import {
+	isPluginEnabled,
 	landPluginApplyOk,
 	loadPlugins,
+	readPluginPrefs,
 	recordLandShip,
 	requirePlugin,
 } from '../../../../../src/lib/index.js';
@@ -19,6 +21,10 @@ export const POST: RequestHandler = async ({ request }) => {
 		if (!body.id || !body.action) return errJson('id and action required');
 		const loaded = await loadRequired();
 		const plug = requirePlugin(await loadPlugins(loaded), body.id);
+		const prefs = await readPluginPrefs(loaded.workspaceRoot);
+		if (!isPluginEnabled(body.id, prefs)) {
+			return errJson(`plugin ${body.id} is off. Turn it on from the LocalHelm menu.`);
+		}
 		const ids = body.ids ?? [];
 		if (!body.apply) {
 			if (!plug.plugin.plan) return errJson(`plugin ${body.id} has no plan`);

@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 import type { LoadedManifest } from './manifest.js';
-import { asPluginBoards, loadPluginFile, loadPlugins } from './plugin.js';
+import { asPluginBoards, loadPluginDashboard, loadPluginFile, loadPlugins } from './plugin.js';
+import { setPluginEnabled } from './pluginPrefs.js';
 import { formatPluginPlanLines, pluginPlanWriteIds, splitCommandCwd } from './pluginPlan.js';
 
 describe('plugins', () => {
@@ -36,6 +37,10 @@ describe('plugins', () => {
 		assert.equal(board.title, 'Demo');
 		assert.equal(asPluginBoards(board).length, 1);
 		assert.equal((await loadPluginFile(file)).id, 'demo');
+		await setPluginEnabled(root, 'demo', false);
+		const dash = await loadPluginDashboard(loaded);
+		assert.deepEqual(dash.plugins.map((p) => ({ id: p.id, enabled: p.enabled })), [{ id: 'demo', enabled: false }]);
+		assert.equal(dash.boards.length, 0);
 	});
 
 	it('reads write ids from a plugin plan and ignores already-current rows', () => {

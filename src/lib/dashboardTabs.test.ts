@@ -29,14 +29,13 @@ describe('dashboardTabs', () => {
 				[
 					{ id: 'filepress', label: 'FilePress Sites' },
 					{ id: 'localslip', label: 'LocalSlip Ports' },
-					{ id: 'xfacts', label: 'xFacts labels' },
+					{ id: 'xfacts', label: 'xFacts labels', enabled: false },
 				],
 				[],
 			),
 			[
 				{ id: 'filepress', label: 'FilePress Sites' },
 				{ id: 'localslip', label: 'LocalSlip Ports' },
-				{ id: 'xfacts', label: 'xFacts labels' },
 			],
 		);
 		assert.deepEqual(

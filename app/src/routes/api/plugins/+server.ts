@@ -1,20 +1,28 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { asPluginBoards, loadPlugins } from '../../../../../src/lib/index.js';
+import { loadPluginDashboard, loadPlugins, setPluginEnabled } from '../../../../../src/lib/index.js';
 import { errJson, loadRequired } from '$lib/server/helm';
 
 export const GET: RequestHandler = async () => {
 	try {
 		const loaded = await loadRequired();
-		const plugins = await loadPlugins(loaded);
-		const boards = [];
-		for (const plug of plugins) {
-			boards.push(...asPluginBoards(await plug.plugin.board()));
+		return json(await loadPluginDashboard(loaded));
+	} catch (err) {
+		return errJson(err);
+	}
+};
+
+export const POST: RequestHandler = async ({ request }) => {
+	try {
+		const body = (await request.json()) as { id?: string; enabled?: boolean };
+		if (!body.id || typeof body.enabled !== 'boolean') return errJson('id and enabled required');
+		const loaded = await loadRequired();
+		const found = await loadPlugins(loaded);
+		if (!found.some((plug) => plug.id === body.id)) {
+			return errJson(`plugin not loaded: ${body.id}. Enroll the project that has localhelm.plugin.mjs.`);
 		}
-		return json({
-			plugins: plugins.map((p) => ({ id: p.id, label: p.label, source: p.source })),
-			boards,
-		});
+		await setPluginEnabled(loaded.workspaceRoot, body.id, body.enabled);
+		return json(await loadPluginDashboard(loaded));
 	} catch (err) {
 		return errJson(err);
 	}

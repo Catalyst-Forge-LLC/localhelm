@@ -35,9 +35,11 @@
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
 	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
-	import { pluginCellLinks, pluginRowOpenHref, siteCellValue, siteLocalHref, siteNeedsEngineSync, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
+	import HelmMenu from '$lib/HelmMenu.svelte';
+	import { pluginCellLinks, pluginRowNote, pluginRowOpenHref, siteCellValue, siteLocalHref, siteNeedsEngineSync, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		canonicalizeTab,
+		isCoreTab,
 		isPortsPluginTab,
 		parseDashboardTab,
 		pluginTabCount,
@@ -188,8 +190,9 @@
 	let observedFilters = $state<PortBoardFilters>({});
 	let bumpKind = $state<Record<string, BumpKind>>({});
 
+	type PluginCatalogItem = PluginTabMeta & { source?: string; enabled: boolean };
 	let pluginBoards = $state<PluginBoard[]>([]);
-	let pluginMetas = $state<PluginTabMeta[]>([]);
+	let pluginMetas = $state<PluginCatalogItem[]>([]);
 	let publishOtp = $state('');
 	let npmUser = $state<string | null>(null);
 	let publishAuthHint = $state('');
@@ -629,16 +632,48 @@
 		return { ...prev, projects, digest: inventoryDigest(projects) };
 	}
 
+	function applyPluginDashboard(plug: {
+		boards: PluginBoard[];
+		plugins?: { id: string; label: string; source?: string; enabled?: boolean }[];
+	}): void {
+		pluginMetas = (plug.plugins ?? []).map((item) => ({
+			id: item.id,
+			label: item.label,
+			source: item.source,
+			enabled: item.enabled !== false,
+		}));
+		pluginBoards = plug.boards;
+		if (!isCoreTab(tab) && pluginMetas.some((item) => item.id === canonicalizeTab(tab) && !item.enabled)) {
+			setTab('today');
+		}
+	}
+
 	async function loadPluginBoards(): Promise<void> {
 		try {
-			const plug = (await call('/api/plugins')) as {
+			applyPluginDashboard((await call('/api/plugins')) as {
 				boards: PluginBoard[];
-				plugins?: { id: string; label: string }[];
-			};
-			pluginMetas = plug.plugins ?? [];
-			pluginBoards = plug.boards;
+				plugins?: { id: string; label: string; source?: string; enabled?: boolean }[];
+			});
 		} catch {
 			/* keep the last boards */
+		}
+	}
+
+	async function setPluginOn(id: string, enabled: boolean): Promise<void> {
+		pluginMetas = pluginMetas.map((item) => (item.id === id ? { ...item, enabled } : item));
+		if (!enabled && canonicalizeTab(tab) === id) setTab('today');
+		try {
+			applyPluginDashboard((await call('/api/plugins', {
+				method: 'POST',
+				body: JSON.stringify({ id, enabled }),
+			})) as {
+				boards: PluginBoard[];
+				plugins?: { id: string; label: string; source?: string; enabled?: boolean }[];
+			});
+			note(`${id} ${enabled ? 'on' : 'off'}`, { id, enabled });
+		} catch (err) {
+			error = err instanceof Error ? err.message : String(err);
+			await loadPluginBoards();
 		}
 	}
 
@@ -1956,6 +1991,7 @@
 					badge={activityUnseen ? 'new' : entries.length || ''}
 					onclick={() => setActivityOpen(!activityOpen)}
 				/>
+				<HelmMenu plugins={pluginMetas} busy={Boolean(busy)} onToggle={(id, enabled) => void setPluginOn(id, enabled)} />
 			</div>
 		</div>
 
@@ -2615,6 +2651,7 @@
 								{#each board.rows as row (row.id)}
 									{@const liveHref = pluginRowOpenHref(row)}
 									{@const localHref = siteLocalHref(row.id, leaseBoardAll?.rows ?? [])}
+									{@const rowNote = pluginRowNote(board.plugin, row.cells)}
 									<tr>
 										<td class="tick">
 											<input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedSites[row.id]} />
@@ -2633,6 +2670,7 @@
 													<span class="id">{row.label ?? row.id}</span>
 												{/if}
 												<CrossChips compact chips={chipsFor(row.id, 'sites')} onOpen={(kind) => openCross(row.id, kind)} />
+												{#if rowNote}<span class="chip quiet">{rowNote}</span>{/if}
 											</div>
 										</td>
 										{#each siteCols as col (col.id)}

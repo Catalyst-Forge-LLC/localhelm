@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import type { LoadedManifest } from './manifest.js';
 import { joinRoot, toPosix } from './paths.js';
 import { pathExists } from './pkg.js';
+import { isPluginEnabled, readPluginPrefs } from './pluginPrefs.js';
 
 export const PLUGIN_FILE_NAMES = ['localhelm.plugin.mjs', 'localhelm.plugin.js'] as const;
 
@@ -101,4 +102,31 @@ export function requirePlugin(plugins: LoadedPlugin[], id: string): LoadedPlugin
 		throw new Error(`plugin not loaded: ${id} (found ${have}). Enroll the project that has localhelm.plugin.mjs.`);
 	}
 	return hit;
+}
+
+export type PluginListing = {
+	id: string;
+	label: string;
+	source: string;
+	enabled: boolean;
+};
+
+export async function loadPluginDashboard(loaded: LoadedManifest): Promise<{
+	plugins: PluginListing[];
+	boards: PluginBoard[];
+}> {
+	const found = await loadPlugins(loaded);
+	const prefs = await readPluginPrefs(loaded.workspaceRoot);
+	const plugins = found.map((plug) => ({
+		id: plug.id,
+		label: plug.label,
+		source: plug.source,
+		enabled: isPluginEnabled(plug.id, prefs),
+	}));
+	const boards: PluginBoard[] = [];
+	for (const plug of found) {
+		if (!isPluginEnabled(plug.id, prefs)) continue;
+		boards.push(...asPluginBoards(await plug.plugin.board()));
+	}
+	return { plugins, boards };
 }

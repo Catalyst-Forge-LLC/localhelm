@@ -2,6 +2,7 @@ import { familyRole, familyStem } from './family.js';
 
 const HIDDEN_FILEPRESS_COLS = new Set(['pin', 'locked', 'update', 'headers', 'ship']);
 const HIDDEN_FILEPRESS_JOBS = new Set(['sync', 'push']);
+const HIDDEN_XFACTS_COLS = new Set(['app', 'name', 'status']);
 
 export type BoardColumn = { id: string; label: string };
 
@@ -13,8 +14,17 @@ export function sitePluginJobVisible(plugin: string, actionId: string): boolean 
 }
 
 export function siteTableColumns(plugin: string, columns: readonly BoardColumn[]): BoardColumn[] {
+	if (plugin === 'xfacts') return columns.filter((col) => !HIDDEN_XFACTS_COLS.has(col.id));
 	if (plugin !== 'filepress') return [...columns];
 	return [{ id: 'engine', label: 'engine' }, ...columns.filter((col) => !HIDDEN_FILEPRESS_COLS.has(col.id))];
+}
+
+/** Quiet row note. xFacts keeps "ok" off the table and only surfaces a problem. */
+export function pluginRowNote(plugin: string, cells: Record<string, string>): string | null {
+	if (plugin !== 'xfacts') return null;
+	const status = (cells.status ?? '').trim();
+	if (!status || status === 'ok' || status === '—') return null;
+	return status;
 }
 
 export function siteEngineVersion(cells: Record<string, string>): string {

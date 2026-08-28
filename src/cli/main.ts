@@ -1,7 +1,8 @@
 import { applyBump, planBump } from '../lib/bump.js';
 import { applyCascade, planCascade } from '../lib/cascade.js';
 import { fleetDeps } from '../lib/deps.js';
-import { asPluginBoards, loadPlugins, requirePlugin } from '../lib/plugin.js';
+import { asPluginBoards, loadPluginDashboard, loadPlugins, requirePlugin } from '../lib/plugin.js';
+import { isPluginEnabled, readPluginPrefs } from '../lib/pluginPrefs.js';
 import { pluginPlanWriteIds } from '../lib/pluginPlan.js';
 import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
@@ -695,13 +696,13 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 		const json = takeFlag(argv, '--json');
 		if (argv.length) fail('usage: localhelm plugins [--json]');
 		const loaded = await requireManifest();
-		const plugins = await loadPlugins(loaded);
-		if (json) printJson({ plugins: plugins.map((p) => ({ id: p.id, label: p.label, source: p.source })) });
+		const { plugins } = await loadPluginDashboard(loaded);
+		if (json) printJson({ plugins });
 		else if (plugins.length === 0) {
 			process.stdout.write('No plugins. An enrolled project can expose localhelm.plugin.mjs.\n');
 		} else {
 			process.stdout.write(
-				`${['id\tlabel\tsource', ...plugins.map((p) => `${p.id}\t${p.label}\t${p.source}`)].join('\n')}\n`,
+				`${['id\tlabel\tenabled\tsource', ...plugins.map((p) => `${p.id}\t${p.label}\t${p.enabled ? 'on' : 'off'}\t${p.source}`)].join('\n')}\n`,
 			);
 		}
 		return;
@@ -717,6 +718,10 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 		if (!pluginId) fail('usage: localhelm plugin <id> [action] [name...] [--apply]');
 		const loaded = await requireManifest();
 		const plug = requirePlugin(await loadPlugins(loaded), pluginId);
+		const prefs = await readPluginPrefs(loaded.workspaceRoot);
+		if (apply && !isPluginEnabled(pluginId, prefs)) {
+			fail(`plugin ${pluginId} is off. Turn it on from the LocalHelm menu.`);
+		}
 		const action = argv[0] && !argv[0].includes('/') ? argv.shift() : undefined;
 		const ids = argv;
 		if (!action) {

@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import {
 	pluginCellHref,
 	pluginCellLinks,
+	pluginRowNote,
 	pluginRowOpenHref,
 	siteCellValue,
 	siteEngineVersion,
@@ -31,6 +32,22 @@ describe('siteDisplay', () => {
 			['engine', 'git', 'live'],
 		);
 		assert.deepEqual(siteTableColumns('other', [{ id: 'pin', label: 'pin' }]), [{ id: 'pin', label: 'pin' }]);
+	});
+
+	it('hides xFacts app, name, and ok-status columns', () => {
+		assert.deepEqual(
+			siteTableColumns('xfacts', [
+				{ id: 'app', label: 'app' },
+				{ id: 'tool', label: 'tool' },
+				{ id: 'skill', label: 'skill' },
+				{ id: 'name', label: 'name' },
+				{ id: 'status', label: 'status' },
+			]).map((col) => col.id),
+			['tool', 'skill'],
+		);
+		assert.equal(pluginRowNote('xfacts', { status: 'ok' }), null);
+		assert.equal(pluginRowNote('xfacts', { status: 'needs encode' }), 'needs encode');
+		assert.equal(pluginRowNote('filepress', { status: 'needs encode' }), null);
 	});
 
 	it('keeps FilePress sync and push off the Sites job list', () => {

@@ -35,11 +35,13 @@ export function isPortsPluginTab(tab: string): boolean {
 }
 
 export function pluginTabMetas(
-	plugins: ReadonlyArray<{ id: string; label: string }>,
+	plugins: ReadonlyArray<{ id: string; label: string; enabled?: boolean }>,
 	boards: ReadonlyArray<{ plugin: string; title: string }>,
 ): PluginTabMeta[] {
 	if (plugins.length) {
-		return plugins.map((plug) => ({ id: plug.id, label: plug.label.trim() || plug.id }));
+		return plugins
+			.filter((plug) => plug.enabled !== false)
+			.map((plug) => ({ id: plug.id, label: plug.label.trim() || plug.id }));
 	}
 	const seen = new Map<string, PluginTabMeta>();
 	for (const board of boards) {

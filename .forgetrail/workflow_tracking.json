@@ -974,6 +974,19 @@
         "Invent a product-level SkillFacts file"
       ],
       "status": "active"
+    },
+    {
+      "id": "d69",
+      "timestamp": "2026-08-28T22:55:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "Plugin tabs stay in the nav. A header menu toggles which discovered plugins are on. Off plugins persist in .localhelm/plugins.json and do not load boards or jobs. xFacts drops app/name/status columns; the repo name is the AppFacts link and only non-ok status shows as a row note.",
+      "rationale": "Operator 2026-08-28: ok/ok/ok was noise, and plugin management should be enablement, not moving tabs.",
+      "alternatives_considered": [
+        "Put plugin tabs inside the hamburger",
+        "Keep a status column of ok"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
