@@ -967,8 +967,8 @@
       "timestamp": "2026-08-20T20:50:00Z",
       "phase": "2-scaffolding",
       "session": 3,
-      "issue": "npmjs.com resolves README images from the published tarball. A logo at site/static/logo.png 404s unless that path is in package.json files.",
-      "resolution": "Ship site/static/logo.png in files, same pattern as LocalBerth.",
+      "issue": "npmjs.com does not load relative README images from the tarball. GitHub is private, so raw.githubusercontent.com 404s even when site/static/logo.png is in files.",
+      "resolution": "Keep logo in files. Point README at https://unpkg.com/localhelm/site/static/logo.png. Do not put the AppFacts hash URL under a Nutrition label heading — npm strips it and leaves an empty heading.",
       "category": "tooling"
     },
     {

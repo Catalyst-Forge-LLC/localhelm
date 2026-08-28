@@ -26,7 +26,16 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 
 **Project pointer:** LocalHelm `app/vite.config.ts`.
 
+### 3. Private GitHub + relative README logo 404s on npmjs
+
+**What went wrong:** `package.json` `files` already included `site/static/logo.png` (in the tarball; unpkg 200). npmjs still showed a broken image. The GitHub repo is private, so `raw.githubusercontent.com` 404s. Putting `site/static/logo.png` in `files` is necessary but not sufficient.
+
+**Suggested Lite change:** In the npm publish / README notes: npmjs does not reliably load relative README images from the tarball. If the repo is **private**, do not use a GitHub raw URL. Point the `<img>` at a public CDN of the published file (`https://unpkg.com/<pkg>/path/to/logo.png`) and keep that path in `files`. Also: npm sanitizes very long hash URLs (AppFacts viewer); a `## Nutrition label` with only that link renders as an empty heading.
+
+**Project pointer:** LocalHelm `README.md`.
+
 | Topic | Lite § to patch |
 | --- | --- |
 | Node builtins in Svelte client graph | §4.2 / anti-patterns |
 | Vite allowedHosts vs Tailscale `*.ts.net` | §4.2 / anti-patterns |
+| Private GitHub README images on npmjs | npm / README |

@@ -201,3 +201,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - `pnpm ship` failed on `404 /favicon.png (linked from /)`. Added `site/static/favicon.png` (64×64 from the helm logo). FilePress engine will ignore a missing favicon after the next publish; this site still ships the PNG.
 - Site masthead is black with light type so the black-backed helm mark sits flush (`site/theme.css`). Page body stays parchment.
 - Public slogan is **Control panel for local development** (d62). Shipping-only “status for the products you ship” dropped — the board includes local tools that never publish.
+- npm README logo must be an unpkg URL (`https://unpkg.com/localhelm/site/static/logo.png`). The GitHub repo is private, so a relative or raw.githubusercontent.com src 404s on npmjs. Do not put the AppFacts viewer hash under a Nutrition label heading — npm strips the link and leaves an empty heading. AppFacts stays on the site footer.
