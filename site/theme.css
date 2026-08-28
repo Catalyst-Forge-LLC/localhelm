@@ -1,1 +1,28 @@
-/* filepress site theme — edit freely or use Genie Mode in dev */
+/* Dark masthead so the black-backed helm mark sits flush, not as a box. */
+.site-header {
+	background: #000;
+	border-bottom-color: #1c1c1c;
+	color: #f3efe6;
+}
+
+.site-header .site-title {
+	color: #f3efe6;
+}
+
+.site-header .site-tagline {
+	color: #c4bfb4;
+}
+
+.site-header .site-nav a {
+	color: #c4bfb4;
+}
+
+.site-header .site-nav a:hover {
+	color: #e0b87a;
+}
+
+.site-header .site-title:focus-visible,
+.site-header .site-nav a:focus-visible {
+	outline: 2px solid #e0b87a;
+	outline-offset: 3px;
+}
