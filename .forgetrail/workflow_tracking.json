@@ -869,9 +869,30 @@
         "Proxy favicons through Helm"
       ],
       "status": "active"
+    },
+    {
+      "id": "d61",
+      "timestamp": "2026-08-28T04:28:00Z",
+      "phase": "2-scaffolding",
+      "session": 21,
+      "decision": "site/static/favicon.png is required for getfilepress 0.1.18 prerender. FilePress engine will ignore a missing PNG after the next publish; this site still ships the PNG.",
+      "rationale": "Operator 2026-08-28: pnpm ship failed with 404 /favicon.png (linked from /). Layout always links the PNG first.",
+      "alternatives_considered": [
+        "Wait for a getfilepress bump",
+        "Patch only the engine"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-08-28T04:28:00Z",
+      "phase": "2-scaffolding",
+      "session": 21,
+      "issue": "pnpm ship died in filepress build: 404 /favicon.png (linked from /). site/static had logo.png and favicon.svg only. getfilepress 0.1.18 always links the PNG.",
+      "resolution": "Add site/static/favicon.png (64×64 from logo.png). Engine handleHttpError will ignore missing favicons after the next getfilepress publish.",
+      "category": "tooling"
+    },
     {
       "timestamp": "2026-08-28T04:02:00Z",
       "phase": "2-scaffolding",
