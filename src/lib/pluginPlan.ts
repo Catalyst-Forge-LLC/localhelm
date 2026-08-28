@@ -22,6 +22,21 @@ function textField(row: Record<string, unknown>, key: string): string {
 	return typeof value === 'string' ? value.trim() : '';
 }
 
+function cwdLine(cwd: string): string {
+	return cwd ? `in ${cwd}` : '';
+}
+
+/** Pull a trailing ` in <folder>` off a command so the folder can sit on its own line. */
+export function splitCommandCwd(text: string): { command: string; cwd: string } {
+	const match = text.match(/^(.+?)\s+in\s+(\S+)$/);
+	if (!match?.[1] || !match[2]) return { command: text, cwd: '' };
+	return { command: match[1].trim(), cwd: match[2] };
+}
+
+function planBlock(parts: Array<string | undefined>): string {
+	return parts.filter((part): part is string => Boolean(part)).join('\n');
+}
+
 /** Job detail only — never FilePress leftover cells (update / headers) on ship or push. */
 function jobDetail(row: Record<string, unknown>, action: string): string {
 	const reason = textField(row, 'reason');
@@ -52,11 +67,12 @@ export function formatPluginPlanLines(data: unknown): string[] {
 							? row.path
 							: '?';
 			const recipe = typeof row.recipe === 'string' ? row.recipe.trim() : '';
-			const cwd = typeof row.proposedCwd === 'string' ? row.proposedCwd : '';
+			const proposedCwd = typeof row.proposedCwd === 'string' ? row.proposedCwd.trim() : '';
+			const proposedCommand = typeof row.proposedCommand === 'string' ? row.proposedCommand.trim() : '';
 			const rowAction = typeof row.action === 'string' ? row.action : '';
 			const showStartRecipe = Boolean(recipe) && (!rowAction || rowAction === 'start' || rowAction === 'recipe');
 			if (showStartRecipe) {
-				return [id, recipe, envBits(row), cwd ? `in ${cwd}` : ''].filter(Boolean).join('  ');
+				return planBlock([id, cwdLine(proposedCwd), recipe, envBits(row)]);
 			}
 			if (rowAction === 'skip') {
 				const why =
@@ -69,12 +85,12 @@ export function formatPluginPlanLines(data: unknown): string[] {
 			const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
 			const to = typeof row.to === 'string' ? row.to : typeof row.toSpec === 'string' ? row.toSpec : '';
 			const range = from && to ? `${from} → ${to}` : from || to;
-			const guess =
-				typeof row.proposedCommand === 'string' && typeof row.proposedCwd === 'string'
-					? `${row.proposedCommand} in ${row.proposedCwd}`
-					: '';
-			const showAction = Boolean(rowAction) && rowAction !== 'ship' && !detail.startsWith(rowAction);
-			return [id, showAction ? rowAction : '', range, detail, guess].filter(Boolean).join('  ');
+			const parsed = splitCommandCwd(detail);
+			const cwd = proposedCwd || parsed.cwd;
+			const command = proposedCommand || parsed.command;
+			const showAction = Boolean(rowAction) && rowAction !== 'ship' && !command.startsWith(rowAction);
+			const bits = [id, showAction ? rowAction : '', range, cwdLine(cwd), command];
+			return cwd ? planBlock(bits) : bits.filter(Boolean).join('  ');
 		});
 }
 

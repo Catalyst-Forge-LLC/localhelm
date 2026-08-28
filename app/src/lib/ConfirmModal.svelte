@@ -189,7 +189,9 @@
 	}
 
 	li + li {
-		margin-top: 0.25rem;
+		margin-top: 0.55rem;
+		padding-top: 0.45rem;
+		border-top: 1px solid #27272a;
 	}
 
 	.extra {

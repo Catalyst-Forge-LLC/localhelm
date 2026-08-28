@@ -5,7 +5,7 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 import type { LoadedManifest } from './manifest.js';
 import { asPluginBoards, loadPluginFile, loadPlugins } from './plugin.js';
-import { formatPluginPlanLines, pluginPlanWriteIds } from './pluginPlan.js';
+import { formatPluginPlanLines, pluginPlanWriteIds, splitCommandCwd } from './pluginPlan.js';
 
 describe('plugins', () => {
 	it('loads a generic plugin from an enrolled project', async () => {
@@ -53,6 +53,11 @@ describe('plugins', () => {
 		assert.equal(pluginPlanWriteIds({ note: 'old shape, no writes flags' }), null);
 	});
 
+	it('splits a trailing in-folder off the command', () => {
+		assert.deepEqual(splitCommandCwd('pnpm ship in filepress'), { command: 'pnpm ship', cwd: 'filepress' });
+		assert.deepEqual(splitCommandCwd('pnpm update getfilepress'), { command: 'pnpm update getfilepress', cwd: '' });
+	});
+
 	it('prints PORT and HOST on a start recipe line', () => {
 		assert.deepEqual(
 			formatPluginPlanLines({
@@ -68,7 +73,7 @@ describe('plugins', () => {
 				],
 			}),
 			[
-				'dictawhisper  pnpm serve  PORT=7777 HOST=127.0.0.1  in Z:/workspace/dictawhisper',
+				'dictawhisper\nin Z:/workspace/dictawhisper\npnpm serve\nPORT=7777 HOST=127.0.0.1',
 				'up  —  already listening (pid 9)',
 			],
 		);
@@ -108,7 +113,7 @@ describe('plugins', () => {
 					},
 				],
 			}),
-			['localberth  pnpm ship in sites/localberth'],
+			['localberth\nin sites/localberth\npnpm ship'],
 		);
 		assert.deepEqual(
 			formatPluginPlanLines({
