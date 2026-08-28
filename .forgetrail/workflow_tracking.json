@@ -843,9 +843,30 @@
         "Accept --hosts as a required address only"
       ],
       "status": "active"
+    },
+    {
+      "id": "d59",
+      "timestamp": "2026-08-28T03:58:00Z",
+      "phase": "2-scaffolding",
+      "session": 21,
+      "decision": "Vite server.allowedHosts is true so Tailscale MagicDNS (*.ts.net) and other LAN names can load the visitor face. Write APIs stay loopback-only.",
+      "rationale": "Operator 2026-08-27: phone hit *.ts.net and Vite returned 403 Blocked request. IPs were already allowed; hostnames were not.",
+      "alternatives_considered": [
+        "Allow only .ts.net",
+        "Require listing each MagicDNS name"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-08-28T03:58:00Z",
+      "phase": "2-scaffolding",
+      "session": 21,
+      "issue": "Phone on Tailscale MagicDNS (*.ts.net) got Vite 403 Blocked request. This host is not allowed. IPs were allowed; hostnames were not.",
+      "resolution": "Set server.allowedHosts: true in app/vite.config.ts. Write APIs stay loopback-only.",
+      "category": "tooling"
+    },
     {
       "timestamp": "2026-08-28T03:55:00Z",
       "phase": "2-scaffolding",

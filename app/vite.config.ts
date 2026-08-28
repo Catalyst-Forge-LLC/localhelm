@@ -20,6 +20,9 @@ export default defineConfig({
 	],
 	server: {
 		host: '0.0.0.0',
+		// Tailscale MagicDNS (*.ts.net) and other LAN names. IPs are already allowed.
+		// Write APIs stay loopback-only in hooks.server.ts.
+		allowedHosts: true,
 		fs: { allow: [repoRoot] },
 	},
 	resolve: {

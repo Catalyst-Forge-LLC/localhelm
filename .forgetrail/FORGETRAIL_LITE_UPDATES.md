@@ -18,6 +18,15 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 
 **Project pointer:** LocalHelm `src/lib/visitorTiles.ts` vs `src/lib/visitorMachine.ts`.
 
+### 2. Vite `allowedHosts` blocks Tailscale MagicDNS
+
+**What went wrong:** A local dashboard bound `0.0.0.0` so a phone could open it. Hitting `http://<machine>.<tailnet>.ts.net:PORT` returned Vite `403 Blocked request. This host is not allowed.` Raw Tailscale/LAN IPs worked. Vite 6+ allows localhost and IPs by default, not DNS names.
+
+**Suggested Lite change:** In Vite / SvelteKit serve notes (§4.2 or anti-patterns): if the spine is meant to be opened from a phone via LAN name or Tailscale MagicDNS, set `server.allowedHosts: true` (or `['.ts.net']`) in `vite.config`. Pair with loopback-only write routes if the board has no auth.
+
+**Project pointer:** LocalHelm `app/vite.config.ts`.
+
 | Topic | Lite § to patch |
 | --- | --- |
 | Node builtins in Svelte client graph | §4.2 / anti-patterns |
+| Vite allowedHosts vs Tailscale `*.ts.net` | §4.2 / anti-patterns |

@@ -22,11 +22,17 @@ describe('loopback face', () => {
 		assert.equal(isOperatorFace('127.0.0.1', 'localhost:4321'), true);
 		assert.equal(isOperatorFace('127.0.0.1', '100.64.1.2:4321'), false);
 		assert.equal(isOperatorFace('192.168.1.9', '192.168.1.9:4321'), false);
+		assert.equal(isOperatorFace('100.64.1.2', 'mycroftone.tail1234.ts.net:4321'), false);
 	});
 
 	it('rewrites Open links onto the Host the phone already typed', () => {
 		assert.equal(visitorPageHost('100.64.1.2:4321'), '100.64.1.2');
+		assert.equal(visitorPageHost('mycroftone.tail1234.ts.net:4321'), 'mycroftone.tail1234.ts.net');
 		assert.equal(visitorHttpUrl('100.64.1.2', 5201), 'http://100.64.1.2:5201/');
+		assert.equal(
+			visitorHttpUrl('mycroftone.tail1234.ts.net', 5201),
+			'http://mycroftone.tail1234.ts.net:5201/',
+		);
 		assert.equal(visitorTileLetter('localhelm-site'), 'L');
 	});
 });
