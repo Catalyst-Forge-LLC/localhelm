@@ -1,6 +1,6 @@
 {
   "name": "localhelm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "description": "Control panel for local development. Fleet, sites, and ports — including tools that never ship.",
