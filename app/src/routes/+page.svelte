@@ -3907,7 +3907,6 @@
 		display: none;
 	}
 
-	.candidates,
 	.xchip {
 		margin-left: 0.35rem;
 		padding: 0.05rem 0.4rem;
@@ -3932,7 +3931,14 @@
 	}
 
 	.candidates {
+		list-style: none;
+		margin: 0.5rem 0;
+		padding: 0;
 		max-height: min(28rem, 50dvh);
+		overflow: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
 	}
 
 	.grow {
