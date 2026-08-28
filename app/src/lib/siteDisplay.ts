@@ -4,6 +4,7 @@ export {
 	siteLiveHref,
 	siteLocalHref,
 	siteNeedsEngineSync,
+	sitePluginJobVisible,
 	siteSyncLabel,
 	siteSyncTarget,
 	siteTableColumns,

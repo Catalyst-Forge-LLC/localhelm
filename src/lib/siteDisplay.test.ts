@@ -6,6 +6,7 @@ import {
 	siteLiveHref,
 	siteLocalHref,
 	siteNeedsEngineSync,
+	sitePluginJobVisible,
 	siteSyncLabel,
 	siteSyncTarget,
 	siteTableColumns,
@@ -27,6 +28,13 @@ describe('siteDisplay', () => {
 			['engine', 'git', 'live'],
 		);
 		assert.deepEqual(siteTableColumns('other', [{ id: 'pin', label: 'pin' }]), [{ id: 'pin', label: 'pin' }]);
+	});
+
+	it('keeps FilePress sync and push off the Sites job list', () => {
+		assert.equal(sitePluginJobVisible('filepress', 'ship'), true);
+		assert.equal(sitePluginJobVisible('filepress', 'sync'), false);
+		assert.equal(sitePluginJobVisible('filepress', 'push'), false);
+		assert.equal(sitePluginJobVisible('localslip', 'push'), true);
 	});
 
 	it('prefers the locked version and names the sync target', () => {

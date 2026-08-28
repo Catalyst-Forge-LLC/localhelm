@@ -1,10 +1,17 @@
 import { familyRole, familyStem } from './family.js';
 
 const HIDDEN_FILEPRESS_COLS = new Set(['pin', 'locked', 'update', 'headers', 'ship']);
+const HIDDEN_FILEPRESS_JOBS = new Set(['sync', 'push']);
 
 export type BoardColumn = { id: string; label: string };
 
 /** FilePress already sent pin / locked / update. Helm shows one engine version instead. */
+/** Sync is a dedicated engine button. Push lives on Fleet, where origin/ahead already show. */
+export function sitePluginJobVisible(plugin: string, actionId: string): boolean {
+	if (plugin !== 'filepress') return true;
+	return !HIDDEN_FILEPRESS_JOBS.has(actionId);
+}
+
 export function siteTableColumns(plugin: string, columns: readonly BoardColumn[]): BoardColumn[] {
 	if (plugin !== 'filepress') return [...columns];
 	return [{ id: 'engine', label: 'engine' }, ...columns.filter((col) => !HIDDEN_FILEPRESS_COLS.has(col.id))];

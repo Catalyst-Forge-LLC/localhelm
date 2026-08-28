@@ -32,7 +32,7 @@
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
 	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
-	import { siteCellValue, siteLiveHref, siteLocalHref, siteNeedsEngineSync, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
+	import { siteCellValue, siteLiveHref, siteLocalHref, siteNeedsEngineSync, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		idsToSelection,
 		parseListParam,
@@ -317,11 +317,6 @@
 	}));
 	const unpublishedPublishIds = $derived(
 		shipRows.filter((row) => row.unpublishedAhead && !whyNotPublish(row)).map((row) => row.id),
-	);
-	const filepressPushIds = $derived(
-		(filepressBoard?.rows ?? [])
-			.filter((row) => row.actions.some((act) => act.id === 'push'))
-			.map((row) => row.id),
 	);
 	const fleetIds = $derived(visibleProjects.map((row) => row.id));
 	const siteIds = $derived((filepressBoard?.rows ?? []).map((row) => row.id));
@@ -1087,7 +1082,7 @@
 				if (!seen.has(act.id)) seen.set(act.id, { id: act.id, label: act.label, icon: act.icon });
 			}
 		}
-		return [...seen.values()];
+		return [...seen.values()].filter((act) => sitePluginJobVisible(board.plugin, act.id));
 	}
 
 	function actionIcon(act: { id: string; icon?: string }): string | null {
@@ -1770,7 +1765,7 @@
 				'Site names can match a fleet package and still be a different checkout.',
 				'Engine is the locked getfilepress version. Sync engine <version> appears only when that site is behind or headers need a merge. Headers and ship stay on the job buttons, not extra columns.',
 				'Land does needed engine/package writes, then Sync → Push → Ship for the site.',
-				'Push is git push origin <branch> only — never --force.',
+				'Git push stays on Fleet — that board already shows branch, ahead, and origin.',
 			);
 		}
 		bits.push('Check rows, then run a job on the selection.');
@@ -2515,7 +2510,7 @@
 							<h2>{board.title}</h2>
 							<InfoHint
 								summary={board.plugin === 'filepress'
-									? 'Content sites. Check rows, then Sync, Push, or Ship.'
+									? 'Content sites. Check rows, then Sync or Ship. Land still pushes. Git push is on Fleet.'
 									: 'Check rows, then run a job on the selection.'}
 								detail={siteBoardHelp(board)}
 							/>
@@ -2625,7 +2620,7 @@
 														{siteSyncLabel(row.cells)}
 													</button>
 												{/if}
-												{#each row.actions.filter((act) => board.plugin !== 'filepress' || act.id !== 'sync') as act (act.id)}
+												{#each row.actions.filter((act) => sitePluginJobVisible(board.plugin, act.id)) as act (act.id)}
 													{@const icon = actionIcon(act)}
 													<button
 														class="btn btn-sm"

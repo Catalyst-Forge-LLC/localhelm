@@ -896,6 +896,19 @@
         "One board for repos, sites, and ports"
       ],
       "status": "active"
+    },
+    {
+      "id": "d63",
+      "timestamp": "2026-08-28T17:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "Sites does not show a FilePress Push job. Git push stays on Fleet/Today, which already list branch, ahead, and origin. Land still runs Sync → Push → Ship.",
+      "rationale": "Operator 2026-08-28: Sites Push duplicated Fleet/Today with less detail. Adding origin/ahead on Sites would copy the git board. Removing the extra button keeps one place for git push.",
+      "alternatives_considered": [
+        "Add branch/ahead/origin detail on the Sites Push button",
+        "Keep both buttons and explain the difference"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
