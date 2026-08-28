@@ -9,6 +9,8 @@ localhelm serve --host 127.0.0.1 --port 4321
 
 Default bind is loopback on **4321**. The checkout dashboard (`app/`) calls the same library as the CLI.
 
+`localhelm serve --host 0.0.0.0` (or a LAN/Tailscale address) is the **visitor** face on the phone: tiles for listening sites past loopback. Tap a tile to open it on that same host. The operator board (Today / Fleet / writes) stays on loopback.
+
 ## Tabs
 
 | Tab | What it is |

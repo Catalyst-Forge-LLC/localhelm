@@ -816,6 +816,20 @@
         "Keep ~/.localberth"
       ],
       "status": "active"
+    },
+    {
+      "id": "d57",
+      "timestamp": "2026-08-28T03:40:00Z",
+      "phase": "2-scaffolding",
+      "session": 21,
+      "decision": "LocalHelm gets a LocalSlip-style visitor tile face when the client is not on loopback Host. Tiles come from the Ports plugin (listening LAN leases). Open URLs rewrite onto the phone Host. Favicons are loaded by the phone from each app. Write /api routes stay loopback-only except GET /api/visitor. Do not fold peek, claim, or firewall into Helm.",
+      "rationale": "Operator 2026-08-27: run LocalHelm and get the same visitor tiles to sites without opening the Slip dashboard.",
+      "alternatives_considered": [
+        "Redirect the phone to localslip :54321",
+        "Iframe the Slip visitor page",
+        "Reimplement peekHttp in Helm"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

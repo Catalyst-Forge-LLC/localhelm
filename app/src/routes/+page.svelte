@@ -38,6 +38,14 @@
 		selectionToIds,
 		serializeListParam,
 	} from '$lib/urlListParam';
+	import VisitorFace from '$lib/VisitorFace.svelte';
+	import type { VisitorSnapshot } from '../../../src/lib/visitorTiles.js';
+
+	let {
+		data = { face: 'operator' },
+	}: {
+		data: { face: 'operator' | 'visitor'; pageHost?: string | null; visitor?: VisitorSnapshot };
+	} = $props();
 
 	type BumpKind = 'patch' | 'minor' | 'major';
 	type Pin = {
@@ -1753,6 +1761,7 @@
 	}
 
 	onMount(() => {
+		if (data.face === 'visitor') return;
 		const params = new URLSearchParams(window.location.search);
 		restoreUrlState(params);
 		try {
@@ -1771,6 +1780,12 @@
 	<title>LocalHelm</title>
 </svelte:head>
 
+{#if data.face === 'visitor'}
+	<VisitorFace
+		initial={data.visitor ?? { hostname: '', addresses: [], tiles: [] }}
+		pageHost={data.pageHost ?? null}
+	/>
+{:else}
 <div class="shell">
 	<header>
 		<div class="head-row">
@@ -3068,6 +3083,7 @@
 		<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
 	{/if}
 </ConfirmModal>
+{/if}
 
 <style>
 	:global(html),
