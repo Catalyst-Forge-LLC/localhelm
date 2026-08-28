@@ -163,7 +163,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - Ports Start/Stop: LocalBerth starts/stops a stored recipe (`pnpm serve` by default) detached. LocalHelm only hosts the plan/confirm buttons. Observed stays read-only. Claim/release stay on `localberth`. Checked leases persist as `?leases=`. Confirm lines show the recipe command, not `start start …`. A `-api` lease with no folder of that name guesses the package folder and `pnpm start` (dictawhisper-api → dictawhisper). Hyphenless lease names match hyphenated folders (`temperpass-site` → `temper-pass`). `start` sets `PORT` to that lease — dictawhisper `serve` must not let the UI port (7777) become the API (8008).
 - Cheap surfaces (draft): `docs/specs/cheap-surfaces.md`. H1–H5 landed: family stacks, look cards, `PORT`/`HOST` on confirm, `localhelm brief` + Copy brief, soft archive (`.localhelm/archive.json`, hide not delete), family start/stop, Save guess. Today Ports is one column with titled Stacks and Down or conflicted lists.
-- Confirm dismisses as soon as you say yes. The header keeps “Working…” while start/stop finishes. The dialog must not pin itself open just because a write is still in flight.
+- Confirm (d71): a sequenced list (publish steps, pull/push ids) stays up after yes and ticks the current line. Start/stop still dismisses; the header rail still shows Working…. The dialog must not pin itself open just because a family start/stop is in flight.
 
 ### Session 16 — 2026-08-25
 

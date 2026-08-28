@@ -11,8 +11,10 @@ export { clearNpmCache, liftLatestIfVersionExists, npmHasVersion, npmLatest, wit
 export { retargetSpecifier } from './pinwrite.js';
 export { fleetReady } from './ready.js';
 export type { ReadyView } from './ready.js';
-export { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, planPublishFromInventory, publishAuthHintFor, requirePublishIds } from './publish.js';
-export type { PublishRow, PublishStep } from './publish.js';
+export { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, planPublishFromInventory, publishAuthHintFor, publishStepLabel, requirePublishIds } from './publish.js';
+export type { PublishRow, PublishStep, PublishStepEvent } from './publish.js';
+export { applyConfirmStep, emptyConfirmPhases, markConfirmKey } from './confirmProgress.js';
+export type { ConfirmPhase } from './confirmProgress.js';
 export {
 	applyLand,
 	companionIdForSite,

@@ -10,11 +10,9 @@ import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
 import { plainPublishError, whyNotPublish } from './writeGate.js';
 
-export type PublishStep =
-	| { kind: 'bump'; from: string; to: string; bumpKind: BumpKind }
-	| { kind: 'commit'; message: string }
-	| { kind: 'push'; branch: string; origin: string }
-	| { kind: 'publish'; name: string; version: string };
+export type { PublishStep } from './publishTypes.js';
+import type { PublishStep } from './publishTypes.js';
+export { publishStepLabel } from './publishDisplay.js';
 
 export type PublishRow = {
 	id: string;
@@ -30,6 +28,12 @@ export type PublishRow = {
 
 export type PublishResult = { ok: boolean; stdout: string; stderr: string };
 export type PublishRunner = (cwd: string, args: string[]) => PublishResult | Promise<PublishResult>;
+export type PublishStepEvent = {
+	id: string;
+	index: number;
+	kind: PublishStep['kind'];
+	status: 'start' | 'done' | 'fail';
+};
 
 export const NPM_PUBLISH_AUTH_HINT =
 	'Run localhelm auth and put a granular automation token (Bypass 2FA) in your user ~/.npmrc before you publish. LocalHelm never stores the token.';
@@ -231,17 +235,25 @@ export async function planPublish(
 export async function applyPublish(
 	loaded: LoadedManifest,
 	row: PublishRow,
-	opts: { otp?: string; run?: PublishRunner } = {},
+	opts: { otp?: string; run?: PublishRunner; onStep?: (event: PublishStepEvent) => void } = {},
 ): Promise<PublishRow> {
 	if (row.action !== 'publish') return row;
 	const project = loaded.manifest.projects.find((p) => p.id === row.id);
 	if (!project) return { ...row, action: 'skip', reason: 'not enrolled' };
 	const abs = joinRoot(loaded.workspaceRoot, project.path);
 
-	for (const step of row.steps) {
+	const emit = (index: number, kind: PublishStep['kind'], status: PublishStepEvent['status']): void => {
+		opts.onStep?.({ id: row.id, index, kind, status });
+	};
+
+	for (let index = 0; index < row.steps.length; index++) {
+		const step = row.steps[index];
+		if (!step) continue;
+		emit(index, step.kind, 'start');
 		if (step.kind === 'bump') {
 			const bump = await planBump(loaded, row.id, step.bumpKind);
 			if (bump.action !== 'bump' || bump.to !== step.to) {
+				emit(index, step.kind, 'fail');
 				return { ...row, action: 'skip', reason: bump.reason ?? `bump drifted (planned ${step.to})` };
 			}
 			await applyBump({ ...bump, commit: 'skip' });
@@ -249,6 +261,7 @@ export async function applyPublish(
 			const file = rootPkgPath(abs);
 			const committed = commitPaths(abs, [file], step.message);
 			if (!committed.ok) {
+				emit(index, step.kind, 'fail');
 				return { ...row, reason: `commit: ${committed.error}` };
 			}
 		} else if (step.kind === 'push') {
@@ -262,6 +275,7 @@ export async function applyPublish(
 			};
 			const pushed = applyPush(loaded.workspaceRoot, pushRow);
 			if (pushed.reason !== 'pushed') {
+				emit(index, step.kind, 'fail');
 				return { ...row, reason: `push: ${pushed.reason ?? pushed.stderr}` };
 			}
 		} else if (step.kind === 'publish') {
@@ -270,6 +284,7 @@ export async function applyPublish(
 			const run = opts.run ?? defaultPublishRunner;
 			const result = await Promise.resolve(run(abs, args));
 			if (!result.ok) {
+				emit(index, step.kind, 'fail');
 				const stderr = result.stderr.trim();
 				return {
 					...row,
@@ -278,6 +293,7 @@ export async function applyPublish(
 					reason: plainPublishError(stderr || 'npm publish failed'),
 				};
 			}
+			emit(index, step.kind, 'done');
 			return {
 				...row,
 				stdout: result.stdout.trim() || undefined,
@@ -285,6 +301,7 @@ export async function applyPublish(
 				reason: `published ${step.name}@${step.version}`,
 			};
 		}
+		emit(index, step.kind, 'done');
 	}
 	return { ...row, reason: 'no publish step' };
 }

@@ -1001,6 +1001,19 @@
         "Insert Working… between chips and tabs"
       ],
       "status": "active"
+    },
+    {
+      "id": "d71",
+      "timestamp": "2026-08-28T23:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "A confirm list that is a sequence stays on screen after yes. Publish streams each step (bump/commit/push/npm) and ticks the matching line. Pull/Push highlight the current id. Start/stop still dismisses.",
+      "rationale": "Operator 2026-08-28: the publish modal listed bump → push → npm but only the button changed to Working.",
+      "alternatives_considered": [
+        "Close the modal and put step text only in the header rail",
+        "Split publish apply into one HTTP call per step"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

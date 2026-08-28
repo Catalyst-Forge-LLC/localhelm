@@ -1,5 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import Icon from './Icon.svelte';
+
+	type Phase = 'pending' | 'current' | 'done' | 'fail';
 
 	type Props = {
 		open: boolean;
@@ -12,6 +15,7 @@
 		busyLabel?: string;
 		canApply?: boolean;
 		items?: string[];
+		itemPhases?: Phase[];
 		children?: Snippet;
 		onconfirm: () => void;
 		oncancel?: () => void;
@@ -28,10 +32,13 @@
 		busyLabel = '',
 		canApply = true,
 		items = [],
+		itemPhases = [],
 		children,
 		onconfirm,
 		oncancel,
 	}: Props = $props();
+
+	const showPhases = $derived(itemPhases.some((phase) => phase !== 'pending'));
 
 	let dialogEl = $state<HTMLDialogElement | null>(null);
 
@@ -79,9 +86,25 @@
 			<p class="hint">{hint}</p>
 		{/if}
 		{#if items.length}
-			<ul>
+			<ul class:tracked={showPhases}>
 				{#each items as item, i (`${i}:${item}`)}
-					<li>{item}</li>
+					{@const phase = itemPhases[i] ?? 'pending'}
+					<li class:current={phase === 'current'} class:done={phase === 'done'} class:fail={phase === 'fail'}>
+						{#if showPhases}
+							<span class="mark" aria-hidden="true">
+								{#if phase === 'done'}
+									<Icon icon="lucide:check" />
+								{:else if phase === 'fail'}
+									<Icon icon="lucide:x" />
+								{:else if phase === 'current'}
+									<Icon icon="lucide:loader-circle" class="icon spin" />
+								{:else}
+									<span class="dot"></span>
+								{/if}
+							</span>
+						{/if}
+						<span>{item}</span>
+					</li>
 				{/each}
 			</ul>
 		{/if}
@@ -183,9 +206,50 @@
 	}
 
 	li {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.45rem;
 		min-width: 0;
 		white-space: pre-wrap;
 		overflow-wrap: anywhere;
+	}
+
+	.tracked li.current {
+		color: #fde68a;
+	}
+
+	.tracked li.done {
+		color: #a7f3d0;
+	}
+
+	.tracked li.fail {
+		color: #fca5a5;
+	}
+
+	.mark {
+		flex-shrink: 0;
+		width: 0.9rem;
+		margin-top: 0.12rem;
+		color: inherit;
+	}
+
+	.dot {
+		display: block;
+		width: 0.38rem;
+		height: 0.38rem;
+		margin: 0.26rem auto 0;
+		border-radius: 999px;
+		background: #52525b;
+	}
+
+	:global(.spin) {
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	li + li {

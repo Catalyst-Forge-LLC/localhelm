@@ -31,6 +31,7 @@
 	} from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
+	import { applyConfirmStep, emptyConfirmPhases, markConfirmKey, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
 	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
@@ -202,6 +203,8 @@
 	let confirmLabel = $state('Confirm');
 	let confirmVariant = $state<'write' | 'danger'>('write');
 	let confirmItems = $state<string[]>([]);
+	let confirmItemKeys = $state<string[]>([]);
+	let confirmPhases = $state<ConfirmPhase[]>([]);
 	let confirmCanApply = $state(true);
 	let confirmShowOtp = $state(false);
 	let confirmRun = $state<(() => void) | null>(null);
@@ -555,6 +558,60 @@
 		return data;
 	}
 
+	async function callNdjson(
+		url: string,
+		init: RequestInit,
+		onEvent: (event: Record<string, unknown>) => void,
+	): Promise<unknown> {
+		let res: Response;
+		try {
+			res = await fetch(url, {
+				...init,
+				headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
+			});
+		} catch (err) {
+			throw new Error(plainFetchError(err));
+		}
+		const kind = res.headers.get('content-type') ?? '';
+		if (!kind.includes('ndjson')) {
+			let data: { error?: string };
+			try {
+				data = (await res.json()) as { error?: string };
+			} catch {
+				throw new Error(
+					res.ok
+						? 'Dashboard returned a non-JSON response.'
+						: `Dashboard request failed (${res.status} ${res.statusText}).`,
+				);
+			}
+			if (!res.ok) throw new Error(data.error ?? res.statusText);
+			return data;
+		}
+		if (!res.body) throw new Error('Dashboard returned an empty progress stream.');
+		const reader = res.body.getReader();
+		const dec = new TextDecoder();
+		let buf = '';
+		let result: unknown;
+		const take = (line: string): void => {
+			const trimmed = line.trim();
+			if (!trimmed) return;
+			const event = JSON.parse(trimmed) as Record<string, unknown>;
+			if (event.type === 'error') throw new Error(String(event.error ?? 'Publish failed.'));
+			if (event.type === 'result') result = event;
+			else onEvent(event);
+		};
+		while (true) {
+			const { done, value } = await reader.read();
+			if (done) break;
+			buf += dec.decode(value, { stream: true });
+			const lines = buf.split('\n');
+			buf = lines.pop() ?? '';
+			for (const line of lines) take(line);
+		}
+		if (buf.trim()) take(buf);
+		return result ?? {};
+	}
+
 	function formatEntryTime(at: string): string {
 		const when = new Date(at);
 		return Number.isNaN(when.getTime()) ? at : when.toLocaleTimeString();
@@ -621,7 +678,20 @@
 			const name = names[i];
 			if (!name) continue;
 			busy = bulkProgressLabel(verb, i + 1, names.length, name);
-			await fn(name);
+			if (confirmItemKeys.includes(name)) {
+				confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'current');
+			}
+			try {
+				await fn(name);
+				if (confirmItemKeys.includes(name)) {
+					confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'done');
+				}
+			} catch (err) {
+				if (confirmItemKeys.includes(name)) {
+					confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'fail');
+				}
+				throw err;
+			}
 		}
 	}
 
@@ -782,6 +852,7 @@
 		title: string;
 		hint: string;
 		items: string[];
+		itemKeys?: string[];
 		confirmLabel: string;
 		variant?: 'write' | 'danger';
 		canApply: boolean;
@@ -791,6 +862,8 @@
 		confirmTitle = spec.title;
 		confirmHint = spec.hint;
 		confirmItems = spec.items;
+		confirmItemKeys = spec.itemKeys ?? spec.items.map((_, i) => String(i));
+		confirmPhases = emptyConfirmPhases(spec.items.length);
 		confirmLabel = spec.confirmLabel;
 		confirmVariant = spec.variant ?? 'write';
 		confirmCanApply = spec.canApply;
@@ -1279,6 +1352,7 @@
 						? 'git pull --ff-only on the listed repos. Dirty or diverged trees are skipped.'
 						: 'Nothing is eligible: repos must be clean and behind.',
 					items: eligible.length ? eligible.map((row) => `${row.id}  ${row.branch ?? '?'}  ${row.reason ?? 'pull'}`) : ['Nothing to pull.'],
+					itemKeys: eligible.map((row) => row.id),
 					confirmLabel: eligible.length === 1 ? `Pull ${eligible[0]?.id}` : `Pull ${eligible.length} repos`,
 					canApply: eligible.length > 0,
 					run: () => void applyPull(eligible.map((row) => row.id)),
@@ -1330,6 +1404,7 @@
 							? `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'cannot push'}`
 							: 'Nothing is eligible: repos must be ahead of origin and not diverged.',
 					items: eligible.length ? pushItems(eligible) : ['Nothing to push.'],
+					itemKeys: eligible.map((row) => row.id),
 					confirmLabel: eligible.length === 1 ? `Push ${eligible[0]?.id}` : `Push ${eligible.length} to origin`,
 					canApply: eligible.length > 0,
 					run: () => void applyPush(eligible.map((row) => row.id)),
@@ -1365,20 +1440,15 @@
 		});
 	}
 
-	function publishItems(row: PublishRow): string[] {
-		const lines = [`${row.id}  ${row.npm ?? ''}@${row.version ?? '?'}`];
-		let n = 0;
-		for (const step of row.steps) {
-			if (step.kind === 'commit') {
-				lines.push(`   commit: ${step.message}`);
-				continue;
-			}
-			n += 1;
-			if (step.kind === 'bump') lines.push(`${n}. bump ${step.from} → ${step.to} (${step.bumpKind}) and commit`);
-			else if (step.kind === 'push') lines.push(`${n}. git push origin ${step.branch} → ${step.origin}`);
-			else lines.push(`${n}. npm publish ${step.name}@${step.version}`);
-		}
-		return lines;
+	function publishItems(row: PublishRow, named: boolean): string[] {
+		return row.steps.map((step, i) => {
+			const line = `${i + 1}. ${publishStepLabel(step)}`;
+			return named ? `${row.id}  ${line}` : line;
+		});
+	}
+
+	function publishItemKeys(row: PublishRow): string[] {
+		return row.steps.map((_, i) => `${row.id}:${i}`);
 	}
 
 	async function startPublish(ids: string[]): Promise<void> {
@@ -1421,7 +1491,10 @@
 						: ids.length === 1
 							? `${ids[0]}: ${data.rows[0]?.reason ?? 'cannot publish'}`
 							: 'No listed package is ready to publish.',
-					items: eligible.length ? eligible.flatMap(publishItems) : data.rows.map((row) => `${row.id}  ${row.reason ?? 'skipped'}`),
+					items: eligible.length
+						? eligible.flatMap((row) => publishItems(row, eligible.length > 1))
+						: data.rows.map((row) => `${row.id}  ${row.reason ?? 'skipped'}`),
+					itemKeys: eligible.flatMap(publishItemKeys),
 					confirmLabel: eligible.length === 1 ? `Publish ${eligible[0]?.version}` : `Publish ${eligible.length}`,
 					variant: 'danger',
 					canApply: eligible.length > 0,
@@ -1450,16 +1523,27 @@
 			async () => {
 				const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
 				await eachNamed('publishing', ids, async (id) => {
-					const data = (await call('/api/publish', {
-						method: 'POST',
-						body: JSON.stringify({
-							apply: true,
-							ids: [id],
-							kind: bumpKind[id] ?? 'patch',
-							otp,
-						}),
-					})) as { rows: PublishRow[] };
-					rows.push(...data.rows);
+					const data = (await callNdjson(
+						'/api/publish',
+						{
+							method: 'POST',
+							body: JSON.stringify({
+								apply: true,
+								ids: [id],
+								kind: bumpKind[id] ?? 'patch',
+								otp,
+							}),
+						},
+						(event) => {
+							if (event.type !== 'step') return;
+							confirmPhases = applyConfirmStep(confirmItemKeys, confirmPhases, {
+								id: String(event.id ?? id),
+								index: Number(event.index),
+								status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
+							});
+						},
+					)) as { rows?: PublishRow[] };
+					rows.push(...(data.rows ?? []));
 				});
 				note(publishApplyTitle(rows), { rows: slimPublishRows(rows) });
 				publishOtp = '';
@@ -3153,6 +3237,7 @@
 	busyLabel={busy}
 	canApply={confirmCanApply}
 	items={confirmItems}
+	itemPhases={confirmPhases}
 	onconfirm={() => {
 		const fn = confirmRun;
 		confirmRun = null;

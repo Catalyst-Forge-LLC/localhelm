@@ -6,6 +6,7 @@ import { describe, it } from 'node:test';
 import { helmBumpMessage } from './commit.js';
 import { runGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
+import { publishStepLabel } from './publishDisplay.js';
 import { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, planPublishFromInventory, publishAuthHintFor, requirePublishIds } from './publish.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
 
@@ -60,6 +61,10 @@ describe('publish plan', () => {
 
 	it('names the bump commit the house way', () => {
 		assert.equal(helmBumpMessage('ollanet', '0.6.7'), 'Helm: bump ollanet to 0.6.7.');
+		assert.equal(
+			publishStepLabel({ kind: 'bump', from: '1.0.0', to: '1.0.1', bumpKind: 'patch' }),
+			'bump 1.0.0 → 1.0.1 (patch)',
+		);
 	});
 
 	it('skips dirty, private, behind-npm, and diverged rows', () => {
@@ -200,13 +205,25 @@ describe('publish apply', () => {
 		assert.equal(planned[0]?.action, 'publish');
 
 		const calls: string[][] = [];
+		const events: string[] = [];
 		const applied = await applyPublish(loaded, planned[0]!, {
 			run: (_cwd, args) => {
 				calls.push(args);
 				return { ok: true, stdout: '+ widget@1.0.1', stderr: '' };
 			},
+			onStep: (event) => events.push(`${event.index}:${event.kind}:${event.status}`),
 		});
 		assert.equal(applied.reason, 'published widget@1.0.1');
+		assert.deepEqual(events, [
+			'0:bump:start',
+			'0:bump:done',
+			'1:commit:start',
+			'1:commit:done',
+			'2:push:start',
+			'2:push:done',
+			'3:publish:start',
+			'3:publish:done',
+		]);
 		assert.equal(calls.length, 1);
 		assert.deepEqual(calls[0], ['publish', '--access', 'public']);
 		assert.equal(calls[0]?.includes('--force'), false);
