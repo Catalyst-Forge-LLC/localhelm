@@ -5,8 +5,10 @@ import {
 	landPluginApplyOk,
 	landWouldPublish,
 	requireLandSiteId,
+	requireLandSiteIds,
 	LAND_ENGINE_ID,
 } from './land.js';
+import { landConfirmItems } from './landDisplay.js';
 import { shipUnchanged } from './landShips.js';
 import type { ProjectStatus } from './types.js';
 
@@ -60,6 +62,17 @@ describe('requireLandSiteId', () => {
 		assert.throws(() => requireLandSiteId(''), /name the FilePress site/);
 		assert.throws(() => requireLandSiteId('   '), /name the FilePress site/);
 		assert.equal(requireLandSiteId(' aibreze-site '), 'aibreze-site');
+	});
+
+	it('requires named ids and prefixes confirm lines when landing more than one', () => {
+		assert.throws(() => requireLandSiteIds([]), /name the FilePress site/);
+		assert.deepEqual(requireLandSiteIds([' aibreze ', 'dictawhisper', 'aibreze']), ['aibreze', 'dictawhisper']);
+		const lined = landConfirmItems([
+			{ siteId: 'aibreze', steps: [{ label: 'Sync' }, { label: 'Ship' }] },
+			{ siteId: 'dictawhisper', steps: [] },
+		]);
+		assert.deepEqual(lined.items, ['aibreze  Sync', 'aibreze  Ship', 'dictawhisper  already current']);
+		assert.deepEqual(lined.keys, ['aibreze', 'aibreze', 'dictawhisper']);
 	});
 });
 

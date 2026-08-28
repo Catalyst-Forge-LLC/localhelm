@@ -64,9 +64,17 @@ export function companionIdForSite(
 export function requireLandSiteId(siteId: string | undefined): string {
 	const named = (siteId ?? '').trim();
 	if (!named) {
-		throw new Error('name the FilePress site id to land. LocalHelm will not land every site in one apply.');
+		throw new Error('name the FilePress site id to land. LocalHelm will not land every site unless you name them.');
 	}
 	return named;
+}
+
+export function requireLandSiteIds(ids: readonly string[] | undefined): string[] {
+	const named = [...new Set((ids ?? []).map((id) => id.trim()).filter(Boolean))];
+	if (!named.length) {
+		throw new Error('name the FilePress site id(s) to land. LocalHelm will not land every site unless you name them.');
+	}
+	return named.map((id) => requireLandSiteId(id));
 }
 
 function packageLabel(role: LandRole, id: string, kind: LandStepKind, detail: string): string {

@@ -32,6 +32,7 @@
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
 	import { applyConfirmStep, emptyConfirmPhases, markConfirmKey, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
+	import { landConfirmItems } from '$lib/landDisplay';
 	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
@@ -1624,81 +1625,117 @@
 		});
 	}
 
-	async function startLand(siteId: string): Promise<void> {
+	type LandPlanPayload = {
+		plan: {
+			siteId: string;
+			companionId: string | null;
+			engineId: string;
+			steps: { kind: string; label: string }[];
+			needsPublish: boolean;
+			note: string;
+		};
+		npmUser?: string | null;
+		authHint?: string;
+	};
+
+	async function planLandSite(siteId: string): Promise<LandPlanPayload> {
+		return (await call('/api/land', {
+			method: 'POST',
+			body: JSON.stringify({ apply: false, siteId }),
+		})) as LandPlanPayload;
+	}
+
+	async function startLand(siteIds: string[]): Promise<void> {
+		const ids = [...new Set(siteIds.map((id) => id.trim()).filter(Boolean))];
+		if (!ids.length) return;
 		await run(
-			`planning land ${siteId}`,
+			ids.length === 1 ? `planning land ${ids[0]}` : `planning land for ${ids.length} sites`,
 			async () => {
-				const data = (await call('/api/land', {
-					method: 'POST',
-					body: JSON.stringify({ apply: false, siteId }),
-				})) as {
-					plan: {
-						siteId: string;
-						companionId: string | null;
-						engineId: string;
-						steps: { kind: string; label: string }[];
-						needsPublish: boolean;
-						note: string;
-					};
-					npmUser?: string | null;
-					authHint?: string;
-				};
-				publishAuthHint = data.authHint ?? '';
-				if (data.npmUser) {
-					npmUser = data.npmUser;
-					persistNpmUser(data.npmUser);
+				const payloads: LandPlanPayload[] = [];
+				for (const siteId of ids) {
+					payloads.push(await planLandSite(siteId));
 				}
-				const steps = data.plan.steps;
-				note(`land plan ${siteId} — ${steps.length} step(s), nothing written`, data);
-				const companion = data.plan.companionId ? ` Companion package: ${data.plan.companionId}.` : ' No matching fleet package.';
+				const firstAuth = payloads.find((row) => row.authHint);
+				publishAuthHint = firstAuth?.authHint ?? '';
+				for (const row of payloads) {
+					if (row.npmUser) {
+						npmUser = row.npmUser;
+						persistNpmUser(row.npmUser);
+					}
+				}
+				const plans = payloads.map((row) => row.plan);
+				const lined = landConfirmItems(plans);
+				const work = plans.filter((plan) => plan.steps.length > 0);
+				const needsPublish = plans.some((plan) => plan.needsPublish);
+				const one = plans[0];
+				note(
+					ids.length === 1
+						? `land plan ${ids[0]} — ${one?.steps.length ?? 0} step(s), nothing written`
+						: `land plan ${ids.length} sites — ${work.length} with writes, nothing written`,
+					{ plans },
+				);
+				const companion = ids.length === 1
+					? one?.companionId
+						? ` Companion package: ${one.companionId}.`
+						: ' No matching fleet package.'
+					: ` ${work.length} of ${ids.length} need a write.`;
 				offerConfirm({
-					title: steps.length ? `Land ${siteId}?` : `Nothing to land for ${siteId}`,
-					hint: steps.length
-						? `${data.plan.note}${companion}${data.plan.needsPublish && publishAuthHint ? ` ${publishAuthHint}` : ''}`
-						: data.plan.note,
-					items: steps.length
-						? steps.map((step, i) => `${i + 1}. ${step.label}`)
-						: ['Already current.'],
-					confirmLabel: steps.length ? `Land ${siteId}` : 'Land',
-					variant: data.plan.needsPublish ? 'danger' : 'write',
-					canApply: steps.length > 0,
-					showOtp: data.plan.needsPublish,
-					run: () => void applyLand(siteId),
+					title: work.length
+						? work.length === 1
+							? `Land ${work[0]?.siteId}?`
+							: `Land ${work.length} sites?`
+						: ids.length === 1
+							? `Nothing to land for ${ids[0]}`
+							: 'Nothing to land',
+					hint: work.length
+						? `${one?.note ?? ''}${companion}${needsPublish && publishAuthHint ? ` ${publishAuthHint}` : ''}`
+						: one?.note ?? 'Already current.',
+					items: lined.items.length ? lined.items : ['Already current.'],
+					itemKeys: lined.keys,
+					confirmLabel: work.length === 1 ? `Land ${work[0]?.siteId}` : work.length ? `Land ${work.length}` : 'Land',
+					variant: needsPublish ? 'danger' : 'write',
+					canApply: work.length > 0,
+					showOtp: needsPublish,
+					run: () => void applyLand(work.map((plan) => plan.siteId)),
 				});
 			},
 			{ closeConfirm: false },
 		);
 	}
 
-	async function applyLand(siteId: string): Promise<void> {
-		await run(`landing ${siteId}`, async () => {
-			const data = (await call('/api/land', {
-				method: 'POST',
-				body: JSON.stringify({
-					apply: true,
-					siteId,
-					otp: publishOtp.trim() ? publishOtp.trim() : undefined,
-				}),
-			})) as {
-				result: {
-					ok: boolean;
-					stoppedAt?: string;
-					steps: { ok: boolean; label: string; reason: string }[];
-				};
-			};
-			const ok = data.result.steps.filter((s) => s.ok).length;
-			const failed = data.result.steps.filter((s) => !s.ok);
-			note(
-				data.result.ok
-					? `land --apply ${siteId} — ${ok} step(s) ok`
-					: `land --apply ${siteId} — stopped: ${data.result.stoppedAt ?? failed[0]?.label ?? 'failed'}`,
-				data,
-			);
-			publishOtp = '';
-			await loadPluginBoards();
-			await loadStatus({ ids: [siteId] });
-			if (!data.result.ok) {
-				error = failed.map((s) => `${s.label}: ${s.reason}`).join(' · ') || data.result.stoppedAt || 'land failed';
+	async function applyLand(siteIds: string[]): Promise<void> {
+		const ids = [...new Set(siteIds.map((id) => id.trim()).filter(Boolean))];
+		await run(bulkProgressLabel('landing', 1, ids.length, ids[0]), async () => {
+			const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
+			try {
+				await eachNamed('landing', ids, async (siteId) => {
+					const data = (await call('/api/land', {
+						method: 'POST',
+						body: JSON.stringify({ apply: true, siteId, otp }),
+					})) as {
+						result: {
+							ok: boolean;
+							stoppedAt?: string;
+							steps: { ok: boolean; label: string; reason: string }[];
+						};
+					};
+					const ok = data.result.steps.filter((s) => s.ok).length;
+					const failed = data.result.steps.filter((s) => !s.ok);
+					note(
+						data.result.ok
+							? `land --apply ${siteId} — ${ok} step(s) ok`
+							: `land --apply ${siteId} — stopped: ${data.result.stoppedAt ?? failed[0]?.label ?? 'failed'}`,
+						data,
+					);
+					if (!data.result.ok) {
+						error = failed.map((s) => `${s.label}: ${s.reason}`).join(' · ') || data.result.stoppedAt || 'land failed';
+						throw new Error(error);
+					}
+				});
+			} finally {
+				publishOtp = '';
+				await loadPluginBoards();
+				await loadStatus({ ids });
 			}
 		});
 	}
@@ -2321,6 +2358,15 @@
 									<button
 										class="btn btn-write btn-sm"
 										disabled={Boolean(busy)}
+										onclick={() => startLand(filepressSyncIds)}
+										title="Plans Land for every site that needs an engine write. Confirm in the modal."
+									>
+										<Icon icon="lucide:plane-landing" />
+										Land{filepressSyncIds.length > 1 ? ` ${filepressSyncIds.length}` : ''}
+									</button>
+									<button
+										class="btn btn-write btn-sm"
+										disabled={Boolean(busy)}
 										onclick={() => startPluginJob(filepressBoard.plugin, 'sync', filepressSyncIds, 'Sync engine')}
 										title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
 									>
@@ -2345,7 +2391,7 @@
 													<button
 														class="btn btn-sm btn-write"
 														disabled={Boolean(busy)}
-														onclick={() => startLand(site.id)}
+														onclick={() => startLand([site.id])}
 														title="Plans engine package, matching fleet package, then Sync → Push → Ship for this site. Confirm in the modal."
 													>
 														<Icon icon="lucide:plane-landing" />
@@ -2656,12 +2702,24 @@
 							<h2>{board.title}</h2>
 							<InfoHint
 								summary={board.plugin === 'filepress'
-									? 'Content sites. Check rows, then Sync or Ship. Land still pushes. Git push is on Fleet.'
+									? 'Content sites. Check rows, then Land, Sync, or Ship. Land still pushes. Git push is on Fleet.'
 									: 'Check rows, then run a job on the selection.'}
 								detail={siteBoardHelp(board)}
 							/>
 						</div>
 						<div class="group-buttons">
+							{#if board.plugin === 'filepress'}
+								{@const landIds = board.rows.filter((row) => selectedSites[row.id]).map((row) => row.id)}
+								<button
+									class="btn btn-write"
+									disabled={Boolean(busy) || landIds.length === 0}
+									onclick={() => startLand(landIds)}
+									title="Plans engine package, matching fleet package, then Sync → Push → Ship for the checked sites. Confirm in the modal."
+								>
+									<Icon icon="lucide:plane-landing" />
+									Land{landIds.length ? ` (${landIds.length})` : ''}
+								</button>
+							{/if}
 							{#each boardActions(board) as act (act.id)}
 								{@const icon = actionIcon(act)}
 								<button
@@ -2759,7 +2817,7 @@
 													<button
 														class="btn btn-sm btn-write"
 														disabled={Boolean(busy)}
-														onclick={() => startLand(row.id)}
+														onclick={() => startLand([row.id])}
 														title="Plans engine package, matching fleet package, then Sync → Push → Ship for this site. Confirm in the modal."
 													>
 														<Icon icon="lucide:plane-landing" />

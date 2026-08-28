@@ -24,7 +24,9 @@ export {
 	landWouldPublish,
 	planLand,
 	requireLandSiteId,
+	requireLandSiteIds,
 } from './land.js';
+export { landConfirmItems } from './landDisplay.js';
 export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from './land.js';
 export { landShipsPath, readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 export type { LandShipRecord } from './landShips.js';

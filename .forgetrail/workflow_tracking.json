@@ -1040,6 +1040,19 @@
         "Leave facts dirty for a follow-up commit"
       ],
       "status": "active"
+    },
+    {
+      "id": "d74",
+      "timestamp": "2026-08-28T23:40:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "Land accepts named site ids (dashboard checked rows, Today needing list, CLI land <id>...). It still will not land the whole Sites board unless those ids are named.",
+      "rationale": "Operator 2026-08-28: after FilePress Push left the Sites toolbar, there was no way to Land more than one site.",
+      "alternatives_considered": [
+        "Keep Land one-id only",
+        "Land every FilePress row with no selection"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

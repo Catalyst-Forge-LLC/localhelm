@@ -11,7 +11,7 @@ import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requir
 import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublishIds, type PublishRow } from '../lib/publish.js';
 import { archiveIds, readArchive, restoreIds } from '../lib/archive.js';
 import { buildBrief } from '../lib/brief.js';
-import { applyLand, planLand, requireLandSiteId } from '../lib/land.js';
+import { applyLand, planLand, requireLandSiteIds } from '../lib/land.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
@@ -40,7 +40,7 @@ Usage:
   localhelm publish <id>... --apply [--kind K] [--otp CODE]
   localhelm auth
   localhelm cascade <id> [--to V] [--apply] [--no-commit]
-  localhelm land <site-id> [--apply] [--otp CODE]
+  localhelm land <site-id>... [--apply] [--otp CODE]
   localhelm brief [--json]
   localhelm archive [id...] [--apply] [--restore]
   localhelm plugins
@@ -607,44 +607,65 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 		}
 		const leftovers = argv.filter((a) => a.startsWith('-'));
 		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
-		if (argv.length !== 1) fail('usage: localhelm land <site-id> [--apply] [--otp CODE]');
-		let siteId: string;
+		if (!argv.length) fail('usage: localhelm land <site-id>... [--apply] [--otp CODE]');
+		let siteIds: string[];
 		try {
-			siteId = requireLandSiteId(argv[0]);
+			siteIds = requireLandSiteIds(argv);
 		} catch (err) {
 			fail(err instanceof Error ? err.message : String(err));
 		}
 		const loaded = await requireManifest();
-		const plan = await planLand(loaded, siteId);
+		const plans = [];
+		for (const siteId of siteIds) {
+			plans.push(await planLand(loaded, siteId));
+		}
 		if (!apply) {
-			if (json) printJson({ plan, writes: false });
+			if (json) printJson({ plans, writes: false });
 			else {
-				const lines = [
-					`land\t${plan.siteId}`,
-					`companion\t${plan.companionId ?? '(none)'}`,
-					`engine\t${plan.engineId}`,
-					...plan.steps.map((step, i) => `${i + 1}.\t${step.label}`),
-					'',
-					plan.note,
-				];
-				if (!plan.steps.length) lines.push('Nothing to apply.');
-				else lines.push('Nothing written. Re-run with --apply to run these steps in order. Never --force.');
+				const lines: string[] = [];
+				for (const plan of plans) {
+					if (lines.length) lines.push('');
+					lines.push(
+						`land\t${plan.siteId}`,
+						`companion\t${plan.companionId ?? '(none)'}`,
+						`engine\t${plan.engineId}`,
+						...plan.steps.map((step, i) => `${i + 1}.\t${step.label}`),
+						'',
+						plan.note,
+					);
+					if (!plan.steps.length) lines.push('Nothing to apply.');
+				}
+				if (plans.some((plan) => plan.steps.length)) {
+					lines.push('Nothing written. Re-run with --apply to run these steps in order. Never --force.');
+				}
 				process.stdout.write(`${lines.join('\n')}\n`);
 			}
 			return;
 		}
 		const lock = await acquireJobLock(loaded.workspaceRoot);
 		try {
-			const result = await applyLand(loaded, plan, { otp });
-			if (json) printJson({ plan, result, writes: true });
+			const results = [];
+			for (const plan of plans) {
+				if (!plan.steps.length) {
+					results.push({ siteId: plan.siteId, ok: true, steps: [] });
+					continue;
+				}
+				const result = await applyLand(loaded, plan, { otp });
+				results.push(result);
+				if (!result.ok) break;
+			}
+			if (json) printJson({ plans, results, writes: true });
 			else {
-				const lines = [
-					`land\t${plan.siteId}\t${result.ok ? 'ok' : 'stopped'}`,
-					...result.steps.map((step) => `${step.ok ? 'ok' : 'fail'}\t${step.label}\t${step.reason}`),
-				];
-				if (result.stoppedAt) lines.push(`stopped\t${result.stoppedAt}`);
+				const lines: string[] = [];
+				for (const result of results) {
+					lines.push(`land\t${result.siteId}\t${result.ok ? 'ok' : 'stopped'}`);
+					for (const step of result.steps) {
+						lines.push(`${step.ok ? 'ok' : 'fail'}\t${step.label}\t${step.reason}`);
+					}
+					if (result.stoppedAt) lines.push(`stopped\t${result.stoppedAt}`);
+				}
 				process.stdout.write(`${lines.join('\n')}\n`);
-				if (!result.ok) process.exitCode = 1;
+				if (results.some((result) => !result.ok)) process.exitCode = 1;
 			}
 		} finally {
 			await lock.release();
