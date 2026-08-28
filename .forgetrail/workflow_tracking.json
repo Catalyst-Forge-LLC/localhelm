@@ -847,6 +847,14 @@
   ],
   "gotchas": [
     {
+      "timestamp": "2026-08-28T03:55:00Z",
+      "phase": "2-scaffolding",
+      "session": 21,
+      "issue": "VisitorFace imported visitorOpenHref from visitorTiles.ts, which also imported node:os. Vite externalized os and the browser threw Cannot access node:os.hostname; HMR then forced a full reload.",
+      "resolution": "Split hostname/NIC listing into visitorMachine.ts (server only). Client uses visitorHttpUrl from loopback.ts.",
+      "category": "tooling"
+    },
+    {
       "timestamp": "2026-08-20T19:05:00Z",
       "phase": "2-scaffolding",
       "session": 1,

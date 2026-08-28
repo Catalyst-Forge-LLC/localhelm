@@ -10,4 +10,14 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 
 ## Entries
 
-_(Add numbered sections: what went wrong, suggested Lite change with § reference, optional repo pointer.)_
+### 1. Shared TS imported by `.svelte` must not import `node:*`
+
+**What went wrong:** A Svelte 5 client component imported `visitorOpenHref` from a shared module that also `import`ed `node:os`. Vite externalized `node:os` and the browser threw `Cannot access "node:os.hostname" in client code`. The next HMR update then forced a full reload.
+
+**Suggested Lite change:** In the SvelteKit pitfalls / dashboard section (near §4.2 or the anti-patterns around shared `$lib`), add: modules imported by `.svelte` (even one named export) are in the browser graph. Keep `node:os`, `node:fs`, `node:child_process` in a `*Machine.ts` / `$lib/server` file. Client code uses `import type` plus browser-safe helpers (`visitorHttpUrl`, not a wrapper that lives next to `os.hostname`).
+
+**Project pointer:** LocalHelm `src/lib/visitorTiles.ts` vs `src/lib/visitorMachine.ts`.
+
+| Topic | Lite § to patch |
+| --- | --- |
+| Node builtins in Svelte client graph | §4.2 / anti-patterns |

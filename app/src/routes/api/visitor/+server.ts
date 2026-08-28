@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { asPluginBoards, loadPlugins } from '../../../../../src/lib/index.js';
-import { visitorSnapshotFromBoards } from '../../../../../src/lib/visitorTiles.js';
+import { visitorSnapshotFromBoards } from '../../../../../src/lib/visitorMachine.js';
 import { errJson, loadOptional } from '$lib/server/helm';
 
 export const GET: RequestHandler = async () => {

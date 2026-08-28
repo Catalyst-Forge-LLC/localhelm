@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { asPluginBoards, loadPlugins } from '../../../src/lib/index.js';
 import { isOperatorFace, visitorPageHost } from '../../../src/lib/loopback.js';
-import { visitorSnapshotFromBoards } from '../../../src/lib/visitorTiles.js';
+import { visitorSnapshotFromBoards } from '../../../src/lib/visitorMachine.js';
 import { loadOptional } from '$lib/server/helm';
 
 export const load: PageServerLoad = async ({ getClientAddress, request }) => {

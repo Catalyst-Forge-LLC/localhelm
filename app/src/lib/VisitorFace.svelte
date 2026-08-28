@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import VisitorTile from '$lib/VisitorTile.svelte';
-	import { visitorOpenHref, type VisitorSnapshot } from '../../../src/lib/visitorTiles.js';
+	import { visitorHttpUrl } from '../../../src/lib/loopback.js';
+	import type { VisitorSnapshot } from '../../../src/lib/visitorTiles.js';
 
 	let {
 		initial,
@@ -59,7 +60,7 @@
 						name={tile.name}
 						port={tile.port}
 						title={tile.title}
-						href={visitorOpenHref(pageHost, tile.port)}
+						href={pageHost ? visitorHttpUrl(pageHost, tile.port) : null}
 					/>
 				{/each}
 			</div>

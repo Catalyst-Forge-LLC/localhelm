@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import type { PluginBoard } from './plugin.js';
+import { visitorMachineCard } from './visitorMachine.js';
 import { isVisitorSelf, visitorTilesFromBoards } from './visitorTiles.js';
 
 const leaseBoard = (rows: PluginBoard['rows']): PluginBoard => ({
@@ -49,5 +50,13 @@ describe('visitor tiles from Ports boards', () => {
 		assert.equal(isVisitorSelf('localslip', 9999), true);
 		assert.equal(isVisitorSelf('filepress', 54321), true);
 		assert.equal(isVisitorSelf('filepress', 5180), false);
+	});
+});
+
+describe('visitor machine card', () => {
+	it('returns a hostname string and an address list', () => {
+		const card = visitorMachineCard();
+		assert.equal(typeof card.hostname, 'string');
+		assert.ok(Array.isArray(card.addresses));
 	});
 });
