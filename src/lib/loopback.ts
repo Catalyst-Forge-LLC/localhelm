@@ -72,7 +72,30 @@ export function visitorHttpUrl(pageHost: string, port: number): string | null {
 	return `http://${pageHost}:${port}/`;
 }
 
-export const VISITOR_FAVICON_FILES = ['favicon.png', 'favicon.svg', 'favicon.ico'] as const;
+/** True for a Host that Vite already allows (IPv4 / IPv6), not a DNS name. */
+export function isLiteralIpHost(host: string): boolean {
+	const h = host.replace(/^\[|\]$/g, '');
+	if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(h)) return true;
+	return h.includes(':');
+}
+
+/**
+ * Favicons load from a literal IP when the Open Host is a DNS name.
+ * Other Vite apps 403 `*.ts.net` Host; they allow IPs.
+ */
+export function visitorFaviconHost(
+	pageHost: string | null,
+	addresses: readonly string[] = [],
+): string | null {
+	if (pageHost && isLiteralIpHost(pageHost)) return pageHost;
+	const ip = addresses.find((addr) => {
+		if (!/^\d{1,3}(?:\.\d{1,3}){3}$/.test(addr)) return false;
+		return !addr.startsWith('127.') && !addr.startsWith('169.254.');
+	});
+	return ip ?? pageHost;
+}
+
+export const VISITOR_FAVICON_FILES = ['favicon.png', 'favicon.svg', 'favicon.ico', 'logo.png'] as const;
 
 export function visitorFaviconCandidates(href: string): string[] {
 	try {

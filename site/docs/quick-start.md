@@ -20,7 +20,7 @@ Put gitignore-style patterns in `.localhelmignore` at the workspace (or a parent
 localhelm serve
 ```
 
-Then visit `http://127.0.0.1:4321`. Serve binds all interfaces so a phone on the LAN can open the visitor tiles. Loopback is still the operator board: Today, Fleet, Sites, and Ports. Write APIs stay loopback-only.
+Then visit `http://127.0.0.1:4321` for the operator board. **Visitor** (or `http://127.0.0.1:4321/visitor`) is the phone tile grid. A phone hitting `/` on a LAN or Tailscale Host is sent to `/visitor`. Write APIs stay loopback-only.
 
 ## A write is a plan
 

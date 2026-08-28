@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import {
 	isLoopbackClient,
 	isOperatorFace,
+	visitorFaviconHost,
 	visitorHttpUrl,
 	visitorPageHost,
 	visitorTileLetter,
@@ -34,5 +35,14 @@ describe('loopback face', () => {
 			'http://mycroftone.tail1234.ts.net:5201/',
 		);
 		assert.equal(visitorTileLetter('localhelm-site'), 'L');
+	});
+
+	it('loads favicons from a LAN IP when Open is a MagicDNS name', () => {
+		assert.equal(visitorFaviconHost('127.0.0.1', ['100.64.1.2']), '127.0.0.1');
+		assert.equal(
+			visitorFaviconHost('mycroftone.tail1234.ts.net', ['100.74.12.14', '192.168.1.244']),
+			'100.74.12.14',
+		);
+		assert.equal(visitorFaviconHost('100.64.1.2', ['192.168.1.244']), '100.64.1.2');
 	});
 });

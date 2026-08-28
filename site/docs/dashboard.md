@@ -9,7 +9,7 @@ localhelm serve --host 127.0.0.1 --port 4321
 
 Default bind is **all interfaces** on **4321**. `--host` / `--hosts` (Vite-style, with or without an address) also means all interfaces. `--host 127.0.0.1` stays loopback-only. The checkout dashboard (`app/`) calls the same library as the CLI.
 
-The phone on a LAN or Tailscale Host (`*.ts.net` or a Tailscale IP) is the **visitor** face: tiles for listening sites past loopback. Tap a tile to open it on that same host. Vite allows those Host names (`allowedHosts: true`). The operator board (Today / Fleet / writes) stays on loopback. Write APIs stay loopback-only.
+The phone on a LAN or Tailscale Host (`*.ts.net` or a Tailscale IP) is redirected to **`/visitor`**: tiles for listening sites past loopback. Tap a tile to open it on that same host. From the operator board, **Visitor** opens the same page. Vite allows those Host names (`allowedHosts: true`). Favicons load from a LAN IP when the Host is a DNS name, because other Vite apps 403 `*.ts.net`. Write APIs stay loopback-only.
 
 ## Tabs
 

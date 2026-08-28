@@ -38,15 +38,6 @@
 		selectionToIds,
 		serializeListParam,
 	} from '$lib/urlListParam';
-	import VisitorFace from '$lib/VisitorFace.svelte';
-	import type { VisitorSnapshot } from '../../../src/lib/visitorTiles.js';
-
-	let {
-		data = { face: 'operator' },
-	}: {
-		data: { face: 'operator' | 'visitor'; pageHost?: string | null; visitor?: VisitorSnapshot };
-	} = $props();
-
 	type BumpKind = 'patch' | 'minor' | 'major';
 	type Pin = {
 		name: string;
@@ -1764,7 +1755,6 @@
 	}
 
 	onMount(() => {
-		if (data.face === 'visitor') return;
 		const params = new URLSearchParams(window.location.search);
 		restoreUrlState(params);
 		try {
@@ -1785,17 +1775,10 @@
 
 <svelte:window
 	onkeydown={(event) => {
-		if (data.face === 'visitor') return;
 		if (event.key === 'Escape' && activityOpen && !confirmOpen && !addOpen) setActivityOpen(false);
 	}}
 />
 
-{#if data.face === 'visitor'}
-	<VisitorFace
-		initial={data.visitor ?? { hostname: '', addresses: [], tiles: [] }}
-		pageHost={data.pageHost ?? null}
-	/>
-{:else}
 <div class="shell">
 	<header>
 		<div class="head-row">
@@ -1842,6 +1825,10 @@
 							<Icon icon="lucide:clipboard" />
 							{briefCopied ? 'Copied brief' : 'Copy brief'}
 						</button>
+						<a class="btn" href="/visitor" title="Phone tile grid. Same page visitors get.">
+							<Icon icon="lucide:layout-grid" />
+							Visitor
+						</a>
 						<button
 							class="btn"
 							disabled={Boolean(busy)}
@@ -3089,7 +3076,6 @@
 		<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
 	{/if}
 </ConfirmModal>
-{/if}
 
 <style>
 	:global(html),
@@ -3235,6 +3221,7 @@
 		padding: 0.28rem 0.62rem;
 		font-size: 0.8rem;
 		cursor: pointer;
+		text-decoration: none;
 	}
 
 	.btn:hover:not(:disabled) {

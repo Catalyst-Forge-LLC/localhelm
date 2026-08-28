@@ -80,7 +80,13 @@ export { IGNORE_FILE_NAME, loadScanIgnore } from './ignorefile.js';
 export { resolveUserPath } from './paths.js';
 export { acquireJobLock } from './lock.js';
 export { scanFolders } from './scan.js';
-export { isOperatorFace, isLoopbackClient, visitorHttpUrl, visitorPageHost } from './loopback.js';
+export {
+	isOperatorFace,
+	isLoopbackClient,
+	visitorFaviconHost,
+	visitorHttpUrl,
+	visitorPageHost,
+} from './loopback.js';
 export { visitorSnapshotFromBoards } from './visitorMachine.js';
 export { visitorTilesFromBoards } from './visitorTiles.js';
 export type { VisitorSnapshot, VisitorTile } from './visitorTiles.js';

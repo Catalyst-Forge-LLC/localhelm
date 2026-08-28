@@ -11,17 +11,20 @@
 		name,
 		port,
 		href,
+		iconHref = null,
 		title = null,
 	}: {
 		name: string;
 		port: number;
 		href: string | null;
+		iconHref?: string | null;
 		title?: string | null;
 	} = $props();
 
 	const letter = $derived(visitorTileLetter(name));
 	const heading = $derived(title?.trim() || name);
-	const candidates = $derived(href ? visitorFaviconCandidates(href) : [...VISITOR_FAVICON_FILES].map((file) => `/${file}`));
+	const iconBase = $derived(iconHref ?? href);
+	const candidates = $derived(iconBase ? visitorFaviconCandidates(iconBase) : [...VISITOR_FAVICON_FILES].map((file) => `/${file}`));
 	let iconIndex = $state(0);
 	let broken = $state(false);
 	let copied = $state(false);

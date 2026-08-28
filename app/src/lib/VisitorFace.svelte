@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import VisitorTile from '$lib/VisitorTile.svelte';
-	import { visitorHttpUrl } from '../../../src/lib/loopback.js';
+	import { isLoopbackBind, visitorFaviconHost, visitorHttpUrl } from '../../../src/lib/loopback.js';
 	import type { VisitorSnapshot } from '../../../src/lib/visitorTiles.js';
 
 	let {
@@ -14,6 +14,7 @@
 
 	let feed = $state<VisitorSnapshot | null>(null);
 	const snapshot = $derived(feed ?? initial);
+	const iconHost = $derived(visitorFaviconHost(pageHost, snapshot.addresses));
 
 	async function copy(value: string) {
 		try {
@@ -39,6 +40,9 @@
 	<header>
 		<img class="mark" src="/logo.png" alt="" width="72" height="48" />
 		<span class="word">LocalHelm</span>
+		{#if pageHost && isLoopbackBind(pageHost)}
+			<a class="meta" href="/">Operator board</a>
+		{/if}
 		{#if snapshot.hostname}
 			<button type="button" class="meta" onclick={() => copy(snapshot.hostname)}>{snapshot.hostname}</button>
 		{/if}
@@ -61,6 +65,7 @@
 						port={tile.port}
 						title={tile.title}
 						href={pageHost ? visitorHttpUrl(pageHost, tile.port) : null}
+						iconHref={iconHost ? visitorHttpUrl(iconHost, tile.port) : null}
 					/>
 				{/each}
 			</div>
@@ -108,6 +113,7 @@
 	}
 	.meta {
 		cursor: pointer;
+		text-decoration: none;
 	}
 	.meta:hover {
 		color: #fff;
