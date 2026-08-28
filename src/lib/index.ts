@@ -61,6 +61,7 @@ export { formatPluginPlanLines, pluginPlanWriteIds } from './pluginPlan.js';
 export type { HelmPlugin, LoadedPlugin, PluginBoard, PluginTab } from './plugin.js';
 export { applyBump, planBump } from './bump.js';
 export type { BumpPlan } from './bump.js';
+export { listFactsFiles, rewriteFactsVersion } from './factsVersion.js';
 export { applyExport, defaultExportPath, planExport } from './export.js';
 export type { ExportPlan } from './export.js';
 export {

@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { commitPaths, helmBumpMessage } from './commit.js';
+import { listFactsFiles, rewriteFactsVersion } from './factsVersion.js';
 import { readGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
 import { joinRoot } from './paths.js';
@@ -56,8 +57,17 @@ export async function applyBump(plan: BumpPlan): Promise<void> {
 	const next = raw.replace(/"version"\s*:\s*"([^"]*)"/, `"version": "${plan.to}"`);
 	if (next === raw) throw new Error(`did not replace version in ${plan.file}`);
 	await writeFile(plan.file, next, 'utf8');
+	const files = [plan.file];
+	const scanRoot = plan.repo ?? plan.file.replace(/[/\\]package\.json$/i, '');
+	for (const facts of await listFactsFiles(scanRoot)) {
+		const factsRaw = await readFile(facts, 'utf8');
+		const factsNext = rewriteFactsVersion(factsRaw, plan.from, plan.to);
+		if (!factsNext) continue;
+		await writeFile(facts, factsNext, 'utf8');
+		files.push(facts);
+	}
 	if (plan.commit === 'commit' && plan.commitMessage && plan.repo) {
-		const committed = commitPaths(plan.repo, [plan.file], plan.commitMessage);
+		const committed = commitPaths(plan.repo, files, plan.commitMessage);
 		if (!committed.ok) {
 			throw new Error(`wrote ${plan.to} but commit failed: ${committed.error}`);
 		}

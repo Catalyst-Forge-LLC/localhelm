@@ -61,6 +61,36 @@ describe('bump and export', () => {
 		assert.doesNotMatch(dirty.stdout, /package\.json/);
 	});
 
+	it('commits matching SkillFacts with package.json', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-bump-facts-'));
+		const pkgDir = path.join(root, 'widget');
+		await mkdir(path.join(pkgDir, 'skills', 'widget'), { recursive: true });
+		await writeFile(
+			path.join(pkgDir, 'package.json'),
+			'{\n  "name": "widget",\n  "version": "0.1.8",\n  "license": "Apache-2.0"\n}\n',
+		);
+		await writeFile(
+			path.join(pkgDir, 'skills', 'widget', 'SKILL_FACTS.md'),
+			'---\nskill_facts_version: "0.1.0"\nversion: "0.1.8"\n---\n\n| **Version** | 0.1.8 |\n',
+		);
+		assert.equal(runGit(pkgDir, ['init']).ok, true);
+		assert.equal(runGit(pkgDir, ['add', '--', 'package.json', 'skills/widget/SKILL_FACTS.md']).ok, true);
+		assert.equal(runGit(pkgDir, ['-c', 'user.email=helm@test', '-c', 'user.name=Helm', 'commit', '-m', 'init']).ok, true);
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: { workspaceRoot: '.', projects: [{ id: 'widget', path: 'widget', npm: 'widget' }] },
+		};
+		const plan = await planBump(loaded, 'widget', 'patch');
+		await applyBump(plan);
+		const facts = await readFile(path.join(pkgDir, 'skills', 'widget', 'SKILL_FACTS.md'), 'utf8');
+		assert.match(facts, /version: "0\.1\.9"/);
+		assert.match(facts, /skill_facts_version: "0\.1\.0"/);
+		const show = runGit(pkgDir, ['show', '--name-only', '--pretty=format:']);
+		assert.match(show.stdout, /package\.json/);
+		assert.match(show.stdout, /SKILL_FACTS\.md/);
+	});
+
 	it('plans an export path', () => {
 		const plan = planExport('Z:/workspace');
 		assert.equal(plan.file, 'Z:/workspace/localhelm.status.json');

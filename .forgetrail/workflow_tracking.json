@@ -1014,6 +1014,19 @@
         "Split publish apply into one HTTP call per step"
       ],
       "status": "active"
+    },
+    {
+      "id": "d72",
+      "timestamp": "2026-08-28T23:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "Bump also rewrites the package version in APP/TOOL/SKILL_FACTS.md (frontmatter and Version table) and commits those files with package.json.",
+      "rationale": "Operator 2026-08-28: aibreze prepublish failed twice because Helm cut package.json and left SkillFacts one patch behind.",
+      "alternatives_considered": [
+        "Keep bump package.json-only and fix facts by hand after every cut",
+        "Run x-facts reencode from Helm (needs Python and a sibling checkout)"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
