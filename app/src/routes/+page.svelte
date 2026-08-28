@@ -1780,6 +1780,13 @@
 	<title>LocalHelm</title>
 </svelte:head>
 
+<svelte:window
+	onkeydown={(event) => {
+		if (data.face === 'visitor') return;
+		if (event.key === 'Escape' && activityOpen && !confirmOpen && !addOpen) setActivityOpen(false);
+	}}
+/>
+
 {#if data.face === 'visitor'}
 	<VisitorFace
 		initial={data.visitor ?? { hostname: '', addresses: [], tiles: [] }}
@@ -3000,12 +3007,6 @@
 	{/if}
 	</div>
 </div>
-
-<svelte:window
-	onkeydown={(event) => {
-		if (event.key === 'Escape' && activityOpen && !confirmOpen && !addOpen) setActivityOpen(false);
-	}}
-/>
 
 <AddProjectsModal bind:open={addOpen} busy={Boolean(busy)}>
 	<label for="scan-root">Folder to scan</label>
