@@ -6,7 +6,7 @@
 
 **Control panel for local development.**
 
-Fleet, sites, and ports in one place — including tools that never ship. Pairing: **LocalSlip** is the slip; **LocalHelm** is the wheel.
+One board for fleet, sites, and ports, including tools that never publish. [LocalSlip](https://localslip.dev) is the slip; LocalHelm is the wheel.
 
 ```bash
 pnpm add -g localhelm
@@ -37,10 +37,10 @@ localhelm plugin filepress sync
 localhelm serve                         # :4321 on all interfaces
 ```
 
-`scan` never writes. Mutating commands print a plan; pass `--apply` to write. `publish` requires named project ids; it bumps and pushes only when needed, then `npm publish`. Never `--force`. One job at a time (`.localhelm/job.lock`).
+`scan` never writes. Other commands print a plan; `--apply` writes. `publish` and `push` need named ids. Never `--force`.
 
-The loopback dashboard (`app/`, checkout only) calls the same library: scan/enroll, status, bump, fetch, pull, push, publish, export, ready, cascade.
+`localhelm serve` opens the dashboard on port 4321. Same library as the CLI. Writes stay on loopback.
 
-Put gitignore-style patterns in `.localhelmignore` at the workspace (or a parent). `node_modules`, dot-folders, and `__*` are always skipped. Optional user-global list: `~/.localhelm/ignore`.
+Skip folders with `.localhelmignore` at the workspace, or `~/.localhelm/ignore`.
 
 Requires Node 22+. License Apache-2.0. Site: [localhelm.dev](https://localhelm.dev).

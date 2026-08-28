@@ -1,6 +1,6 @@
 # localhelm.dev
 
-Marketing + docs site for [LocalHelm](https://github.com/Catalyst-Forge-LLC/localhelm), built with [FilePress](https://getfilepress.com) (`getfilepress` on npm). Modeled on the LocalSlip explainer.
+Marketing + docs site for [LocalHelm](https://github.com/Catalyst-Forge-LLC/localhelm), built with [FilePress](https://getfilepress.com) (`getfilepress` on npm). Modeled on the [LocalSlip](https://localslip.dev) explainer.
 
 ```bash
 pnpm install
@@ -11,7 +11,7 @@ pnpm build         # → build/ (includes /docs mount)
 
 Docs source: `docs/*.md` + `_nav.json`. FilePress mounts `docs/dist` at `/docs` via `paths` in `filepress.config.ts` (requires getfilepress **≥ 0.1.8** for Docs clicks in `filepress dev`).
 
-If LocalSlip is installed, this explainer stays on **5201** as `localhelm-site` (not the dashboard on 4321). 5188 was already `docupuncture-site`.
+If [LocalSlip](https://localslip.dev) is installed, this explainer stays on **5201** as `localhelm-site` (not the dashboard on 4321).
 
 Optional: add `theme.css` next to `filepress.config.ts` to override the default Essay theme.
 

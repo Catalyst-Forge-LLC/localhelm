@@ -9,7 +9,7 @@ localhelm serve --host 127.0.0.1 --port 4321
 
 Default bind is **all interfaces** on **4321**. `--host` / `--hosts` (Vite-style, with or without an address) also means all interfaces. `--host 127.0.0.1` stays loopback-only. The checkout dashboard (`app/`) calls the same library as the CLI.
 
-The phone on a LAN or Tailscale Host (`*.ts.net` or a Tailscale IP) is redirected to **`/visitor`**: tiles for listening sites past loopback. Tap a tile to open it on that same host. From the operator board, **Visitor** opens the same page. Vite allows those Host names (`allowedHosts: true`). Favicons load from a LAN IP when the Host is a DNS name, because other Vite apps 403 `*.ts.net`. Write APIs stay loopback-only.
+A phone on LAN or Tailscale opens **`/visitor`**: tiles for listening sites. Tap a tile to open it on that host. From the operator board, **Visitor** is the same page. Write APIs stay on loopback.
 
 ## Tabs
 
@@ -18,7 +18,7 @@ The phone on a LAN or Tailscale Host (`*.ts.net` or a Tailscale IP) is redirecte
 | Today | Needs you (writes), Looks (Ports facts), Sites and Ports snapshots |
 | Fleet | Enrolled repos: version, git, pins, the same writes as Today |
 | Sites | FilePress jobs, if a FilePress site is enrolled |
-| Ports | LocalSlip leases, if LocalSlip is enrolled |
+| Ports | [LocalSlip](https://localslip.dev) leases, if enrolled |
 
 The same product can appear on three tabs. **Also on** chips jump and check that id.
 
