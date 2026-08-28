@@ -246,6 +246,7 @@ export async function applyPublish(
 		opts.onStep?.({ id: row.id, index, kind, status });
 	};
 
+	let bumpFiles: string[] = [];
 	for (let index = 0; index < row.steps.length; index++) {
 		const step = row.steps[index];
 		if (!step) continue;
@@ -256,10 +257,10 @@ export async function applyPublish(
 				emit(index, step.kind, 'fail');
 				return { ...row, action: 'skip', reason: bump.reason ?? `bump drifted (planned ${step.to})` };
 			}
-			await applyBump({ ...bump, commit: 'skip' });
+			bumpFiles = await applyBump({ ...bump, commit: 'skip' });
 		} else if (step.kind === 'commit') {
-			const file = rootPkgPath(abs);
-			const committed = commitPaths(abs, [file], step.message);
+			const files = bumpFiles.length > 0 ? bumpFiles : [rootPkgPath(abs)];
+			const committed = commitPaths(abs, files, step.message);
 			if (!committed.ok) {
 				emit(index, step.kind, 'fail');
 				return { ...row, reason: `commit: ${committed.error}` };

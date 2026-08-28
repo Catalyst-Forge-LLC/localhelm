@@ -164,10 +164,14 @@ describe('publish apply', () => {
 		await mkdir(bare);
 		assert.equal(runGit(bare, ['init', '--bare']).ok, true);
 		const pkgDir = path.join(root, 'widget');
-		await mkdir(pkgDir);
+		await mkdir(path.join(pkgDir, 'skills', 'widget'), { recursive: true });
 		gitRepo(pkgDir);
 		await writeFile(path.join(pkgDir, 'package.json'), '{\n  "name": "widget",\n  "version": "1.0.0"\n}\n');
-		assert.equal(runGit(pkgDir, ['add', 'package.json']).ok, true);
+		await writeFile(
+			path.join(pkgDir, 'skills', 'widget', 'SKILL_FACTS.md'),
+			'---\nskill_facts_version: "0.1.0"\nversion: "1.0.0"\n---\n\n| **Version** | 1.0.0 |\n',
+		);
+		assert.equal(runGit(pkgDir, ['add', 'package.json', 'skills/widget/SKILL_FACTS.md']).ok, true);
 		assert.equal(runGit(pkgDir, ['commit', '-m', 'init']).ok, true);
 		assert.equal(runGit(pkgDir, ['remote', 'add', 'origin', bare]).ok, true);
 		assert.equal(runGit(pkgDir, ['push', '-u', 'origin', 'HEAD']).ok, true);
@@ -229,8 +233,11 @@ describe('publish apply', () => {
 		assert.equal(calls[0]?.includes('--force'), false);
 		const pkg = await readFile(path.join(pkgDir, 'package.json'), 'utf8');
 		assert.match(pkg, /"version": "1.0.1"/);
+		const facts = await readFile(path.join(pkgDir, 'skills', 'widget', 'SKILL_FACTS.md'), 'utf8');
+		assert.match(facts, /version: "1\.0\.1"/);
 		assert.equal(runGit(pkgDir, ['status', '--porcelain']).stdout.trim(), '');
 		assert.match(runGit(pkgDir, ['log', '-1', '--pretty=%s']).stdout, /Helm: bump widget to 1\.0\.1/);
+		assert.match(runGit(pkgDir, ['show', '--name-only', '--pretty=format:']).stdout, /SKILL_FACTS\.md/);
 	});
 
 	it('keeps a short reason when npm prints env warnings plus a gate', async () => {

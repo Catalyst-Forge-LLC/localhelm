@@ -49,7 +49,7 @@ export async function planBump(loaded: LoadedManifest, id: string, kind: BumpKin
 	}
 }
 
-export async function applyBump(plan: BumpPlan): Promise<void> {
+export async function applyBump(plan: BumpPlan): Promise<string[]> {
 	if (plan.action !== 'bump' || !plan.to || !plan.from) {
 		throw new Error(plan.reason ?? `cannot apply bump for ${plan.id}`);
 	}
@@ -72,4 +72,5 @@ export async function applyBump(plan: BumpPlan): Promise<void> {
 			throw new Error(`wrote ${plan.to} but commit failed: ${committed.error}`);
 		}
 	}
+	return files;
 }
