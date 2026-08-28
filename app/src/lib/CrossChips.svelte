@@ -14,8 +14,8 @@
 
 	function chipTip(kind: CrossChip['kind']): string {
 		if (kind === 'fleet') return 'Opens Fleet and checks this package.';
-		if (kind === 'sites') return 'Opens Sites and checks this FilePress site.';
-		return 'Opens Ports and checks this lease.';
+		if (kind === 'sites') return 'Opens FilePress Sites and checks this site.';
+		return 'Opens LocalSlip Ports and checks this lease.';
 	}
 </script>
 

@@ -27,6 +27,16 @@ export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from
 export { landShipsPath, readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 export type { LandShipRecord } from './landShips.js';
 export { asPluginBoards, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
+export {
+	canonicalizeTab,
+	isCoreTab,
+	isPortsPluginTab,
+	parseDashboardTab,
+	pluginTabCount,
+	pluginTabIcon,
+	pluginTabMetas,
+} from './dashboardTabs.js';
+export type { PluginTabMeta } from './dashboardTabs.js';
 export { archiveIds, archivePath, isArchived, readArchive, restoreIds } from './archive.js';
 export type { ArchiveFile } from './archive.js';
 export { buildBrief, formatBrief } from './brief.js';

@@ -37,6 +37,15 @@
 	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
 	import { siteCellValue, siteLiveHref, siteLocalHref, siteNeedsEngineSync, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
+		canonicalizeTab,
+		isPortsPluginTab,
+		parseDashboardTab,
+		pluginTabCount,
+		pluginTabIcon,
+		pluginTabMetas,
+		type PluginTabMeta,
+	} from '$lib/dashboardTabs';
+	import {
 		idsToSelection,
 		parseListParam,
 		selectionToIds,
@@ -150,12 +159,11 @@
 		commitReason?: string;
 	};
 	type LogEntry = { at: string; time: string; title: string; body: string };
-	type TabId = 'today' | 'fleet' | 'sites' | 'ports';
 	type PortPane = 'leases' | 'stacks' | 'observed';
 	type NeedFilter = 'all' | 'publish' | 'cut' | 'push';
 
 	let inventory = $state<Inventory | null>(null);
-	let tab = $state<TabId>('today');
+	let tab = $state('today');
 	let portPane = $state<PortPane>('leases');
 	let needFilter = $state<NeedFilter>('all');
 	let activityOpen = $state(false);
@@ -179,6 +187,7 @@
 	let bumpKind = $state<Record<string, BumpKind>>({});
 
 	let pluginBoards = $state<PluginBoard[]>([]);
+	let pluginMetas = $state<PluginTabMeta[]>([]);
 	let publishOtp = $state('');
 	let npmUser = $state<string | null>(null);
 	let publishAuthHint = $state('');
@@ -255,9 +264,10 @@
 			.filter((row) => row.behind > 0 || row.linked > 0);
 	});
 	const attentionRows = $derived(visibleProjects.filter((row) => rowNeedsYou(row)));
-	const siteBoards = $derived(pluginBoards.filter((board) => (board.tab ?? 'sites') === 'sites'));
-	const portBoards = $derived(pluginBoards.filter((board) => board.tab === 'ports'));
-	const filepressBoard = $derived(siteBoards.find((board) => board.plugin === 'filepress') ?? siteBoards[0] ?? null);
+	const pluginTabs = $derived(pluginTabMetas(pluginMetas, pluginBoards));
+	const siteBoards = $derived(pluginBoards.filter((board) => board.plugin === canonicalizeTab(tab) && !isPortsPluginTab(tab)));
+	const portBoards = $derived(pluginBoards.filter((board) => board.plugin === 'localslip' || board.tab === 'ports'));
+	const filepressBoard = $derived(pluginBoards.find((board) => board.plugin === 'filepress') ?? null);
 	const sitesNeedingYou = $derived((filepressBoard?.rows ?? []).filter((row) => siteNeedsYou(row.cells)));
 	const leaseBoardAll = $derived(portBoards.find((board) => board.title === 'Leases') ?? portBoards[0] ?? null);
 	const parkedLeaseCount = $derived((leaseBoardAll?.rows ?? []).filter((row) => row.cells.parked === 'yes').length);
@@ -346,9 +356,8 @@
 		}
 	}
 
-	function parseTab(raw: string | null): TabId | null {
-		if (raw === 'today' || raw === 'fleet' || raw === 'sites' || raw === 'ports') return raw;
-		return null;
+	function parseTab(raw: string | null): string | null {
+		return parseDashboardTab(raw);
 	}
 
 	function parsePortPane(raw: string | null): PortPane | null {
@@ -368,8 +377,8 @@
 		return canPush(row);
 	}
 
-	function setTab(next: TabId): void {
-		tab = next;
+	function setTab(next: string): void {
+		tab = canonicalizeTab(next);
 	}
 
 	function setPortPane(next: PortPane): void {
@@ -433,7 +442,7 @@
 		if (!urlSyncReady) return;
 		const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
 		if (tab === 'today') params.delete('tab');
-		else params.set('tab', tab);
+		else params.set('tab', canonicalizeTab(tab));
 		if (portPane === 'leases') params.delete('ports');
 		else params.set('ports', portPane);
 		if (activityOpen) params.set('activity', '1');
@@ -620,7 +629,11 @@
 
 	async function loadPluginBoards(): Promise<void> {
 		try {
-			const plug = (await call('/api/plugins')) as { boards: PluginBoard[] };
+			const plug = (await call('/api/plugins')) as {
+				boards: PluginBoard[];
+				plugins?: { id: string; label: string }[];
+			};
+			pluginMetas = plug.plugins ?? [];
 			pluginBoards = plug.boards;
 		} catch {
 			/* keep the last boards */
@@ -745,12 +758,12 @@
 	function openPortsFamily(ids: string[]): void {
 		checkPortsFamily(ids);
 		portPane = 'leases';
-		setTab('ports');
+		setTab('localslip');
 	}
 
 	function openPortsStacks(): void {
 		portPane = 'stacks';
-		setTab('ports');
+		setTab('localslip');
 	}
 
 	function familyJobIds(seeds: string[]): string[] {
@@ -778,7 +791,7 @@
 		}
 		if (kind === 'sites') {
 			selectedSites = { ...selectedSites, [id]: true };
-			setTab('sites');
+			setTab('filepress');
 			return;
 		}
 		openPortsFamily([id]);
@@ -789,9 +802,14 @@
 			openPortsFamily([id]);
 			return;
 		}
-		if (siteIds.includes(id)) {
+		const pluginHit = pluginBoards.find((board) => board.rows.some((row) => row.id === id));
+		if (pluginHit) {
+			if (pluginHit.plugin === 'localslip' || pluginHit.tab === 'ports') {
+				openPortsFamily([id]);
+				return;
+			}
 			selectedSites = { ...selectedSites, [id]: true };
-			setTab('sites');
+			setTab(pluginHit.plugin);
 			return;
 		}
 		selectedIds = { ...selectedIds, [id]: true };
@@ -1986,16 +2004,21 @@
 			Fleet
 			{#if inventory}<span class="count quiet">{inventory.digest.projects}</span>{/if}
 		</button>
-		<button type="button" class="tab" class:active={tab === 'sites'} onclick={() => setTab('sites')}>
-			<Icon icon="lucide:globe" />
-			Sites
-			{#if filepressBoard}<span class="count quiet">{filepressBoard.rows.length}</span>{/if}
-		</button>
-		<button type="button" class="tab" class:active={tab === 'ports'} class:hot={portsNeedingYou.length > 0} onclick={() => setTab('ports')}>
-			<Icon icon="lucide:anchor" />
-			Ports
-			{#if leaseBoard}<span class="count quiet">{leaseBoard.rows.length}</span>{/if}
-		</button>
+		{#each pluginTabs as plug (plug.id)}
+			<button
+				type="button"
+				class="tab"
+				class:active={canonicalizeTab(tab) === plug.id}
+				class:hot={plug.id === 'localslip' && portsNeedingYou.length > 0}
+				onclick={() => setTab(plug.id)}
+			>
+				<Icon icon={pluginTabIcon(plug.id)} />
+				{plug.label}
+				{#if pluginTabCount(plug.id, pluginBoards)}
+					<span class="count quiet">{pluginTabCount(plug.id, pluginBoards)}</span>
+				{/if}
+			</button>
+		{/each}
 	</nav>
 
 	<div class="workspace">
@@ -2047,7 +2070,7 @@
 					</div>
 					<div class="panel-body">
 						{#if statusReady && attentionRows.length === 0 && cascadeOnlyRows.length === 0}
-							<p class="quiet-banner">All quiet on the fleet. Looks, Sites, and Ports stay in the other panes.</p>
+							<p class="quiet-banner">All quiet on the fleet. Looks, FilePress, and LocalSlip stay in the other panes.</p>
 						{:else if statusReady && filteredAttentionRows.length === 0 && filteredCascadeRows.length === 0}
 							<p class="dim small">
 								{#if needFilter === 'publish'}
@@ -2193,7 +2216,7 @@
 					<section class="panel fill">
 						<div class="section-head">
 							<div>
-								<h2>FilePress sites</h2>
+								<h2>FilePress Sites</h2>
 								<p class="hint">
 									{#if !statusReady}
 										Reading sites…
@@ -2218,7 +2241,7 @@
 										Sync engine
 									</button>
 								{/if}
-								<button type="button" class="btn btn-sm" onclick={() => setTab('sites')}><Icon icon="lucide:arrow-right" /> Sites</button>
+								<button type="button" class="btn btn-sm" onclick={() => setTab('filepress')}><Icon icon="lucide:arrow-right" /> FilePress Sites</button>
 							</div>
 						</div>
 						<div class="panel-body">
@@ -2247,7 +2270,7 @@
 									{/each}
 								</ul>
 							{:else if statusReady && filepressBoard}
-								<p class="dim small">Open Sites for the full board.</p>
+								<p class="dim small">Open FilePress Sites for the full board.</p>
 							{:else if statusReady}
 								<p class="dim small">Enroll the filepress checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 							{/if}
@@ -2275,7 +2298,7 @@
 									{/if}
 								</p>
 							</div>
-							<button type="button" class="btn btn-sm" onclick={() => setTab('ports')}><Icon icon="lucide:arrow-right" /> Ports</button>
+							<button type="button" class="btn btn-sm" onclick={() => setTab('localslip')}><Icon icon="lucide:arrow-right" /> LocalSlip Ports</button>
 						</div>
 						<div class="panel-body">
 							{#if statusReady && leaseBoard}
@@ -2537,7 +2560,7 @@
 					</p>
 				</section>
 			</div>
-		{:else if tab === 'sites'}
+		{:else if !isPortsPluginTab(tab) && tab !== 'today' && tab !== 'fleet'}
 			{#each siteBoards as board (board.plugin + board.title)}
 				{@const siteCols = siteTableColumns(board.plugin, board.columns)}
 				<section class="panel plugin-board">
@@ -2680,25 +2703,26 @@
 					</div>
 				</section>
 			{:else}
+				{@const plugMeta = pluginTabs.find((plug) => plug.id === canonicalizeTab(tab))}
 				<section class="panel">
-					<h2>Sites</h2>
+					<h2>{plugMeta?.label ?? canonicalizeTab(tab)}</h2>
 					{#if !statusReady}
-						<p class="hint">Reading sites…</p>
+						<p class="hint">Reading {plugMeta?.label ?? 'plugin'}…</p>
 					{:else}
-						<p class="hint">No site plugins loaded. Enroll the filepress checkout to expose <code>localhelm.plugin.mjs</code>.</p>
+						<p class="hint">No {plugMeta?.label ?? canonicalizeTab(tab)} plugin loaded. Enroll the checkout that exposes <code>localhelm.plugin.mjs</code>.</p>
 					{/if}
 				</section>
 			{/each}
-		{:else if tab === 'ports'}
+		{:else if isPortsPluginTab(tab)}
 			{#if !statusReady && !portBoards.length}
 				<section class="panel">
-					<h2>Ports</h2>
+					<h2>LocalSlip Ports</h2>
 					<p class="hint">Reading ports…</p>
 				</section>
 			{:else if !portBoards.length}
 				<section class="panel">
-					<h2>Ports</h2>
-					<p class="hint">No Ports plugin loaded. Enroll the localslip checkout to expose <code>localhelm.plugin.mjs</code>.</p>
+					<h2>LocalSlip Ports</h2>
+					<p class="hint">No LocalSlip plugin loaded. Enroll the localslip checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 				</section>
 			{:else}
 				<div class="subtabs" role="tablist" aria-label="Port views">

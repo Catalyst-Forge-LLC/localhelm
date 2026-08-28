@@ -922,6 +922,19 @@
         "Leave the operator to open Activity JSON"
       ],
       "status": "active"
+    },
+    {
+      "id": "d65",
+      "timestamp": "2026-08-28T22:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 22,
+      "decision": "Dashboard nav is Today, Fleet, then one tab per loaded plugin, labeled with the plugin name (FilePress Sites, LocalSlip Ports, xFacts labels). ?tab=sites and ?tab=ports still open those plugins.",
+      "rationale": "Operator 2026-08-28: Sites was dumping every non-port plugin together. Product names on the tabs are clearer than generic Sites/Ports.",
+      "alternatives_considered": [
+        "Keep Sites/Ports and nest plugins inside",
+        "Add a last-action column instead of more tabs"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
