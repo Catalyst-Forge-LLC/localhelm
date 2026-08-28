@@ -1578,6 +1578,12 @@
 		return parts.join(' · ');
 	}
 
+	function candidateFolderLabel(row: Candidate): string {
+		const rel = row.path.replace(/\\/g, '/');
+		if (!rel || rel === '.') return row.absPath;
+		return rel;
+	}
+
 	function todayBadges(row: Project): Badge[] {
 		return badges(row).filter((badge) => {
 			if (badge.text === 'nothing to do') return false;
@@ -3023,6 +3029,9 @@
 					/>
 					<div>
 						<div class="id">{row.id}</div>
+						{#if candidateFolderLabel(row) !== row.id}
+							<div class="path" title={row.absPath}>{candidateFolderLabel(row)}</div>
+						{/if}
 						<div class="dim small">
 							{row.npmName ?? 'no package name'}{row.version ? ` ${row.version}` : ''}{row.git ? ' · git' : ' · no git'}{already
 								? ' · enrolled'
@@ -3954,6 +3963,18 @@
 		background: #3d3d46;
 		border-radius: 0.4rem;
 		padding: 0.3rem 0.45rem;
+	}
+
+	.candidates li > div {
+		min-width: 0;
+	}
+
+	.candidates .path {
+		margin-top: 0.05rem;
+		color: #a8a8b0;
+		font-size: 0.72rem;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		overflow-wrap: anywhere;
 	}
 
 	.candidates li.already {
