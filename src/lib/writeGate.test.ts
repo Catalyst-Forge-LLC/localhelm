@@ -79,6 +79,10 @@ describe('publishApplyTitle', () => {
 		]);
 		assert.equal(title, 'publish --apply — 1 published, 2 failed: aibreze, finetuna');
 		assert.equal(
+			publishApplyTitle([{ id: 'finetuna', reason: 'open GitHub Publish finetuna@1.1.5  https://github.com/x/y/actions/workflows/publish.yml' }]),
+			'publish --apply — 1 opened GitHub',
+		);
+		assert.equal(
 			publishResultLine({ id: 'aibreze', reason: 'skill facts still 0.1.9 (package 0.1.10)' }),
 			'aibreze  skill facts still 0.1.9 (package 0.1.10)',
 		);

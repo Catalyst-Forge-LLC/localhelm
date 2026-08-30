@@ -19,6 +19,7 @@
 		commitCountLabel,
 		fleetWriteIds,
 		fleetWriteLabel,
+		isGithubPublishReason,
 		isPublishedReason,
 		nextCutVersion,
 		plainGitError,
@@ -31,7 +32,7 @@
 	} from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
-	import { applyConfirmStep, emptyConfirmPhases, markConfirmKey, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
+	import { applyConfirmStep, emptyConfirmPhases, markConfirmKey, publishNeedsGithub, publishNeedsNpm, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
 	import { landConfirmItems } from '$lib/landDisplay';
 	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
@@ -1475,20 +1476,33 @@
 				}
 				const eligible = data.rows.filter((r) => r.action === 'publish');
 				const cuttingNew = eligible.some((row) => row.steps.some((step) => step.kind === 'bump'));
+				const githubOnly = eligible.length > 0 && eligible.every((row) => publishNeedsGithub(row.steps) && !publishNeedsNpm(row.steps));
+				const needsNpm = eligible.some((row) => publishNeedsNpm(row.steps));
 				note(`publish plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
 				const cutNote = cuttingNew
 					? 'The current local version is already on npm. Confirming cuts a new version.'
 					: '';
+				const githubNote = githubOnly
+					? 'These packages publish from GitHub Actions (OIDC provenance). Confirm writes the cut, then open the Publish workflow.'
+					: eligible.some((row) => publishNeedsGithub(row.steps))
+						? 'Some packages publish from GitHub Actions. Confirm writes the cut; open each GitHub Publish link instead of npm here.'
+						: '';
 				offerConfirm({
 					title: eligible.length === 1
 						? cuttingNew
-							? `Cut and publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
-							: `Publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
+							? githubOnly
+								? `Cut ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version} and open GitHub?`
+								: `Cut and publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
+							: githubOnly
+								? `Open GitHub Publish for ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
+								: `Publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
 						: eligible.length
-							? `Publish ${eligible.length} packages?`
+							? githubOnly
+								? `Open GitHub Publish for ${eligible.length} packages?`
+								: `Publish ${eligible.length} packages?`
 							: 'Nothing to publish',
 					hint: eligible.length
-						? [publishAuthHint, cutNote].filter(Boolean).join(' ')
+						? [needsNpm ? publishAuthHint : '', cutNote, githubNote].filter(Boolean).join(' ')
 						: ids.length === 1
 							? `${ids[0]}: ${data.rows[0]?.reason ?? 'cannot publish'}`
 							: 'No listed package is ready to publish.',
@@ -1496,10 +1510,18 @@
 						? eligible.flatMap((row) => publishItems(row, eligible.length > 1))
 						: data.rows.map((row) => `${row.id}  ${row.reason ?? 'skipped'}`),
 					itemKeys: eligible.flatMap(publishItemKeys),
-					confirmLabel: eligible.length === 1 ? `Publish ${eligible[0]?.version}` : `Publish ${eligible.length}`,
+					confirmLabel: eligible.length === 1
+						? githubOnly
+							? cuttingNew
+								? `Cut ${eligible[0]?.version}`
+								: 'Open GitHub'
+							: `Publish ${eligible[0]?.version}`
+						: githubOnly
+							? `Open GitHub ${eligible.length}`
+							: `Publish ${eligible.length}`,
 					variant: 'danger',
 					canApply: eligible.length > 0,
-					showOtp: eligible.length > 0,
+					showOtp: needsNpm,
 					run: () => void applyPublish(eligible.map((row) => row.id)),
 				});
 			},
@@ -1557,17 +1579,27 @@
 			return;
 		}
 		const failed = rows.filter((row) => !isPublishedReason(row.reason));
+		const github = rows.filter((row) => isGithubPublishReason(row.reason));
+		const npmOk = rows.filter((row) => row.reason?.startsWith('published '));
 		offerConfirm({
 			title: failed.length
 				? failed.length === rows.length
 					? 'Nothing reached npm'
-					: `${failed.length} of ${rows.length} did not reach npm`
-				: rows.length === 1
-					? `Published ${rows[0]?.reason?.replace(/^published /, '') ?? rows[0]?.id}`
-					: `Published ${rows.length} packages`,
+					: `${failed.length} of ${rows.length} did not finish`
+				: github.length && !npmOk.length
+					? rows.length === 1
+						? 'Open GitHub to publish'
+						: `Open GitHub for ${github.length} packages`
+					: rows.length === 1
+						? `Published ${rows[0]?.reason?.replace(/^published /, '') ?? rows[0]?.id}`
+						: `Published ${npmOk.length} packages`,
 			hint: failed.length
-				? 'Those packages did not reach npm. Fix the line below, then publish those ids again.'
-				: 'All listed packages reached npm.',
+				? 'Those packages did not finish. Fix the line below, then try those ids again.'
+				: github.length && !npmOk.length
+					? 'Laptop npm publish is blocked (OIDC provenance). Click the GitHub Publish link and run the workflow.'
+					: github.length
+						? 'Packages that reached npm are listed. Click any GitHub Publish link to run that workflow.'
+						: 'All listed packages reached npm.',
 			items: rows.map(publishResultLine),
 			confirmLabel: 'OK',
 			canApply: false,
@@ -1631,8 +1663,9 @@
 			companionId: string | null;
 			engineId: string;
 			steps: { kind: string; label: string }[];
-			needsPublish: boolean;
-			note: string;
+						needsPublish: boolean;
+						needsOtp: boolean;
+						note: string;
 		};
 		npmUser?: string | null;
 		authHint?: string;
@@ -1667,6 +1700,7 @@
 				const lined = landConfirmItems(plans);
 				const work = plans.filter((plan) => plan.steps.length > 0);
 				const needsPublish = plans.some((plan) => plan.needsPublish);
+				const needsOtp = plans.some((plan) => plan.needsOtp);
 				const one = plans[0];
 				note(
 					ids.length === 1
@@ -1688,14 +1722,14 @@
 							? `Nothing to land for ${ids[0]}`
 							: 'Nothing to land',
 					hint: work.length
-						? `${one?.note ?? ''}${companion}${needsPublish && publishAuthHint ? ` ${publishAuthHint}` : ''}`
+						? `${one?.note ?? ''}${companion}${needsOtp && publishAuthHint ? ` ${publishAuthHint}` : ''}`
 						: one?.note ?? 'Already current.',
 					items: lined.items.length ? lined.items : ['Already current.'],
 					itemKeys: lined.keys,
 					confirmLabel: work.length === 1 ? `Land ${work[0]?.siteId}` : work.length ? `Land ${work.length}` : 'Land',
 					variant: needsPublish ? 'danger' : 'write',
 					canApply: work.length > 0,
-					showOtp: needsPublish,
+					showOtp: needsOtp,
 					run: () => void applyLand(work.map((plan) => plan.siteId)),
 				});
 			},

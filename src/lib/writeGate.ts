@@ -61,14 +61,24 @@ export function plainPublishError(raw: string): string {
 	return (first ?? 'npm publish failed').slice(0, 160);
 }
 
+export function isGithubPublishReason(reason: string | undefined): boolean {
+	return Boolean(reason?.startsWith('open GitHub Publish'));
+}
+
 export function isPublishedReason(reason: string | undefined): boolean {
-	return Boolean(reason?.startsWith('published '));
+	return Boolean(reason?.startsWith('published ') || isGithubPublishReason(reason));
 }
 
 export function publishApplyTitle(rows: ReadonlyArray<{ id: string; reason?: string }>): string {
-	const published = rows.filter((row) => isPublishedReason(row.reason)).length;
+	const github = rows.filter((row) => isGithubPublishReason(row.reason)).length;
+	const published = rows.filter((row) => row.reason?.startsWith('published ')).length;
 	const failed = rows.filter((row) => !isPublishedReason(row.reason));
-	const ok = `${published} published`;
+	const ok = [
+		published ? `${published} published` : '',
+		github ? `${github} opened GitHub` : '',
+	]
+		.filter(Boolean)
+		.join(', ') || '0 published';
 	if (failed.length === 0) return `publish --apply — ${ok}`;
 	return `publish --apply — ${ok}, ${failed.length} failed: ${failed.map((row) => row.id).join(', ')}`;
 }

@@ -6,6 +6,7 @@ import type { LoadedManifest } from './manifest.js';
 import { joinRoot } from './paths.js';
 import { rootPkgPath } from './pkg.js';
 import { bumpTriple, type BumpKind } from './semver.js';
+import { detectGithubPublish } from './githubPublish.js';
 import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
 import { plainPublishError, whyNotPublish } from './writeGate.js';
@@ -149,6 +150,7 @@ function summarize(steps: PublishStep[]): string {
 			if (step.kind === 'bump') return `bump ${step.from}→${step.to}`;
 			if (step.kind === 'commit') return 'commit';
 			if (step.kind === 'push') return `push ${step.branch}`;
+			if (step.kind === 'github') return `GitHub Publish ${step.name}@${step.version}`;
 			return `npm publish ${step.name}@${step.version}`;
 		})
 		.join(' · ');
@@ -198,7 +200,18 @@ function planPublishOne(row: ProjectStatus, kind: BumpKind): PublishRow {
 		steps.push({ kind: 'push', branch: row.git.branch, origin: row.git.origin });
 	}
 
-	steps.push({ kind: 'publish', name: npmName, version });
+	const github = detectGithubPublish(row.absPath, row.git.origin);
+	if (github) {
+		steps.push({
+			kind: 'github',
+			name: npmName,
+			version,
+			url: github.url,
+			workflow: github.file,
+		});
+	} else {
+		steps.push({ kind: 'publish', name: npmName, version });
+	}
 	return {
 		...base,
 		action: 'publish',
@@ -279,6 +292,13 @@ export async function applyPublish(
 				emit(index, step.kind, 'fail');
 				return { ...row, reason: `push: ${pushed.reason ?? pushed.stderr}` };
 			}
+		} else if (step.kind === 'github') {
+			emit(index, step.kind, 'done');
+			return {
+				...row,
+				stdout: step.url,
+				reason: `open GitHub Publish ${step.name}@${step.version}  ${step.url}`,
+			};
 		} else if (step.kind === 'publish') {
 			const args = ['publish', '--access', 'public'];
 			if (opts.otp) args.push('--otp', opts.otp);

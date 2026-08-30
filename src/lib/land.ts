@@ -4,7 +4,7 @@ import { loadPlugins, requirePlugin, type HelmPlugin } from './plugin.js';
 import { applyPublish, planPublishFromInventory, type PublishRow } from './publish.js';
 import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
-import { commitCountLabel, plainGitError, plainPublishError, whyNotPublish, whyNotPush } from './writeGate.js';
+import { commitCountLabel, isPublishedReason, plainGitError, plainPublishError, whyNotPublish, whyNotPush } from './writeGate.js';
 import { readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 
 export const LAND_ENGINE_ID = 'filepress';
@@ -32,6 +32,7 @@ export type LandPlan = {
 	companionId: string | null;
 	steps: LandStep[];
 	needsPublish: boolean;
+	needsOtp: boolean;
 	note: string;
 };
 
@@ -276,6 +277,7 @@ export async function planLand(loaded: LoadedManifest, siteIdRaw: string): Promi
 	steps.push(...(await siteSteps(plug.plugin, loaded.workspaceRoot, siteId)));
 
 	const needsPublish = steps.some((s) => s.kind === 'publish');
+	const needsOtp = steps.some((s) => s.publishRow?.steps.some((step) => step.kind === 'publish'));
 	const note = steps.length
 		? 'Does the writes that are already needed, in order. Engine package, matching fleet package, then this site. Ship is skipped when the tree matches the last successful ship.'
 		: `${siteId} is already current — nothing to land.`;
@@ -286,6 +288,7 @@ export async function planLand(loaded: LoadedManifest, siteIdRaw: string): Promi
 		companionId,
 		steps,
 		needsPublish,
+		needsOtp,
 		note,
 	};
 }
@@ -331,7 +334,7 @@ export async function applyLand(
 		}
 		if (step.kind === 'publish' && step.publishRow) {
 			const next = await applyPublish(loaded, step.publishRow, { otp: opts.otp });
-			const ok = Boolean(next.reason?.startsWith('published '));
+			const ok = isPublishedReason(next.reason);
 			out.steps.push({
 				...step,
 				ok,

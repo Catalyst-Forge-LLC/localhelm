@@ -1053,6 +1053,20 @@
         "Land every FilePress row with no selection"
       ],
       "status": "active"
+    },
+    {
+      "id": "d75",
+      "timestamp": "2026-08-30T02:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 23,
+      "decision": "Detect a provenance Publish workflow (workflow_dispatch + npm publish + id-token/--provenance) from the checkout. Publish plan/apply then opens a github.com Actions link instead of npm publish on the laptop. No fleet-manifest allowlist of shop names.",
+      "rationale": "Operator 2026-08-29: some repos can only publish from GitHub (OIDC provenance) and error if Helm runs npm from the CLI.",
+      "alternatives_considered": [
+        "Keep failing locally and tell the operator to publish by hand",
+        "Store publish:github on each fleet row",
+        "Call the Actions API to dispatch the workflow"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

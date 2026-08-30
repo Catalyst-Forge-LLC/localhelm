@@ -60,6 +60,16 @@
 		if (busy) return;
 		onconfirm();
 	}
+
+	function itemLink(item: string): { before: string; href: string; after: string } | null {
+		const match = /(https:\/\/[^\s]+)/.exec(item);
+		if (!match?.[1] || match.index == null) return null;
+		return {
+			before: item.slice(0, match.index),
+			href: match[1],
+			after: item.slice(match.index + match[1].length),
+		};
+	}
 </script>
 
 <dialog
@@ -89,6 +99,7 @@
 			<ul class:tracked={showPhases}>
 				{#each items as item, i (`${i}:${item}`)}
 					{@const phase = itemPhases[i] ?? 'pending'}
+					{@const link = itemLink(item)}
 					<li class:current={phase === 'current'} class:done={phase === 'done'} class:fail={phase === 'fail'}>
 						{#if showPhases}
 							<span class="mark" aria-hidden="true">
@@ -103,7 +114,13 @@
 								{/if}
 							</span>
 						{/if}
-						<span>{item}</span>
+						<span>
+							{#if link}
+								{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+							{:else}
+								{item}
+							{/if}
+						</span>
 					</li>
 				{/each}
 			</ul>
@@ -212,6 +229,12 @@
 		min-width: 0;
 		white-space: pre-wrap;
 		overflow-wrap: anywhere;
+	}
+
+	li a {
+		color: #fbbf24;
+		text-decoration: underline;
+		text-underline-offset: 0.12em;
 	}
 
 	.tracked li.current {

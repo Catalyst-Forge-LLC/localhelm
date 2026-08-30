@@ -155,6 +155,46 @@ describe('publish plan', () => {
 			['publish'],
 		);
 	});
+
+	it('plans a GitHub Publish link when the checkout has an OIDC workflow', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-pub-gh-'));
+		const pkgDir = path.join(root, 'finetuna');
+		await mkdir(path.join(pkgDir, '.github', 'workflows'), { recursive: true });
+		await writeFile(
+			path.join(pkgDir, '.github', 'workflows', 'publish.yml'),
+			'on:\n  workflow_dispatch:\npermissions:\n  id-token: write\njobs:\n  p:\n    steps:\n      - run: npm publish --provenance\n',
+		);
+		const [row] = planPublishFromInventory(
+			inventory([
+				project({
+					id: 'finetuna',
+					path: 'finetuna',
+					absPath: pkgDir,
+					localVersion: '1.1.5',
+					unpublishedAhead: true,
+					npm: { name: 'finetuna', latest: '1.1.4', status: 'ok' },
+					git: {
+						repo: true,
+						dirty: false,
+						staged: 0,
+						unstaged: 0,
+						untracked: 0,
+						ahead: 0,
+						behind: 0,
+						branch: 'main',
+						origin: 'https://github.com/Catalyst-Forge-LLC/finetuna.git',
+					},
+				}),
+			]),
+			['finetuna'],
+			'patch',
+		);
+		assert.deepEqual(
+			row?.steps.map((s) => s.kind),
+			['github'],
+		);
+		assert.equal(row?.steps[0]?.kind === 'github' && row.steps[0].url, 'https://github.com/Catalyst-Forge-LLC/finetuna/actions/workflows/publish.yml');
+	});
 });
 
 describe('publish apply', () => {
@@ -278,5 +318,60 @@ describe('publish apply', () => {
 		assert.match(applied.reason ?? '', /Provenance only works in GitHub Actions/);
 		assert.equal(applied.reason?.includes('auto-install-peers'), false);
 		assert.match(applied.stderr ?? '', /auto-install-peers/);
+	});
+
+	it('does not call npm publish when the step is GitHub Actions', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-pub-gh-apply-'));
+		const pkgDir = path.join(root, 'finetuna');
+		await mkdir(path.join(pkgDir, '.github', 'workflows'), { recursive: true });
+		gitRepo(pkgDir);
+		await writeFile(path.join(pkgDir, 'package.json'), '{\n  "name": "finetuna",\n  "version": "1.1.5"\n}\n');
+		await writeFile(
+			path.join(pkgDir, '.github', 'workflows', 'publish.yml'),
+			'on:\n  workflow_dispatch:\npermissions:\n  id-token: write\njobs:\n  p:\n    steps:\n      - run: npm publish --provenance\n',
+		);
+		assert.equal(runGit(pkgDir, ['add', 'package.json']).ok, true);
+		assert.equal(runGit(pkgDir, ['commit', '-m', 'init']).ok, true);
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: { workspaceRoot: '.', projects: [{ id: 'finetuna', path: 'finetuna' }] },
+		};
+		const planned = planPublishFromInventory(
+			inventory([
+				project({
+					id: 'finetuna',
+					path: 'finetuna',
+					absPath: pkgDir,
+					localVersion: '1.1.5',
+					unpublishedAhead: true,
+					npm: { name: 'finetuna', latest: '1.1.4', status: 'ok' },
+					git: {
+						repo: true,
+						dirty: false,
+						staged: 0,
+						unstaged: 0,
+						untracked: 0,
+						ahead: 0,
+						behind: 0,
+						branch: 'main',
+						origin: 'https://github.com/Catalyst-Forge-LLC/finetuna.git',
+					},
+				}),
+			]),
+			['finetuna'],
+			'patch',
+		);
+		assert.equal(planned[0]?.steps.some((step) => step.kind === 'github'), true);
+		let ran = 0;
+		const applied = await applyPublish(loaded, planned[0]!, {
+			run: () => {
+				ran += 1;
+				return { ok: false, stdout: '', stderr: 'should not run' };
+			},
+		});
+		assert.equal(ran, 0);
+		assert.match(applied.reason ?? '', /open GitHub Publish finetuna@1\.1\.5/);
+		assert.match(applied.reason ?? '', /actions\/workflows\/publish\.yml/);
 	});
 });

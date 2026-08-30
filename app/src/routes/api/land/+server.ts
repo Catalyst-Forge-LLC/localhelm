@@ -20,12 +20,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		const loaded = await loadRequired();
 		const plan = await planLand(loaded, siteId);
 		if (!body.apply) {
-			const npmUser = plan.needsPublish ? npmWhoami() : undefined;
+			const npmUser = plan.needsOtp ? npmWhoami() : undefined;
 			return json({
 				plan,
 				writes: false,
 				npmUser,
-				authHint: plan.needsPublish ? publishAuthHintFor(npmUser) : undefined,
+				authHint: plan.needsOtp ? publishAuthHintFor(npmUser) : undefined,
 			});
 		}
 		const result = await withLockAt(loaded.workspaceRoot, () =>

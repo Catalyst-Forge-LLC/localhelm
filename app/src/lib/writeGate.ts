@@ -8,6 +8,7 @@ export {
 	plainPublishError,
 	publishApplyTitle,
 	publishResultLine,
+	isGithubPublishReason,
 	isPublishedReason,
 	whyNotPublish,
 	whyNotPush,
