@@ -2744,6 +2744,9 @@
 						<div class="group-buttons">
 							{#if board.plugin === 'filepress'}
 								{@const landIds = board.rows.filter((row) => selectedSites[row.id]).map((row) => row.id)}
+								{@const syncIds = board.rows
+									.filter((row) => selectedSites[row.id] && siteNeedsEngineSync(row.cells))
+									.map((row) => row.id)}
 								<button
 									class="btn btn-write"
 									disabled={Boolean(busy) || landIds.length === 0}
@@ -2752,6 +2755,15 @@
 								>
 									<Icon icon="lucide:plane-landing" />
 									Land{landIds.length ? ` (${landIds.length})` : ''}
+								</button>
+								<button
+									class="btn btn-write"
+									disabled={Boolean(busy) || syncIds.length === 0}
+									onclick={() => startPluginJob(board.plugin, 'sync', syncIds, 'Sync engine')}
+									title="Retargets getfilepress and merges headers for the checked sites that are behind. Confirm in the modal."
+								>
+									<Icon icon="lucide:refresh-cw" />
+									Sync engine{syncIds.length ? ` (${syncIds.length})` : ''}
 								</button>
 							{/if}
 							{#each boardActions(board) as act (act.id)}
