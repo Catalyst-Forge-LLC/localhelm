@@ -39,7 +39,7 @@
 <div class="visit">
 	<header>
 		<img class="mark" src="/logo.png" alt="" width="72" height="48" />
-		<span class="word">LocalHelm</span>
+		<span class="word">Deck</span>
 		{#if pageHost && isLoopbackBind(pageHost)}
 			<a class="meta" href="/">Operator board</a>
 		{/if}
@@ -54,8 +54,8 @@
 	<main>
 		{#if snapshot.tiles.length === 0}
 			<p class="empty">
-				Nothing listening past loopback. Start a site on all interfaces, or claim with
-				<code>localslip … --lan</code>.
+				The Deck is empty. Nothing listening past loopback. Start a site on all interfaces, or
+				claim with <code>localslip … --lan</code>.
 			</p>
 		{:else}
 			<div class="grid">

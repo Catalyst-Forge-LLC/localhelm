@@ -18,7 +18,7 @@ describe('loopback face', () => {
 		assert.equal(isLoopbackClient('100.64.1.2'), false);
 	});
 
-	it('keeps the operator board on loopback Host and the visitor face on LAN Host', () => {
+	it('keeps the operator board on loopback Host and the Deck on LAN Host', () => {
 		assert.equal(isOperatorFace('127.0.0.1', '127.0.0.1:4321'), true);
 		assert.equal(isOperatorFace('127.0.0.1', 'localhost:4321'), true);
 		assert.equal(isOperatorFace('127.0.0.1', '100.64.1.2:4321'), false);

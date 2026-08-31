@@ -12,7 +12,7 @@ const leaseBoard = (rows: PluginBoard['rows']): PluginBoard => ({
 	rows,
 });
 
-describe('visitor tiles from Ports boards', () => {
+describe('Deck tiles from Ports boards', () => {
 	it('keeps listening LAN leases and drops loopback, parked, and this dashboard', () => {
 		const tiles = visitorTilesFromBoards(
 			[

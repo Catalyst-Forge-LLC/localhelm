@@ -1067,6 +1067,20 @@
         "Call the Actions API to dispatch the workflow"
       ],
       "status": "active"
+    },
+    {
+      "id": "d76",
+      "timestamp": "2026-08-31T21:38:00Z",
+      "phase": "2-scaffolding",
+      "session": 24,
+      "decision": "The phone tile grid is the Deck. Canonical route is /deck. Non-loopback / and /visitor redirect there. Menu label is Deck. GET /api/visitor still feeds the tiles. Do not fold peek, claim, or firewall into Helm.",
+      "rationale": "Operator 2026-08-31: visitor tileboard needed a product name; Deck fits Helm/Slip.",
+      "alternatives_considered": [
+        "Pier",
+        "Lanterns",
+        "Keep Visitor"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

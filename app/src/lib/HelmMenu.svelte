@@ -109,9 +109,9 @@
 
 			<p class="heading spaced">Board</p>
 			<div class="actions">
-				<a class="item" href="/visitor" onclick={close}>
+				<a class="item" href="/deck" onclick={close}>
 					<Icon icon="lucide:layout-grid" />
-					Visitor tiles
+					Deck
 				</a>
 				<button type="button" class="item" disabled={!statusReady} onclick={() => { close(); onCopyBrief(); }}>
 					<Icon icon="lucide:clipboard" />

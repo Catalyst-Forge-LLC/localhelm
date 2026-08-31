@@ -6,7 +6,7 @@ title: Introduction
 
 [LocalSlip](https://localslip.dev) is the slip; LocalHelm is the wheel.
 
-You have a folder of repos. `git status` in one of them answers that repo. The board also shows listening leases and the phone tile grid.
+You have a folder of repos. `git status` in one of them answers that repo. The board also shows listening leases and the Deck.
 
 Scan a folder, check which ones to keep, then read git, npm, dependents, and listening leases in one place.
 

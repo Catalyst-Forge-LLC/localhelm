@@ -24,7 +24,7 @@ export function isVisitorSelf(id: string, port: number, helmPort?: number): bool
 	return false;
 }
 
-/** Named lease that is listening past loopback — the phone can reach it. */
+/** Named lease that is listening past loopback — it belongs on the Deck. */
 export function isVisitorLeaseRow(row: {
 	id: string;
 	cells: Record<string, string>;

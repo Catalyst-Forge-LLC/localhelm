@@ -54,4 +54,5 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Table cleanup: Fleet one version column; Ports drop listening/log/firewall noise; Sites hide headers/ship columns _(2026-08-26)_
 - [x] Cut version only when origin has commits since the last npm version _(2026-08-26)_
 - [x] Today pane board: section scroll, Looks on the glass, refresh pinned to the id _(2026-08-26)_
+- [x] Phone tile grid is the Deck (`/deck`); `/visitor` redirects _(2026-08-31)_
 - [x] Needs you filter: All / Publish / Cut / Push _(2026-08-26)_
