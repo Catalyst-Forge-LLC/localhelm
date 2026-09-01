@@ -12,7 +12,7 @@ Public name **LocalHelm**. CLI and npm package **`localhelm`**. Repo folder `loc
 
 ## 0. Summary
 
-The Catalyst Forge workspace (`Z:\workspace` on the kickoff machine) held **52 git repos** and **47 `package.json` trees** on 2026-08-20. About fifteen of those are public products on [catalystforge.com/open-source](https://www.catalystforge.com/open-source). More landed in the last two weeks (EmberDossier is already on npm as `get-ember-dossier@0.1.4` and is not on the shelf). They depend on each other: sites pin `getfilepress`, packages pin `ollanet` and `aibreze`, some use `link:` for local work.
+The Catalyst Forge workspace (`Z:\workspace` on the kickoff machine) held **52 git repos** and **47 `package.json` trees** on 2026-08-20. About fifteen of those are public products on [catalystforge.com/open-source](https://www.catalystforge.com/open-source). More landed in the last two weeks (EmberDossier is already on npm as `get-ember-dossier@0.1.4` and is not on the shelf). They depend on each other: sites pin `getfilepress`, packages pin `ollanet` and `smellcheck`, some use `link:` for local work.
 
 The current workaround is walking the folders: bump, `prepublishOnly`, publish, then remember every consumer, then remember the shelf card in `catalyst-forge/src/lib/projects.js`. That last file is already stale. Local vs shelf on 2026-08-20:
 
@@ -21,7 +21,7 @@ The current workaround is walking the folders: bump, `prepublishOnly`, publish, 
 | FilePress (`getfilepress`) | v0.1.2 | 0.1.8 |
 | ollanet | v0.4.1 | 0.6.6 |
 | LocalBerth | v0.2.0 | 0.2.6 |
-| aiBreze | v0.1.1 | 0.1.6 |
+| Smell Check | v0.1.1 | 0.1.6 |
 | Finetuna | v1.1.1 | 1.1.3 |
 | ForgeTrail | v0.3.0 | 0.3.0 |
 
@@ -103,7 +103,7 @@ Fields that matter:
 Pin kinds a builder must classify, not squash into one string:
 
 - registry range: `^0.1.8`, `~0.1.8`, exact `0.1.8`
-- `link:../aibreze` (pnpm workspace-style local)
+- `link:../smellcheck` (pnpm workspace-style local)
 - `file:…`
 - `workspace:`
 - git URL (`github:org/repo#ref`)
@@ -308,18 +308,18 @@ Every mutating command prints a plan unless the operator already passed a confir
 
 The first fleet on the kickoff machine should be easy to enroll. Discover + a documented seed list, not magic:
 
-**On the CF shelf today:** ForgeTrail (`forgetrail`), aiBreze (`aibreze`), TemperPass (`temperpass`), xFacts family (hub + five label folders), FilePress (`getfilepress`), IngotVault, Finetuna, ollanet, Docupuncture, DictaWhisper, LocalBerth.
+**On the CF shelf today:** ForgeTrail (`forgetrail`), Smell Check (`smellcheck`), TemperPass (`temperpass`), xFacts family (hub + five label folders), FilePress (`getfilepress`), IngotVault, Finetuna, ollanet, Docupuncture, DictaWhisper, LocalBerth.
 
 **Published, not on the shelf (2026-08-20):** EmberDossier (`get-ember-dossier`).
 
 **Measured house edges (root or `site/package.json`):**
 
 - Many `site/` packages → `getfilepress` `^0.1.8`
-- `dictawhisper` → `ollanet` `^0.6.5`, `aibreze` `^0.1.2`
+- `dictawhisper` → `ollanet` `^0.6.5`, `smellcheck` `^0.2.0`
 - `filepress` (engine) → `ollanet` `^0.4.0` (behind local 0.6.6)
 - `anticonfab` → `ollanet` `^0.4.1`
-- `ingotvault`, `localberth` → `aibreze` `^0.1.5`
-- `catalyst-forge`, `ember-dossier`, `what-over-how` → `aibreze` `link:../aibreze`
+- `ingotvault`, `localslip` → `smellcheck` `^0.2.0`
+- `catalyst-forge`, `ember-dossier`, `what-over-how` → `smellcheck` `link:../smellcheck`
 - Several content repos → `getfilepress` as a site engine
 
 The seed list will rot. The manifest is the source of truth after day one.
@@ -414,11 +414,11 @@ The seed list will rot. The manifest is the source of truth after day one.
 
 ## 8. Acceptance criteria
 
-- Given a fleet manifest with FilePress, ollanet, and aiBreze, when `localhelm status` runs, then the table shows local versions matching each root `package.json`, npm latest for those names (or a named fetch error), and the CF shelf versions from `projects.js`.
-- Given the 2026-08-20 numbers, when status runs against that tree, then FilePress, ollanet, LocalBerth, aiBreze, and Finetuna report catalog-stale.
+- Given a fleet manifest with FilePress, ollanet, and Smell Check, when `localhelm status` runs, then the table shows local versions matching each root `package.json`, npm latest for those names (or a named fetch error), and the CF shelf versions from `projects.js`.
+- Given the 2026-08-20 numbers, when status runs against that tree, then FilePress, ollanet, LocalBerth, Smell Check, and Finetuna report catalog-stale.
 - Given EmberDossier enrolled with `catalogName` set, when it is absent from `projects.js`, then status reports a catalog gap, not a version compare.
 - Given `filepress` folder and npm name `getfilepress`, when status and deps run, then dependents of `getfilepress` (including `site/package.json` pins) attach to FilePress, not to a missing package called `filepress`.
-- Given `catalyst-forge` pins `aibreze` via `link:../aibreze`, when `deps` runs, then that edge is `link`, not "on ^latest."
+- Given `catalyst-forge` pins `smellcheck` via `link:../smellcheck`, when `deps` runs, then that edge is `link`, not "on ^latest."
 - Given ollanet local `0.6.6` and `filepress` pinning `ollanet` `^0.4.0`, when `deps ollanet` runs, then FilePress is behind if the lock/resolved version is not 0.6.x current.
 - Given a cascade plan for package A at npm V, when a dependent is dirty with unrelated files, then apply skips or refuses that dependent and writes nothing there.
 - Given a cascade plan when A@V is not on npm, when the operator did not confirm local `link:`, then apply refuses.
@@ -469,6 +469,6 @@ The seed list will rot. The manifest is the source of truth after day one.
 
 ## 11. What success looks like
 
-After you publish `getfilepress` or `aibreze` or `ollanet`, you run `localhelm status` (or open the dashboard) and see who is still on last week's pin, which shelf cards are stale, and which clones are dirty. You confirm a cascade. Each consumer gets a pin and lockfile update, or a skipped row with a reason. You confirm a catalog sync. The public shelf matches npm. You still type `pnpm publish` yourself, in the package that earned it, one at a time.
+After you publish `getfilepress` or `smellcheck` or `ollanet`, you run `localhelm status` (or open the dashboard) and see who is still on last week's pin, which shelf cards are stale, and which clones are dirty. You confirm a cascade. Each consumer gets a pin and lockfile update, or a skipped row with a reason. You confirm a catalog sync. The public shelf matches npm. You still type `pnpm publish` yourself, in the package that earned it, one at a time.
 
 The next dozen tools do not need a better memory. They need a helm.
