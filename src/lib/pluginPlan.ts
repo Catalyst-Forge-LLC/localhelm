@@ -50,22 +50,29 @@ function jobDetail(row: Record<string, unknown>, action: string): string {
 	return '';
 }
 
-/** Confirm lines for plugin plans. Start/recipe rows include PORT/HOST. Stop/park do not. */
-export function formatPluginPlanLines(data: unknown): string[] {
+function pluginPlanRows(data: unknown): Record<string, unknown>[] {
 	if (!data || typeof data !== 'object') return [];
 	const rows = (data as { rows?: unknown }).rows;
 	if (!Array.isArray(rows)) return [];
-	return rows
-		.filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === 'object')
-		.map((row) => {
-			const id =
-				typeof row.id === 'string'
-					? row.id
-					: typeof row.fromId === 'string'
-						? row.fromId
-						: typeof row.path === 'string'
-							? row.path
-							: '?';
+	return rows.filter((row): row is Record<string, unknown> => Boolean(row) && typeof row === 'object');
+}
+
+function pluginRowId(row: Record<string, unknown>): string {
+	if (typeof row.id === 'string') return row.id;
+	if (typeof row.fromId === 'string') return row.fromId;
+	if (typeof row.path === 'string') return row.path;
+	return '?';
+}
+
+/** Keys aligned with `formatPluginPlanLines` so a multi-id confirm can use the roster. */
+export function pluginPlanLineKeys(data: unknown): string[] {
+	return pluginPlanRows(data).map(pluginRowId);
+}
+
+/** Confirm lines for plugin plans. Start/recipe rows include PORT/HOST. Stop/park do not. */
+export function formatPluginPlanLines(data: unknown): string[] {
+	return pluginPlanRows(data).map((row) => {
+		const id = pluginRowId(row);
 			const recipe = typeof row.recipe === 'string' ? row.recipe.trim() : '';
 			const proposedCwd = typeof row.proposedCwd === 'string' ? row.proposedCwd.trim() : '';
 			const proposedCommand = typeof row.proposedCommand === 'string' ? row.proposedCommand.trim() : '';

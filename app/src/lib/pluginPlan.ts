@@ -1,1 +1,1 @@
-export { formatPluginPlanLines, pluginPlanWriteIds } from '../../../src/lib/pluginPlan.js';
+export { formatPluginPlanLines, pluginPlanLineKeys, pluginPlanWriteIds } from '../../../src/lib/pluginPlan.js';

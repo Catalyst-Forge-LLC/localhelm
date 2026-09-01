@@ -17,6 +17,14 @@ export type { PublishRow, PublishStep, PublishStepEvent } from './publish.js';
 export { applyConfirmStep, emptyConfirmPhases, markConfirmKey } from './confirmProgress.js';
 export type { ConfirmPhase } from './confirmProgress.js';
 export {
+	buildConfirmRoster,
+	confirmGroupId,
+	confirmGroupPhase,
+	confirmRosterSelected,
+	confirmStepLabel,
+} from './confirmRoster.js';
+export type { ConfirmRosterGroup, ConfirmRosterStep } from './confirmRoster.js';
+export {
 	applyLand,
 	companionIdForSite,
 	LAND_ENGINE_ID,
@@ -60,7 +68,7 @@ export type { FamilyMember, LeaseRowInput, PortFamily, PortLook, PortLookKind } 
 export { activityLinkedIds } from './activityLinks.js';
 export { crosswalkChips } from './crosswalk.js';
 export type { CrossChip } from './crosswalk.js';
-export { formatPluginPlanLines, pluginPlanWriteIds } from './pluginPlan.js';
+export { formatPluginPlanLines, pluginPlanLineKeys, pluginPlanWriteIds } from './pluginPlan.js';
 export type { HelmPlugin, LoadedPlugin, PluginBoard, PluginTab } from './plugin.js';
 export { applyBump, planBump } from './bump.js';
 export type { BumpPlan } from './bump.js';

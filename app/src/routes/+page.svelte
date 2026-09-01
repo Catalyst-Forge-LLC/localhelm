@@ -10,7 +10,7 @@
 	import Tooltip from '$lib/Tooltip.svelte';
 	import { activityLinkedIds } from '$lib/activityLinks';
 	import { crosswalkChips } from '$lib/crosswalk';
-	import { formatPluginPlanLines, pluginPlanWriteIds } from '$lib/pluginPlan';
+	import { formatPluginPlanLines, pluginPlanLineKeys, pluginPlanWriteIds } from '$lib/pluginPlan';
 	import { formatBrief } from '$lib/briefFormat';
 	import { familyMemberNames } from '$lib/family';
 	import { portFamilies, portLooks, type PortFamily } from '$lib/looks';
@@ -1620,6 +1620,7 @@
 				const writeIds = pluginPlanWriteIds(data);
 				const applyIds = writeIds ?? [...ids];
 				const items = rowLines(data);
+				const lineKeys = pluginPlanLineKeys(data);
 				note(`${plugin} ${action} plan ${scope}`, data);
 				offerConfirm({
 					title: applyIds.length
@@ -1627,6 +1628,7 @@
 						: `Nothing to ${label.toLowerCase()}`,
 					hint: pluginJobHint(plugin, action, applyIds, writeIds, data),
 					items: items.length ? items : ['Nothing to do.'],
+					itemKeys: items.length && lineKeys.length === items.length ? lineKeys : undefined,
 					confirmLabel: applyIds.length === 1 ? label : `${label} ${applyIds.length}`,
 					canApply: applyIds.length > 0,
 					run: () => void applyPluginJob(plugin, action, applyIds),
@@ -3341,6 +3343,7 @@
 	busyLabel={busy}
 	canApply={confirmCanApply}
 	items={confirmItems}
+	itemKeys={confirmItemKeys}
 	itemPhases={confirmPhases}
 	onconfirm={() => {
 		const fn = confirmRun;

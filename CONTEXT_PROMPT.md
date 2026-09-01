@@ -207,3 +207,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 24 — 2026-08-31
 
 - The phone tile grid is the **Deck** (`/deck`). Menu label **Deck**. `/visitor` and a LAN/Tailscale hit on `/` redirect there. Internal poll stays `GET /api/visitor`.
+- Confirm with two or more named ids uses a **roster + current** pane (d77): names on the left, that id’s steps on the right. Apply follows the running row; click another name to stay there. One package stays a flat list.

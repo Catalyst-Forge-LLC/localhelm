@@ -1081,6 +1081,20 @@
         "Keep Visitor"
       ],
       "status": "active"
+    },
+    {
+      "id": "d77",
+      "timestamp": "2026-09-01T01:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 24,
+      "decision": "A confirm with two or more named ids uses a roster + current pane: names and status on the left, that id's steps on the right. Apply follows the running row; click another name to pin it. One package or anonymous index keys stay a flat list.",
+      "rationale": "Operator 2026-08-31: a 9-package publish became a long scroller of every step; individual loaders were fine, tracking was not. Roster still works at 20 ids.",
+      "alternatives_considered": [
+        "Package cards that collapse",
+        "Keep the list and pin a Now bar",
+        "Compact dots that expand one row"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

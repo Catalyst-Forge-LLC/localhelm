@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { buildConfirmRoster, confirmRosterSelected } from './confirmRoster';
 	import Icon from './Icon.svelte';
 
 	type Phase = 'pending' | 'current' | 'done' | 'fail';
@@ -15,6 +16,7 @@
 		busyLabel?: string;
 		canApply?: boolean;
 		items?: string[];
+		itemKeys?: string[];
 		itemPhases?: Phase[];
 		children?: Snippet;
 		onconfirm: () => void;
@@ -32,6 +34,7 @@
 		busyLabel = '',
 		canApply = true,
 		items = [],
+		itemKeys = [],
 		itemPhases = [],
 		children,
 		onconfirm,
@@ -39,6 +42,42 @@
 	}: Props = $props();
 
 	const showPhases = $derived(itemPhases.some((phase) => phase !== 'pending'));
+	const groups = $derived(buildConfirmRoster(items, itemKeys, itemPhases));
+	const liveId = $derived(
+		groups?.find((group) => group.phase === 'current')?.id ??
+			groups?.find((group) => group.phase === 'fail')?.id ??
+			null,
+	);
+
+	let pinned = $state<string | null>(null);
+	let rosterEl = $state<HTMLElement | null>(null);
+	let stepListEl = $state<HTMLElement | null>(null);
+	const rosterSig = $derived(`${items.join('\n')}\0${itemKeys.join('\n')}`);
+
+	$effect(() => {
+		rosterSig;
+		pinned = null;
+	});
+
+	const selectedId = $derived(groups ? confirmRosterSelected(groups, pinned) : null);
+	const selected = $derived(groups?.find((group) => group.id === selectedId) ?? null);
+
+	$effect(() => {
+		const id = selectedId;
+		if (!id || !rosterEl) return;
+		const row = rosterEl.querySelector(`[data-roster="${CSS.escape(id)}"]`);
+		row?.scrollIntoView({ block: 'nearest' });
+	});
+
+	$effect(() => {
+		if (!stepListEl) return;
+		const current = stepListEl.querySelector('li.current');
+		current?.scrollIntoView({ block: 'nearest' });
+	});
+
+	function pick(id: string): void {
+		pinned = id === liveId ? null : id;
+	}
 
 	let dialogEl = $state<HTMLDialogElement | null>(null);
 
@@ -70,11 +109,19 @@
 			after: item.slice(match.index + match[1].length),
 		};
 	}
+
+	function phaseMark(phase: Phase) {
+		if (phase === 'done') return { icon: 'lucide:check' as const, spin: false };
+		if (phase === 'fail') return { icon: 'lucide:x' as const, spin: false };
+		if (phase === 'current') return { icon: 'lucide:loader-circle' as const, spin: true };
+		return null;
+	}
 </script>
 
 <dialog
 	bind:this={dialogEl}
 	class="confirm"
+	class:wide={Boolean(groups)}
 	aria-labelledby="confirm-title"
 	onclose={() => {
 		if (!open) return;
@@ -95,7 +142,66 @@
 		{#if hint}
 			<p class="hint">{hint}</p>
 		{/if}
-		{#if items.length}
+		{#if groups && selected}
+			<div class="split">
+				<div class="roster" bind:this={rosterEl} role="listbox" aria-label="Packages">
+					{#each groups as group (group.id)}
+						<button
+							type="button"
+							class="roster-row"
+							class:on={group.id === selectedId}
+							class:current={group.phase === 'current'}
+							class:done={group.phase === 'done'}
+							class:fail={group.phase === 'fail'}
+							data-roster={group.id}
+							role="option"
+							aria-selected={group.id === selectedId}
+							onclick={() => pick(group.id)}
+						>
+							<span class="mark" aria-hidden="true">
+								{#if phaseMark(group.phase)}
+									{@const mark = phaseMark(group.phase)!}
+									<Icon icon={mark.icon} class={mark.spin ? 'icon spin' : 'icon'} />
+								{:else}
+									<span class="dot"></span>
+								{/if}
+							</span>
+							<span class="name">{group.id}</span>
+							{#if group.phase === 'current'}
+								<span class="now">now</span>
+							{/if}
+							{#if group.total > 1}
+								<span class="count">{group.done}/{group.total}</span>
+							{/if}
+						</button>
+					{/each}
+				</div>
+				<ol class="steps" class:tracked={showPhases} bind:this={stepListEl}>
+					{#each selected.steps as step, i (`${selected.id}:${i}:${step.text}`)}
+						{@const link = itemLink(step.text)}
+						<li class:current={step.phase === 'current'} class:done={step.phase === 'done'} class:fail={step.phase === 'fail'}>
+							{#if showPhases}
+								<span class="mark" aria-hidden="true">
+									{#if phaseMark(step.phase)}
+										{@const mark = phaseMark(step.phase)!}
+										<Icon icon={mark.icon} class={mark.spin ? 'icon spin' : 'icon'} />
+									{:else}
+										<span class="dot"></span>
+									{/if}
+								</span>
+							{/if}
+							<span>
+								{#if link}
+									{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+								{:else}
+									{step.text}
+								{/if}
+							</span>
+						</li>
+					{/each}
+				</ol>
+			</div>
+		{:else if items.length}
 			<ul class:tracked={showPhases}>
 				{#each items as item, i (`${i}:${item}`)}
 					{@const phase = itemPhases[i] ?? 'pending'}
@@ -103,12 +209,9 @@
 					<li class:current={phase === 'current'} class:done={phase === 'done'} class:fail={phase === 'fail'}>
 						{#if showPhases}
 							<span class="mark" aria-hidden="true">
-								{#if phase === 'done'}
-									<Icon icon="lucide:check" />
-								{:else if phase === 'fail'}
-									<Icon icon="lucide:x" />
-								{:else if phase === 'current'}
-									<Icon icon="lucide:loader-circle" class="icon spin" />
+								{#if phaseMark(phase)}
+									{@const mark = phaseMark(phase)!}
+									<Icon icon={mark.icon} class={mark.spin ? 'icon spin' : 'icon'} />
 								{:else}
 									<span class="dot"></span>
 								{/if}
@@ -185,6 +288,10 @@
 		box-shadow: 0 24px 48px rgb(0 0 0 / 0.55);
 	}
 
+	.wide .panel {
+		width: min(48rem, calc(100vw - 2rem));
+	}
+
 	.confirm::backdrop {
 		background: rgb(0 0 0 / 0.62);
 	}
@@ -206,10 +313,20 @@
 		line-height: 1.4;
 	}
 
-	ul {
+	.split {
+		display: grid;
+		grid-template-columns: minmax(10.5rem, 13.5rem) minmax(0, 1fr);
+		gap: 0.55rem;
 		margin: 0.75rem 0 0;
-		padding: 0.55rem 0.7rem;
-		max-height: 14rem;
+		min-height: 12rem;
+		max-height: min(28rem, calc(100dvh - 14rem));
+	}
+
+	.roster,
+	ul,
+	ol.steps {
+		margin: 0;
+		padding: 0.45rem;
 		min-width: 0;
 		overflow-x: hidden;
 		overflow-y: auto;
@@ -217,9 +334,83 @@
 		border: 1px solid #27272a;
 		border-radius: 0.45rem;
 		background: #09090b;
+	}
+
+	ul {
+		margin: 0.75rem 0 0;
+		padding: 0.55rem 0.7rem;
+		max-height: 14rem;
 		font-size: 0.78rem;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 		line-height: 1.45;
+	}
+
+	ol.steps {
+		padding: 0.55rem 0.7rem;
+		font-size: 0.78rem;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		line-height: 1.45;
+	}
+
+	.roster-row {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		width: 100%;
+		margin: 0;
+		padding: 0.35rem 0.4rem;
+		border: 0;
+		border-radius: 0.35rem;
+		background: transparent;
+		color: #d4d4d8;
+		font: inherit;
+		font-size: 0.8rem;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.roster-row + .roster-row {
+		margin-top: 0.15rem;
+	}
+
+	.roster-row:hover {
+		background: #18181b;
+	}
+
+	.roster-row.on {
+		background: #27272a;
+		color: #fafafa;
+	}
+
+	.roster-row.current {
+		color: #fde68a;
+	}
+
+	.roster-row.done {
+		color: #a7f3d0;
+	}
+
+	.roster-row.fail {
+		color: #fca5a5;
+	}
+
+	.roster-row .name {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.now,
+	.count {
+		flex-shrink: 0;
+		font-size: 0.68rem;
+		color: #a1a1aa;
+	}
+
+	.roster-row.current .now {
+		color: #fde68a;
 	}
 
 	li {
@@ -254,6 +445,10 @@
 		width: 0.9rem;
 		margin-top: 0.12rem;
 		color: inherit;
+	}
+
+	.roster-row .mark {
+		margin-top: 0;
 	}
 
 	.dot {
@@ -323,5 +518,16 @@
 		border-color: #991b1b;
 		background: #7f1d1d;
 		color: #fecaca;
+	}
+
+	@media (max-width: 36rem) {
+		.split {
+			grid-template-columns: 1fr;
+			max-height: min(32rem, calc(100dvh - 12rem));
+		}
+
+		.roster {
+			max-height: 9rem;
+		}
 	}
 </style>
