@@ -353,6 +353,10 @@
 		const row = inventory?.projects.find((p) => p.id === id);
 		return row ? !whyNotPublish(row) : false;
 	}));
+	const checkedPushIds = $derived(checkedIds.filter((id) => {
+		const row = inventory?.projects.find((p) => p.id === id);
+		return row ? !whyNotPush(row.git) : false;
+	}));
 	const unpublishedPublishIds = $derived(
 		shipRows.filter((row) => row.unpublishedAhead && !whyNotPublish(row)).map((row) => row.id),
 	);
@@ -1382,6 +1386,9 @@
 
 	function pushItems(rows: GitRow[]): string[] {
 		return rows.map((row) => {
+			if (row.action !== 'push') {
+				return `${row.id}  ${row.reason ?? 'skipped'}`;
+			}
 			const n = row.ahead ?? '?';
 			return `${row.id}  ${row.branch ?? '?'}  ${n} commit(s)\n→  ${row.origin ?? ''}`;
 		});
@@ -1397,16 +1404,24 @@
 					body: JSON.stringify({ apply: false, ids: onlyIds }),
 				})) as { rows: GitRow[] };
 				const eligible = data.rows.filter((r) => r.action === 'push');
+				const named = Boolean(onlyIds?.length);
+				const listed = named ? data.rows : eligible;
 				note(`push plan — ${eligible.length} of ${data.rows.length} eligible (origin only), nothing written`, data);
+				const skipNote =
+					named && listed.length > eligible.length
+						? `${eligible.length} of ${listed.length} checked can push. Click a name to see why the others stay local. `
+						: '';
 				offerConfirm({
 					title: eligible.length === 1 ? `Push ${eligible[0]?.id} to origin?` : eligible.length ? 'Push these branches to origin?' : 'Nothing to push',
 					hint: eligible.length
-						? 'git push origin only. Never --force. Never the IngotVault backup remote. Uncommitted files stay in the working tree.'
+						? `${skipNote}git push origin only. Never --force. Never the IngotVault backup remote. Uncommitted files stay in the working tree.`
 						: onlyIds?.length === 1
 							? `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'cannot push'}`
-							: 'Nothing is eligible: repos must be ahead of origin and not diverged.',
-					items: eligible.length ? pushItems(eligible) : ['Nothing to push.'],
-					itemKeys: eligible.map((row) => row.id),
+							: named
+								? 'None of the checked repos can push: they must be ahead of origin and not diverged.'
+								: 'Nothing is eligible: repos must be ahead of origin and not diverged.',
+					items: listed.length ? pushItems(listed) : ['Nothing to push.'],
+					itemKeys: listed.map((row) => row.id),
 					confirmLabel: eligible.length === 1 ? `Push ${eligible[0]?.id}` : `Push ${eligible.length} to origin`,
 					canApply: eligible.length > 0,
 					run: () => void applyPush(eligible.map((row) => row.id)),
@@ -2563,12 +2578,12 @@
 							</button>
 							<button
 								class="btn btn-write"
-								disabled={Boolean(busy) || !checkedIds.length}
+								disabled={Boolean(busy) || !checkedPushIds.length}
 								onclick={() => startPush(checkedIds)}
-								title="Shows which checked repos would push to origin. Confirm in the modal. Never --force."
+								title="Shows which checked repos would push to origin. The count is how many are ahead, not how many are checked. Confirm in the modal. Never --force."
 							>
 								<Icon icon="lucide:upload" />
-								Push{checkedIds.length ? ` (${checkedIds.length})` : ''}
+								Push{checkedPushIds.length ? ` (${checkedPushIds.length})` : ''}
 							</button>
 							<button
 								class="btn btn-write"

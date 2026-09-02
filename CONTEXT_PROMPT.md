@@ -208,3 +208,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - The phone tile grid is the **Deck** (`/deck`). Menu label **Deck**. `/visitor` and a LAN/Tailscale hit on `/` redirect there. Internal poll stays `GET /api/visitor`.
 - Confirm with two or more named ids uses a **roster + current** pane (d77): names on the left, that id’s steps on the right. Apply follows the running row; click another name to stay there. One package stays a flat list.
+
+### Session 25 — 2026-09-02
+
+- Fleet toolbar **Push (N)** counts checked repos that are ahead of origin (same idea as **Publish (N)**), not every checkbox. A named Push confirm lists every checked id; skipped rows keep their reason (`not ahead`, `no origin`, `diverged`). Confirm still writes only the eligible ones.

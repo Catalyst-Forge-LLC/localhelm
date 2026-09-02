@@ -56,4 +56,5 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Today pane board: section scroll, Looks on the glass, refresh pinned to the id _(2026-08-26)_
 - [x] Phone tile grid is the Deck (`/deck`); `/visitor` redirects _(2026-08-31)_
 - [x] Confirm roster + current pane for multi-id writes _(2026-08-31)_
+- [x] Named Push confirm lists skipped checked rows; toolbar count is eligible _(2026-09-02)_
 - [x] Needs you filter: All / Publish / Cut / Push _(2026-08-26)_
