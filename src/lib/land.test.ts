@@ -115,6 +115,20 @@ describe('landPluginApplyOk', () => {
 		assert.equal(failed.ok, false);
 		assert.match(failed.reason, /push failed|plugin failed/);
 	});
+
+	it('summarizes a ship log instead of joining the last chunks', () => {
+		const failed = landPluginApplyOk({
+			results: [{ id: 'smellcheck', ok: false }],
+			log: [
+				'smellcheck ship pnpm ship in smellcheck\\site',
+				'vite v8.2.2 building client environment for production...\n✓ 199 modules transformed.\nfilepress: Genie leaked into the static build (dev-only).\n_app\\immutable\\chunks\\x.js: GeniePanel',
+				'smellcheck ship failed (exit 1)',
+			],
+		});
+		assert.equal(failed.ok, false);
+		assert.equal(failed.reason, 'filepress: Genie leaked into the static build (dev-only).');
+		assert.ok(failed.reason.length < 80);
+	});
 });
 
 describe('shipUnchanged', () => {

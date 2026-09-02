@@ -212,3 +212,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 25 — 2026-09-02
 
 - Fleet toolbar **Push (N)** counts checked repos that are ahead of origin (same idea as **Publish (N)**), not every checkbox. A named Push confirm lists every checked id; skipped rows keep their reason (`not ahead`, `no origin`, `diverged`). Confirm still writes only the eligible ones.
+- Land / Sites ship failures show a short plugin reason on the banner (`filepress: Genie leaked…`). The Vite/wrangler dump stays in Activity.

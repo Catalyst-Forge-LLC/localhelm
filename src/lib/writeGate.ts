@@ -98,6 +98,39 @@ export function plainGitError(raw: string): string {
 	return first.slice(0, 90);
 }
 
+const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g;
+const PLUGIN_NOISE =
+	/^(npm warn |vite |computing gzip|✓ |✔ |transforming|rendering chunks|Wrote site|Run npm run preview|ELIFECYCLE|Using @sveltejs|VITE_CONFIG|configLoader|PLUGIN_TIMINGS|DeprecationWarning|Set `VITE_CONFIG|Your Vite config|Your build spent|See https:\/\/rolldown|Not measurable|Profile with|Measured inside|Those rows are|docs: built|\.svelte-kit\/|\[404\] GET )/i;
+
+function stripAnsi(text: string): string {
+	return text.replace(ANSI, '').replace(/\r/g, '');
+}
+
+/** Short line from a FilePress / plugin apply log. Keep the raw dump in Activity. */
+export function plainPluginError(raw: string): string {
+	const text = stripAnsi(raw).trim();
+	if (!text) return 'plugin failed';
+
+	const filepress = /filepress:\s+([^\n]+)/i.exec(text);
+	if (filepress?.[1]) {
+		const head = filepress[1].replace(/\s+/g, ' ').trim();
+		return `filepress: ${head}`.slice(0, 160);
+	}
+
+	const wrangler = /(?:✘|x)\s*\[ERROR\][^\n]+/i.exec(text);
+	if (wrangler?.[0]) return wrangler[0].replace(/\s+/g, ' ').trim().slice(0, 160);
+
+	const lines = text
+		.split(/\n| · /)
+		.map((line) => line.trim())
+		.filter((line) => line.length > 0 && !PLUGIN_NOISE.test(line));
+	const named = lines.find(
+		(line) => /error|failed|assert|denied|unauthorized/i.test(line) && !/ship failed \(exit/i.test(line),
+	);
+	const hit = named ?? lines.find((line) => /ship failed/i.test(line)) ?? lines.at(-1) ?? 'plugin failed';
+	return hit.replace(/\s+/g, ' ').slice(0, 160);
+}
+
 /** Same skips as planPushOne. Dirty is not a skip — uncommitted files stay local. */
 export function whyNotPush(git: GateGit): string | undefined {
 	if (!git.repo) return 'no git';

@@ -6,6 +6,7 @@ import {
 	fleetWriteIds,
 	fleetWriteLabel,
 	plainGitError,
+	plainPluginError,
 	plainPublishError,
 	publishApplyTitle,
 	publishResultLine,
@@ -45,6 +46,26 @@ describe('plainGitError', () => {
 			plainGitError('git@github.com: Permission denied (publickey).\r\nfatal: Could not read from remote repository.'),
 			'origin rejected the SSH key',
 		);
+	});
+});
+
+describe('plainPluginError', () => {
+	it('keeps a FilePress assertion and drops the Vite build dump', () => {
+		const raw = [
+			'smellcheck ship pnpm ship in smellcheck\\site',
+			'\u001b[36mvite v8.2.2 \u001b[32mbuilding client environment for production...\u001b[39m',
+			'✓ 199 modules transformed.',
+			'Wrote site to "Z:\\workspace\\smellcheck\\site\\build"',
+			'ELIFECYCLE  Command failed with exit code 1.',
+			'filepress: Genie leaked into the static build (dev-only).',
+			'_app\\immutable\\chunks\\BaPzVmF0.js: GeniePanel',
+			'smellcheck ship failed (exit 1)',
+		].join('\n');
+		assert.equal(plainPluginError(raw), 'filepress: Genie leaked into the static build (dev-only).');
+	});
+
+	it('keeps a short push failure', () => {
+		assert.equal(plainPluginError('aibreze-site push failed'), 'aibreze-site push failed');
 	});
 });
 

@@ -33,7 +33,7 @@
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
 	import { applyConfirmStep, emptyConfirmPhases, markConfirmKey, publishNeedsGithub, publishNeedsNpm, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
-	import { landConfirmItems } from '$lib/landDisplay';
+	import { landConfirmItems, landPluginApplyOk } from '$lib/landDisplay';
 	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
@@ -1661,6 +1661,11 @@
 				body: JSON.stringify({ id: plugin, action, ids: [id], apply: true }),
 			});
 			note(`${verb} --apply ${id}`, data);
+			const check = landPluginApplyOk(data);
+			if (!check.ok) {
+				error = `${id}: ${check.reason}`;
+				throw new Error(error);
+			}
 		});
 	}
 
@@ -3610,6 +3615,9 @@
 
 	.err {
 		color: #f87171;
+		max-height: 4.5em;
+		overflow: auto;
+		word-break: break-word;
 	}
 
 	.info {

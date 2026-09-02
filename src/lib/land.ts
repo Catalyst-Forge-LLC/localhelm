@@ -4,7 +4,7 @@ import { loadPlugins, requirePlugin, type HelmPlugin } from './plugin.js';
 import { applyPublish, planPublishFromInventory, type PublishRow } from './publish.js';
 import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
-import { commitCountLabel, isPublishedReason, plainGitError, plainPublishError, whyNotPublish, whyNotPush } from './writeGate.js';
+import { commitCountLabel, isPublishedReason, plainGitError, plainPluginError, plainPublishError, whyNotPublish, whyNotPush } from './writeGate.js';
 import { readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 
 export const LAND_ENGINE_ID = 'filepress';
@@ -232,8 +232,8 @@ export function landPluginApplyOk(result: unknown): { ok: boolean; reason: strin
 		const failed = body.results.filter((row) => row.ok === false);
 		if (failed.length) {
 			const ids = failed.map((row) => row.id ?? '?').join(', ');
-			const log = Array.isArray(body.log) ? body.log.slice(-3).join(' · ') : '';
-			return { ok: false, reason: log || `plugin failed for ${ids}` };
+			const log = Array.isArray(body.log) ? body.log.join('\n') : '';
+			return { ok: false, reason: plainPluginError(log) || `plugin failed for ${ids}` };
 		}
 	}
 	return { ok: true, reason: 'done' };

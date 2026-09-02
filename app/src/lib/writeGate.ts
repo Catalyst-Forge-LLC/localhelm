@@ -5,6 +5,7 @@ export {
 	fleetWriteLabel,
 	nextCutVersion,
 	plainGitError,
+	plainPluginError,
 	plainPublishError,
 	publishApplyTitle,
 	publishResultLine,
