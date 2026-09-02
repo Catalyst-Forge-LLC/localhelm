@@ -4,8 +4,10 @@ import { loadPlugins, requirePlugin, type HelmPlugin } from './plugin.js';
 import { applyPublish, planPublishFromInventory, type PublishRow } from './publish.js';
 import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
-import { commitCountLabel, isPublishedReason, plainGitError, plainPluginError, plainPublishError, whyNotPublish, whyNotPush } from './writeGate.js';
+import { commitCountLabel, isPublishedReason, landPluginApplyOk, plainGitError, plainPublishError, whyNotPublish, whyNotPush } from './writeGate.js';
 import { readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
+
+export { landPluginApplyOk };
 
 export const LAND_ENGINE_ID = 'filepress';
 export const LAND_PLUGIN_ID = 'filepress';
@@ -222,21 +224,6 @@ async function siteSteps(
 		}
 	}
 	return steps;
-}
-
-/** Shared with applyLand — FilePress bridge returns `{ results: [{ ok }] }`. */
-export function landPluginApplyOk(result: unknown): { ok: boolean; reason: string } {
-	if (!result || typeof result !== 'object') return { ok: true, reason: 'done' };
-	const body = result as { results?: Array<{ id?: string; ok?: boolean }>; log?: string[] };
-	if (Array.isArray(body.results)) {
-		const failed = body.results.filter((row) => row.ok === false);
-		if (failed.length) {
-			const ids = failed.map((row) => row.id ?? '?').join(', ');
-			const log = Array.isArray(body.log) ? body.log.join('\n') : '';
-			return { ok: false, reason: plainPluginError(log) || `plugin failed for ${ids}` };
-		}
-	}
-	return { ok: true, reason: 'done' };
 }
 
 export async function planLand(loaded: LoadedManifest, siteIdRaw: string): Promise<LandPlan> {

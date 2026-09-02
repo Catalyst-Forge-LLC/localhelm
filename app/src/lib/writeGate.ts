@@ -4,6 +4,7 @@ export {
 	fleetWriteIds,
 	fleetWriteLabel,
 	nextCutVersion,
+	landPluginApplyOk,
 	plainGitError,
 	plainPluginError,
 	plainPublishError,

@@ -276,11 +276,12 @@
 	}
 
 	.panel {
+		display: flex;
+		flex-direction: column;
 		width: min(36rem, calc(100vw - 2rem));
 		max-width: 100%;
 		max-height: calc(100dvh - 2rem);
-		overflow-x: hidden;
-		overflow-y: auto;
+		overflow: hidden;
 		border: 1px solid #3f3f46;
 		border-radius: 0.75rem;
 		background: #18181b;
@@ -297,16 +298,22 @@
 	}
 
 	.body {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		flex: 1;
 		padding: 1.15rem 1.25rem 1.1rem;
 	}
 
 	h2 {
+		flex-shrink: 0;
 		margin: 0;
 		font-size: 1.02rem;
 		font-weight: 600;
 	}
 
 	.hint {
+		flex-shrink: 0;
 		margin: 0.4rem 0 0;
 		color: #a1a1aa;
 		font-size: 0.82rem;
@@ -318,8 +325,9 @@
 		grid-template-columns: minmax(10.5rem, 13.5rem) minmax(0, 1fr);
 		gap: 0.55rem;
 		margin: 0.75rem 0 0;
-		min-height: 12rem;
-		max-height: min(28rem, calc(100dvh - 14rem));
+		min-height: 0;
+		flex: 1 1 auto;
+		height: min(22rem, calc(100dvh - 16rem));
 	}
 
 	.roster,
@@ -328,6 +336,7 @@
 		margin: 0;
 		padding: 0.45rem;
 		min-width: 0;
+		min-height: 0;
 		overflow-x: hidden;
 		overflow-y: auto;
 		list-style: none;
@@ -486,6 +495,7 @@
 		display: flex;
 		justify-content: flex-end;
 		flex-wrap: wrap;
+		flex-shrink: 0;
 		gap: 0.4rem;
 		margin-top: 1rem;
 	}
@@ -523,7 +533,7 @@
 	@media (max-width: 36rem) {
 		.split {
 			grid-template-columns: 1fr;
-			max-height: min(32rem, calc(100dvh - 12rem));
+			height: min(26rem, calc(100dvh - 14rem));
 		}
 
 		.roster {

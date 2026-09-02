@@ -131,6 +131,21 @@ export function plainPluginError(raw: string): string {
 	return hit.replace(/\s+/g, ' ').slice(0, 160);
 }
 
+/** FilePress bridge returns `{ results: [{ ok }] }`. Safe for the Svelte bundle. */
+export function landPluginApplyOk(result: unknown): { ok: boolean; reason: string } {
+	if (!result || typeof result !== 'object') return { ok: true, reason: 'done' };
+	const body = result as { results?: Array<{ id?: string; ok?: boolean }>; log?: string[] };
+	if (Array.isArray(body.results)) {
+		const failed = body.results.filter((row) => row.ok === false);
+		if (failed.length) {
+			const ids = failed.map((row) => row.id ?? '?').join(', ');
+			const log = Array.isArray(body.log) ? body.log.join('\n') : '';
+			return { ok: false, reason: plainPluginError(log) || `plugin failed for ${ids}` };
+		}
+	}
+	return { ok: true, reason: 'done' };
+}
+
 /** Same skips as planPushOne. Dirty is not a skip — uncommitted files stay local. */
 export function whyNotPush(git: GateGit): string | undefined {
 	if (!git.repo) return 'no git';

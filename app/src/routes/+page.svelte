@@ -25,6 +25,7 @@
 		plainGitError,
 		publishApplyTitle,
 		publishResultLine,
+		landPluginApplyOk,
 		whyNotPublish,
 		whyNotPush,
 		writableCascadeCount,
@@ -33,7 +34,7 @@
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
 	import { applyConfirmStep, emptyConfirmPhases, markConfirmKey, publishNeedsGithub, publishNeedsNpm, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
-	import { landConfirmItems, landPluginApplyOk } from '$lib/landDisplay';
+	import { landConfirmItems } from '$lib/landDisplay';
 	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
