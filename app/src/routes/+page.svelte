@@ -3946,6 +3946,14 @@
 		vertical-align: top;
 	}
 
+	tbody tr:nth-child(even) {
+		background: #323238;
+	}
+
+	tbody tr:hover {
+		background: #3e3c36;
+	}
+
 	.tick {
 		width: 1.8rem;
 	}

@@ -217,3 +217,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Land is the site: Sync getfilepress → Push → Ship. It does not publish filepress or a companion package (d78).
 - Land plan is one request for all named sites (d79). Apply still runs one site at a time.
 - Land confirm ticks one step at a time (sync, then push, then ship). Shared site keys used to spin every line for that site (d80).
+- Fleet / Sites / Ports tables use a light even-row stripe and a hover highlight.
