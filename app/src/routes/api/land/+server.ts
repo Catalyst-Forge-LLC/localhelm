@@ -31,20 +31,47 @@ export const POST: RequestHandler = async ({ request }) => {
 				authHint: needsOtp ? publishAuthHintFor(npmUser) : undefined,
 			});
 		}
-		const results = await withLockAt(loaded.workspaceRoot, async () => {
-			const out = [];
-			for (const plan of plans) {
-				if (!plan.steps.length) {
-					out.push({ siteId: plan.siteId, ok: true, steps: [] });
-					continue;
+
+		const stream = new ReadableStream({
+			async start(controller) {
+				const enc = new TextEncoder();
+				const send = (obj: unknown): void => {
+					controller.enqueue(enc.encode(`${JSON.stringify(obj)}\n`));
+				};
+				try {
+					const results = await withLockAt(loaded.workspaceRoot, async () => {
+						const out = [];
+						for (const plan of plans) {
+							if (!plan.steps.length) {
+								out.push({ siteId: plan.siteId, ok: true, steps: [] });
+								continue;
+							}
+							const result = await applyLand(loaded, plan, {
+								otp: body.otp,
+								onStep: (event) => send({ type: 'step', ...event }),
+							});
+							out.push(result);
+							if (!result.ok) break;
+						}
+						return out;
+					});
+					send({ type: 'result', plans, results, result: results[0], writes: true });
+				} catch (err) {
+					send({
+						type: 'error',
+						error: err instanceof Error ? err.message : String(err),
+					});
+				} finally {
+					controller.close();
 				}
-				const result = await applyLand(loaded, plan, { otp: body.otp });
-				out.push(result);
-				if (!result.ok) break;
-			}
-			return out;
+			},
 		});
-		return json({ plans, results, result: results[0], writes: true });
+		return new Response(stream, {
+			headers: {
+				'content-type': 'application/x-ndjson; charset=utf-8',
+				'cache-control': 'no-store',
+			},
+		});
 	} catch (err) {
 		return errJson(err);
 	}

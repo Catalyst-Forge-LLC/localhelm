@@ -60,4 +60,5 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Land/ship banner keeps the FilePress reason, not the Vite dump _(2026-09-02)_
 - [x] Land is site-only: sync engine + push + ship; no filepress/companion publish _(2026-09-03)_
 - [x] Land plan is one request for all named sites _(2026-09-03)_
+- [x] Land confirm spins only the current step _(2026-09-03)_
 - [x] Needs you filter: All / Publish / Cut / Push _(2026-08-26)_

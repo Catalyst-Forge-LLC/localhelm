@@ -10,10 +10,10 @@ export function landConfirmItems(
 			keys.push(plan.siteId);
 			continue;
 		}
-		for (const step of plan.steps) {
+		plan.steps.forEach((step, i) => {
 			items.push(multi ? `${plan.siteId}  ${step.label}` : step.label);
-			keys.push(plan.siteId);
-		}
+			keys.push(`${plan.siteId}:${i}`);
+		});
 	}
 	return { items, keys };
 }

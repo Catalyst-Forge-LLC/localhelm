@@ -189,25 +189,35 @@ export async function planLand(loaded: LoadedManifest, siteIdRaw: string): Promi
 	return plan;
 }
 
+export type LandStepEvent = {
+	id: string;
+	index: number;
+	status: 'start' | 'done' | 'fail';
+};
+
 export async function applyLand(
 	loaded: LoadedManifest,
 	plan: LandPlan,
-	_opts: { otp?: string } = {},
+	opts: { otp?: string; onStep?: (event: LandStepEvent) => void } = {},
 ): Promise<LandApplyResult> {
 	const plug = requirePlugin(await loadPlugins(loaded), LAND_PLUGIN_ID);
 	const out: LandApplyResult = { siteId: plan.siteId, ok: true, steps: [] };
 
-	for (const step of plan.steps) {
+	for (let index = 0; index < plan.steps.length; index++) {
+		const step = plan.steps[index]!;
+		opts.onStep?.({ id: plan.siteId, index, status: 'start' });
 		if (step.pluginAction) {
 			if (!plug.plugin.apply) {
 				out.steps.push({ ...step, ok: false, reason: 'plugin has no apply' });
 				out.ok = false;
 				out.stoppedAt = step.label;
+				opts.onStep?.({ id: plan.siteId, index, status: 'fail' });
 				return out;
 			}
 			const result = await plug.plugin.apply(step.pluginAction, [plan.siteId]);
 			const check = landPluginApplyOk(result);
 			out.steps.push({ ...step, ok: check.ok, reason: check.reason });
+			opts.onStep?.({ id: plan.siteId, index, status: check.ok ? 'done' : 'fail' });
 			if (!check.ok) {
 				out.ok = false;
 				out.stoppedAt = step.label;
@@ -221,6 +231,7 @@ export async function applyLand(
 		out.steps.push({ ...step, ok: false, reason: 'unknown step' });
 		out.ok = false;
 		out.stoppedAt = step.label;
+		opts.onStep?.({ id: plan.siteId, index, status: 'fail' });
 		return out;
 	}
 	return out;

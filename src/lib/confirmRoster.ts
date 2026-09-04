@@ -13,7 +13,7 @@ export type ConfirmRosterGroup = {
 	steps: ConfirmRosterStep[];
 };
 
-/** `coldeye:2` is a publish step; `coldeye` is the whole package (pull/land). */
+/** `coldeye:2` is a publish or Land step; `coldeye` is the whole package (pull/push). */
 export function confirmGroupId(key: string): string {
 	const match = /^(.+):(\d+)$/.exec(key);
 	return match?.[1] ?? key;

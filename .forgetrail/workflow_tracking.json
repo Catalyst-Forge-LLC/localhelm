@@ -1123,6 +1123,19 @@
         "Keep one HTTP request per site"
       ],
       "status": "active"
+    },
+    {
+      "id": "d80",
+      "timestamp": "2026-09-04T03:51:00Z",
+      "phase": "2-scaffolding",
+      "session": 25,
+      "decision": "Land confirm keys are siteId:stepIndex. Apply streams step start/done/fail so only the current Land step spins. Sync, push, and ship stay sequential.",
+      "rationale": "Operator 2026-09-03: Land ollanet showed sync engine and ship spinning at once. Apply was already one step at a time; both lines shared the site id key.",
+      "alternatives_considered": [
+        "Keep site-id keys and accept both lines as current",
+        "Mark only the first step current until the whole site returns"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

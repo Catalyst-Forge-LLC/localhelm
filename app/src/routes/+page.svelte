@@ -1755,10 +1755,21 @@
 			const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
 			try {
 				await eachNamed('landing', ids, async (siteId) => {
-					const data = (await call('/api/land', {
-						method: 'POST',
-						body: JSON.stringify({ apply: true, siteId, otp }),
-					})) as {
+					const data = (await callNdjson(
+						'/api/land',
+						{
+							method: 'POST',
+							body: JSON.stringify({ apply: true, siteId, otp }),
+						},
+						(event) => {
+							if (event.type !== 'step') return;
+							confirmPhases = applyConfirmStep(confirmItemKeys, confirmPhases, {
+								id: String(event.id ?? siteId),
+								index: Number(event.index),
+								status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
+							});
+						},
+					)) as {
 						result: {
 							ok: boolean;
 							stoppedAt?: string;

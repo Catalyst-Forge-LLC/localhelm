@@ -75,7 +75,7 @@ describe('requireLandSiteId', () => {
 			{ siteId: 'dictawhisper', steps: [] },
 		]);
 		assert.deepEqual(lined.items, ['aibreze  Sync', 'aibreze  Ship', 'dictawhisper  already current']);
-		assert.deepEqual(lined.keys, ['aibreze', 'aibreze', 'dictawhisper']);
+		assert.deepEqual(lined.keys, ['aibreze:0', 'aibreze:1', 'dictawhisper']);
 	});
 });
 
