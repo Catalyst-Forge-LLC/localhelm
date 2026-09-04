@@ -3,6 +3,7 @@
 	import { replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
+	import CellWait from '$lib/CellWait.svelte';
 	import CrossChips from '$lib/CrossChips.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import IconButton from '$lib/IconButton.svelte';
@@ -99,9 +100,11 @@
 			actions: { id: string; label: string; write: boolean; icon?: string }[];
 		}[];
 	};
+	type RosterRow = { id: string; path: string; npm?: string; group?: string };
 	type Project = {
 		id: string;
 		path: string;
+		pending?: boolean;
 		localVersion: string | null;
 		private: boolean;
 		missing: boolean;
@@ -212,6 +215,10 @@
 	let confirmShowOtp = $state(false);
 	let confirmRun = $state<(() => void) | null>(null);
 	let statusReady = $state(false);
+	let rosterReady = $state(false);
+	let pluginsReady = $state(false);
+	let roster = $state<RosterRow[]>([]);
+	let manifestPath = $state('');
 	let archivedIds = $state<string[]>([]);
 	let showArchived = $state(false);
 	let showParked = $state(false);
@@ -222,10 +229,10 @@
 	let busy = $state('');
 	let error = $state('');
 
-	const enrolledIds = $derived(new Set((inventory?.projects ?? []).map((p) => p.id)));
+	const enrolledIds = $derived(new Set((inventory ? inventory.projects : roster).map((p) => p.id)));
 	const archivedSet = $derived(new Set(archivedIds));
 	const visibleProjects = $derived(
-		(inventory?.projects ?? [])
+		(inventory ? inventory.projects : roster.map(shellProject))
 			.filter((row) => showArchived || !archivedSet.has(row.id))
 			.toSorted((a, b) => a.id.localeCompare(b.id, undefined, { sensitivity: 'base' })),
 	);
@@ -501,6 +508,7 @@
 	});
 
 	function rowNeedsYou(row: Project): boolean {
+		if (row.pending) return false;
 		return badges(row).some((badge) => badge.text !== 'nothing to do') || writesFor(row).length > 0;
 	}
 
@@ -538,7 +546,13 @@
 	}
 
 	function writesFor(row: Project): FleetWriteId[] {
+		if (row.pending) return [];
 		return fleetWriteIds(row, cascadeFor(row.id)?.writable ?? 0);
+	}
+
+	function readyNamed(ids: string[]): string[] {
+		const pending = new Set(visibleProjects.filter((row) => row.pending).map((row) => row.id));
+		return ids.filter((id) => !pending.has(id));
 	}
 
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
@@ -702,6 +716,30 @@
 		}
 	}
 
+	function shellProject(row: RosterRow): Project {
+		return {
+			id: row.id,
+			path: row.path,
+			pending: true,
+			localVersion: null,
+			private: false,
+			missing: false,
+			unpublishedAhead: false,
+			cascadeBehind: 0,
+			npm: { name: row.npm, status: 'pending' },
+			git: {
+				repo: false,
+				dirty: false,
+				staged: 0,
+				unstaged: 0,
+				untracked: 0,
+				ahead: null,
+				behind: null,
+			},
+			pins: [],
+		};
+	}
+
 	function inventoryDigest(projects: Project[]): Inventory['digest'] {
 		return {
 			projects: projects.length,
@@ -748,6 +786,38 @@
 			});
 		} catch {
 			/* keep the last boards */
+		} finally {
+			pluginsReady = true;
+		}
+	}
+
+	async function loadArchive(): Promise<void> {
+		try {
+			const archived = (await call('/api/archive')) as { ids?: string[] };
+			archivedIds = Array.isArray(archived.ids) ? archived.ids : [];
+		} catch {
+			/* keep the last archive list */
+		}
+	}
+
+	async function loadRoster(): Promise<void> {
+		try {
+			const data = (await call('/api/roster')) as {
+				projects?: RosterRow[];
+				archivedIds?: string[];
+				scanRoot?: string;
+				cwd?: string;
+				manifestPath?: string | null;
+			};
+			roster = data.projects ?? [];
+			if (Array.isArray(data.archivedIds)) archivedIds = data.archivedIds;
+			if (!candidates.length && data.scanRoot) scanRoot = data.scanRoot;
+			if (data.cwd) cwd = data.cwd;
+			if (data.manifestPath) manifestPath = data.manifestPath;
+		} catch {
+			/* status will fill */
+		} finally {
+			rosterReady = true;
 		}
 	}
 
@@ -798,23 +868,19 @@
 		}
 		if (opts.fetchRemotes && !scoped) fetchedAt = new Date().toLocaleTimeString();
 		if (!candidates.length) scanRoot = data.scanRoot;
+		if (data.inventory?.manifestPath) manifestPath = data.inventory.manifestPath;
 		const kinds = { ...bumpKind };
 		for (const row of data.inventory?.projects ?? []) kinds[row.id] ??= 'patch';
 		bumpKind = kinds;
-		if (opts.extras !== false && !scoped) {
-			await loadPluginBoards();
-			await loadActivity();
-			try {
-				const archived = (await call('/api/archive')) as { ids?: string[] };
-				archivedIds = Array.isArray(archived.ids) ? archived.ids : [];
-			} catch {
-				/* keep the last archive list */
-			}
-		}
 		statusReady = true;
+		if (opts.extras !== false && !scoped) {
+			void loadPluginBoards();
+			void loadActivity();
+			void loadArchive();
+		}
 	}
 
-	async function refresh(fetchRemotes = false): Promise<void> {
+	async function refresh(fetchRemotes = false, extras = true): Promise<void> {
 		await run(fetchRemotes ? 'fetching remotes, then reading status' : 'reading status', async () => {
 			const fleet = inventory?.projects.map((row) => row.id) ?? [];
 			if (fetchRemotes && fleet.length) {
@@ -823,10 +889,10 @@
 				});
 				fetchedAt = new Date().toLocaleTimeString();
 				busy = 'reading status';
-				await loadStatus({ extras: true });
+				await loadStatus({ extras });
 				return;
 			}
-			await loadStatus({ fetchRemotes, extras: true });
+			await loadStatus({ fetchRemotes, extras });
 		});
 	}
 
@@ -1143,6 +1209,7 @@
 	}
 
 	async function startBump(ids: string[]): Promise<void> {
+		ids = readyNamed(ids);
 		if (ids.length === 0) {
 			error = 'Check at least one fleet row first.';
 			return;
@@ -1396,6 +1463,10 @@
 	}
 
 	async function startPush(onlyIds?: string[]): Promise<void> {
+		if (onlyIds) {
+			onlyIds = readyNamed(onlyIds);
+			if (!onlyIds.length) return;
+		}
 		const scope = onlyIds?.length === 1 ? onlyIds[0] : onlyIds?.length ? `${onlyIds.length} repos` : 'all';
 		await run(
 			`planning push ${scope}`,
@@ -1470,6 +1541,7 @@
 	}
 
 	async function startPublish(ids: string[]): Promise<void> {
+		ids = readyNamed(ids);
 		if (ids.length === 0) return;
 		const label = ids.length === 1 ? ids[0] : `${ids.length} packages`;
 		await run(
@@ -1999,6 +2071,7 @@
 	}
 
 	function needActions(row: Project): NeedAction[] {
+		if (row.pending) return [];
 		const pins = cascadeFor(row.id)?.writable ?? 0;
 		const acts: NeedAction[] = writesFor(row).map((id) => ({
 			id,
@@ -2070,7 +2143,9 @@
 		}
 		urlSyncReady = true;
 		void loadActivity();
-		void refresh();
+		void loadRoster();
+		void loadPluginBoards();
+		void refresh(false, false);
 	});
 </script>
 
@@ -2151,7 +2226,7 @@
 				<HelmMenu
 					plugins={pluginMetas}
 					busy={Boolean(busy)}
-					fleetPath={inventory?.manifestPath ?? ''}
+					fleetPath={inventory?.manifestPath ?? manifestPath}
 					{serveLine}
 					{npmUser}
 					{fetchedAt}
@@ -2253,9 +2328,11 @@
 						{/if}
 					</div>
 					<div class="panel-body">
-						{#if statusReady && attentionRows.length === 0 && cascadeOnlyRows.length === 0}
+						{#if !statusReady}
+							<p class="dim small"><CellWait label="Reading fleet…" showLabel /></p>
+						{:else if attentionRows.length === 0 && cascadeOnlyRows.length === 0}
 							<p class="quiet-banner">All quiet on the fleet. Looks, FilePress, and LocalSlip stay in the other panes.</p>
-						{:else if statusReady && filteredAttentionRows.length === 0 && filteredCascadeRows.length === 0}
+						{:else if filteredAttentionRows.length === 0 && filteredCascadeRows.length === 0}
 							<p class="dim small">
 								{#if needFilter === 'publish'}
 									No version waiting on npm. All still shows dirty trees and Write pins.
@@ -2265,7 +2342,7 @@
 									Nothing to push. All still shows Cut, Publish, and Write pins.
 								{/if}
 							</p>
-						{:else if statusReady}
+						{:else}
 							<ul class="need-list">
 								{#each filteredAttentionRows as row (row.id)}
 									{@const cascadeTarget = cascadeFor(row.id)}
@@ -2360,8 +2437,8 @@
 						</div>
 					</div>
 					<div class="panel-body">
-						{#if !statusReady}
-							<p class="dim small">Reading looks…</p>
+						{#if !pluginsReady}
+							<p class="dim small"><CellWait label="Reading looks…" showLabel /></p>
 						{:else if !portLookCards.length}
 							<p class="dim small">Nothing to look at. Stacks and down leases stay on Ports.</p>
 						{:else}
@@ -2402,14 +2479,14 @@
 							<div>
 								<h2>FilePress Sites</h2>
 								<p class="hint">
-									{#if !statusReady}
-										Reading sites…
-									{:else if !filepressBoard}
-										No FilePress plugin loaded.
-									{:else if sitesNeedingYou.length}
+									{#if filepressBoard && sitesNeedingYou.length}
 										{sitesNeedingYou.length} of {filepressBoard.rows.length} need an engine write. Land does Sync, then Push and Ship.
-									{:else}
+									{:else if filepressBoard}
 										{filepressBoard.rows.length} sites · none waiting on an engine sync.
+									{:else if !pluginsReady}
+										Reading sites…
+									{:else}
+										No FilePress plugin loaded.
 									{/if}
 								</p>
 							</div>
@@ -2438,7 +2515,7 @@
 							</div>
 						</div>
 						<div class="panel-body">
-							{#if statusReady && filepressBoard && sitesNeedingYou.length}
+							{#if filepressBoard && sitesNeedingYou.length}
 								<ul class="need-list">
 									{#each sitesNeedingYou as site (site.id)}
 										<li class="need-card">
@@ -2462,9 +2539,11 @@
 										</li>
 									{/each}
 								</ul>
-							{:else if statusReady && filepressBoard}
+							{:else if filepressBoard}
 								<p class="dim small">Open FilePress Sites for the full board.</p>
-							{:else if statusReady}
+							{:else if !pluginsReady}
+								<p class="dim small"><CellWait label="Reading sites…" showLabel /></p>
+							{:else}
 								<p class="dim small">Enroll the filepress checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 							{/if}
 						</div>
@@ -2474,11 +2553,7 @@
 							<div>
 								<h2>Ports</h2>
 								<p class="hint">
-									{#if !statusReady}
-										Reading ports…
-									{:else if !leaseBoard}
-										No Ports plugin loaded.
-									{:else}
+									{#if leaseBoard}
 										{leaseBoard.rows.length} lease{leaseBoard.rows.length === 1 ? '' : 's'}
 										{#if portFamilyCards.length}
 											· {portFamilyCards.length} stack{portFamilyCards.length === 1 ? '' : 's'}
@@ -2488,13 +2563,17 @@
 										{:else}
 											· all listening
 										{/if}
+									{:else if !pluginsReady}
+										Reading ports…
+									{:else}
+										No Ports plugin loaded.
 									{/if}
 								</p>
 							</div>
 							<button type="button" class="btn btn-sm" onclick={() => setTab('localslip')}><Icon icon="lucide:arrow-right" /> LocalSlip Ports</button>
 						</div>
 						<div class="panel-body">
-							{#if statusReady && leaseBoard}
+							{#if leaseBoard}
 								<div class="ports-snapshot">
 									{#if portFamilyCards.length}
 										<div>
@@ -2542,7 +2621,9 @@
 										</div>
 									{/if}
 								</div>
-							{:else if statusReady}
+							{:else if !pluginsReady}
+								<p class="dim small"><CellWait label="Reading ports…" showLabel /></p>
+							{:else}
 								<p class="dim small">Enroll the localslip checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 							{/if}
 						</div>
@@ -2685,10 +2766,16 @@
 												/>
 											</div>
 										</td>
-										<td class="mono" class:ahead={row.unpublishedAhead}>{fleetVersionLabel(row)}</td>
-										<td class="small">{gitSummary(row)}</td>
+										<td class="mono" class:ahead={row.unpublishedAhead}>
+											{#if row.pending}<CellWait label={`Reading version for ${row.id}`} />{:else}{fleetVersionLabel(row)}{/if}
+										</td>
+										<td class="small">
+											{#if row.pending}<CellWait label={`Reading git for ${row.id}`} />{:else}{gitSummary(row)}{/if}
+										</td>
 										<td>
-											{#if row.pins.length}
+											{#if row.pending}
+												<CellWait label={`Reading pins for ${row.id}`} />
+											{:else if row.pins.length}
 												<div class="pins">
 													{#each row.pins as pin (pin.fromFile + pin.name)}
 														<span class={`pin ${pinTone(pin)}`} title={`${pin.fromFile} package.json · ${pin.spec}${pin.note ? ` · ${pin.note}` : ''}`}>
@@ -2701,36 +2788,40 @@
 											{/if}
 										</td>
 										<td>
-											<div class="need-cell">
-												{#each needActions(row) as act (act.id)}
-													<Tooltip title={act.title}>
-														<button
-															type="button"
-															class="btn btn-sm btn-write"
-															disabled={Boolean(busy) || Boolean(act.disabled)}
-															onclick={act.run}
-														>
-															{act.label}
-														</button>
-													</Tooltip>
-												{/each}
-												{#each leftoverBadges(row) as badge (badge.text)}
-													<Tooltip title={badge.title ?? badge.text}>
-														<span class={`badge ${badge.tone}`}>{badge.text}</span>
-													</Tooltip>
-												{/each}
-											</div>
+											{#if row.pending}
+												<CellWait label={`Reading needs for ${row.id}`} />
+											{:else}
+												<div class="need-cell">
+													{#each needActions(row) as act (act.id)}
+														<Tooltip title={act.title}>
+															<button
+																type="button"
+																class="btn btn-sm btn-write"
+																disabled={Boolean(busy) || Boolean(act.disabled)}
+																onclick={act.run}
+															>
+																{act.label}
+															</button>
+														</Tooltip>
+													{/each}
+													{#each leftoverBadges(row) as badge (badge.text)}
+														<Tooltip title={badge.title ?? badge.text}>
+															<span class={`badge ${badge.tone}`}>{badge.text}</span>
+														</Tooltip>
+													{/each}
+												</div>
+											{/if}
 										</td>
 										<td>
 											<div class="bump">
-												<select aria-label={`bump kind for ${row.id}`} bind:value={bumpKind[row.id]}>
+												<select aria-label={`bump kind for ${row.id}`} bind:value={bumpKind[row.id]} disabled={row.pending}>
 													<option value="patch">patch</option>
 													<option value="minor">minor</option>
 													<option value="major">major</option>
 												</select>
 												<button
 													class="btn btn-sm btn-write"
-													disabled={Boolean(busy)}
+													disabled={Boolean(busy) || Boolean(row.pending)}
 													onclick={() => startBump([row.id])}
 													title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish."
 												>
@@ -2740,7 +2831,9 @@
 										</td>
 									</tr>
 								{/each}
-								{#if !inventory?.projects.length}
+								{#if !rosterReady && !inventory}
+									<tr><td class="empty" colspan="7"><CellWait label="Reading fleet…" showLabel /></td></tr>
+								{:else if !visibleProjects.length}
 									<tr><td class="empty" colspan="7">Nothing enrolled yet. Open Add projects, scan a folder, tick the ones you ship, then write.</td></tr>
 								{/if}
 							</tbody>
@@ -2932,20 +3025,64 @@
 				</section>
 			{:else}
 				{@const plugMeta = pluginTabs.find((plug) => plug.id === canonicalizeTab(tab))}
-				<section class="panel">
-					<h2>{plugMeta?.label ?? canonicalizeTab(tab)}</h2>
-					{#if !statusReady}
-						<p class="hint">Reading {plugMeta?.label ?? 'plugin'}…</p>
-					{:else}
-						<p class="hint">No {plugMeta?.label ?? canonicalizeTab(tab)} plugin loaded. Enroll the checkout that exposes <code>localhelm.plugin.mjs</code>.</p>
+				<section class="panel plugin-board">
+					<div class="section-head">
+						<div>
+							<h2>{plugMeta?.label ?? canonicalizeTab(tab)}</h2>
+							{#if !pluginsReady}
+								<p class="hint">Reading {plugMeta?.label ?? 'plugin'}…</p>
+							{:else}
+								<p class="hint">No {plugMeta?.label ?? canonicalizeTab(tab)} plugin loaded. Enroll the checkout that exposes <code>localhelm.plugin.mjs</code>.</p>
+							{/if}
+						</div>
+					</div>
+					{#if !pluginsReady}
+						<div class="table-wrap">
+							<table>
+								<thead>
+									<tr>
+										<th class="tick"></th>
+										<th>site</th>
+										<th>engine</th>
+										<th>plugin jobs</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td class="empty" colspan="4"><CellWait label={`Reading ${plugMeta?.label ?? 'plugin'}…`} showLabel /></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
 					{/if}
 				</section>
 			{/each}
 		{:else if isPortsPluginTab(tab)}
-			{#if !statusReady && !portBoards.length}
-				<section class="panel">
-					<h2>LocalSlip Ports</h2>
-					<p class="hint">Reading ports…</p>
+			{#if !pluginsReady && !portBoards.length}
+				<section class="panel plugin-board">
+					<div class="section-head">
+						<div>
+							<h2>LocalSlip Ports</h2>
+							<p class="hint">Reading ports…</p>
+						</div>
+					</div>
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th class="tick"></th>
+									<th>lease</th>
+									<th>port</th>
+									<th>plugin jobs</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td class="empty" colspan="4"><CellWait label="Reading ports…" showLabel /></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				</section>
 			{:else if !portBoards.length}
 				<section class="panel">
@@ -3052,7 +3189,7 @@
 									</tbody>
 								</table>
 							</div>
-						{:else if statusReady}
+						{:else if pluginsReady}
 							<p class="dim small">No stacks yet. A family appears when a fleet row and a lease share a stem.</p>
 						{/if}
 					</section>

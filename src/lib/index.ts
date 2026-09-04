@@ -63,6 +63,8 @@ export {
 export type { PluginTabMeta } from './dashboardTabs.js';
 export { archiveIds, archivePath, isArchived, readArchive, restoreIds } from './archive.js';
 export type { ArchiveFile } from './archive.js';
+export { fleetRoster } from './roster.js';
+export type { FleetRosterRow } from './roster.js';
 export { buildBrief, formatBrief } from './brief.js';
 export type { BriefLease, BriefProject } from './brief.js';
 export { familyMemberNames, familyRole, familyStem, groupIdsByFamily } from './family.js';

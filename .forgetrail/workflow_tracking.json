@@ -1136,6 +1136,20 @@
         "Mark only the first step current until the whole site returns"
       ],
       "status": "active"
+    },
+    {
+      "id": "d81",
+      "timestamp": "2026-09-04T10:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 26,
+      "decision": "Dashboard boot paints table chrome before fleet status finishes. GET /api/roster is manifest+archive only. Plugin boards load in parallel with /api/status. Pending fleet cells and empty Sites/Ports boards show a spinner. Write buttons stay disabled until that row’s facts exist. Sites/Ports must not say plugin-not-loaded while pluginsReady is false.",
+      "rationale": "Operator 2026-09-04: tables waited on the full status+plugin read and looked empty. They asked for tables first and a loader where a cell has no data yet.",
+      "alternatives_considered": [
+        "SSR the roster from +page.server.ts",
+        "Keep one /api/status and stream rows",
+        "Skeleton rows with fake dashes instead of a spinner"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

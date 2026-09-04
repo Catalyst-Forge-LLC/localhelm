@@ -145,7 +145,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 12 — 2026-08-23
 
 - Today: one gold write per need. Cut version is the extra. Publish OTP moved into the confirm modal. Fleet row Push/Publish dropped (toolbar + checks). Header reads are Refresh and Fetch remotes.
-- Status must finish before Today says the fleet is quiet or the header says there is no fleet. Sites and Ports wait too — they say “Reading…” instead of “plugin not loaded” while status is in flight. npm whoami rides with `/api/status` and is remembered if a later check flakes.
+- Status must finish before Today says the fleet is quiet or the header says there is no fleet. Sites and Ports wait on plugin boards, not fleet status — they say “Reading…” instead of “plugin not loaded” while plugins are in flight. npm whoami rides with `/api/status` and is remembered if a later check flakes.
 - Activity is a header icon (Lucide `scroll-text`), not a tab. Same Iconify + Lucide offline set as Exec Foundry. Tabs and write buttons carry icons too.
 
 ### Session 13 — 2026-08-23
@@ -219,3 +219,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Land confirm ticks one step at a time (sync, then push, then ship). Shared site keys used to spin every line for that site (d80).
 - Fleet / Sites / Ports tables use a light even-row stripe and a hover highlight.
 - Land / plugin fail reasons skip generic `update failed (exit 1)` and show the FilePress/pnpm line on the confirm.
+
+### Session 26 — 2026-09-04
+
+- Dashboard boot: `GET /api/roster` (manifest + archive only) paints Fleet rows immediately. Plugin boards and fleet status run in parallel. Version / git / pins / needs-you cells spin until that row’s status arrives. Sites and Ports show table chrome + a loader, and do not say “plugin not loaded” while plugins are still reading. Write buttons stay off until facts exist.
