@@ -10,14 +10,18 @@ export { helmBumpMessage, helmRetargetMessage } from './commit.js';
 export {
 	applyDirtCommit,
 	dirtFileLine,
+	discoverOllanetServer,
 	fallbackCommitMessage,
-	ollamaBaseUrl,
+	isLocalOllanetServer,
+	ollamaCommitMessage,
+	ollanetMachineLabel,
 	parseStatusPorcelain,
+	pickOllanetServer,
 	planDirtCommit,
 	requireCommitIds,
 	secretCommitSkip,
 } from './dirtCommit.js';
-export type { DirtCommitPlan, DirtCommitRow, DirtFile } from './dirtCommit.js';
+export type { CommitDraftApi, DirtCommitPlan, DirtCommitRow, DirtFile } from './dirtCommit.js';
 export { clearNpmCache, liftLatestIfVersionExists, npmHasVersion, npmLatest, withPublishedLocal } from './npm.js';
 export { retargetSpecifier } from './pinwrite.js';
 export { fleetReady } from './ready.js';
@@ -141,7 +145,7 @@ export type { GitJobRow } from './git.js';
 export { IGNORE_FILE_NAME, loadScanIgnore } from './ignorefile.js';
 export { resolveUserPath } from './paths.js';
 export { acquireJobLock } from './lock.js';
-export { scanFolders } from './scan.js';
+export { compareScanPath, scanFolders } from './scan.js';
 export {
 	isOperatorFace,
 	isLoopbackClient,

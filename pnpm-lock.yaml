@@ -11,6 +11,9 @@ importers:
       ignore:
         specifier: ^7.0.6
         version: 7.0.6
+      ollanet:
+        specifier: ^0.6.8
+        version: 0.6.8
     devDependencies:
       '@types/node':
         specifier: ^24.3.0
@@ -197,6 +200,11 @@ packages:
     resolution: {integrity: sha512-BAg6QkE8W+TuQLrrw0Ugr7HegXduRuuj8/ti2kSOc+jz1dmx8/WNcjr6XGnq5YpDWxFwwaavqD0+jIUOKelTsw==}
     engines: {node: '>= 4'}
 
+  ollanet@0.6.8:
+    resolution: {integrity: sha512-JKcZE+j4siNrcV90WtHkJWZqTSJveXbF0r5yhLx40nIThXyqflbBCYgu3Fzfu5HXgwo1iD65p7fX3ndowscyQA==}
+    engines: {node: '>=20'}
+    hasBin: true
+
   tsx@4.23.12:
     resolution: {integrity: sha512-FDf4L4sYzKtzWYhU/Xm0AQFdTjdIxNo9ElTf2mxXM6k8YMHXzYUe4yODVaXP4V9uMFbVg8c0qyBccK2OOxb45Q==}
     engines: {node: '>=18.0.0'}
@@ -327,6 +335,8 @@ snapshots:
     optional: true
 
   ignore@7.0.6: {}
+
+  ollanet@0.6.8: {}
 
   tsx@4.23.12:
     dependencies:

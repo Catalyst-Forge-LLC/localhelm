@@ -3,18 +3,60 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
+import type { ScannedServer } from 'ollanet';
 import {
 	applyDirtCommit,
 	cleanSuggestedMessage,
+	discoverOllanetServer,
 	fallbackCommitMessage,
 	ollamaCommitMessage,
 	parseStatusPorcelain,
+	pickOllanetServer,
 	planDirtCommit,
 	requireCommitIds,
 	secretCommitSkip,
+	type CommitDraftApi,
 } from './dirtCommit.js';
 import { runGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
+
+function fakeServer(partial: Partial<ScannedServer> = {}): ScannedServer {
+	return {
+		hostname: 'desk',
+		dnsName: 'desk.ts.net',
+		ip: '100.64.0.2',
+		port: 11434,
+		os: 'linux',
+		source: 'tailscale',
+		self: false,
+		endpoint: 'http://100.64.0.2:11434',
+		models: [{ name: 'llama3.2:latest', tuned: false }],
+		...partial,
+	};
+}
+
+const localServer = fakeServer({
+	hostname: 'localhost',
+	dnsName: '',
+	ip: '127.0.0.1',
+	source: 'localhost',
+	self: true,
+	endpoint: 'http://127.0.0.1:11434',
+});
+
+async function withoutOllamaEnv<T>(fn: () => Promise<T>): Promise<T> {
+	const keys = ['LOCALHELM_OLLAMA_URL', 'LOCALHELM_OLLAMA_MACHINE', 'LOCALHELM_OLLAMA_MODEL'] as const;
+	const prev = Object.fromEntries(keys.map((key) => [key, process.env[key]]));
+	for (const key of keys) delete process.env[key];
+	try {
+		return await fn();
+	} finally {
+		for (const key of keys) {
+			if (prev[key] == null) delete process.env[key];
+			else process.env[key] = prev[key];
+		}
+	}
+}
 
 async function gitRepo(dir: string): Promise<void> {
 	assert.equal(runGit(dir, ['init']).ok, true);
@@ -45,24 +87,84 @@ describe('dirtCommit helpers', () => {
 		assert.equal(cleanSuggestedMessage('Here is a commit message:\n\nFix the bind.'), 'Fix the bind.');
 	});
 
-	it('uses Ollama text when generate succeeds', async () => {
-		const drafted = await ollamaCommitMessage('prompt', async (url) => {
-			if (String(url).endsWith('/api/tags')) {
-				return new Response(JSON.stringify({ models: [{ name: 'llama3.2:latest' }] }));
-			}
-			return new Response(JSON.stringify({ response: 'Fix lease bind on Windows.' }));
-		});
-		assert.ok(!('error' in drafted));
-		assert.equal(drafted.message, 'Fix lease bind on Windows.');
-		assert.equal(drafted.model, 'llama3.2:latest');
+	it('prefers a live local Ollama host over a network one', () => {
+		const remote = fakeServer();
+		assert.equal(pickOllanetServer([remote, localServer]), localServer);
+		assert.equal(pickOllanetServer([remote]), remote);
 	});
 
-	it('returns a plain error when Ollama is down', async () => {
-		const drafted = await ollamaCommitMessage('prompt', async () => {
-			throw new Error('fetch failed');
+	it('asks ollanet for localhost first and skips LAN when a host is live', async () => {
+		const seen: Array<{ lanScan?: boolean; save?: boolean }> = [];
+		const picked = await discoverOllanetServer({
+			scanNetwork: async (opts) => {
+				seen.push(opts);
+				return { servers: [localServer] };
+			},
+			lastScan: async () => ({ servers: [fakeServer()] }),
 		});
-		assert.ok('error' in drafted);
-		assert.match(drafted.error, /Ollama is not running/);
+		assert.ok(!('error' in picked));
+		assert.equal(picked.endpoint, localServer.endpoint);
+		assert.deepEqual(seen, [{ lanScan: false, save: false }]);
+	});
+
+	it('uses a last-scan network host before a LAN sweep', async () => {
+		const remote = fakeServer();
+		const seen: Array<{ lanScan?: boolean; save?: boolean }> = [];
+		const picked = await discoverOllanetServer({
+			scanNetwork: async (opts) => {
+				seen.push(opts);
+				if (opts.lanScan) return { servers: [remote] };
+				return { servers: [] };
+			},
+			lastScan: async () => ({ servers: [localServer, remote] }),
+		});
+		assert.ok(!('error' in picked));
+		assert.equal(picked.ip, remote.ip);
+		assert.deepEqual(seen, [{ lanScan: false, save: false }]);
+	});
+
+	it('sweeps the LAN only when live and last-scan find nothing', async () => {
+		const remote = fakeServer();
+		const seen: Array<{ lanScan?: boolean; save?: boolean }> = [];
+		const picked = await discoverOllanetServer({
+			scanNetwork: async (opts) => {
+				seen.push(opts);
+				return opts.lanScan ? { servers: [remote] } : { servers: [] };
+			},
+			lastScan: async () => ({ servers: [localServer] }),
+		});
+		assert.ok(!('error' in picked));
+		assert.equal(picked.ip, remote.ip);
+		assert.deepEqual(seen, [
+			{ lanScan: false, save: false },
+			{ lanScan: true, save: false },
+		]);
+	});
+
+	it('uses Ollama text from the host ollanet picked', async () => {
+		await withoutOllamaEnv(async () => {
+			const api: CommitDraftApi = {
+				scanNetwork: async () => ({ servers: [localServer] }),
+				lastScan: async () => null,
+				ollamaChat: async () => ({ content: 'Fix lease bind on Windows.', thinking: '', chunk: {} }),
+			};
+			const drafted = await ollamaCommitMessage('prompt', api);
+			assert.ok(!('error' in drafted));
+			assert.equal(drafted.message, 'Fix lease bind on Windows.');
+			assert.equal(drafted.model, 'llama3.2:latest');
+			assert.equal(drafted.host, 'localhost');
+		});
+	});
+
+	it('returns a plain error when ollanet finds no host', async () => {
+		await withoutOllamaEnv(async () => {
+			const drafted = await ollamaCommitMessage('prompt', {
+				scanNetwork: async () => ({ servers: [] }),
+				lastScan: async () => null,
+			});
+			assert.ok('error' in drafted);
+			assert.match(drafted.error, /ollanet found no Ollama host/);
+		});
 	});
 });
 

@@ -12,6 +12,11 @@ export type ScanOptions = {
 	cwd?: string;
 };
 
+/** Folder list order: A–Z, ignore case, keep children under their parent. */
+export function compareScanPath(a: string, b: string): number {
+	return toPosix(a).localeCompare(toPosix(b), undefined, { sensitivity: 'base', numeric: true });
+}
+
 async function isGitRepo(dir: string): Promise<boolean> {
 	try {
 		const gitPath = path.join(dir, '.git');
@@ -94,7 +99,7 @@ export async function scanFolders(options: ScanOptions): Promise<ScanCandidate[]
 	}
 	const rows: ScanCandidate[] = [];
 	const seen = new Set<string>();
-	for (const dir of [...dirs].sort()) {
+	for (const dir of [...dirs].sort(compareScanPath)) {
 		const row = await candidateFor(dir, workspaceHint);
 		if (!row) continue;
 		const key = toPosix(path.resolve(workspaceHint ?? cwd, row.path));

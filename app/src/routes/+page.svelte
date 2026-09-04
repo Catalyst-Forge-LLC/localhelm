@@ -240,6 +240,11 @@
 			.filter((row) => showArchived || !archivedSet.has(row.id))
 			.toSorted((a, b) => a.id.localeCompare(b.id, undefined, { sensitivity: 'base' })),
 	);
+	const scanCandidates = $derived(
+		candidates.toSorted((a, b) =>
+			a.path.localeCompare(b.path, undefined, { sensitivity: 'base', numeric: true }),
+		),
+	);
 	const checkedScan = $derived(
 		Object.entries(selectedScan)
 			.filter(([, on]) => on)
@@ -1290,6 +1295,7 @@
 		suggestSource?: string;
 		suggestNote?: string;
 		suggestModel?: string;
+		suggestHost?: string;
 	};
 
 	function dirtPlanLine(file: DirtCommitRow['files'][number]): string {
@@ -1334,7 +1340,7 @@
 				offerConfirm({
 					title: can.length === 1 ? `Commit ${can[0]?.id}?` : can.length ? `Commit ${can.length} repos?` : 'Nothing to commit',
 					hint: can.length
-						? 'Ollama will draft a message. Edit it, then Confirm runs git add and git commit. Secrets stay out. No push.'
+						? 'ollanet looks for Ollama (local first, then the network). Edit the draft, then Confirm runs git add and git commit. Secrets stay out. No push.'
 						: data.rows[0]?.reason ?? 'Nothing dirty to commit.',
 					items,
 					itemKeys,
@@ -1362,7 +1368,7 @@
 				if (!row || confirmMessageTouched[id] || !confirmOpen) continue;
 				if (row.message) confirmMessages = { ...confirmMessages, [id]: row.message };
 				confirmDraftHint = row.suggestSource === 'ollama' && row.suggestModel
-					? `Ollama (${row.suggestModel}) drafted this. Edit if you want.`
+					? `Ollama (${row.suggestModel}${row.suggestHost ? ` on ${row.suggestHost}` : ''}) drafted this. Edit if you want.`
 					: row.suggestNote ?? 'Edit the message, then confirm.';
 			} catch (err) {
 				if (!confirmDraftHint) {
@@ -3611,11 +3617,11 @@
 	</div>
 	{#if candidates.length}
 		<p class="hint">
-			{candidates.filter((c) => !enrolledIds.has(c.id)).length} new ·
-			{candidates.filter((c) => enrolledIds.has(c.id)).length} already enrolled
+			{scanCandidates.filter((c) => !enrolledIds.has(c.id)).length} new ·
+			{scanCandidates.filter((c) => enrolledIds.has(c.id)).length} already enrolled
 		</p>
 		<ul class="candidates">
-			{#each candidates as row (row.absPath)}
+			{#each scanCandidates as row (row.absPath)}
 				{@const already = enrolledIds.has(row.id)}
 				<li class:already>
 					<input

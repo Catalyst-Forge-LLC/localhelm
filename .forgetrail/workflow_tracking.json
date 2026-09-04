@@ -1164,6 +1164,20 @@
         "Auto-commit without a modal"
       ],
       "status": "active"
+    },
+    {
+      "id": "d83",
+      "timestamp": "2026-09-04T12:05:00Z",
+      "phase": "2-scaffolding",
+      "session": 27,
+      "decision": "Commit drafts discover Ollama through ollanet. Prefer a live local/self host with models, then a last-scan network host, then an opt-in LAN sweep. Prompts go through ollanet’s chat client with save disabled. Do not hardcode 127.0.0.1:11434. LOCALHELM_OLLAMA_MACHINE / LOCALHELM_OLLAMA_MODEL pin; LOCALHELM_OLLAMA_URL is a last-resort base URL still via ollanet.",
+      "rationale": "Operator 2026-09-04: Helm should use ollanet to check for Ollama locally and on the network if needed, not a homemade localhost client.",
+      "alternatives_considered": [
+        "Keep LOCALHELM_OLLAMA_URL as the only lookup",
+        "Vendor ollanet host discovery",
+        "Always run a LAN sweep"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

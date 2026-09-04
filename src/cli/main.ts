@@ -375,7 +375,7 @@ async function main(): Promise<void> {
 				for (const file of row.files) process.stdout.write(`  ${dirtFileLine(file)}\n`);
 				if (row.message) {
 					const src = row.suggestSource === 'ollama' && row.suggestModel
-						? `ollama ${row.suggestModel}`
+						? `ollanet ${row.suggestModel}${row.suggestHost ? ` @ ${row.suggestHost}` : ''}`
 						: row.suggestNote ?? 'draft';
 					process.stdout.write(`  message (${src}):\n`);
 					for (const line of row.message.split(/\r?\n/)) process.stdout.write(`    ${line}\n`);

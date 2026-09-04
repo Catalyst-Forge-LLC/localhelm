@@ -64,6 +64,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "ignore": "^7.0.6"
+    "ignore": "^7.0.6",
+    "ollanet": "^0.6.8"
   }
 }
