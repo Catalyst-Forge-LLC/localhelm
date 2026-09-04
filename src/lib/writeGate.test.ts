@@ -185,6 +185,11 @@ describe('fleetWriteIds', () => {
 		const both = row({ commitsSinceNpm: 2, git: git({ ahead: 3 }) });
 		assert.deepEqual(fleetWriteIds(both), ['push', 'cut']);
 	});
+
+	it('offers Commit first when the tree is dirty', () => {
+		assert.deepEqual(fleetWriteIds(row({ git: git({ dirty: true }) })), ['commit']);
+		assert.equal(fleetWriteLabel('commit', row({ git: git({ dirty: true }) })), 'Commit');
+	});
 });
 
 describe('writableCascadeCount', () => {

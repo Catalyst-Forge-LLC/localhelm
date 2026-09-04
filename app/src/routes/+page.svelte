@@ -16,6 +16,7 @@
 	import { familyMemberNames } from '$lib/family';
 	import { portFamilies, portLooks, type PortFamily } from '$lib/looks';
 	import {
+		canCommit,
 		canCutVersion,
 		commitCountLabel,
 		fleetWriteIds,
@@ -213,6 +214,9 @@
 	let confirmPhases = $state<ConfirmPhase[]>([]);
 	let confirmCanApply = $state(true);
 	let confirmShowOtp = $state(false);
+	let confirmMessages = $state<Record<string, string>>({});
+	let confirmDraftHint = $state('');
+	let confirmMessageTouched = $state<Record<string, boolean>>({});
 	let confirmRun = $state<(() => void) | null>(null);
 	let statusReady = $state(false);
 	let rosterReady = $state(false);
@@ -364,6 +368,10 @@
 	const checkedPushIds = $derived(checkedIds.filter((id) => {
 		const row = inventory?.projects.find((p) => p.id === id);
 		return row ? !whyNotPush(row.git) : false;
+	}));
+	const checkedCommitIds = $derived(checkedIds.filter((id) => {
+		const row = inventory?.projects.find((p) => p.id === id);
+		return row ? canCommit(row) : false;
 	}));
 	const unpublishedPublishIds = $derived(
 		shipRows.filter((row) => row.unpublishedAhead && !whyNotPublish(row)).map((row) => row.id),
@@ -930,6 +938,8 @@
 		variant?: 'write' | 'danger';
 		canApply: boolean;
 		showOtp?: boolean;
+		messages?: Record<string, string>;
+		draftHint?: string;
 		run?: () => void;
 	}): void {
 		confirmTitle = spec.title;
@@ -941,6 +951,9 @@
 		confirmVariant = spec.variant ?? 'write';
 		confirmCanApply = spec.canApply;
 		confirmShowOtp = Boolean(spec.showOtp);
+		confirmMessages = spec.messages ?? {};
+		confirmDraftHint = spec.draftHint ?? '';
+		confirmMessageTouched = {};
 		confirmRun = spec.canApply && spec.run ? spec.run : null;
 		confirmOpen = true;
 	}
@@ -1266,6 +1279,138 @@
 			},
 			{ closeConfirm: false },
 		);
+	}
+
+	type DirtCommitRow = {
+		id: string;
+		action: string;
+		reason?: string;
+		files: { path: string; from?: string; code: string; skip?: string }[];
+		message: string;
+		suggestSource?: string;
+		suggestNote?: string;
+		suggestModel?: string;
+	};
+
+	function dirtPlanLine(file: DirtCommitRow['files'][number]): string {
+		const mark = file.code.trim() || '??';
+		if (file.skip) return `skip  ${file.path}  (${file.skip})`;
+		if (file.from) return `${mark}  ${file.from} → ${file.path}`;
+		return `${mark}  ${file.path}`;
+	}
+
+	async function startCommit(ids: string[]): Promise<void> {
+		ids = readyNamed(ids);
+		if (ids.length === 0) {
+			error = 'Check at least one dirty fleet row first.';
+			return;
+		}
+		const label = ids.length === 1 ? ids[0] : `${ids.length} repos`;
+		await run(
+			`planning commit ${label}`,
+			async () => {
+				const data = (await call('/api/commit', {
+					method: 'POST',
+					body: JSON.stringify({ ids, apply: false, suggest: false }),
+				})) as { rows: DirtCommitRow[] };
+				const can = data.rows.filter((row) => row.action === 'commit');
+				const items: string[] = [];
+				const itemKeys: string[] = [];
+				const named = data.rows.length > 1;
+				for (const row of data.rows) {
+					if (row.action !== 'commit') {
+						items.push(`${row.id}  skip — ${row.reason ?? 'skipped'}`);
+						itemKeys.push(row.id);
+						continue;
+					}
+					const files = row.files.length ? row.files : [{ path: '(no files)', code: '  ' }];
+					for (const [i, file] of files.entries()) {
+						const line = dirtPlanLine(file);
+						items.push(named ? `${row.id}  ${line}` : line);
+						itemKeys.push(`${row.id}:${i}`);
+					}
+				}
+				note(`commit plan — ${can.length} of ${data.rows.length} dirty, nothing written`, data);
+				offerConfirm({
+					title: can.length === 1 ? `Commit ${can[0]?.id}?` : can.length ? `Commit ${can.length} repos?` : 'Nothing to commit',
+					hint: can.length
+						? 'Ollama will draft a message. Edit it, then Confirm runs git add and git commit. Secrets stay out. No push.'
+						: data.rows[0]?.reason ?? 'Nothing dirty to commit.',
+					items,
+					itemKeys,
+					messages: Object.fromEntries(can.map((row) => [row.id, row.message])),
+					draftHint: can.length ? 'Asking Ollama…' : '',
+					confirmLabel: can.length === 1 ? `Commit ${can[0]?.id}` : `Commit ${can.length}`,
+					canApply: can.length > 0,
+					run: () => void applyCommits(can.map((row) => row.id)),
+				});
+				if (can.length) void suggestCommitDrafts(can.map((row) => row.id));
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function suggestCommitDrafts(ids: string[]): Promise<void> {
+		for (const id of ids) {
+			if (confirmMessageTouched[id] || !confirmOpen) continue;
+			try {
+				const data = (await call('/api/commit', {
+					method: 'POST',
+					body: JSON.stringify({ ids: [id], apply: false, suggest: true }),
+				})) as { rows: DirtCommitRow[] };
+				const row = data.rows[0];
+				if (!row || confirmMessageTouched[id] || !confirmOpen) continue;
+				if (row.message) confirmMessages = { ...confirmMessages, [id]: row.message };
+				confirmDraftHint = row.suggestSource === 'ollama' && row.suggestModel
+					? `Ollama (${row.suggestModel}) drafted this. Edit if you want.`
+					: row.suggestNote ?? 'Edit the message, then confirm.';
+			} catch (err) {
+				if (!confirmDraftHint) {
+					confirmDraftHint = err instanceof Error ? err.message : String(err);
+				}
+			}
+		}
+	}
+
+	function markCommitKeys(id: string, phase: 'current' | 'done' | 'fail'): typeof confirmPhases {
+		let next = confirmPhases;
+		for (const key of confirmItemKeys) {
+			if (key === id || key.startsWith(`${id}:`)) next = markConfirmKey(confirmItemKeys, next, key, phase);
+		}
+		return next;
+	}
+
+	async function applyCommits(ids: string[]): Promise<void> {
+		const named = ids.filter(Boolean);
+		if (!named.length) return;
+		await run(bulkProgressLabel('committing', 1, named.length, named[0]), async () => {
+			for (let i = 0; i < named.length; i++) {
+				const id = named[i];
+				if (!id) continue;
+				busy = bulkProgressLabel('committing', i + 1, named.length, id);
+				confirmPhases = markCommitKeys(id, 'current');
+				try {
+					const data = (await call('/api/commit', {
+						method: 'POST',
+						body: JSON.stringify({
+							ids: [id],
+							apply: true,
+							messages: { [id]: confirmMessages[id] ?? '' },
+						}),
+					})) as { rows: DirtCommitRow[] };
+					const row = data.rows[0];
+					if (row?.action !== 'commit' || row.reason) {
+						throw new Error(row?.reason ?? `commit ${id} failed`);
+					}
+					note(`commit --apply ${id}`, row);
+					confirmPhases = markCommitKeys(id, 'done');
+				} catch (err) {
+					confirmPhases = markCommitKeys(id, 'fail');
+					throw err;
+				}
+			}
+			await loadStatus({ ids: named, extras: false });
+		});
 	}
 
 	async function applyBumps(jobs: { id: string; kind: BumpKind }[]): Promise<void> {
@@ -1958,6 +2103,7 @@
 	function todayBadges(row: Project): Badge[] {
 		return badges(row).filter((badge) => {
 			if (badge.text === 'nothing to do') return false;
+			if (canCommit(row) && badge.text.startsWith('dirty')) return false;
 			if (row.unpublishedAhead && (badge.text.includes('unpublished') || badge.text.includes('never published'))) return false;
 			if ((row.git.ahead ?? 0) > 0 && badge.text.includes('to push')) return false;
 			return true;
@@ -2041,6 +2187,9 @@
 	}
 
 	function needActionTitle(id: FleetWriteId, row: Project): string {
+		if (id === 'commit') {
+			return 'Reads the dirty files, asks Ollama for a message, then you confirm. git add + git commit only. No push.';
+		}
 		if (id === 'publish') return 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.';
 		if (id === 'push') {
 			const commits = commitCountLabel(row.git.ahead);
@@ -2078,7 +2227,8 @@
 			label: fleetWriteLabel(id, row, rowBumpKind(row), pins),
 			title: needActionTitle(id, row),
 			run: () => {
-				if (id === 'publish' || id === 'cut') startPublish([row.id]);
+				if (id === 'commit') void startCommit([row.id]);
+				else if (id === 'publish' || id === 'cut') startPublish([row.id]);
 				else if (id === 'push') startPush([row.id]);
 				else startCascade(row.id);
 			},
@@ -2114,6 +2264,7 @@
 			if (acts.some((act) => act.id === 'publish') && badge.text.includes('unpublished')) return false;
 			if (acts.some((act) => act.id === 'push') && badge.text.includes('to push')) return false;
 			if (acts.some((act) => act.id === 'pins') && badge.text.includes('pin')) return false;
+			if (acts.some((act) => act.id === 'commit') && badge.text.startsWith('dirty')) return false;
 			return true;
 		});
 	}
@@ -2656,6 +2807,15 @@
 							>
 								<Icon icon="lucide:folder-plus" />
 								Add projects
+							</button>
+							<button
+								class="btn btn-write"
+								disabled={Boolean(busy) || !checkedCommitIds.length}
+								onclick={() => void startCommit(checkedIds)}
+								title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push."
+							>
+								<Icon icon="lucide:git-commit-horizontal" />
+								Commit{checkedCommitIds.length ? ` (${checkedCommitIds.length})` : ''}
 							</button>
 							<button
 								class="btn btn-write"
@@ -3507,6 +3667,11 @@
 	itemKeys={confirmItemKeys}
 	itemPhases={confirmPhases}
 	failNote={error}
+	bind:messageById={confirmMessages}
+	draftHint={confirmDraftHint}
+	ondraft={(id) => {
+		confirmMessageTouched = { ...confirmMessageTouched, [id]: true };
+	}}
 	onconfirm={() => {
 		const fn = confirmRun;
 		confirmRun = null;

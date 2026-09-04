@@ -64,4 +64,5 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Table zebra stripe + row hover _(2026-09-03)_
 - [x] Land confirm shows the real plugin fail line, not only exit 1 _(2026-09-03)_
 - [x] Tables paint before full status/plugin reads; cells show a loader until facts exist _(2026-09-04)_
+- [x] Commit dirty repos from the dashboard: file list + Ollama/fallback message, confirm to git commit _(2026-09-04)_
 - [x] Needs you filter: All / Publish / Cut / Push _(2026-08-26)_

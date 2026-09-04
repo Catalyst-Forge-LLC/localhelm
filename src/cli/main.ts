@@ -7,6 +7,7 @@ import { pluginPlanWriteIds } from '../lib/pluginPlan.js';
 import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { applyExport, planExport } from '../lib/export.js';
+import { applyDirtCommit, dirtFileLine, planDirtCommit, requireCommitIds } from '../lib/dirtCommit.js';
 import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
 import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublishIds, type PublishRow } from '../lib/publish.js';
 import { archiveIds, readArchive, restoreIds } from '../lib/archive.js';
@@ -30,6 +31,7 @@ Usage:
   localhelm status [id...] [--json] [--fetch]
   localhelm deps [id] [--json]
   localhelm bump <id> patch|minor|major [--apply]
+  localhelm commit <id>... [--message TEXT] [--apply]
   localhelm fetch
   localhelm pull [--apply]
   localhelm push [id...]                 # plan
@@ -331,6 +333,59 @@ async function main(): Promise<void> {
 					? ''
 					: 'Nothing written. Re-run with --apply to write package.json and commit that file.';
 			process.stdout.write(`${line}${footer ? `\n${footer}` : ''}\n`);
+		}
+		return;
+	}
+
+	if (cmd === 'commit') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		const messageFlag = takeOpt(argv, '--message') ?? takeOpt(argv, '-m');
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		let ids: string[];
+		try {
+			ids = requireCommitIds(argv);
+		} catch (err) {
+			fail(err instanceof Error ? err.message : String(err));
+		}
+		const loaded = await requireManifest();
+		const plan = await planDirtCommit(loaded, ids, { suggest: !messageFlag });
+		let rows = plan.rows;
+		if (apply) {
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				rows = plan.rows.map((row) => {
+					if (row.action !== 'commit') return row;
+					const message = messageFlag?.trim() || row.message;
+					return applyDirtCommit(loaded, row, message);
+				});
+			} finally {
+				await lock.release();
+			}
+		}
+		if (json) printJson({ rows, writes: apply });
+		else {
+			for (const row of rows) {
+				if (row.action !== 'commit') {
+					process.stdout.write(`${row.id}\tskip\t${row.reason ?? ''}\n`);
+					continue;
+				}
+				process.stdout.write(`${row.id}\tcommit\t${row.path}\n`);
+				for (const file of row.files) process.stdout.write(`  ${dirtFileLine(file)}\n`);
+				if (row.message) {
+					const src = row.suggestSource === 'ollama' && row.suggestModel
+						? `ollama ${row.suggestModel}`
+						: row.suggestNote ?? 'draft';
+					process.stdout.write(`  message (${src}):\n`);
+					for (const line of row.message.split(/\r?\n/)) process.stdout.write(`    ${line}\n`);
+				}
+			}
+			if (!apply) {
+				process.stdout.write(
+					'Nothing written. Re-run with the same id(s) and --apply to git add + git commit. Pass --message to skip Ollama. No push.\n',
+				);
+			}
 		}
 		return;
 	}

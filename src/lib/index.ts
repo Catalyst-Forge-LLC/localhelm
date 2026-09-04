@@ -7,6 +7,17 @@ export type { LoadedManifest } from './manifest.js';
 export { applyCascade, planCascade } from './cascade.js';
 export type { CascadePlan, CascadeRow } from './cascade.js';
 export { helmBumpMessage, helmRetargetMessage } from './commit.js';
+export {
+	applyDirtCommit,
+	dirtFileLine,
+	fallbackCommitMessage,
+	ollamaBaseUrl,
+	parseStatusPorcelain,
+	planDirtCommit,
+	requireCommitIds,
+	secretCommitSkip,
+} from './dirtCommit.js';
+export type { DirtCommitPlan, DirtCommitRow, DirtFile } from './dirtCommit.js';
 export { clearNpmCache, liftLatestIfVersionExists, npmHasVersion, npmLatest, withPublishedLocal } from './npm.js';
 export { retargetSpecifier } from './pinwrite.js';
 export { fleetReady } from './ready.js';
@@ -81,6 +92,7 @@ export { listFactsFiles, rewriteFactsVersion } from './factsVersion.js';
 export { applyExport, defaultExportPath, planExport } from './export.js';
 export type { ExportPlan } from './export.js';
 export {
+	canCommit,
 	canCutVersion,
 	commitCountLabel,
 	fleetWriteIds,

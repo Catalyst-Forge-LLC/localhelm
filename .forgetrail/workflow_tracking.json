@@ -1150,6 +1150,20 @@
         "Skeleton rows with fake dashes instead of a spinner"
       ],
       "status": "active"
+    },
+    {
+      "id": "d82",
+      "timestamp": "2026-09-04T10:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 27,
+      "decision": "Dirty fleet rows offer Commit. The plan lists files; Ollama (local HTTP) may draft the message; the confirm lets you edit the message. Apply is git add + git commit for named ids only. No push. Secret-looking paths (.env, pem, id_rsa, credentials.json, .npmrc) are shown as skip. If Ollama is down, a fallback message is still editable. CLI is localhelm commit <id>... [--message] [--apply].",
+      "rationale": "Operator 2026-09-04: committing dirty repos meant opening each folder or IDE. They asked for a modal with the file list and an Ollama-drafted message they can approve or edit.",
+      "alternatives_considered": [
+        "Commit all dirty repos in one apply",
+        "Require Ollama or fail the plan",
+        "Auto-commit without a modal"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

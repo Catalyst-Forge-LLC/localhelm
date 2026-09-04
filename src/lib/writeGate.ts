@@ -216,12 +216,20 @@ export function canCutVersion(row: PublishGateRow): boolean {
 	return !row.unpublishedAhead && !whyNotPublish(row);
 }
 
-export const FLEET_WRITE_ORDER = ['publish', 'push', 'pins', 'cut'] as const;
+export const FLEET_WRITE_ORDER = ['commit', 'publish', 'push', 'pins', 'cut'] as const;
 export type FleetWriteId = (typeof FLEET_WRITE_ORDER)[number];
+
+export function canCommit(row: { missing?: boolean; git: GateGit }): boolean {
+	if (row.missing) return false;
+	if (!row.git.repo) return false;
+	if (row.git.busy) return false;
+	return Boolean(row.git.dirty);
+}
 
 /** Writes Today and Fleet both offer. Order is the gold-write priority. */
 export function fleetWriteIds(row: PublishGateRow, writablePins = 0): FleetWriteId[] {
 	const ids: FleetWriteId[] = [];
+	if (canCommit(row)) ids.push('commit');
 	if (row.unpublishedAhead && !whyNotPublish(row)) ids.push('publish');
 	if ((row.git.ahead ?? 0) > 0 && !whyNotPush(row.git)) ids.push('push');
 	if (writablePins > 0) ids.push('pins');
@@ -250,6 +258,7 @@ export function fleetWriteLabel(
 	kind: BumpKind = 'patch',
 	writablePins = 0,
 ): string {
+	if (id === 'commit') return 'Commit';
 	if (id === 'publish') return `Publish ${row.localVersion ?? ''}`.trim();
 	if (id === 'push') {
 		const commits = commitCountLabel(row.git.ahead);

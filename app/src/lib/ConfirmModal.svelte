@@ -19,9 +19,12 @@
 		itemKeys?: string[];
 		itemPhases?: Phase[];
 		failNote?: string;
+		messageById?: Record<string, string>;
+		draftHint?: string;
 		children?: Snippet;
 		onconfirm: () => void;
 		oncancel?: () => void;
+		ondraft?: (id: string) => void;
 	};
 
 	let {
@@ -38,9 +41,12 @@
 		itemKeys = [],
 		itemPhases = [],
 		failNote = '',
+		messageById = $bindable<Record<string, string>>({}),
+		draftHint = '',
 		children,
 		onconfirm,
 		oncancel,
+		ondraft,
 	}: Props = $props();
 
 	const showPhases = $derived(itemPhases.some((phase) => phase !== 'pending'));
@@ -63,6 +69,9 @@
 
 	const selectedId = $derived(groups ? confirmRosterSelected(groups, pinned) : null);
 	const selected = $derived(groups?.find((group) => group.id === selectedId) ?? null);
+	const draftIds = $derived(Object.keys(messageById));
+	const draftId = $derived(selectedId ?? draftIds[0] ?? '');
+	const draftsReady = $derived(draftIds.length === 0 || draftIds.every((id) => Boolean(messageById[id]?.trim())));
 
 	$effect(() => {
 		const id = selectedId;
@@ -236,6 +245,26 @@
 		{#if children}
 			<div class="extra">{@render children()}</div>
 		{/if}
+		{#if draftId && draftIds.length}
+			<label class="draft" for="confirm-draft">
+				Commit message{#if draftIds.length > 1}
+					<span class="draft-id">{draftId}</span>
+				{/if}
+			</label>
+			{#if draftHint}
+				<p class="draft-hint">{draftHint}</p>
+			{/if}
+			<textarea
+				id="confirm-draft"
+				rows="4"
+				disabled={busy}
+				value={messageById[draftId] ?? ''}
+				oninput={(event) => {
+					messageById = { ...messageById, [draftId]: event.currentTarget.value };
+					ondraft?.(draftId);
+				}}
+			></textarea>
+		{/if}
 		<div class="actions">
 			<button type="button" class="btn" disabled={busy} onclick={cancel}>{canApply ? cancelLabel : 'Close'}</button>
 			{#if canApply}
@@ -244,7 +273,7 @@
 					class="btn"
 					class:danger={variant === 'danger'}
 					class:write={variant === 'write'}
-					disabled={busy}
+					disabled={busy || !draftsReady}
 					onclick={confirm}
 				>
 					{busy ? busyLabel || 'Working…' : confirmLabel}
@@ -502,6 +531,48 @@
 		margin-top: 0.75rem;
 		min-width: 0;
 		overflow-wrap: anywhere;
+	}
+
+	.draft {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.6rem;
+		margin: 0.85rem 0 0.3rem;
+		font-size: 0.78rem;
+		color: #a1a1aa;
+	}
+
+	.draft-id {
+		color: #e4e4e7;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	}
+
+	.draft-hint {
+		margin: 0 0 0.35rem;
+		font-size: 0.75rem;
+		color: #a1a1aa;
+	}
+
+	textarea {
+		display: block;
+		width: 100%;
+		min-height: 5.2rem;
+		box-sizing: border-box;
+		resize: vertical;
+		border: 1px solid #3f3f46;
+		border-radius: 0.4rem;
+		background: #09090b;
+		color: #e4e4e7;
+		padding: 0.45rem 0.55rem;
+		font: inherit;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: 0.78rem;
+		line-height: 1.4;
+	}
+
+	textarea:focus {
+		outline: 1px solid #854d0e;
 	}
 
 	.actions {
