@@ -106,29 +106,41 @@ function stripAnsi(text: string): string {
 	return text.replace(ANSI, '').replace(/\r/g, '');
 }
 
+const GENERIC_PLUGIN_EXIT =
+	/\b(update|ship|push|sync|install|plugin)\b.*\bfailed(?: \(exit \d+\))?$/i;
+
+const SPECIFIC_PLUGIN =
+	/ERR_PNPM_[A-Z0-9_]+[^\n]*|ERR!\s+[^\n]+|No matching version[^\n]*|Cannot find module[^\n]*|EPERM[^\n]*|EACCES[^\n]*|ENOTFOUND[^\n]*|ERESOLVE[^\n]*|getfilepress@[^\s]+ is not installed[^\n]*/i;
+
+function tidyPluginLine(line: string): string {
+	return line.replace(/\s+/g, ' ').trim().slice(0, 160);
+}
+
 /** Short line from a FilePress / plugin apply log. Keep the raw dump in Activity. */
 export function plainPluginError(raw: string): string {
 	const text = stripAnsi(raw).trim();
 	if (!text) return 'plugin failed';
 
 	const filepress = /filepress:\s+([^\n]+)/i.exec(text);
-	if (filepress?.[1]) {
-		const head = filepress[1].replace(/\s+/g, ' ').trim();
-		return `filepress: ${head}`.slice(0, 160);
-	}
+	if (filepress?.[1]) return tidyPluginLine(`filepress: ${filepress[1]}`);
 
 	const wrangler = /(?:✘|x)\s*\[ERROR\][^\n]+/i.exec(text);
-	if (wrangler?.[0]) return wrangler[0].replace(/\s+/g, ' ').trim().slice(0, 160);
+	if (wrangler?.[0]) return tidyPluginLine(wrangler[0]);
+
+	const specific = SPECIFIC_PLUGIN.exec(text);
+	if (specific?.[0]) return tidyPluginLine(specific[0]);
 
 	const lines = text
 		.split(/\n| · /)
 		.map((line) => line.trim())
 		.filter((line) => line.length > 0 && !PLUGIN_NOISE.test(line));
 	const named = lines.find(
-		(line) => /error|failed|assert|denied|unauthorized/i.test(line) && !/ship failed \(exit/i.test(line),
+		(line) =>
+			/error|failed|assert|denied|unauthorized|ERR_/i.test(line) && !GENERIC_PLUGIN_EXIT.test(line),
 	);
-	const hit = named ?? lines.find((line) => /ship failed/i.test(line)) ?? lines.at(-1) ?? 'plugin failed';
-	return hit.replace(/\s+/g, ' ').slice(0, 160);
+	const useful = lines.filter((line) => !GENERIC_PLUGIN_EXIT.test(line));
+	const hit = named ?? useful.at(-1) ?? lines.at(-1) ?? 'plugin failed';
+	return tidyPluginLine(hit);
 }
 
 /** FilePress bridge returns `{ results: [{ ok }] }`. Safe for the Svelte bundle. */

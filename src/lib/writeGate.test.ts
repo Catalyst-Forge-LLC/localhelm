@@ -67,6 +67,19 @@ describe('plainPluginError', () => {
 	it('keeps a short push failure', () => {
 		assert.equal(plainPluginError('aibreze-site push failed'), 'aibreze-site push failed');
 	});
+
+	it('prefers the pnpm line over update failed (exit 1)', () => {
+		const raw = [
+			'localslip   update   pnpm update getfilepress  (0.1.11 → 0.1.28)',
+			'npm warn Unknown env config "python".',
+			'ERR_PNPM_NO_MATCHING_VERSION No matching version found for getfilepress@0.1.28',
+			'localslip   update   failed (exit 1)',
+		].join('\n');
+		assert.equal(
+			plainPluginError(raw),
+			'ERR_PNPM_NO_MATCHING_VERSION No matching version found for getfilepress@0.1.28',
+		);
+	});
 });
 
 describe('plainPublishError', () => {

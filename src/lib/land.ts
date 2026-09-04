@@ -193,6 +193,7 @@ export type LandStepEvent = {
 	id: string;
 	index: number;
 	status: 'start' | 'done' | 'fail';
+	reason?: string;
 };
 
 export async function applyLand(
@@ -211,13 +212,18 @@ export async function applyLand(
 				out.steps.push({ ...step, ok: false, reason: 'plugin has no apply' });
 				out.ok = false;
 				out.stoppedAt = step.label;
-				opts.onStep?.({ id: plan.siteId, index, status: 'fail' });
+				opts.onStep?.({ id: plan.siteId, index, status: 'fail', reason: 'plugin has no apply' });
 				return out;
 			}
 			const result = await plug.plugin.apply(step.pluginAction, [plan.siteId]);
 			const check = landPluginApplyOk(result);
 			out.steps.push({ ...step, ok: check.ok, reason: check.reason });
-			opts.onStep?.({ id: plan.siteId, index, status: check.ok ? 'done' : 'fail' });
+			opts.onStep?.({
+				id: plan.siteId,
+				index,
+				status: check.ok ? 'done' : 'fail',
+				reason: check.ok ? undefined : check.reason,
+			});
 			if (!check.ok) {
 				out.ok = false;
 				out.stoppedAt = step.label;
@@ -231,7 +237,7 @@ export async function applyLand(
 		out.steps.push({ ...step, ok: false, reason: 'unknown step' });
 		out.ok = false;
 		out.stoppedAt = step.label;
-		opts.onStep?.({ id: plan.siteId, index, status: 'fail' });
+		opts.onStep?.({ id: plan.siteId, index, status: 'fail', reason: 'unknown step' });
 		return out;
 	}
 	return out;

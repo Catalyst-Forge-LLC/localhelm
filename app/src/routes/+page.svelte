@@ -1768,6 +1768,9 @@
 								index: Number(event.index),
 								status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
 							});
+							if (event.status === 'fail' && event.reason) {
+								error = String(event.reason);
+							}
 						},
 					)) as {
 						result: {
@@ -3366,6 +3369,7 @@
 	items={confirmItems}
 	itemKeys={confirmItemKeys}
 	itemPhases={confirmPhases}
+	failNote={error}
 	onconfirm={() => {
 		const fn = confirmRun;
 		confirmRun = null;

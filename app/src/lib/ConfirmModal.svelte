@@ -18,6 +18,7 @@
 		items?: string[];
 		itemKeys?: string[];
 		itemPhases?: Phase[];
+		failNote?: string;
 		children?: Snippet;
 		onconfirm: () => void;
 		oncancel?: () => void;
@@ -36,6 +37,7 @@
 		items = [],
 		itemKeys = [],
 		itemPhases = [],
+		failNote = '',
 		children,
 		onconfirm,
 		oncancel,
@@ -227,6 +229,9 @@
 					</li>
 				{/each}
 			</ul>
+		{/if}
+		{#if failNote}
+			<p class="fail-note">{failNote}</p>
 		{/if}
 		{#if children}
 			<div class="extra">{@render children()}</div>
@@ -447,6 +452,14 @@
 
 	.tracked li.fail {
 		color: #fca5a5;
+	}
+
+	.fail-note {
+		margin: 0.65rem 0 0;
+		color: #fca5a5;
+		font-size: 0.8rem;
+		line-height: 1.4;
+		overflow-wrap: anywhere;
 	}
 
 	.mark {
