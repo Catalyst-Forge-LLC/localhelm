@@ -11,7 +11,7 @@ import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requir
 import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublishIds, type PublishRow } from '../lib/publish.js';
 import { archiveIds, readArchive, restoreIds } from '../lib/archive.js';
 import { buildBrief } from '../lib/brief.js';
-import { applyLand, planLand, requireLandSiteIds } from '../lib/land.js';
+import { applyLand, planLandMany, requireLandSiteIds } from '../lib/land.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
@@ -40,7 +40,7 @@ Usage:
   localhelm publish <id>... --apply [--kind K] [--otp CODE]
   localhelm auth
   localhelm cascade <id> [--to V] [--apply] [--no-commit]
-  localhelm land <site-id>... [--apply] [--otp CODE]
+  localhelm land <site-id>... [--apply]
   localhelm brief [--json]
   localhelm archive [id...] [--apply] [--restore]
   localhelm plugins
@@ -607,7 +607,7 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 		}
 		const leftovers = argv.filter((a) => a.startsWith('-'));
 		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
-		if (!argv.length) fail('usage: localhelm land <site-id>... [--apply] [--otp CODE]');
+		if (!argv.length) fail('usage: localhelm land <site-id>... [--apply]');
 		let siteIds: string[];
 		try {
 			siteIds = requireLandSiteIds(argv);
@@ -615,10 +615,7 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 			fail(err instanceof Error ? err.message : String(err));
 		}
 		const loaded = await requireManifest();
-		const plans = [];
-		for (const siteId of siteIds) {
-			plans.push(await planLand(loaded, siteId));
-		}
+		const plans = await planLandMany(loaded, siteIds);
 		if (!apply) {
 			if (json) printJson({ plans, writes: false });
 			else {
@@ -627,8 +624,6 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 					if (lines.length) lines.push('');
 					lines.push(
 						`land\t${plan.siteId}`,
-						`companion\t${plan.companionId ?? '(none)'}`,
-						`engine\t${plan.engineId}`,
 						...plan.steps.map((step, i) => `${i + 1}.\t${step.label}`),
 						'',
 						plan.note,

@@ -1,10 +1,9 @@
-import { applyPull, applyPush, type GitJobRow } from './git.js';
+import type { GitJobRow } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { loadPlugins, requirePlugin, type HelmPlugin } from './plugin.js';
-import { applyPublish, planPublishFromInventory, type PublishRow } from './publish.js';
-import { fleetStatus } from './status.js';
-import type { FleetInventory, ProjectStatus } from './types.js';
-import { commitCountLabel, isPublishedReason, landPluginApplyOk, plainGitError, plainPublishError, whyNotPublish, whyNotPush } from './writeGate.js';
+import { loadPlugins, requirePlugin } from './plugin.js';
+import type { PublishRow } from './publish.js';
+import type { ProjectStatus } from './types.js';
+import { landPluginApplyOk, whyNotPublish } from './writeGate.js';
 import { readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
 
 export { landPluginApplyOk };
@@ -80,112 +79,25 @@ export function requireLandSiteIds(ids: readonly string[] | undefined): string[]
 	return named.map((id) => requireLandSiteId(id));
 }
 
-function packageLabel(role: LandRole, id: string, kind: LandStepKind, detail: string): string {
-	const who = role === 'engine' ? `engine ${id}` : `package ${id}`;
-	if (kind === 'pull') return `${who}: pull (${detail})`;
-	if (kind === 'push') return `${who}: push (${detail})`;
-	return `${who}: publish (${detail})`;
-}
-
-function pullFromStatus(row: ProjectStatus): GitJobRow | null {
-	const git = row.git;
-	if (row.missing || !git.repo) return null;
-	if (git.dirty) return null;
-	if (git.busy) return null;
-	if (!git.origin) return null;
-	if (git.behind == null) return null;
-	if (git.behind === 0) return null;
-	if ((git.ahead ?? 0) > 0) return null;
-	return {
-		id: row.id,
-		path: row.path,
-		action: 'pull',
-		origin: git.origin,
-		branch: git.branch,
-		ahead: git.ahead,
-		remote: 'origin',
-		reason: `${git.behind} behind`,
-	};
-}
-
-function pushFromStatus(row: ProjectStatus): GitJobRow | null {
-	const blocked = whyNotPush(row.git);
-	if (blocked) return null;
-	const dirt = row.git.dirty ? ' · uncommitted files stay local' : '';
-	return {
-		id: row.id,
-		path: row.path,
-		action: 'push',
-		origin: row.git.origin,
-		branch: row.git.branch,
-		ahead: row.git.ahead,
-		remote: 'origin',
-		reason: `${commitCountLabel(row.git.ahead) || row.git.ahead} on ${row.git.branch} → ${row.git.origin}${dirt}`,
-	};
-}
-
-function packageSteps(inventory: FleetInventory, id: string, role: LandRole): LandStep[] {
-	const row = inventory.projects.find((p) => p.id === id);
-	if (!row) return [];
-
-	const steps: LandStep[] = [];
-	const pull = pullFromStatus(row);
-	if (pull) {
-		steps.push({
-			kind: 'pull',
-			role,
-			target: id,
-			label: packageLabel(role, id, 'pull', pull.reason ?? 'behind'),
-			gitRow: pull,
-		});
-	}
-
-	// Publish only when already unpublished-ahead (no opportunistic version cut).
-	if (row.unpublishedAhead && !whyNotPublish(row)) {
-		const pub = planPublishFromInventory(inventory, [id], 'patch')[0];
-		if (pub?.action === 'publish') {
-			steps.push({
-				kind: 'publish',
-				role,
-				target: id,
-				label: packageLabel(role, id, 'publish', pub.reason ?? row.localVersion ?? 'publish'),
-				publishRow: pub,
-			});
-			return steps;
-		}
-	}
-
-	const push = pushFromStatus(row);
-	if (push) {
-		steps.push({
-			kind: 'push',
-			role,
-			target: id,
-			label: packageLabel(role, id, 'push', push.reason ?? `${push.ahead ?? '?'} ahead`),
-			gitRow: push,
-		});
-	}
-	return steps;
-}
-
-type LandPluginRow = {
+export type LandPluginRow = {
 	id?: string;
 	sync?: { writes?: boolean };
 	push?: { writes?: boolean; reason?: string; action?: string };
 	ship?: { writes?: boolean; fingerprint?: string | null; script?: string | null };
 };
 
-async function siteSteps(
-	plugin: HelmPlugin,
-	workspaceRoot: string,
-	siteId: string,
-): Promise<LandStep[]> {
-	if (!plugin.plan) return [];
-	const planned = await plugin.plan('land', [siteId]);
-	const rows = planned && typeof planned === 'object' ? (planned as { rows?: LandPluginRow[] }).rows : null;
-	const row = Array.isArray(rows) ? rows.find((r) => r.id === siteId) ?? rows[0] : null;
-	if (!row) return [];
+export function landRequestSiteIds(body: { siteId?: unknown; siteIds?: unknown }): string[] {
+	const listed = Array.isArray(body.siteIds) ? body.siteIds.filter((id): id is string => typeof id === 'string') : [];
+	const one = typeof body.siteId === 'string' ? [body.siteId] : [];
+	return requireLandSiteIds([...listed, ...one]);
+}
 
+export function landStepsFromPluginRow(
+	siteId: string,
+	row: LandPluginRow | null | undefined,
+	lastShipFingerprint: string | null,
+): LandStep[] {
+	if (!row) return [];
 	const steps: LandStep[] = [];
 	if (row.sync?.writes) {
 		steps.push({
@@ -207,8 +119,7 @@ async function siteSteps(
 	}
 	if (row.ship?.writes) {
 		const fingerprint = row.ship.fingerprint ?? null;
-		const last = await readLandShipFingerprint(workspaceRoot, siteId);
-		if (shipUnchanged(last, fingerprint)) {
+		if (shipUnchanged(lastShipFingerprint, fingerprint)) {
 			/* already shipped this tree — skip */
 		} else {
 			steps.push({
@@ -226,114 +137,67 @@ async function siteSteps(
 	return steps;
 }
 
-export async function planLand(loaded: LoadedManifest, siteIdRaw: string): Promise<LandPlan> {
-	const siteId = requireLandSiteId(siteIdRaw);
-	const enrolledAll = loaded.manifest.projects.map((p) => p.id);
-	const companionId = companionIdForSite(siteId, enrolledAll, LAND_ENGINE_ID);
-	const packageIds = [LAND_ENGINE_ID, companionId].filter(
-		(id): id is string => typeof id === 'string' && enrolledAll.includes(id),
-	);
-	const uniqueIds = [...new Set(packageIds)];
+function pluginLandRows(planned: unknown): LandPluginRow[] {
+	const rows = planned && typeof planned === 'object' ? (planned as { rows?: LandPluginRow[] }).rows : null;
+	return Array.isArray(rows) ? rows : [];
+}
 
-	const [inventory, plug] = await Promise.all([
-		uniqueIds.length
-			? fleetStatus(loaded, { onlyIds: uniqueIds })
-			: Promise.resolve({
-					workspaceRoot: loaded.workspaceRoot,
-					manifestPath: loaded.manifestPath,
-					digest: {
-						projects: 0,
-						dirty: 0,
-						unpublishedAhead: 0,
-						cascadeBehind: 0,
-						missing: 0,
-						npmErrors: 0,
-					},
-					projects: [] as ProjectStatus[],
-				} satisfies FleetInventory),
-		loadPlugins(loaded).then((plugins) => requirePlugin(plugins, LAND_PLUGIN_ID)),
-	]);
+function rowForSite(rows: LandPluginRow[], siteId: string, namedCount: number): LandPluginRow | undefined {
+	const exact = rows.find((r) => r.id === siteId);
+	if (exact) return exact;
+	return namedCount === 1 ? rows[0] : undefined;
+}
 
-	const steps: LandStep[] = [];
-	if (uniqueIds.includes(LAND_ENGINE_ID)) {
-		steps.push(...packageSteps(inventory, LAND_ENGINE_ID, 'engine'));
-	}
-	if (companionId && uniqueIds.includes(companionId)) {
-		steps.push(...packageSteps(inventory, companionId, 'companion'));
-	}
-	steps.push(...(await siteSteps(plug.plugin, loaded.workspaceRoot, siteId)));
+export const LAND_PLAN_NOTE =
+	'Syncs getfilepress on this site, then pushes and ships. Does not publish the filepress package. Ship is skipped when the tree matches the last successful ship.';
 
-	const needsPublish = steps.some((s) => s.kind === 'publish');
-	const needsOtp = steps.some((s) => s.publishRow?.steps.some((step) => step.kind === 'publish'));
-	const note = steps.length
-		? 'Does the writes that are already needed, in order. Engine package, matching fleet package, then this site. Ship is skipped when the tree matches the last successful ship.'
-		: `${siteId} is already current — nothing to land.`;
-
+function landPlanForSite(
+	siteId: string,
+	enrolledAll: readonly string[],
+	steps: LandStep[],
+): LandPlan {
 	return {
 		siteId,
 		engineId: LAND_ENGINE_ID,
-		companionId,
+		companionId: companionIdForSite(siteId, enrolledAll, LAND_ENGINE_ID),
 		steps,
-		needsPublish,
-		needsOtp,
-		note,
+		needsPublish: false,
+		needsOtp: false,
+		note: steps.length ? LAND_PLAN_NOTE : `${siteId} is already current — nothing to land.`,
 	};
+}
+
+export async function planLandMany(loaded: LoadedManifest, idsRaw: readonly string[]): Promise<LandPlan[]> {
+	const siteIds = requireLandSiteIds(idsRaw);
+	const enrolledAll = loaded.manifest.projects.map((p) => p.id);
+	const plug = requirePlugin(await loadPlugins(loaded), LAND_PLUGIN_ID);
+	const planned = plug.plugin.plan ? await plug.plugin.plan('land', siteIds) : null;
+	const rows = pluginLandRows(planned);
+	const lasts = await Promise.all(siteIds.map((id) => readLandShipFingerprint(loaded.workspaceRoot, id)));
+	return siteIds.map((siteId, i) => {
+		const steps = landStepsFromPluginRow(siteId, rowForSite(rows, siteId, siteIds.length), lasts[i] ?? null);
+		return landPlanForSite(siteId, enrolledAll, steps);
+	});
+}
+
+export async function planLand(loaded: LoadedManifest, siteIdRaw: string): Promise<LandPlan> {
+	const plans = await planLandMany(loaded, [requireLandSiteId(siteIdRaw)]);
+	const plan = plans[0];
+	if (!plan) {
+		throw new Error('name the FilePress site id to land. LocalHelm will not land every site unless you name them.');
+	}
+	return plan;
 }
 
 export async function applyLand(
 	loaded: LoadedManifest,
 	plan: LandPlan,
-	opts: { otp?: string } = {},
+	_opts: { otp?: string } = {},
 ): Promise<LandApplyResult> {
 	const plug = requirePlugin(await loadPlugins(loaded), LAND_PLUGIN_ID);
 	const out: LandApplyResult = { siteId: plan.siteId, ok: true, steps: [] };
 
 	for (const step of plan.steps) {
-		if (step.kind === 'pull' && step.gitRow) {
-			const next = applyPull(loaded.workspaceRoot, step.gitRow);
-			const ok = next.reason === 'pulled ff-only';
-			out.steps.push({
-				...step,
-				ok,
-				reason: ok ? next.reason! : plainGitError(next.reason ?? next.stderr ?? 'pull failed'),
-			});
-			if (!ok) {
-				out.ok = false;
-				out.stoppedAt = step.label;
-				return out;
-			}
-			continue;
-		}
-		if (step.kind === 'push' && step.gitRow) {
-			const next = applyPush(loaded.workspaceRoot, step.gitRow);
-			const ok = next.reason === 'pushed';
-			out.steps.push({
-				...step,
-				ok,
-				reason: ok ? 'pushed' : plainGitError(next.reason ?? next.stderr ?? 'push failed'),
-			});
-			if (!ok) {
-				out.ok = false;
-				out.stoppedAt = step.label;
-				return out;
-			}
-			continue;
-		}
-		if (step.kind === 'publish' && step.publishRow) {
-			const next = await applyPublish(loaded, step.publishRow, { otp: opts.otp });
-			const ok = isPublishedReason(next.reason);
-			out.steps.push({
-				...step,
-				ok,
-				reason: ok ? next.reason! : plainPublishError(next.reason ?? next.stderr ?? 'publish failed'),
-			});
-			if (!ok) {
-				out.ok = false;
-				out.stoppedAt = step.label;
-				return out;
-			}
-			continue;
-		}
 		if (step.pluginAction) {
 			if (!plug.plugin.apply) {
 				out.steps.push({ ...step, ok: false, reason: 'plugin has no apply' });

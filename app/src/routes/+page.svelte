@@ -1680,26 +1680,22 @@
 		});
 	}
 
+	type LandPlanBody = {
+		siteId: string;
+		companionId: string | null;
+		engineId: string;
+		steps: { kind: string; label: string }[];
+		needsPublish: boolean;
+		needsOtp: boolean;
+		note: string;
+	};
+
 	type LandPlanPayload = {
-		plan: {
-			siteId: string;
-			companionId: string | null;
-			engineId: string;
-			steps: { kind: string; label: string }[];
-						needsPublish: boolean;
-						needsOtp: boolean;
-						note: string;
-		};
+		plans?: LandPlanBody[];
+		plan?: LandPlanBody;
 		npmUser?: string | null;
 		authHint?: string;
 	};
-
-	async function planLandSite(siteId: string): Promise<LandPlanPayload> {
-		return (await call('/api/land', {
-			method: 'POST',
-			body: JSON.stringify({ apply: false, siteId }),
-		})) as LandPlanPayload;
-	}
 
 	async function startLand(siteIds: string[]): Promise<void> {
 		const ids = [...new Set(siteIds.map((id) => id.trim()).filter(Boolean))];
@@ -1707,19 +1703,16 @@
 		await run(
 			ids.length === 1 ? `planning land ${ids[0]}` : `planning land for ${ids.length} sites`,
 			async () => {
-				const payloads: LandPlanPayload[] = [];
-				for (const siteId of ids) {
-					payloads.push(await planLandSite(siteId));
+				const payload = (await call('/api/land', {
+					method: 'POST',
+					body: JSON.stringify({ apply: false, siteIds: ids }),
+				})) as LandPlanPayload;
+				publishAuthHint = payload.authHint ?? '';
+				if (payload.npmUser) {
+					npmUser = payload.npmUser;
+					persistNpmUser(payload.npmUser);
 				}
-				const firstAuth = payloads.find((row) => row.authHint);
-				publishAuthHint = firstAuth?.authHint ?? '';
-				for (const row of payloads) {
-					if (row.npmUser) {
-						npmUser = row.npmUser;
-						persistNpmUser(row.npmUser);
-					}
-				}
-				const plans = payloads.map((row) => row.plan);
+				const plans = payload.plans?.length ? payload.plans : payload.plan ? [payload.plan] : [];
 				const lined = landConfirmItems(plans);
 				const work = plans.filter((plan) => plan.steps.length > 0);
 				const needsPublish = plans.some((plan) => plan.needsPublish);
@@ -1731,11 +1724,7 @@
 						: `land plan ${ids.length} sites — ${work.length} with writes, nothing written`,
 					{ plans },
 				);
-				const companion = ids.length === 1
-					? one?.companionId
-						? ` Companion package: ${one.companionId}.`
-						: ' No matching fleet package.'
-					: ` ${work.length} of ${ids.length} need a write.`;
+				const extra = ids.length === 1 ? '' : ` ${work.length} of ${ids.length} need a write.`;
 				offerConfirm({
 					title: work.length
 						? work.length === 1
@@ -1745,7 +1734,7 @@
 							? `Nothing to land for ${ids[0]}`
 							: 'Nothing to land',
 					hint: work.length
-						? `${one?.note ?? ''}${companion}${needsOtp && publishAuthHint ? ` ${publishAuthHint}` : ''}`
+						? `${one?.note ?? ''}${extra}${needsOtp && publishAuthHint ? ` ${publishAuthHint}` : ''}`
 						: one?.note ?? 'Already current.',
 					items: lined.items.length ? lined.items : ['Already current.'],
 					itemKeys: lined.keys,
@@ -2048,7 +2037,7 @@
 			bits.push(
 				'Site names can match a fleet package and still be a different checkout.',
 				'Engine is the locked getfilepress version. Sync engine <version> appears only when that site is behind or headers need a merge. Headers and ship stay on the job buttons, not extra columns.',
-				'Land does needed engine/package writes, then Sync → Push → Ship for the site.',
+				'Land syncs getfilepress on the site, then Push → Ship. It does not publish filepress or a matching fleet package.',
 				'Git push stays on Fleet — that board already shows branch, ahead, and origin.',
 			);
 		}
@@ -2449,7 +2438,7 @@
 														class="btn btn-sm btn-write"
 														disabled={Boolean(busy)}
 														onclick={() => startLand([site.id])}
-														title="Plans engine package, matching fleet package, then Sync → Push → Ship for this site. Confirm in the modal."
+														title="Plans Sync → Push → Ship for this site. Confirm in the modal."
 													>
 														<Icon icon="lucide:plane-landing" />
 														Land
@@ -2774,7 +2763,7 @@
 									class="btn btn-write"
 									disabled={Boolean(busy) || landIds.length === 0}
 									onclick={() => startLand(landIds)}
-									title="Plans engine package, matching fleet package, then Sync → Push → Ship for the checked sites. Confirm in the modal."
+									title="Plans Sync → Push → Ship for the checked sites. Confirm in the modal."
 								>
 									<Icon icon="lucide:plane-landing" />
 									Land{landIds.length ? ` (${landIds.length})` : ''}
@@ -2887,7 +2876,7 @@
 														class="btn btn-sm btn-write"
 														disabled={Boolean(busy)}
 														onclick={() => startLand([row.id])}
-														title="Plans engine package, matching fleet package, then Sync → Push → Ship for this site. Confirm in the modal."
+														title="Plans Sync → Push → Ship for this site. Confirm in the modal."
 													>
 														<Icon icon="lucide:plane-landing" />
 														Land

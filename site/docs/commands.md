@@ -18,7 +18,7 @@ title: Commands
 | `localhelm publish <id>… [--apply]` | Bump/push if needed, then npm publish |
 | `localhelm auth` | `npm whoami` and token setup |
 | `localhelm cascade <id> [--apply]` | Retarget dependents to `^V` |
-| `localhelm land <site-id> [--apply]` | Needed engine/package writes, then Sync → Push → Ship |
+| `localhelm land <site-id> [--apply]` | Sync getfilepress on the site, then Push → Ship |
 | `localhelm brief` | Markdown of Today + listening Ports |
 | `localhelm archive [id…] [--apply]` | Hide on Today; folder stays |
 | `localhelm plugins` | Loaded `localhelm.plugin.mjs` hosts |

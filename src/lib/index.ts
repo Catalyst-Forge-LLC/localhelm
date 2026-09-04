@@ -30,8 +30,11 @@ export {
 	LAND_ENGINE_ID,
 	LAND_PLUGIN_ID,
 	landPluginApplyOk,
+	landRequestSiteIds,
+	landStepsFromPluginRow,
 	landWouldPublish,
 	planLand,
+	planLandMany,
 	requireLandSiteId,
 	requireLandSiteIds,
 } from './land.js';

@@ -7,6 +7,9 @@ import {
 	requireLandSiteId,
 	requireLandSiteIds,
 	LAND_ENGINE_ID,
+	LAND_PLAN_NOTE,
+	landRequestSiteIds,
+	landStepsFromPluginRow,
 } from './land.js';
 import { landConfirmItems } from './landDisplay.js';
 import { shipUnchanged } from './landShips.js';
@@ -73,6 +76,54 @@ describe('requireLandSiteId', () => {
 		]);
 		assert.deepEqual(lined.items, ['aibreze  Sync', 'aibreze  Ship', 'dictawhisper  already current']);
 		assert.deepEqual(lined.keys, ['aibreze', 'aibreze', 'dictawhisper']);
+	});
+});
+
+describe('landRequestSiteIds', () => {
+	it('accepts siteIds or a single siteId and requires a name', () => {
+		assert.deepEqual(landRequestSiteIds({ siteIds: [' smellcheck ', 'coldeye', 'smellcheck'] }), [
+			'smellcheck',
+			'coldeye',
+		]);
+		assert.deepEqual(landRequestSiteIds({ siteId: ' aibreze-site ' }), ['aibreze-site']);
+		assert.throws(() => landRequestSiteIds({}), /name the FilePress site/);
+	});
+});
+
+describe('landStepsFromPluginRow', () => {
+	it('maps sync, push, and ship and skips an unchanged ship', () => {
+		assert.deepEqual(landStepsFromPluginRow('orphan', undefined, null), []);
+		const steps = landStepsFromPluginRow(
+			'smellcheck',
+			{
+				id: 'smellcheck',
+				sync: { writes: true },
+				push: { writes: true, action: 'push', reason: '2 ahead' },
+				ship: { writes: true, fingerprint: 'abc', script: 'pnpm ship' },
+			},
+			null,
+		);
+		assert.deepEqual(
+			steps.map((s) => s.kind),
+			['sync', 'site-push', 'ship'],
+		);
+		assert.equal(steps.some((s) => s.kind === 'publish'), false);
+		assert.equal(
+			landStepsFromPluginRow(
+				'smellcheck',
+				{ ship: { writes: true, fingerprint: 'abc' } },
+				'abc',
+			).length,
+			0,
+		);
+	});
+});
+
+describe('LAND_PLAN_NOTE', () => {
+	it('describes site sync and ship, not an engine publish', () => {
+		assert.match(LAND_PLAN_NOTE, /syncs getfilepress/i);
+		assert.match(LAND_PLAN_NOTE, /does not publish the filepress package/i);
+		assert.doesNotMatch(LAND_PLAN_NOTE, /companion|matching fleet package/i);
 	});
 });
 

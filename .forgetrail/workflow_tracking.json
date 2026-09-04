@@ -1095,6 +1095,34 @@
         "Compact dots that expand one row"
       ],
       "status": "active"
+    },
+    {
+      "id": "d78",
+      "timestamp": "2026-09-03T23:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 25,
+      "decision": "Land is the named FilePress site only: Sync getfilepress, then site Push, then Ship. It does not pull, push, or publish the filepress package or a companion fleet package. Fleet Publish stays the npm path. companionId remains plan metadata. needsPublish and needsOtp stay false.",
+      "rationale": "Operator 2026-09-03: landing many sites started each with publish filepress to npm. Land is about the site, not FilePress. They want Land to update/sync the engine pin and ship.",
+      "alternatives_considered": [
+        "Keep engine/companion package writes on Land (d32)",
+        "Publish filepress once, then land sites",
+        "Land = sync + ship only, no site push"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "d79",
+      "timestamp": "2026-09-03T23:56:00Z",
+      "phase": "2-scaffolding",
+      "session": 25,
+      "decision": "Land plan is one FilePress land call for all named site ids (POST /api/land siteIds, CLI planLandMany). The confirm waits on that one plan. Apply still runs one site at a time.",
+      "rationale": "Operator 2026-09-03: Land (N) confirm was slow because the dashboard planned each site in series (N pnpm exec tsx bridges). They picked A: one request, same as Sync/Ship.",
+      "alternatives_considered": [
+        "Reuse the Sites board and skip a live plan",
+        "Keep a FilePress bridge warm",
+        "Keep one HTTP request per site"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
