@@ -1,6 +1,6 @@
 {
   "name": "localhelm",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": false,
   "type": "module",
   "description": "Control panel for local development. The local fleet is the apps and sites you keep, plus the ports they listen on.",
