@@ -69,3 +69,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Add projects list is A–Z by folder path, case-insensitive _(2026-09-04)_
 - [x] Needs you filter: All / Publish / Cut / Push _(2026-08-26)_
 - [x] Needs you bulk Commit / Push / Cut next to Publish unpublished _(2026-09-04)_
+- [x] xFacts labels lists the enrolled fleet; check rows and Add labels _(2026-09-04)_

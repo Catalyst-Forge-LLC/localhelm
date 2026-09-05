@@ -1192,6 +1192,20 @@
         "Add a Commit filter chip without bulk buttons"
       ],
       "status": "active"
+    },
+    {
+      "id": "d85",
+      "timestamp": "2026-09-05T00:22:00Z",
+      "phase": "2-scaffolding",
+      "session": 28,
+      "decision": "The xFacts board lists enrolled fleet projects (from localhelm.fleet.json), not a hardcoded 13-name shelf. Checkboxes work like Fleet. Add labels / Refresh runs the AppFacts generator for named ids, creating APP_FACTS.md when missing. Hidden archived rows stay off. Helm does not reimplement label discovery.",
+      "rationale": "Operator 2026-09-04: the xFacts table looked short. They asked if it only showed repos that already had labels, and wanted to select more like Fleet and add labels as needed.",
+      "alternatives_considered": [
+        "Keep the shelf set and add an Add-projects picker",
+        "Union fleet rows in Helm without changing the xFacts plugin",
+        "Walk every sibling folder and ignore the fleet file"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

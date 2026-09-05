@@ -2288,6 +2288,12 @@
 				'Git push stays on Fleet — that board already shows branch, ahead, and origin.',
 			);
 		}
+		if (board.plugin === 'xfacts') {
+			bits.push(
+				'This is the enrolled fleet, not a short shelf list. Hidden archived rows stay off.',
+				'Check rows like Fleet. Add labels runs the AppFacts generator for repos with no APP_FACTS.md. Refresh rewrites an existing label. Confirm in the modal.',
+			);
+		}
 		bits.push('Check rows, then run a job on the selection.');
 		return bits.filter(Boolean).join('\n\n');
 	}
@@ -3093,14 +3099,17 @@
 							{/if}
 							{#each boardActions(board) as act (act.id)}
 								{@const icon = actionIcon(act)}
+								{@const bulkLabel = board.plugin === 'xfacts' && act.id === 'refresh' ? 'Add / refresh labels' : act.label}
 								<button
 									class="btn btn-write"
 									disabled={Boolean(busy) || checkedSiteIds(board, act.id).length === 0}
-									onclick={() => startPluginJob(board.plugin, act.id, checkedSiteIds(board, act.id), act.label)}
-									title={`Shows what ${act.label.toLowerCase()} would do for the checked sites. Confirm in the modal.`}
+									onclick={() => startPluginJob(board.plugin, act.id, checkedSiteIds(board, act.id), bulkLabel)}
+									title={board.plugin === 'xfacts' && act.id === 'refresh'
+										? 'Creates APP_FACTS.md when missing, or refreshes an existing label. Confirm in the modal.'
+										: `Shows what ${act.label.toLowerCase()} would do for the checked sites. Confirm in the modal.`}
 								>
 									{#if icon}<Icon {icon} />{/if}
-									{act.label}{checkedSiteIds(board, act.id).length ? ` (${checkedSiteIds(board, act.id).length})` : ''}
+									{bulkLabel}{checkedSiteIds(board, act.id).length ? ` (${checkedSiteIds(board, act.id).length})` : ''}
 								</button>
 							{/each}
 						</div>
