@@ -1206,6 +1206,20 @@
         "Walk every sibling folder and ignore the fleet file"
       ],
       "status": "active"
+    },
+    {
+      "id": "d86",
+      "timestamp": "2026-09-05T03:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 28,
+      "decision": "The xFacts board always shows five label columns (app, tool, skill, agent, model). The app cell is the product name with its /v link. Helm hides only name and status (status stays a problem chip). The bridge walks the repo for every *_FACTS.md kind. SKILL.md packs are not SkillFacts. Add labels still writes AppFacts only. “no label” means no facts files at all.",
+      "rationale": "Operator 2026-09-04: after adding labels on coldeye, tool and skill were dashes and there was no app column. They expected every label type as a column, and thought skills had been added.",
+      "alternatives_considered": [
+        "Treat skills/SKILL.md as a skill label",
+        "Keep hiding app and only show a chip when AppFacts exists",
+        "Show agent/model only when some row has those files"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

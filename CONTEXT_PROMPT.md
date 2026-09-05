@@ -230,3 +230,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Add projects lists folders A–Z, ignoring case, with nested folders under their parent. Default string sort put `FocusFreely` above `acmegeek`.
 - Needs you head has bulk Commit dirty / Publish unpublished / Push ahead / Cut versions, not only Publish unpublished.
 - xFacts labels lists the enrolled fleet (not a 13-name shelf). Check rows like Fleet; Add labels / Refresh creates or rewrites APP_FACTS.md.
+
+### Session 28 — 2026-09-05
+
+- xFacts table always shows app / tool / skill / agent / model. App cell is the product name (with `/v` when present). Helm no longer hides the app column. Skill/tool/agent/model stay empty until those `*_FACTS.md` files exist — `SKILL.md` packs are not SkillFacts. “no label” only when the repo has no facts files.

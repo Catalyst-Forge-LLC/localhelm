@@ -2,7 +2,7 @@ import { familyRole, familyStem } from './family.js';
 
 const HIDDEN_FILEPRESS_COLS = new Set(['pin', 'locked', 'update', 'headers', 'ship']);
 const HIDDEN_FILEPRESS_JOBS = new Set(['sync', 'push']);
-const HIDDEN_XFACTS_COLS = new Set(['app', 'name', 'status']);
+const HIDDEN_XFACTS_COLS = new Set(['name', 'status']);
 
 export type BoardColumn = { id: string; label: string };
 

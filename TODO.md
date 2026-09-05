@@ -70,3 +70,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Needs you filter: All / Publish / Cut / Push _(2026-08-26)_
 - [x] Needs you bulk Commit / Push / Cut next to Publish unpublished _(2026-09-04)_
 - [x] xFacts labels lists the enrolled fleet; check rows and Add labels _(2026-09-04)_
+- [x] xFacts table shows app / tool / skill / agent / model; app cell is the product name _(2026-09-05)_

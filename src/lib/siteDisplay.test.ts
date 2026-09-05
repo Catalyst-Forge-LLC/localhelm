@@ -34,16 +34,18 @@ describe('siteDisplay', () => {
 		assert.deepEqual(siteTableColumns('other', [{ id: 'pin', label: 'pin' }]), [{ id: 'pin', label: 'pin' }]);
 	});
 
-	it('hides xFacts app, name, and ok-status columns', () => {
+	it('keeps xFacts label columns and hides name plus ok-status', () => {
 		assert.deepEqual(
 			siteTableColumns('xfacts', [
 				{ id: 'app', label: 'app' },
 				{ id: 'tool', label: 'tool' },
 				{ id: 'skill', label: 'skill' },
+				{ id: 'agent', label: 'agent' },
+				{ id: 'model', label: 'model' },
 				{ id: 'name', label: 'name' },
 				{ id: 'status', label: 'status' },
 			]).map((col) => col.id),
-			['tool', 'skill'],
+			['app', 'tool', 'skill', 'agent', 'model'],
 		);
 		assert.equal(pluginRowNote('xfacts', { status: 'ok' }), null);
 		assert.equal(pluginRowNote('xfacts', { status: 'needs encode' }), 'needs encode');
