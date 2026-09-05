@@ -68,3 +68,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Commit drafts find Ollama through ollanet (local first, network if needed) _(2026-09-04)_
 - [x] Add projects list is A–Z by folder path, case-insensitive _(2026-09-04)_
 - [x] Needs you filter: All / Publish / Cut / Push _(2026-08-26)_
+- [x] Needs you bulk Commit / Push / Cut next to Publish unpublished _(2026-09-04)_

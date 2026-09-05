@@ -1178,6 +1178,20 @@
         "Always run a LAN sweep"
       ],
       "status": "active"
+    },
+    {
+      "id": "d84",
+      "timestamp": "2026-09-05T00:05:00Z",
+      "phase": "2-scaffolding",
+      "session": 28,
+      "decision": "Needs you offers bulk Commit dirty, Publish unpublished, Push ahead, and Cut versions when those writes exist. Each button names the eligible visible ids and still opens a plan you confirm. Write pins stay per publisher. Hidden archived rows are not included.",
+      "rationale": "Operator 2026-09-04: Needs you only had Publish unpublished. They asked for Push, Commit, and the other fleet writes in the same place.",
+      "alternatives_considered": [
+        "Keep only Publish unpublished and use Fleet checks for the rest",
+        "Bulk Write pins across every publisher in one apply",
+        "Add a Commit filter chip without bulk buttons"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

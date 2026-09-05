@@ -186,7 +186,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Fleet table: one version column (npm note only when it differs). Project cell does not repeat the id as the package name.
 - Ports leases: hide listening / log / empty firewall; recipe cell holds command or “no recipe”; name cell is one line.
 - Cut version only when origin has commits after the last npm version (tag or package.json bump). Publish plan skips `nothing to cut`.
-- Today is a four-pane board (Needs you, Looks, Sites, Ports). Each pane scrolls. Refresh sits next to the project id. Needs you is fleet writes; Looks is Ports facts. Needs you filters: All / Publish / Cut / Push (`?need=`).
+- Today is a four-pane board (Needs you, Looks, Sites, Ports). Each pane scrolls. Refresh sits next to the project id. Needs you is fleet writes; Looks is Ports facts. Needs you filters: All / Publish / Cut / Push (`?need=`). The pane head offers bulk **Commit dirty**, **Publish unpublished**, **Push ahead**, and **Cut versions** when those writes exist. Each still opens a plan you confirm. Write pins stay per publisher.
 - Sites tab: a FilePress `live` http(s) URL makes the site name and live cell open in a new tab. `—` and non-http values stay plain text. When the matching `*-site` lease is listening, the same Ports open icon appears on the Sites row (never the dashboard lease).
 - Ports: Leases / Stacks / Observed. Lease filters copy LocalBerth (Listening/Quiet, LAN/Loopback, Conflict/Ephemeral, firewall). Stacks is one row per family with its own Start/Stop. Observed only gets Bind. `?ports=stacks` or `observed`.
 - Plugin confirm lines use the job only. Ship shows `pnpm ship in …`, not leftover `pnpm update getfilepress`. Push uses its git reason. Sync still shows the engine update.
@@ -228,3 +228,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - Dirty repos get **Commit** on Today and Fleet (and a checked-row toolbar). The confirm lists files plus an editable message. **ollanet** finds Ollama (local first, then the network; LAN only if needed) and drafts the text; otherwise a fallback. Confirm is git add + git commit only — no push. CLI: `localhelm commit <id>... [--message TEXT] [--apply]`.
 - Add projects lists folders A–Z, ignoring case, with nested folders under their parent. Default string sort put `FocusFreely` above `acmegeek`.
+- Needs you head has bulk Commit dirty / Publish unpublished / Push ahead / Cut versions, not only Publish unpublished.

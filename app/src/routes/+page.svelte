@@ -284,9 +284,6 @@
 				}),
 			),
 	);
-	const shipRows = $derived(
-		(inventory?.projects ?? []).filter((row) => !row.private && !row.missing && Boolean(row.npm.name)),
-	);
 	const cascadeTargets = $derived.by((): CascadeTarget[] => {
 		const projects = inventory?.projects ?? [];
 		return projects
@@ -379,7 +376,13 @@
 		return row ? canCommit(row) : false;
 	}));
 	const unpublishedPublishIds = $derived(
-		shipRows.filter((row) => row.unpublishedAhead && !whyNotPublish(row)).map((row) => row.id),
+		visibleProjects.filter((row) => row.unpublishedAhead && !whyNotPublish(row)).map((row) => row.id),
+	);
+	const needCommitIds = $derived(visibleProjects.filter((row) => canCommit(row)).map((row) => row.id));
+	const needPushIds = $derived(visibleProjects.filter((row) => canPush(row)).map((row) => row.id));
+	const needCutIds = $derived(visibleProjects.filter((row) => canCutVersion(row)).map((row) => row.id));
+	const needBulkWrites = $derived(
+		needCommitIds.length + unpublishedPublishIds.length + needPushIds.length + needCutIds.length > 0,
 	);
 	const fleetIds = $derived(visibleProjects.map((row) => row.id));
 	const siteIds = $derived((filepressBoard?.rows ?? []).map((row) => row.id));
@@ -2472,16 +2475,53 @@
 								{/each}
 							</div>
 						</div>
-						{#if unpublishedPublishIds.length > 0}
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy)}
-								onclick={() => startPublish(unpublishedPublishIds)}
-								title="Shows bump, push, and npm publish for unpublished-ahead packages the plan would actually publish."
-							>
-								<Icon icon="lucide:package-up" />
-								Publish unpublished
-							</button>
+						{#if needBulkWrites}
+							<div class="group-buttons">
+								{#if needCommitIds.length}
+									<button
+										class="btn btn-write"
+										disabled={Boolean(busy)}
+										onclick={() => void startCommit(needCommitIds)}
+										title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push."
+									>
+										<Icon icon="lucide:git-commit-horizontal" />
+										Commit dirty
+									</button>
+								{/if}
+								{#if unpublishedPublishIds.length}
+									<button
+										class="btn btn-write"
+										disabled={Boolean(busy)}
+										onclick={() => startPublish(unpublishedPublishIds)}
+										title="Shows bump, push, and npm publish for unpublished-ahead packages the plan would actually publish."
+									>
+										<Icon icon="lucide:package-up" />
+										Publish unpublished
+									</button>
+								{/if}
+								{#if needPushIds.length}
+									<button
+										class="btn btn-write"
+										disabled={Boolean(busy)}
+										onclick={() => startPush(needPushIds)}
+										title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local."
+									>
+										<Icon icon="lucide:upload" />
+										Push ahead
+									</button>
+								{/if}
+								{#if needCutIds.length}
+									<button
+										class="btn btn-write"
+										disabled={Boolean(busy)}
+										onclick={() => startPublish(needCutIds)}
+										title="Shows a version cut plus publish for packages whose origin has commits since the last npm version. Confirm in the modal."
+									>
+										<Icon icon="lucide:scissors" />
+										Cut versions
+									</button>
+								{/if}
+							</div>
 						{/if}
 					</div>
 					<div class="panel-body">
