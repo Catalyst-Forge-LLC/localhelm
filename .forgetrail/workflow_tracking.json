@@ -1220,6 +1220,20 @@
         "Show agent/model only when some row has those files"
       ],
       "status": "active"
+    },
+    {
+      "id": "d87",
+      "timestamp": "2026-09-05T03:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 28,
+      "decision": "Add labels / Refresh writes AppFacts and any missing SkillFacts beside SKILL.md packs (code-filled template, no LLM, skip fixtures and .cursor). Existing SkillFacts are left alone. ToolFacts, AgentFacts, and ModelFacts are not invented: tool needs an MCP tool list, agent needs an agent config, model is catalog-only.",
+      "rationale": "Operator 2026-09-04: they chose B (extend Add labels for SkillFacts) and asked about the other label types.",
+      "alternatives_considered": [
+        "Hand-author only SKILL_FACTS.md for coldeye",
+        "Invent ToolFacts/AgentFacts stubs with empty inventories",
+        "Treat SKILL.md as a skill cell without a facts file"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

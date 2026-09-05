@@ -233,4 +233,5 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 28 — 2026-09-05
 
-- xFacts table always shows app / tool / skill / agent / model. App cell is the product name (with `/v` when present). Helm no longer hides the app column. Skill/tool/agent/model stay empty until those `*_FACTS.md` files exist — `SKILL.md` packs are not SkillFacts. “no label” only when the repo has no facts files.
+- xFacts table always shows app / tool / skill / agent / model. App cell is the product name (with `/v` when present). Helm no longer hides the app column. Skill/tool/agent/model stay empty until those `*_FACTS.md` files exist. “no label” only when the repo has no facts files.
+- Add labels / Refresh writes AppFacts and missing SkillFacts next to `SKILL.md` packs. Tool, agent, and model are not invented (no generators; ModelFacts is catalog-only).

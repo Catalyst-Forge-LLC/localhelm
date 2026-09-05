@@ -71,3 +71,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Needs you bulk Commit / Push / Cut next to Publish unpublished _(2026-09-04)_
 - [x] xFacts labels lists the enrolled fleet; check rows and Add labels _(2026-09-04)_
 - [x] xFacts table shows app / tool / skill / agent / model; app cell is the product name _(2026-09-05)_
+- [x] Add labels writes missing SkillFacts next to SKILL.md packs; tool/agent/model stay source-backed _(2026-09-05)_
