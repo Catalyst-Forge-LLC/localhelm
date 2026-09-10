@@ -29,7 +29,7 @@ export type { ReadyView } from './ready.js';
 export { detectGithubPublish, githubRepoFromOrigin, githubWorkflowUrl } from './githubPublish.js';
 export { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, npmWhoami, planPublish, planPublishFromInventory, publishAuthHintFor, publishStepLabel, requirePublishIds } from './publish.js';
 export type { PublishRow, PublishStep, PublishStepEvent } from './publish.js';
-export { applyConfirmStep, emptyConfirmPhases, markConfirmKey } from './confirmProgress.js';
+export { applyConfirmStep, commitDraftProgressHint, emptyConfirmPhases, markConfirmKey } from './confirmProgress.js';
 export type { ConfirmPhase } from './confirmProgress.js';
 export {
 	buildConfirmRoster,

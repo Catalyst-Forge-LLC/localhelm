@@ -72,3 +72,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] xFacts labels lists the enrolled fleet; check rows and Add labels _(2026-09-04)_
 - [x] xFacts table shows app / tool / skill / agent / model; app cell is the product name _(2026-09-05)_
 - [x] Add labels writes missing SkillFacts next to SKILL.md packs; tool/agent/model stay source-backed _(2026-09-05)_
+- [x] Multi-repo Commit keeps Asking Ollama up until every draft lands; one repo at a time _(2026-09-09)_

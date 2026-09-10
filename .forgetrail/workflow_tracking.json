@@ -1234,6 +1234,20 @@
         "Treat SKILL.md as a skill cell without a facts file"
       ],
       "status": "active"
+    },
+    {
+      "id": "d88",
+      "timestamp": "2026-09-09T23:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 29,
+      "decision": "Bulk Commit still drafts Ollama messages one repo at a time (one local GPU). The confirm hint and roster spinner stay on until every draft returns; each message box updates as soon as that repo finishes. The first reply no longer clears Asking Ollama.",
+      "rationale": "Operator 2026-09-09: multi-repo Commit looked like only the first repo got a custom message; the loader died after the first return; later drafts appeared after a wait. They asked if the rest timed out and whether drafts run concurrently.",
+      "alternatives_considered": [
+        "Fire every Ollama chat in parallel",
+        "Wait for all drafts before opening the modal",
+        "Keep a single hint that flips after the first reply"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

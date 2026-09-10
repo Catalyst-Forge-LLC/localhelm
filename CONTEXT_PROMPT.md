@@ -235,3 +235,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - xFacts table always shows app / tool / skill / agent / model. App cell is the product name (with `/v` when present). Helm no longer hides the app column. Skill/tool/agent/model stay empty until those `*_FACTS.md` files exist. “no label” only when the repo has no facts files.
 - Add labels / Refresh writes AppFacts and missing SkillFacts next to `SKILL.md` packs. Tool, agent, and model are not invented (no generators; ModelFacts is catalog-only).
+
+### Session 29 — 2026-09-09
+
+- Multi-repo Commit drafts one Ollama message at a time (one GPU). The “Asking Ollama…” hint and roster spinner stay up until the last repo lands; each textarea updates as soon as that draft returns. They were never concurrent, and the old hint cleared after the first reply.

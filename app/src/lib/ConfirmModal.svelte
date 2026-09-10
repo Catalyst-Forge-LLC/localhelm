@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { commitDraftProgressHint } from './confirmProgress';
 	import { buildConfirmRoster, confirmRosterSelected } from './confirmRoster';
 	import Icon from './Icon.svelte';
 
@@ -21,6 +22,8 @@
 		failNote?: string;
 		messageById?: Record<string, string>;
 		draftHint?: string;
+		draftingIds?: string[];
+		draftNoteById?: Record<string, string>;
 		children?: Snippet;
 		onconfirm: () => void;
 		oncancel?: () => void;
@@ -43,6 +46,8 @@
 		failNote = '',
 		messageById = $bindable<Record<string, string>>({}),
 		draftHint = '',
+		draftingIds = [],
+		draftNoteById = {},
 		children,
 		onconfirm,
 		oncancel,
@@ -72,6 +77,16 @@
 	const draftIds = $derived(Object.keys(messageById));
 	const draftId = $derived(selectedId ?? draftIds[0] ?? '');
 	const draftsReady = $derived(draftIds.length === 0 || draftIds.every((id) => Boolean(messageById[id]?.trim())));
+	const liveDraftHint = $derived(
+		draftingIds.length || Object.keys(draftNoteById).length
+			? commitDraftProgressHint({
+					ids: draftIds.length ? draftIds : draftingIds,
+					pending: draftingIds,
+					selected: draftId || undefined,
+					notes: draftNoteById,
+				})
+			: draftHint,
+	);
 
 	$effect(() => {
 		const id = selectedId;
@@ -173,6 +188,8 @@
 								{#if phaseMark(group.phase)}
 									{@const mark = phaseMark(group.phase)!}
 									<Icon icon={mark.icon} class={mark.spin ? 'icon spin' : 'icon'} />
+								{:else if draftingIds.includes(group.id)}
+									<Icon icon="lucide:loader-circle" class="icon spin" />
 								{:else}
 									<span class="dot"></span>
 								{/if}
@@ -251,8 +268,8 @@
 					<span class="draft-id">{draftId}</span>
 				{/if}
 			</label>
-			{#if draftHint}
-				<p class="draft-hint">{draftHint}</p>
+			{#if liveDraftHint}
+				<p class="draft-hint">{liveDraftHint}</p>
 			{/if}
 			<textarea
 				id="confirm-draft"

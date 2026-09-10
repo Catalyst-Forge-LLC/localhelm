@@ -35,7 +35,7 @@
 	} from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
-	import { applyConfirmStep, emptyConfirmPhases, markConfirmKey, publishNeedsGithub, publishNeedsNpm, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
+	import { applyConfirmStep, commitDraftProgressHint, emptyConfirmPhases, markConfirmKey, publishNeedsGithub, publishNeedsNpm, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
 	import { landConfirmItems } from '$lib/landDisplay';
 	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
@@ -216,6 +216,9 @@
 	let confirmShowOtp = $state(false);
 	let confirmMessages = $state<Record<string, string>>({});
 	let confirmDraftHint = $state('');
+	let confirmDrafting = $state<string[]>([]);
+	let confirmDraftNotes = $state<Record<string, string>>({});
+	let confirmDraftIds = $state<string[]>([]);
 	let confirmMessageTouched = $state<Record<string, boolean>>({});
 	let confirmRun = $state<(() => void) | null>(null);
 	let statusReady = $state(false);
@@ -961,6 +964,9 @@
 		confirmShowOtp = Boolean(spec.showOtp);
 		confirmMessages = spec.messages ?? {};
 		confirmDraftHint = spec.draftHint ?? '';
+		confirmDrafting = [];
+		confirmDraftNotes = {};
+		confirmDraftIds = [];
 		confirmMessageTouched = {};
 		confirmRun = spec.canApply && spec.run ? spec.run : null;
 		confirmOpen = true;
@@ -1348,7 +1354,7 @@
 					items,
 					itemKeys,
 					messages: Object.fromEntries(can.map((row) => [row.id, row.message])),
-					draftHint: can.length ? 'Asking Ollama…' : '',
+					draftHint: can.length ? commitDraftProgressHint({ ids: can.map((row) => row.id), pending: can.map((row) => row.id) }) : '',
 					confirmLabel: can.length === 1 ? `Commit ${can[0]?.id}` : `Commit ${can.length}`,
 					canApply: can.length > 0,
 					run: () => void applyCommits(can.map((row) => row.id)),
@@ -1360,24 +1366,54 @@
 	}
 
 	async function suggestCommitDrafts(ids: string[]): Promise<void> {
+		confirmDraftIds = ids;
+		confirmDrafting = [...ids];
+		confirmDraftNotes = {};
+		confirmDraftHint = commitDraftProgressHint({ ids, pending: confirmDrafting });
 		for (const id of ids) {
-			if (confirmMessageTouched[id] || !confirmOpen) continue;
+			if (!confirmOpen) break;
+			if (confirmMessageTouched[id]) {
+				confirmDrafting = confirmDrafting.filter((item) => item !== id);
+				confirmDraftHint = commitDraftProgressHint({
+					ids: confirmDraftIds,
+					pending: confirmDrafting,
+					notes: confirmDraftNotes,
+				});
+				continue;
+			}
+			confirmDraftHint = commitDraftProgressHint({
+				ids: confirmDraftIds,
+				pending: confirmDrafting,
+				selected: id,
+				notes: confirmDraftNotes,
+			});
 			try {
 				const data = (await call('/api/commit', {
 					method: 'POST',
 					body: JSON.stringify({ ids: [id], apply: false, suggest: true }),
 				})) as { rows: DirtCommitRow[] };
 				const row = data.rows[0];
-				if (!row || confirmMessageTouched[id] || !confirmOpen) continue;
-				if (row.message) confirmMessages = { ...confirmMessages, [id]: row.message };
-				confirmDraftHint = row.suggestSource === 'ollama' && row.suggestModel
-					? `Ollama (${row.suggestModel}${row.suggestHost ? ` on ${row.suggestHost}` : ''}) drafted this. Edit if you want.`
-					: row.suggestNote ?? 'Edit the message, then confirm.';
-			} catch (err) {
-				if (!confirmDraftHint) {
-					confirmDraftHint = err instanceof Error ? err.message : String(err);
+				if (!row || !confirmOpen) continue;
+				if (!confirmMessageTouched[id] && row.message) {
+					confirmMessages = { ...confirmMessages, [id]: row.message };
 				}
+				const note =
+					row.suggestSource === 'ollama' && row.suggestModel
+						? `Ollama (${row.suggestModel}${row.suggestHost ? ` on ${row.suggestHost}` : ''}) drafted this. Edit if you want.`
+						: row.suggestNote ?? 'Edit the message, then confirm.';
+				confirmDraftNotes = { ...confirmDraftNotes, [id]: note };
+			} catch (err) {
+				confirmDraftNotes = {
+					...confirmDraftNotes,
+					[id]: err instanceof Error ? err.message : String(err),
+				};
 			}
+			confirmDrafting = confirmDrafting.filter((item) => item !== id);
+			confirmDraftHint = commitDraftProgressHint({
+				ids: confirmDraftIds,
+				pending: confirmDrafting,
+				notes: confirmDraftNotes,
+			});
 		}
 	}
 
@@ -1392,6 +1428,7 @@
 	async function applyCommits(ids: string[]): Promise<void> {
 		const named = ids.filter(Boolean);
 		if (!named.length) return;
+		confirmDrafting = [];
 		await run(bulkProgressLabel('committing', 1, named.length, named[0]), async () => {
 			for (let i = 0; i < named.length; i++) {
 				const id = named[i];
@@ -3724,6 +3761,8 @@
 	failNote={error}
 	bind:messageById={confirmMessages}
 	draftHint={confirmDraftHint}
+	draftingIds={confirmDrafting}
+	draftNoteById={confirmDraftNotes}
 	ondraft={(id) => {
 		confirmMessageTouched = { ...confirmMessageTouched, [id]: true };
 	}}
