@@ -24,6 +24,6 @@ The same product can appear on three tabs. **Also on** chips jump and check that
 
 ## Writes
 
-Click Push, Publish, Cut version, or Write pins. The modal is the plan. Confirm applies. Close leaves disk unchanged.
+Click Push, Publish, or Write pins. The modal is the plan. Confirm applies. Close leaves disk unchanged. Publish covers both an already-bumped version and a bump plus npm when origin has commits since the last published version.
 
 Publish OTP lives in the confirm modal. Never `--force`.

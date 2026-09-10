@@ -20,7 +20,7 @@ export type PublishGateRow = {
 	localVersion: string | null;
 	npm: { name?: string; latest?: string; status: string; error?: string };
 	git: GateGit;
-	/** Origin commits after the published version. 0 means Cut would bump with no new work. */
+	/** Origin commits after the published version. 0 means Publish would bump with no new work. */
 	commitsSinceNpm?: number | null;
 };
 
@@ -207,7 +207,7 @@ export function whyNotPublish(row: PublishGateRow, kind: BumpKind = 'patch'): st
 
 	const needsBump = !neverPublished && !row.unpublishedAhead;
 	if (needsBump) {
-		if (row.commitsSinceNpm === 0) return 'nothing to cut';
+		if (row.commitsSinceNpm === 0) return 'nothing to publish';
 		try {
 			bumpTriple(row.localVersion, kind);
 		} catch (err) {
@@ -225,12 +225,12 @@ export function whyNotPublish(row: PublishGateRow, kind: BumpKind = 'patch'): st
 	return undefined;
 }
 
-/** Local already matches npm; publish would cut a new version. Same gate as the plan. */
-export function canCutVersion(row: PublishGateRow): boolean {
-	return !row.unpublishedAhead && !whyNotPublish(row);
+/** Same gate as the publish plan: unpublished-ahead or a version bump with new origin commits. */
+export function canPublish(row: PublishGateRow, kind: BumpKind = 'patch'): boolean {
+	return !whyNotPublish(row, kind);
 }
 
-export const FLEET_WRITE_ORDER = ['commit', 'publish', 'push', 'pins', 'cut'] as const;
+export const FLEET_WRITE_ORDER = ['commit', 'publish', 'push', 'pins'] as const;
 export type FleetWriteId = (typeof FLEET_WRITE_ORDER)[number];
 
 export function canCommit(row: { missing?: boolean; git: GateGit }): boolean {
@@ -249,10 +249,9 @@ export function canShip(row: { missing?: boolean; ship?: { dir: string } }): boo
 export function fleetWriteIds(row: PublishGateRow, writablePins = 0): FleetWriteId[] {
 	const ids: FleetWriteId[] = [];
 	if (canCommit(row)) ids.push('commit');
-	if (row.unpublishedAhead && !whyNotPublish(row)) ids.push('publish');
+	if (canPublish(row)) ids.push('publish');
 	if ((row.git.ahead ?? 0) > 0 && !whyNotPush(row.git)) ids.push('push');
 	if (writablePins > 0) ids.push('pins');
-	if (canCutVersion(row)) ids.push('cut');
 	return ids;
 }
 
@@ -278,22 +277,23 @@ export function fleetWriteLabel(
 	writablePins = 0,
 ): string {
 	if (id === 'commit') return 'Commit';
-	if (id === 'publish') return `Publish ${row.localVersion ?? ''}`.trim();
+	if (id === 'publish') {
+		const version = row.unpublishedAhead
+			? (row.localVersion ?? '')
+			: (nextCutVersion(row, kind) ?? row.localVersion ?? '');
+		const commits = row.unpublishedAhead ? '' : commitCountLabel(row.commitsSinceNpm);
+		if (version && commits) return `Publish ${version} · ${commits}`;
+		if (version) return `Publish ${version}`;
+		if (commits) return `Publish · ${commits}`;
+		return 'Publish';
+	}
 	if (id === 'push') {
 		const commits = commitCountLabel(row.git.ahead);
 		return commits ? `Push ${commits}` : 'Push';
 	}
-	if (id === 'pins') {
-		if (writablePins === 1) return 'Write 1 pin';
-		if (writablePins > 1) return `Write ${writablePins} pins`;
-		return 'Write pins';
-	}
-	const next = nextCutVersion(row, kind);
-	const commits = commitCountLabel(row.commitsSinceNpm);
-	if (next && commits) return `Cut ${next} · ${commits}`;
-	if (next) return `Cut ${next}`;
-	if (commits) return `Cut version · ${commits}`;
-	return 'Cut version';
+	if (writablePins === 1) return 'Write 1 pin';
+	if (writablePins > 1) return `Write ${writablePins} pins`;
+	return 'Write pins';
 }
 
 type CascadeConsumer = {

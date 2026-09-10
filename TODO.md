@@ -53,6 +53,7 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Sites: engine version + Sync engine only when behind; one-line site cell _(2026-08-26)_
 - [x] Table cleanup: Fleet one version column; Ports drop listening/log/firewall noise; Sites hide headers/ship columns _(2026-08-26)_
 - [x] Cut version only when origin has commits since the last npm version _(2026-08-26)_
+- [x] Publish absorbs Cut — one button, next version + commit count _(2026-09-10)_
 - [x] Today pane board: section scroll, Looks on the glass, refresh pinned to the id _(2026-08-26)_
 - [x] Phone tile grid is the Deck (`/deck`); `/visitor` redirects _(2026-08-31)_
 - [x] Confirm roster + current pane for multi-id writes _(2026-08-31)_
@@ -68,8 +69,8 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Commit drafts find Ollama through ollanet (network host first, this machine last) _(2026-09-10)_
 - [x] Status/plugin boot is parallel and does not lock the chrome _(2026-09-10)_
 - [x] Add projects list is A–Z by folder path, case-insensitive _(2026-09-04)_
-- [x] Needs you filter: All / Publish / Cut / Push _(2026-08-26)_
-- [x] Needs you bulk Commit / Push / Cut next to Publish unpublished _(2026-09-04)_
+- [x] Needs you filter: All / Publish / Push _(2026-09-10)_
+- [x] Needs you bulk Commit / Publish / Push _(2026-09-10)_
 - [x] xFacts labels lists the enrolled fleet; check rows and Add labels _(2026-09-04)_
 - [x] xFacts table shows app / tool / skill / agent / model; app cell is the product name _(2026-09-05)_
 - [x] Add labels writes missing SkillFacts next to SKILL.md packs; tool/agent/model stay source-backed _(2026-09-05)_

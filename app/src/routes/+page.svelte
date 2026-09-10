@@ -17,7 +17,7 @@
 	import { portFamilies, portLooks, type PortFamily } from '$lib/looks';
 	import {
 		canCommit,
-		canCutVersion,
+		canPublish,
 		canShip,
 		commitCountLabel,
 		fleetWriteIds,
@@ -181,7 +181,7 @@
 	};
 	type LogEntry = { at: string; time: string; title: string; body: string };
 	type PortPane = 'leases' | 'stacks' | 'observed';
-	type NeedFilter = 'all' | 'publish' | 'cut' | 'push';
+	type NeedFilter = 'all' | 'publish' | 'push';
 
 	let inventory = $state<Inventory | null>(null);
 	let tab = $state('today');
@@ -367,7 +367,6 @@
 	const needFilterCounts = $derived({
 		all: attentionRows.length + cascadeOnlyRows.length,
 		publish: attentionRows.filter((row) => rowHasNeed(row, 'publish')).length,
-		cut: attentionRows.filter((row) => rowHasNeed(row, 'cut')).length,
 		push: attentionRows.filter((row) => rowHasNeed(row, 'push')).length,
 	});
 	const todayCount = $derived(
@@ -394,14 +393,11 @@
 		const row = inventory?.projects.find((p) => p.id === id);
 		return row ? canShip(row) : false;
 	}));
-	const unpublishedPublishIds = $derived(
-		visibleProjects.filter((row) => row.unpublishedAhead && !whyNotPublish(row)).map((row) => row.id),
-	);
+	const needPublishIds = $derived(visibleProjects.filter((row) => canPublish(row)).map((row) => row.id));
 	const needCommitIds = $derived(visibleProjects.filter((row) => canCommit(row)).map((row) => row.id));
 	const needPushIds = $derived(visibleProjects.filter((row) => canPush(row)).map((row) => row.id));
-	const needCutIds = $derived(visibleProjects.filter((row) => canCutVersion(row)).map((row) => row.id));
 	const needBulkWrites = $derived(
-		needCommitIds.length + unpublishedPublishIds.length + needPushIds.length + needCutIds.length > 0,
+		needCommitIds.length + needPublishIds.length + needPushIds.length > 0,
 	);
 	const fleetIds = $derived(visibleProjects.map((row) => row.id));
 	const siteIds = $derived((filepressBoard?.rows ?? []).map((row) => row.id));
@@ -438,14 +434,14 @@
 	}
 
 	function parseNeedFilter(raw: string | null): NeedFilter | null {
-		if (raw === 'all' || raw === 'publish' || raw === 'cut' || raw === 'push') return raw;
+		if (raw === 'cut') return 'publish';
+		if (raw === 'all' || raw === 'publish' || raw === 'push') return raw;
 		return null;
 	}
 
 	function rowHasNeed(row: Project, filter: NeedFilter): boolean {
 		if (filter === 'all') return true;
-		if (filter === 'publish') return Boolean(row.unpublishedAhead && canPublish(row));
-		if (filter === 'cut') return canCutVersion(row);
+		if (filter === 'publish') return canPublish(row);
 		return canPush(row);
 	}
 
@@ -567,10 +563,6 @@
 		return cells.listening === 'no' || cells.conflict === 'yes' || cells.firewall === 'needs-elevation';
 	}
 
-
-	function canPublish(row: Project): boolean {
-		return !whyNotPublish(row);
-	}
 
 	function canPush(row: Project): boolean {
 		return !whyNotPush(row.git);
@@ -1909,30 +1901,26 @@
 				const githubOnly = eligible.length > 0 && eligible.every((row) => publishNeedsGithub(row.steps) && !publishNeedsNpm(row.steps));
 				const needsNpm = eligible.some((row) => publishNeedsNpm(row.steps));
 				note(`publish plan — ${eligible.length} of ${data.rows.length} eligible, nothing written`, data);
-				const cutNote = cuttingNew
-					? 'The current local version is already on npm. Confirming cuts a new version.'
+				const bumpNote = cuttingNew
+					? 'Local already matches npm. Confirm bumps to this version, then publishes.'
 					: '';
 				const githubNote = githubOnly
-					? 'These packages publish from GitHub Actions (OIDC provenance). Confirm writes the cut, then open the Publish workflow.'
+					? 'These packages publish from GitHub Actions (OIDC provenance). Confirm writes the version, then open the Publish workflow.'
 					: eligible.some((row) => publishNeedsGithub(row.steps))
-						? 'Some packages publish from GitHub Actions. Confirm writes the cut; open each GitHub Publish link instead of npm here.'
+						? 'Some packages publish from GitHub Actions. Confirm writes the version; open each GitHub Publish link instead of npm here.'
 						: '';
 				offerConfirm({
 					title: eligible.length === 1
-						? cuttingNew
-							? githubOnly
-								? `Cut ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version} and open GitHub?`
-								: `Cut and publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
-							: githubOnly
-								? `Open GitHub Publish for ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
-								: `Publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
+						? githubOnly
+							? `Publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version} and open GitHub?`
+							: `Publish ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}?`
 						: eligible.length
 							? githubOnly
 								? `Open GitHub Publish for ${eligible.length} packages?`
 								: `Publish ${eligible.length} packages?`
 							: 'Nothing to publish',
 					hint: eligible.length
-						? [needsNpm ? publishAuthHint : '', cutNote, githubNote].filter(Boolean).join(' ')
+						? [needsNpm ? publishAuthHint : '', bumpNote, githubNote].filter(Boolean).join(' ')
 						: ids.length === 1
 							? `${ids[0]}: ${data.rows[0]?.reason ?? 'cannot publish'}`
 							: 'No listed package is ready to publish.',
@@ -1941,11 +1929,7 @@
 						: data.rows.map((row) => `${row.id}  ${row.reason ?? 'skipped'}`),
 					itemKeys: eligible.flatMap(publishItemKeys),
 					confirmLabel: eligible.length === 1
-						? githubOnly
-							? cuttingNew
-								? `Cut ${eligible[0]?.version}`
-								: 'Open GitHub'
-							: `Publish ${eligible[0]?.version}`
+						? `Publish ${eligible[0]?.version}`
 						: githubOnly
 							? `Open GitHub ${eligible.length}`
 							: `Publish ${eligible.length}`,
@@ -2395,18 +2379,22 @@
 		if (id === 'commit') {
 			return 'Reads the dirty files, asks Ollama for a message, then you confirm. git add + git commit only. No push.';
 		}
-		if (id === 'publish') return 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.';
+		if (id === 'publish') {
+			if (!row.unpublishedAhead) {
+				const n = row.commitsSinceNpm ?? 0;
+				const next = nextCutVersion(row, rowBumpKind(row));
+				const current = row.npm.latest ?? row.localVersion ?? 'this version';
+				return `Origin has ${n} commit${n === 1 ? '' : 's'} since npm ${current}. Confirm publishes ${next ?? 'the next version'} (${rowBumpKind(row)}). Use Fleet to pick minor or major.`;
+			}
+			return 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.';
+		}
 		if (id === 'push') {
 			const commits = commitCountLabel(row.git.ahead);
 			return commits
 				? `${commits} ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.`
 				: 'Shows the origin URL and commit count. Confirm in the modal. Never --force.';
 		}
-		if (id === 'pins') return 'Shows which dependents would get the new pin. Confirm in the modal.';
-		const n = row.commitsSinceNpm ?? 0;
-		const next = nextCutVersion(row, rowBumpKind(row));
-		const current = row.npm.latest ?? row.localVersion ?? 'this version';
-		return `Origin has ${n} commit${n === 1 ? '' : 's'} since npm ${current}. Confirm bumps to ${next ?? 'the next version'} (${rowBumpKind(row)}) and publishes. Use Fleet to pick minor or major.`;
+		return 'Shows which dependents would get the new pin. Confirm in the modal.';
 	}
 
 	function blockedPublishTitle(row: Project): string {
@@ -2433,7 +2421,7 @@
 			title: needActionTitle(id, row),
 			run: () => {
 				if (id === 'commit') void startCommit([row.id]);
-				else if (id === 'publish' || id === 'cut') startPublish([row.id]);
+				else if (id === 'publish') startPublish([row.id]);
 				else if (id === 'push') startPush([row.id]);
 				else startCascade(row.id);
 			},
@@ -2672,7 +2660,6 @@
 								{#each [
 									{ id: 'all' as const, label: 'All' },
 									{ id: 'publish' as const, label: 'Publish' },
-									{ id: 'cut' as const, label: 'Cut' },
 									{ id: 'push' as const, label: 'Push' },
 								] as chip (chip.id)}
 									<button
@@ -2701,15 +2688,15 @@
 										Commit dirty
 									</button>
 								{/if}
-								{#if unpublishedPublishIds.length}
+								{#if needPublishIds.length}
 									<button
 										class="btn btn-write"
 										disabled={Boolean(busy)}
-										onclick={() => startPublish(unpublishedPublishIds)}
-										title="Shows bump, push, and npm publish for unpublished-ahead packages the plan would actually publish."
+										onclick={() => startPublish(needPublishIds)}
+										title="Shows bump (when needed), push, and npm publish. Confirm in the modal."
 									>
 										<Icon icon="lucide:package-up" />
-										Publish unpublished
+										Publish
 									</button>
 								{/if}
 								{#if needPushIds.length}
@@ -2723,17 +2710,6 @@
 										Push ahead
 									</button>
 								{/if}
-								{#if needCutIds.length}
-									<button
-										class="btn btn-write"
-										disabled={Boolean(busy)}
-										onclick={() => startPublish(needCutIds)}
-										title="Shows a version cut plus publish for packages whose origin has commits since the last npm version. Confirm in the modal."
-									>
-										<Icon icon="lucide:scissors" />
-										Cut versions
-									</button>
-								{/if}
 							</div>
 						{/if}
 					</div>
@@ -2745,11 +2721,9 @@
 						{:else if filteredAttentionRows.length === 0 && filteredCascadeRows.length === 0}
 							<p class="dim small">
 								{#if needFilter === 'publish'}
-									No version waiting on npm. All still shows dirty trees and Write pins.
-								{:else if needFilter === 'cut'}
-									No origin commits since the last npm version. All still shows Push and Publish.
+									Nothing waiting to publish. All still shows dirty trees and Write pins.
 								{:else}
-									Nothing to push. All still shows Cut, Publish, and Write pins.
+									Nothing to push. All still shows Publish and Write pins.
 								{/if}
 							</p>
 						{:else}

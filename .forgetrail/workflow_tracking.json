@@ -1303,6 +1303,19 @@
         "Pull a smaller model on the Mac before changing host preference"
       ],
       "status": "active"
+    },
+    {
+      "id": "d93",
+      "timestamp": "2026-09-10T20:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 34,
+      "decision": "Publish is the only version write. An already-bumped local version is Publish 0.1.0. Origin commits since the last npm version are Publish 0.1.1 · 3 commits (same plan: bump if needed, push if needed, npm or GitHub). Cut is removed from Today filters, bulk buttons, row actions, and fleetWriteIds. CLI was already one command. ?need=cut maps to the Publish filter.",
+      "rationale": "Operator 2026-09-10: Publish and Cut felt the same. Less is more — say Publish, including the next version and commit count.",
+      "alternatives_considered": [
+        "Keep Cut as a quieter extra under Publish",
+        "Rename Cut to Publish next without merging the filters"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

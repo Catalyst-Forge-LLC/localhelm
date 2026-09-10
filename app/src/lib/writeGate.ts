@@ -1,6 +1,6 @@
 export {
 	canCommit,
-	canCutVersion,
+	canPublish,
 	canShip,
 	commitCountLabel,
 	fleetWriteIds,

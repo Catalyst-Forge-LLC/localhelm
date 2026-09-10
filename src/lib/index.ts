@@ -109,7 +109,7 @@ export { applyExport, defaultExportPath, planExport } from './export.js';
 export type { ExportPlan } from './export.js';
 export {
 	canCommit,
-	canCutVersion,
+	canPublish,
 	canShip,
 	commitCountLabel,
 	fleetWriteIds,

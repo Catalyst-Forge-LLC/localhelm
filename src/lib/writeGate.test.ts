@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
-	canCutVersion,
+	canPublish,
 	canShip,
 	commitCountLabel,
 	fleetWriteIds,
@@ -157,35 +157,35 @@ describe('whyNotPublish', () => {
 		assert.equal(whyNotPublish(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), undefined);
 	});
 
-	it('skips a cut when origin has nothing since the last npm version', () => {
-		assert.equal(whyNotPublish(row({ commitsSinceNpm: 0 })), 'nothing to cut');
+	it('skips a bump-publish when origin has nothing since the last npm version', () => {
+		assert.equal(whyNotPublish(row({ commitsSinceNpm: 0 })), 'nothing to publish');
 		assert.equal(whyNotPublish(row({ commitsSinceNpm: 3 })), undefined);
 		assert.equal(whyNotPublish(row({ unpublishedAhead: true, commitsSinceNpm: 0 })), undefined);
 	});
 });
 
 describe('fleetWriteIds', () => {
-	it('offers Cut when Today would, not nothing-to-do', () => {
-		const cut = row({ commitsSinceNpm: 4 });
-		assert.equal(canCutVersion(cut), true);
-		assert.deepEqual(fleetWriteIds(cut), ['cut']);
-		assert.equal(fleetWriteLabel('cut', cut), 'Cut 1.0.1 · 4 commits');
-		assert.equal(fleetWriteLabel('cut', cut, 'minor'), 'Cut 1.1.0 · 4 commits');
-		assert.equal(fleetWriteLabel('cut', row({ commitsSinceNpm: 1 })), 'Cut 1.0.1 · 1 commit');
+	it('offers one Publish for a version bump with origin commits', () => {
+		const next = row({ commitsSinceNpm: 4 });
+		assert.equal(canPublish(next), true);
+		assert.deepEqual(fleetWriteIds(next), ['publish']);
+		assert.equal(fleetWriteLabel('publish', next), 'Publish 1.0.1 · 4 commits');
+		assert.equal(fleetWriteLabel('publish', next, 'minor'), 'Publish 1.1.0 · 4 commits');
+		assert.equal(fleetWriteLabel('publish', row({ commitsSinceNpm: 1 })), 'Publish 1.0.1 · 1 commit');
+		assert.equal(fleetWriteLabel('publish', row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), 'Publish 1.0.0');
 		assert.equal(fleetWriteLabel('push', row({ git: git({ ahead: 3 }) })), 'Push 3 commits');
 		assert.equal(fleetWriteLabel('push', row({ git: git({ ahead: 1 }) })), 'Push 1 commit');
-		assert.equal(fleetWriteLabel('pins', cut, 'patch', 1), 'Write 1 pin');
-		assert.equal(fleetWriteLabel('pins', cut, 'patch', 2), 'Write 2 pins');
+		assert.equal(fleetWriteLabel('pins', next, 'patch', 1), 'Write 1 pin');
+		assert.equal(fleetWriteLabel('pins', next, 'patch', 2), 'Write 2 pins');
 		assert.equal(commitCountLabel(1), '1 commit');
 		assert.equal(commitCountLabel(11), '11 commits');
 		assert.deepEqual(fleetWriteIds(row({ commitsSinceNpm: 0 })), []);
-		assert.equal(canCutVersion(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), false);
 		assert.deepEqual(fleetWriteIds(row({ unpublishedAhead: true, git: git({ ahead: 0 }) })), ['publish']);
 	});
 
-	it('keeps Push and Cut together when both apply', () => {
+	it('keeps Push and Publish together when both apply', () => {
 		const both = row({ commitsSinceNpm: 2, git: git({ ahead: 3 }) });
-		assert.deepEqual(fleetWriteIds(both), ['push', 'cut']);
+		assert.deepEqual(fleetWriteIds(both), ['publish', 'push']);
 	});
 
 	it('offers Commit first when the tree is dirty', () => {

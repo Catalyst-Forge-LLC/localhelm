@@ -1,10 +1,11 @@
-import { commitCountLabel, whyNotPublish, whyNotPush } from './writeGate.js';
+import { commitCountLabel, nextCutVersion, whyNotPublish, whyNotPush } from './writeGate.js';
 
 export type BriefProject = {
 	id: string;
 	missing: boolean;
 	unpublishedAhead: boolean;
 	localVersion: string | null;
+	commitsSinceNpm?: number | null;
 	git: {
 		dirty: boolean;
 		ahead: number | null;
@@ -33,21 +34,29 @@ export function formatBrief(input: {
 }): string {
 	const lines: string[] = ['# LocalHelm brief', ''];
 	const dirty = input.projects.filter((row) => row.git.dirty && !row.missing);
-	const unpublished = input.projects.filter((row) => row.unpublishedAhead && !whyNotPublish(row));
+	const publishable = input.projects.filter((row) => !whyNotPublish(row));
 	const pushable = input.projects.filter((row) => !whyNotPush(row.git));
 	const missing = input.projects.filter((row) => row.missing);
 
 	lines.push('## Needs a write');
-	if (!unpublished.length && !pushable.length && !dirty.length && !missing.length) {
+	if (!publishable.length && !pushable.length && !dirty.length && !missing.length) {
 		lines.push('- none');
 	} else {
-		for (const row of unpublished) lines.push(`- publish ${row.id}${row.localVersion ? ` ${row.localVersion}` : ''}`);
+		for (const row of publishable) {
+			const version = row.unpublishedAhead
+				? row.localVersion
+				: (nextCutVersion(row) ?? row.localVersion);
+			const commits = row.unpublishedAhead ? '' : commitCountLabel(row.commitsSinceNpm);
+			lines.push(
+				`- publish ${row.id}${version ? ` ${version}` : ''}${commits ? ` · ${commits}` : ''}`,
+			);
+		}
 		for (const row of pushable) {
-			if (unpublished.some((other) => other.id === row.id)) continue;
+			if (publishable.some((other) => other.id === row.id)) continue;
 			lines.push(`- push ${row.id}${row.git.ahead ? ` (${commitCountLabel(row.git.ahead)})` : ''}`);
 		}
 		for (const row of dirty) {
-			if (unpublished.some((other) => other.id === row.id) || pushable.some((other) => other.id === row.id)) continue;
+			if (publishable.some((other) => other.id === row.id) || pushable.some((other) => other.id === row.id)) continue;
 			lines.push(`- dirty ${row.id}`);
 		}
 		for (const row of missing) lines.push(`- missing ${row.id}`);
