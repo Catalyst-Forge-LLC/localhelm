@@ -2862,7 +2862,7 @@
 				</section>
 
 				<div class="today-side">
-					<section class="panel fill">
+					<section class="panel fill today-sites">
 						<div class="section-head">
 							<div>
 								<h2>FilePress Sites</h2>
@@ -2936,7 +2936,7 @@
 							{/if}
 						</div>
 					</section>
-					<section class="panel fill">
+					<section class="panel fill today-ports">
 						<div class="section-head">
 							<div>
 								<h2>Ports</h2>
@@ -4426,11 +4426,13 @@
 
 		.today-side {
 			grid-area: side;
-			grid-template-rows: auto minmax(0, 1fr);
+			align-self: stretch;
+			grid-template-rows: minmax(0, 1.1fr) minmax(0, 1fr);
 		}
 
-		.today-side > .panel.fill:first-child {
-			max-height: 42%;
+		.today-sites,
+		.today-ports {
+			min-height: 0;
 		}
 
 		.fleet-layout {

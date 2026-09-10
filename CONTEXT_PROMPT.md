@@ -247,3 +247,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 31 — 2026-09-10
 
 - A multi-item confirm (repos, FilePress sites, xFacts rows, leases) can uncheck a name to leave it out. Confirm only applies the names still checked. Title and button counts retarget. One subject stays a flat list with no checkboxes.
+
+### Session 32 — 2026-09-10
+
+- Today FilePress Sites shares the right column with Ports (`1.1fr` / `1fr`, same split as Needs you / Looks) instead of sizing to its cards and capping at 42%.

@@ -1276,6 +1276,19 @@
         "Remove excluded rows from the list instead of unchecking"
       ],
       "status": "active"
+    },
+    {
+      "id": "d91",
+      "timestamp": "2026-09-10T19:40:00Z",
+      "phase": "2-scaffolding",
+      "session": 32,
+      "decision": "Today’s FilePress Sites panel shares the right column with Ports using the same 1.1fr / 1fr split as Needs you / Looks. Drop the 42% max-height and auto first row that left a gap under two site cards.",
+      "rationale": "Operator 2026-09-10: the FilePress Sites block on Today did not reach the available height.",
+      "alternatives_considered": [
+        "Keep FilePress content-sized and grow Ports into the gap",
+        "Give FilePress all leftover space and keep Ports auto"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
