@@ -243,3 +243,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 30 — 2026-09-10
 
 - Fleet / Today **Ship** and CLI `localhelm ship <id>...` run `pnpm ship` for enrolled projects that have the script (root or `site/package.json`). Same for xFacts rows. This is wrangler / Pages, not FilePress Land. Named ids on apply. Never `--force`. Not a gold Today need.
+
+### Session 31 — 2026-09-10
+
+- A multi-item confirm (repos, FilePress sites, xFacts rows, leases) can uncheck a name to leave it out. Confirm only applies the names still checked. Title and button counts retarget. One subject stays a flat list with no checkboxes.

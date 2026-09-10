@@ -35,6 +35,8 @@ export { applyConfirmStep, commitDraftProgressHint, emptyConfirmPhases, markConf
 export type { ConfirmPhase } from './confirmProgress.js';
 export {
 	buildConfirmRoster,
+	confirmApplyIds,
+	confirmCountText,
 	confirmGroupId,
 	confirmGroupPhase,
 	confirmRosterSelected,

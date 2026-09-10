@@ -6,6 +6,8 @@ import {
 	confirmGroupPhase,
 	confirmRosterSelected,
 	confirmStepLabel,
+	confirmApplyIds,
+	confirmCountText,
 } from './confirmRoster.js';
 
 describe('confirmRoster', () => {
@@ -57,5 +59,17 @@ describe('confirmRoster', () => {
 		assert.ok(groups);
 		assert.equal(confirmRosterSelected(groups, null), 'b');
 		assert.equal(confirmRosterSelected(groups, 'a'), 'a');
+	});
+
+	it('drops excluded group ids and retargets the count', () => {
+		assert.deepEqual(confirmApplyIds(['coldeye:0', 'coldeye:1', 'detangler:0'], ['coldeye']), ['detangler']);
+		assert.deepEqual(confirmApplyIds(['a', 'b', 'c'], []), ['a', 'b', 'c']);
+		assert.equal(confirmCountText('Commit 10 repos?', 8, 10), 'Commit 8 repos?');
+		assert.equal(confirmCountText('Commit 10', 10, 10), 'Commit 10');
+		assert.equal(confirmCountText('Push these branches to origin?', 2, 4), 'Push these branches to origin? (2 of 4)');
+		assert.deepEqual(confirmApplyIds(['aibreze-site:0', 'aibreze-site:1', 'dictawhisper:0'], ['aibreze-site']), [
+			'dictawhisper',
+		]);
+		assert.equal(confirmCountText('Land 4 sites?', 2, 4), 'Land 2 sites?');
 	});
 });

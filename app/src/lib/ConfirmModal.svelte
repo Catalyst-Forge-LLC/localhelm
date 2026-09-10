@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { commitDraftProgressHint } from './confirmProgress';
-	import { buildConfirmRoster, confirmRosterSelected } from './confirmRoster';
+	import { buildConfirmRoster, confirmCountText, confirmRosterSelected } from './confirmRoster';
 	import Icon from './Icon.svelte';
 
 	type Phase = 'pending' | 'current' | 'done' | 'fail';
@@ -19,13 +19,16 @@
 		items?: string[];
 		itemKeys?: string[];
 		itemPhases?: Phase[];
+		/** Subject ids this confirm would write (repos, sites, leases). Omit skips. */
+		applyIds?: string[];
+		excludedIds?: string[];
 		failNote?: string;
 		messageById?: Record<string, string>;
 		draftHint?: string;
 		draftingIds?: string[];
 		draftNoteById?: Record<string, string>;
 		children?: Snippet;
-		onconfirm: () => void;
+		onconfirm: (includedIds: string[]) => void;
 		oncancel?: () => void;
 		ondraft?: (id: string) => void;
 	};
@@ -43,6 +46,8 @@
 		items = [],
 		itemKeys = [],
 		itemPhases = [],
+		applyIds = [],
+		excludedIds = $bindable<string[]>([]),
 		failNote = '',
 		messageById = $bindable<Record<string, string>>({}),
 		draftHint = '',
@@ -70,13 +75,30 @@
 	$effect(() => {
 		rosterSig;
 		pinned = null;
+		excludedIds = [];
 	});
 
 	const selectedId = $derived(groups ? confirmRosterSelected(groups, pinned) : null);
 	const selected = $derived(groups?.find((group) => group.id === selectedId) ?? null);
 	const draftIds = $derived(Object.keys(messageById));
 	const draftId = $derived(selectedId ?? draftIds[0] ?? '');
-	const draftsReady = $derived(draftIds.length === 0 || draftIds.every((id) => Boolean(messageById[id]?.trim())));
+	const applyPool = $derived(applyIds.length ? applyIds : (groups?.map((group) => group.id) ?? []));
+	const includedApply = $derived(applyPool.filter((id) => !excludedIds.includes(id)));
+	const canExclude = $derived(Boolean(groups && groups.length >= 2 && applyIds.length >= 2));
+	const displayTitle = $derived(canExclude ? confirmCountText(title, includedApply.length, applyPool.length) : title);
+	const displayLabel = $derived(
+		canExclude ? confirmCountText(confirmLabel, includedApply.length, applyPool.length) : confirmLabel,
+	);
+	const displayHint = $derived(
+		canExclude
+			? [hint, 'Uncheck a name to leave it out of this confirm.']
+					.filter(Boolean)
+					.join(' ')
+			: hint,
+	);
+	const draftsReady = $derived(
+		draftIds.filter((id) => !excludedIds.includes(id)).every((id) => Boolean(messageById[id]?.trim())),
+	);
 	const liveDraftHint = $derived(
 		draftingIds.length || Object.keys(draftNoteById).length
 			? commitDraftProgressHint({
@@ -105,6 +127,11 @@
 		pinned = id === liveId ? null : id;
 	}
 
+	function setIncluded(id: string, on: boolean): void {
+		if (busy) return;
+		excludedIds = on ? excludedIds.filter((item) => item !== id) : [...new Set([...excludedIds, id])];
+	}
+
 	let dialogEl = $state<HTMLDialogElement | null>(null);
 
 	$effect(() => {
@@ -123,7 +150,7 @@
 		event.preventDefault();
 		event.stopPropagation();
 		if (busy) return;
-		onconfirm();
+		onconfirm(includedApply);
 	}
 
 	function itemLink(item: string): { before: string; href: string; after: string } | null {
@@ -164,44 +191,56 @@
 >
 	<div class="panel">
 	<div class="body">
-		<h2 id="confirm-title">{title}</h2>
-		{#if hint}
-			<p class="hint">{hint}</p>
+		<h2 id="confirm-title">{displayTitle}</h2>
+		{#if displayHint}
+			<p class="hint">{displayHint}</p>
 		{/if}
 		{#if groups && selected}
 			<div class="split">
-				<div class="roster" bind:this={rosterEl} role="listbox" aria-label="Packages">
+				<div class="roster" bind:this={rosterEl} role="listbox" aria-label="Items in this confirm">
 					{#each groups as group (group.id)}
-						<button
-							type="button"
+						<div
 							class="roster-row"
 							class:on={group.id === selectedId}
+							class:out={excludedIds.includes(group.id)}
 							class:current={group.phase === 'current'}
 							class:done={group.phase === 'done'}
 							class:fail={group.phase === 'fail'}
 							data-roster={group.id}
 							role="option"
 							aria-selected={group.id === selectedId}
-							onclick={() => pick(group.id)}
 						>
-							<span class="mark" aria-hidden="true">
-								{#if phaseMark(group.phase)}
-									{@const mark = phaseMark(group.phase)!}
-									<Icon icon={mark.icon} class={mark.spin ? 'icon spin' : 'icon'} />
-								{:else if draftingIds.includes(group.id)}
-									<Icon icon="lucide:loader-circle" class="icon spin" />
-								{:else}
-									<span class="dot"></span>
+							{#if canExclude && applyPool.includes(group.id)}
+								<label class="include">
+									<input
+										type="checkbox"
+										checked={!excludedIds.includes(group.id)}
+										disabled={busy}
+										aria-label={`Include ${group.id}`}
+										onchange={(event) => setIncluded(group.id, event.currentTarget.checked)}
+									/>
+								</label>
+							{/if}
+							<button type="button" class="pick" onclick={() => pick(group.id)}>
+								<span class="mark" aria-hidden="true">
+									{#if phaseMark(group.phase)}
+										{@const mark = phaseMark(group.phase)!}
+										<Icon icon={mark.icon} class={mark.spin ? 'icon spin' : 'icon'} />
+									{:else if draftingIds.includes(group.id)}
+										<Icon icon="lucide:loader-circle" class="icon spin" />
+									{:else}
+										<span class="dot"></span>
+									{/if}
+								</span>
+								<span class="name">{group.id}</span>
+								{#if group.phase === 'current'}
+									<span class="now">now</span>
 								{/if}
-							</span>
-							<span class="name">{group.id}</span>
-							{#if group.phase === 'current'}
-								<span class="now">now</span>
-							{/if}
-							{#if group.total > 1}
-								<span class="count">{group.done}/{group.total}</span>
-							{/if}
-						</button>
+								{#if group.total > 1}
+									<span class="count">{group.done}/{group.total}</span>
+								{/if}
+							</button>
+						</div>
 					{/each}
 				</div>
 				<ol class="steps" class:tracked={showPhases} bind:this={stepListEl}>
@@ -290,10 +329,10 @@
 					class="btn"
 					class:danger={variant === 'danger'}
 					class:write={variant === 'write'}
-					disabled={busy || !draftsReady}
+					disabled={busy || !draftsReady || (canExclude && includedApply.length === 0)}
 					onclick={confirm}
 				>
-					{busy ? busyLabel || 'Working…' : confirmLabel}
+					{busy ? busyLabel || 'Working…' : displayLabel}
 				</button>
 			{/if}
 		</div>
@@ -415,31 +454,69 @@
 	.roster-row {
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
+		gap: 0.2rem;
 		width: 100%;
 		margin: 0;
-		padding: 0.35rem 0.4rem;
-		border: 0;
+		padding: 0.1rem 0.15rem 0.1rem 0.25rem;
 		border-radius: 0.35rem;
-		background: transparent;
 		color: #d4d4d8;
-		font: inherit;
-		font-size: 0.8rem;
-		text-align: left;
-		cursor: pointer;
 	}
 
 	.roster-row + .roster-row {
 		margin-top: 0.15rem;
 	}
 
-	.roster-row:hover {
-		background: #18181b;
-	}
-
 	.roster-row.on {
 		background: #27272a;
 		color: #fafafa;
+	}
+
+	.roster-row.out {
+		opacity: 0.48;
+	}
+
+	.roster-row.out .name {
+		text-decoration: line-through;
+	}
+
+	.include {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+		margin: 0;
+		padding: 0.2rem 0.15rem;
+		cursor: pointer;
+	}
+
+	.include input {
+		margin: 0;
+		accent-color: #ca8a04;
+	}
+
+	.pick {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		flex: 1;
+		min-width: 0;
+		margin: 0;
+		padding: 0.25rem 0.25rem 0.25rem 0.1rem;
+		border: 0;
+		border-radius: 0.3rem;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		font-size: 0.8rem;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.pick:hover {
+		background: #18181b;
+	}
+
+	.roster-row.on .pick:hover {
+		background: transparent;
 	}
 
 	.roster-row.current {

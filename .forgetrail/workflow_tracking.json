@@ -1262,6 +1262,20 @@
         "xFacts-only ship (catalyst-forge has no facts plugin)"
       ],
       "status": "active"
+    },
+    {
+      "id": "d90",
+      "timestamp": "2026-09-10T19:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 31,
+      "decision": "Multi-item confirm rosters (2+ named subjects) get include checkboxes. Unchecked names are left out of apply. Same modal for fleet repos, FilePress/xFacts sites, and LocalSlip leases. Title and confirm label retarget the count. A single subject stays a flat list.",
+      "rationale": "Operator 2026-09-10: in a multi confirm they want to exclude items, not only repos — also sites and the rest.",
+      "alternatives_considered": [
+        "Cancel and re-check the fleet/sites table",
+        "Exclude only on Commit",
+        "Remove excluded rows from the list instead of unchecking"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

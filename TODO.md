@@ -74,3 +74,4 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Add labels writes missing SkillFacts next to SKILL.md packs; tool/agent/model stay source-backed _(2026-09-05)_
 - [x] Multi-repo Commit keeps Asking Ollama up until every draft lands; one repo at a time _(2026-09-09)_
 - [x] Ship for enrolled `scripts.ship` (facts, catalyst-forge, …); Fleet + xFacts + CLI; not FilePress Land _(2026-09-10)_
+- [x] Multi confirm can uncheck repos, sites, or leases to leave them out _(2026-09-10)_

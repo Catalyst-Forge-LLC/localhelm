@@ -229,7 +229,9 @@
 	let confirmDraftNotes = $state<Record<string, string>>({});
 	let confirmDraftIds = $state<string[]>([]);
 	let confirmMessageTouched = $state<Record<string, boolean>>({});
-	let confirmRun = $state<(() => void) | null>(null);
+	let confirmWriteIds = $state<string[]>([]);
+	let confirmExcluded = $state<string[]>([]);
+	let confirmRun = $state<((includedIds: string[]) => void) | null>(null);
 	let statusReady = $state(false);
 	let rosterReady = $state(false);
 	let pluginsReady = $state(false);
@@ -958,18 +960,23 @@
 		hint: string;
 		items: string[];
 		itemKeys?: string[];
+		applyIds?: string[];
 		confirmLabel: string;
 		variant?: 'write' | 'danger';
 		canApply: boolean;
 		showOtp?: boolean;
 		messages?: Record<string, string>;
 		draftHint?: string;
-		run?: () => void;
+		run?: (includedIds: string[]) => void;
 	}): void {
 		confirmTitle = spec.title;
 		confirmHint = spec.hint;
 		confirmItems = spec.items;
-		confirmItemKeys = spec.itemKeys ?? spec.items.map((_, i) => String(i));
+		confirmItemKeys =
+			spec.itemKeys ??
+			(spec.applyIds?.length === spec.items.length ? spec.applyIds : spec.items.map((_, i) => String(i)));
+		confirmWriteIds = spec.applyIds ?? [];
+		confirmExcluded = [];
 		confirmPhases = emptyConfirmPhases(spec.items.length);
 		confirmLabel = spec.confirmLabel;
 		confirmVariant = spec.variant ?? 'write';
@@ -1136,9 +1143,16 @@
 				...ids.map((id) => (restore ? `restore ${id}` : `hide ${id}`)),
 				...parkIds.map((id) => `park ${id} — port stays`),
 			],
+			itemKeys: [...ids, ...parkIds],
+			applyIds: [...ids, ...parkIds],
 			confirmLabel: restore ? 'Restore' : parkIds.length ? 'Hide and park' : 'Hide',
 			canApply: true,
-			run: () => void applyArchive(ids, restore, parkIds),
+			run: (included) =>
+				void applyArchive(
+					ids.filter((id) => included.includes(id)),
+					restore,
+					parkIds.filter((id) => included.includes(id)),
+				),
 		});
 	}
 
@@ -1170,19 +1184,27 @@
 					method: 'POST',
 					body: JSON.stringify({ paths, apply: false }),
 				});
-				const adds = Array.isArray((plan as { rows?: { action?: string }[] }).rows)
-					? (plan as { rows: { action?: string }[] }).rows.filter((row) => row.action === 'add')
+				const rows = Array.isArray((plan as { rows?: { action?: string; id?: string; path?: string }[] }).rows)
+					? (plan as { rows: { action?: string; id?: string; path?: string }[] }).rows
 					: [];
+				const adds = rows.filter((row) => row.action === 'add' && row.id && row.path);
+				const lined = rowLines(plan);
+				const lineKeys = pluginPlanLineKeys(plan);
 				note(`enroll plan — ${paths.length} project(s), nothing written`, plan);
 				offerConfirm({
 					title: adds.length ? `Add ${adds.length} project${adds.length === 1 ? '' : 's'} to the fleet?` : 'Nothing to enroll',
 					hint: adds.length
 						? 'Writes these rows into localhelm.fleet.json. Does not copy or delete folders.'
 						: 'Every ticked folder is already enrolled or cannot be added.',
-					items: rowLines(plan).length ? rowLines(plan) : ['Nothing to enroll.'],
+					items: lined.length ? lined : ['Nothing to enroll.'],
+					itemKeys: lined.length && lineKeys?.length === lined.length ? lineKeys : rows.map((row) => row.id ?? ''),
+					applyIds: adds.map((row) => row.id as string),
 					confirmLabel: adds.length === 1 ? 'Add to fleet' : `Add ${adds.length} to fleet`,
 					canApply: adds.length > 0,
-					run: () => void applyEnroll(paths),
+					run: (included) => {
+						const next = adds.filter((row) => included.includes(row.id as string)).map((row) => row.path as string);
+						if (next.length) void applyEnroll(next);
+					},
 				});
 			},
 			{ closeConfirm: false },
@@ -1216,20 +1238,28 @@
 					method: 'POST',
 					body: JSON.stringify({ ids, apply: false }),
 				});
-				const removes = Array.isArray((plan as { rows?: { action?: string }[] }).rows)
-					? (plan as { rows: { action?: string }[] }).rows.filter((row) => row.action === 'update')
+				const rows = Array.isArray((plan as { rows?: { action?: string; id?: string }[] }).rows)
+					? (plan as { rows: { action?: string; id?: string }[] }).rows
 					: [];
+				const removes = rows.filter((row) => row.action === 'update' && row.id);
+				const lined = rowLines(plan);
+				const lineKeys = pluginPlanLineKeys(plan);
 				note(`unenroll plan — ${ids.length} row(s), nothing written`, plan);
 				offerConfirm({
 					title: removes.length ? `Remove ${removes.length} project${removes.length === 1 ? '' : 's'} from the fleet?` : 'Nothing to remove',
 					hint: removes.length
 						? 'Rewrites localhelm.fleet.json without these rows. Never deletes a folder.'
 						: 'None of the ticked rows are enrolled.',
-					items: rowLines(plan).length ? rowLines(plan) : ['Nothing to remove.'],
+					items: lined.length ? lined : ['Nothing to remove.'],
+					itemKeys: lined.length && lineKeys?.length === lined.length ? lineKeys : rows.map((row) => row.id ?? ''),
+					applyIds: removes.map((row) => row.id as string),
 					confirmLabel: removes.length === 1 ? 'Remove from fleet' : `Remove ${removes.length} from fleet`,
 					variant: 'danger',
 					canApply: removes.length > 0,
-					run: () => void applyUnenroll(ids),
+					run: (included) => {
+						const next = ids.filter((id) => included.includes(id));
+						if (next.length) void applyUnenroll(next);
+					},
 				});
 			},
 			{ closeConfirm: false },
@@ -1293,14 +1323,18 @@
 								: `${plan.id}  ${plan.from ?? '?'} → ${plan.to}\nno commit — ${plan.commitReason ?? 'skipped'}`
 							: `${plan.id}  ${plan.reason ?? 'skipped'}`,
 					),
+					itemKeys: plans.map((plan) => plan.id),
+					applyIds: can.map((plan) => plan.id),
 					confirmLabel: can.length === 1 ? `Bump and commit ${can[0]?.to}` : `Bump and commit ${can.length}`,
 					canApply: can.length > 0,
-					run: () =>
+					run: (included) =>
 						void applyBumps(
-							can.map((plan) => ({
-								id: plan.id,
-								kind: jobs.find((job) => job.id === plan.id)?.kind ?? 'patch',
-							})),
+							can
+								.filter((plan) => included.includes(plan.id))
+								.map((plan) => ({
+									id: plan.id,
+									kind: jobs.find((job) => job.id === plan.id)?.kind ?? 'patch',
+								})),
 						),
 				});
 			},
@@ -1370,7 +1404,8 @@
 					draftHint: can.length ? commitDraftProgressHint({ ids: can.map((row) => row.id), pending: can.map((row) => row.id) }) : '',
 					confirmLabel: can.length === 1 ? `Commit ${can[0]?.id}` : `Commit ${can.length}`,
 					canApply: can.length > 0,
-					run: () => void applyCommits(can.map((row) => row.id)),
+					applyIds: can.map((row) => row.id),
+					run: (included) => void applyCommits(can.map((row) => row.id).filter((id) => included.includes(id))),
 				});
 				if (can.length) void suggestCommitDrafts(can.map((row) => row.id));
 			},
@@ -1385,7 +1420,7 @@
 		confirmDraftHint = commitDraftProgressHint({ ids, pending: confirmDrafting });
 		for (const id of ids) {
 			if (!confirmOpen) break;
-			if (confirmMessageTouched[id]) {
+			if (confirmMessageTouched[id] || confirmExcluded.includes(id)) {
 				confirmDrafting = confirmDrafting.filter((item) => item !== id);
 				confirmDraftHint = commitDraftProgressHint({
 					ids: confirmDraftIds,
@@ -1636,7 +1671,8 @@
 					itemKeys: eligible.map((row) => row.id),
 					confirmLabel: eligible.length === 1 ? `Pull ${eligible[0]?.id}` : `Pull ${eligible.length} repos`,
 					canApply: eligible.length > 0,
-					run: () => void applyPull(eligible.map((row) => row.id)),
+					applyIds: eligible.map((row) => row.id),
+					run: (included) => void applyPull(eligible.map((row) => row.id).filter((id) => included.includes(id))),
 				});
 			},
 			{ closeConfirm: false },
@@ -1703,7 +1739,8 @@
 					itemKeys: listed.map((row) => row.id),
 					confirmLabel: eligible.length === 1 ? `Push ${eligible[0]?.id}` : `Push ${eligible.length} to origin`,
 					canApply: eligible.length > 0,
-					run: () => void applyPush(eligible.map((row) => row.id)),
+					applyIds: eligible.map((row) => row.id),
+					run: (included) => void applyPush(eligible.map((row) => row.id).filter((id) => included.includes(id))),
 				});
 			},
 			{ closeConfirm: false },
@@ -1780,7 +1817,8 @@
 					itemKeys: listed.map((row) => row.id),
 					confirmLabel: eligible.length === 1 ? `Ship ${eligible[0]?.id}` : `Ship ${eligible.length}`,
 					canApply: eligible.length > 0,
-					run: () => void applyShip(eligible.map((row) => row.id)),
+					applyIds: eligible.map((row) => row.id),
+					run: (included) => void applyShip(eligible.map((row) => row.id).filter((id) => included.includes(id))),
 				});
 			},
 			{ closeConfirm: false },
@@ -1894,7 +1932,8 @@
 					variant: 'danger',
 					canApply: eligible.length > 0,
 					showOtp: needsNpm,
-					run: () => void applyPublish(eligible.map((row) => row.id)),
+					applyIds: eligible.map((row) => row.id),
+					run: (included) => void applyPublish(eligible.map((row) => row.id).filter((id) => included.includes(id))),
 				});
 			},
 			{ closeConfirm: false },
@@ -2000,10 +2039,16 @@
 						: `Nothing to ${label.toLowerCase()}`,
 					hint: pluginJobHint(plugin, action, applyIds, writeIds, data),
 					items: items.length ? items : ['Nothing to do.'],
-					itemKeys: items.length && lineKeys.length === items.length ? lineKeys : undefined,
+					itemKeys:
+						items.length && lineKeys.length === items.length
+							? lineKeys
+							: items.length === applyIds.length
+								? applyIds
+								: ids,
+					applyIds,
 					confirmLabel: applyIds.length === 1 ? label : `${label} ${applyIds.length}`,
 					canApply: applyIds.length > 0,
-					run: () => void applyPluginJob(plugin, action, applyIds),
+					run: (included) => void applyPluginJob(plugin, action, applyIds.filter((id) => included.includes(id))),
 				});
 			},
 			{ closeConfirm: false },
@@ -2098,7 +2143,8 @@
 					variant: needsPublish ? 'danger' : 'write',
 					canApply: work.length > 0,
 					showOtp: needsOtp,
-					run: () => void applyLand(work.map((plan) => plan.siteId)),
+					applyIds: work.map((plan) => plan.siteId),
+					run: (included) => void applyLand(work.map((plan) => plan.siteId).filter((id) => included.includes(id))),
 				});
 			},
 			{ closeConfirm: false },
@@ -3877,10 +3923,12 @@
 	ondraft={(id) => {
 		confirmMessageTouched = { ...confirmMessageTouched, [id]: true };
 	}}
-	onconfirm={() => {
+	applyIds={confirmWriteIds}
+	bind:excludedIds={confirmExcluded}
+	onconfirm={(included) => {
 		const fn = confirmRun;
 		confirmRun = null;
-		fn?.();
+		fn?.(included);
 	}}
 >
 	{#if confirmShowOtp}

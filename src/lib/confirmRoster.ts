@@ -71,6 +71,28 @@ export function buildConfirmRoster(
 	});
 }
 
+/** Unique group ids still in the confirm, in roster order. */
+export function confirmApplyIds(keys: readonly string[], excluded: readonly string[] = []): string[] {
+	const skip = new Set(excluded);
+	const seen = new Set<string>();
+	const out: string[] = [];
+	for (const key of keys) {
+		const id = confirmGroupId(key);
+		if (!id || skip.has(id) || seen.has(id)) continue;
+		seen.add(id);
+		out.push(id);
+	}
+	return out;
+}
+
+/** Keep the original wording when nothing is left out; otherwise retarget the count. */
+export function confirmCountText(text: string, included: number, total: number): string {
+	if (total < 2 || included === total) return text;
+	const swapped = text.replace(/(\d+)(?!.*\d)/, String(included));
+	if (swapped !== text) return swapped;
+	return `${text} (${included} of ${total})`;
+}
+
 /** Pinned row wins; otherwise follow the running (or failed) group. */
 export function confirmRosterSelected(
 	groups: readonly ConfirmRosterGroup[],
