@@ -2,11 +2,11 @@ import { defineFilepressConfig } from 'getfilepress';
 
 export default defineFilepressConfig({
 	title: 'LocalHelm',
-	description: 'Control panel for local development.',
+	description: 'See which local projects need attention in one place.',
 	url: 'https://localhelm.dev',
 	author: 'Catalyst Forge, LLC',
 	tagline: 'Control panel for local development',
-	lede: 'Your local fleet is the apps and sites you keep, plus the ports they listen on.',
+	lede: 'Scan, enroll, then read git, npm, and dependents. Ports are optional.',
 	logo: '/logo.png',
 	ogImage: '/logo.png',
 	homePage: 'home',

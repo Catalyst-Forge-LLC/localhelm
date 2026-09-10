@@ -2,7 +2,9 @@
 title: Quick start
 ---
 
-## Scan and enroll
+## Standalone first
+
+With only LocalHelm installed:
 
 ```bash
 localhelm scan ..
@@ -10,9 +12,7 @@ localhelm enroll ../my-cli ../my-lib --apply
 localhelm status
 ```
 
-`scan` never writes. `enroll` prints a plan; `--apply` writes the fleet file.
-
-Put gitignore-style patterns in `.localhelmignore` at the workspace (or a parent). `node_modules`, dot-folders, and `__*` are always skipped.
+`scan` proposes folders. Nothing joins until `--apply`. `status` reports dirty trees, local versus published versions, and pin disagreements (a local `package.json` that does not match what dependents or npm last said). That is useful without LocalSlip, FilePress, or xFacts.
 
 ## Open the dashboard
 
@@ -20,7 +20,15 @@ Put gitignore-style patterns in `.localhelmignore` at the workspace (or a parent
 localhelm serve
 ```
 
-Then visit `http://127.0.0.1:4321` for the operator board. The **Deck** (`/deck`) is the phone tile grid. A phone hitting `/` on LAN or Tailscale lands there. Ports come from [LocalSlip](https://localslip.dev). Write APIs stay on loopback.
+Then visit `http://127.0.0.1:4321` for the operator board. The **Deck** (`/deck`) is the phone tile grid. A phone hitting `/` on LAN or Tailscale lands there. Write APIs stay on loopback.
+
+## Optional integrations
+
+| Integration | What it adds | Required to enroll? |
+| --- | --- | --- |
+| [LocalSlip](https://localslip.dev) | Ports tab, start/stop of claimed listeners | No |
+| FilePress plugin | Sites jobs (`plugin filepress`) | No |
+| xFacts plugin | Labels board for enrolled AppFacts | No |
 
 ## A write is a plan
 

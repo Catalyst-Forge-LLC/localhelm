@@ -6,7 +6,7 @@
 
 **Control panel for local development.**
 
-Your local fleet is the apps and sites you keep, including tools that never publish. Ports sit on the same board. [LocalSlip](https://localslip.dev) is the slip; LocalHelm is the wheel.
+See which local projects need attention: uncommitted work, package versions, dependents, and supported site or port status. Scan proposes. You enroll. `status` is a read. Writes need `--apply`. [LocalSlip](https://localslip.dev) is the slip. LocalHelm is the wheel. Ports and FilePress jobs are optional.
 
 ```bash
 pnpm add -g localhelm
