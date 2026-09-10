@@ -1248,6 +1248,20 @@
         "Keep a single hint that flips after the first reply"
       ],
       "status": "active"
+    },
+    {
+      "id": "d89",
+      "timestamp": "2026-09-10T17:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 30,
+      "decision": "Helm-native Ship runs `pnpm ship` for any enrolled project that has scripts.ship (root or site/package.json). Fleet toolbar, Today/Fleet row button, CLI `localhelm ship <id>...`, and xFacts row Ship. Plan then confirm; named ids on apply; never --force. Not a gold Today need. FilePress Sites Land/Ship stays for getfilepress sites.",
+      "rationale": "Operator 2026-09-10: x-facts and other *-facts have a ship script (wrangler), as does catalyst-forge. They are not FilePress. Sites Ship never appeared, and they could not ship those repos from Helm.",
+      "alternatives_considered": [
+        "Treat scripts.ship as a gold Needs-you write (would light every facts repo forever)",
+        "FilePress-only ship (status quo)",
+        "xFacts-only ship (catalyst-forge has no facts plugin)"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

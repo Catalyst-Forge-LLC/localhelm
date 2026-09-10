@@ -146,14 +146,28 @@ export function plainPluginError(raw: string): string {
 /** FilePress bridge returns `{ results: [{ ok }] }`. Safe for the Svelte bundle. */
 export function landPluginApplyOk(result: unknown): { ok: boolean; reason: string } {
 	if (!result || typeof result !== 'object') return { ok: true, reason: 'done' };
-	const body = result as { results?: Array<{ id?: string; ok?: boolean }>; log?: string[] };
-	if (Array.isArray(body.results)) {
-		const failed = body.results.filter((row) => row.ok === false);
+	const body = result as {
+		results?: Array<{ id?: string; ok?: boolean; detail?: string }>;
+		rows?: Array<{ id?: string; ok?: boolean; detail?: string }>;
+		log?: string[];
+		ok?: boolean;
+	};
+	const list = Array.isArray(body.results) ? body.results : Array.isArray(body.rows) ? body.rows : null;
+	if (list) {
+		const failed = list.filter((row) => row.ok === false);
 		if (failed.length) {
 			const ids = failed.map((row) => row.id ?? '?').join(', ');
+			const detail = failed
+				.map((row) => (typeof row.detail === 'string' ? row.detail : ''))
+				.filter(Boolean)
+				.join('\n');
 			const log = Array.isArray(body.log) ? body.log.join('\n') : '';
-			return { ok: false, reason: plainPluginError(log) || `plugin failed for ${ids}` };
+			return { ok: false, reason: plainPluginError(detail || log) || `plugin failed for ${ids}` };
 		}
+	}
+	if (body.ok === false) {
+		const log = Array.isArray(body.log) ? body.log.join('\n') : '';
+		return { ok: false, reason: plainPluginError(log) || 'plugin failed' };
 	}
 	return { ok: true, reason: 'done' };
 }
@@ -224,6 +238,11 @@ export function canCommit(row: { missing?: boolean; git: GateGit }): boolean {
 	if (!row.git.repo) return false;
 	if (row.git.busy) return false;
 	return Boolean(row.git.dirty);
+}
+
+/** Optional deploy. Not a gold Today need — private sites can always ship. */
+export function canShip(row: { missing?: boolean; ship?: { dir: string } }): boolean {
+	return Boolean(!row.missing && row.ship);
 }
 
 /** Writes Today and Fleet both offer. Order is the gold-write priority. */

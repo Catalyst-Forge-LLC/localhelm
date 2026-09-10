@@ -37,4 +37,29 @@ describe('fleetStatus onlyIds', () => {
 		);
 		assert.equal(one.digest.projects, 1);
 	});
+
+	it('marks scripts.ship on root or site package.json', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-status-ship-'));
+		await mkdir(path.join(root, 'forge'));
+		await writeFile(
+			path.join(root, 'forge', 'package.json'),
+			'{\n  "name": "forge",\n  "private": true,\n  "scripts": { "ship": "wrangler pages deploy" }\n}\n',
+		);
+		await mkdir(path.join(root, 'plain'));
+		await writeFile(path.join(root, 'plain', 'package.json'), '{\n  "name": "plain",\n  "private": true\n}\n');
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: {
+				workspaceRoot: '.',
+				projects: [
+					{ id: 'forge', path: 'forge' },
+					{ id: 'plain', path: 'plain' },
+				],
+			},
+		};
+		const inventory = await fleetStatus(loaded);
+		assert.deepEqual(inventory.projects.find((row) => row.id === 'forge')?.ship, { dir: 'root' });
+		assert.equal(inventory.projects.find((row) => row.id === 'plain')?.ship, undefined);
+	});
 });

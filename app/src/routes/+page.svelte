@@ -18,6 +18,7 @@
 	import {
 		canCommit,
 		canCutVersion,
+		canShip,
 		commitCountLabel,
 		fleetWriteIds,
 		fleetWriteLabel,
@@ -130,6 +131,14 @@
 			error?: string;
 		};
 		pins: Pin[];
+		ship?: { dir: 'root' | 'site' };
+	};
+	type ScriptShipRow = {
+		id: string;
+		action: string;
+		reason?: string;
+		dir?: 'root' | 'site';
+		cwd?: string;
 	};
 	type Inventory = {
 		manifestPath: string;
@@ -377,6 +386,10 @@
 	const checkedCommitIds = $derived(checkedIds.filter((id) => {
 		const row = inventory?.projects.find((p) => p.id === id);
 		return row ? canCommit(row) : false;
+	}));
+	const checkedShipIds = $derived(checkedIds.filter((id) => {
+		const row = inventory?.projects.find((p) => p.id === id);
+		return row ? canShip(row) : false;
 	}));
 	const unpublishedPublishIds = $derived(
 		visibleProjects.filter((row) => row.unpublishedAhead && !whyNotPublish(row)).map((row) => row.id),
@@ -1599,6 +1612,9 @@
 		if (action === 'push') {
 			return 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.';
 		}
+		if (plugin === 'xfacts' && action === 'ship') {
+			return 'Runs pnpm ship in that repo (wrangler / Pages). Confirm to deploy. Not FilePress Land. Never --force.';
+		}
 		return 'The plugin runs this in each listed checkout. LocalHelm does not reimplement it.';
 	}
 
@@ -1716,6 +1732,83 @@
 			await loadStatus({ ids });
 			if (failed.length) {
 				error = failed.map((r) => `${r.id}: ${r.reason ?? 'push failed'}`).join(' · ');
+			}
+		});
+	}
+
+	function shipItems(rows: ScriptShipRow[]): string[] {
+		return rows.map((row) => {
+			if (row.action !== 'ship') {
+				return `${row.id}  ${row.reason ?? 'skipped'}`;
+			}
+			const where = row.dir === 'site' ? 'site/' : 'root';
+			return `${row.id}  pnpm run ship (${where})`;
+		});
+	}
+
+	async function startShip(onlyIds?: string[]): Promise<void> {
+		if (onlyIds) {
+			onlyIds = readyNamed(onlyIds);
+			if (!onlyIds.length) return;
+		}
+		const scope = onlyIds?.length === 1 ? onlyIds[0] : onlyIds?.length ? `${onlyIds.length} repos` : 'all';
+		await run(
+			`planning ship ${scope}`,
+			async () => {
+				const data = (await call('/api/ship', {
+					method: 'POST',
+					body: JSON.stringify({ apply: false, ids: onlyIds }),
+				})) as { rows: ScriptShipRow[] };
+				const eligible = data.rows.filter((r) => r.action === 'ship');
+				const named = Boolean(onlyIds?.length);
+				const listed = named ? data.rows : eligible;
+				note(`ship plan — ${eligible.length} of ${data.rows.length} have scripts.ship, nothing written`, data);
+				const skipNote =
+					named && listed.length > eligible.length
+						? `${eligible.length} of ${listed.length} checked have a ship script. `
+						: '';
+				offerConfirm({
+					title: eligible.length === 1 ? `Ship ${eligible[0]?.id}?` : eligible.length ? 'Ship these projects?' : 'Nothing to ship',
+					hint: eligible.length
+						? `${skipNote}Runs pnpm ship in each checkout (wrangler / Pages). Not FilePress Land. Confirm to deploy. Never --force.`
+						: onlyIds?.length === 1
+							? `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'no scripts.ship'}`
+							: named
+								? 'None of the checked repos have a ship script in package.json (root or site/).'
+								: 'Nothing enrolled has scripts.ship.',
+					items: listed.length ? shipItems(listed) : ['Nothing to ship.'],
+					itemKeys: listed.map((row) => row.id),
+					confirmLabel: eligible.length === 1 ? `Ship ${eligible[0]?.id}` : `Ship ${eligible.length}`,
+					canApply: eligible.length > 0,
+					run: () => void applyShip(eligible.map((row) => row.id)),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyShip(ids: string[]): Promise<void> {
+		await run(bulkProgressLabel('shipping', 1, ids.length, ids[0]), async () => {
+			const rows: ScriptShipRow[] = [];
+			await eachNamed('shipping', ids, async (id) => {
+				const data = (await call('/api/ship', {
+					method: 'POST',
+					body: JSON.stringify({ apply: true, ids: [id] }),
+				})) as { rows: ScriptShipRow[] };
+				rows.push(...data.rows);
+			});
+			const eligible = rows.filter((r) => r.action === 'ship');
+			const failed = eligible.filter((r) => !r.reason?.startsWith('shipped '));
+			const ok = eligible.length - failed.length;
+			note(
+				failed.length
+					? `ship --apply — ${ok} shipped, ${failed.length} failed: ${failed.map((r) => `${r.id}: ${r.reason ?? 'ship failed'}`).join(' · ')}`
+					: `ship --apply — ${ok} shipped`,
+				{ rows },
+			);
+			await loadStatus({ ids });
+			if (failed.length) {
+				error = failed.map((r) => `${r.id}: ${r.reason ?? 'ship failed'}`).join(' · ');
 			}
 		});
 	}
@@ -2226,7 +2319,7 @@
 		return pin.onLatest === false ? 'pin-behind' : 'pin-ok';
 	}
 
-	type NeedAction = { id: FleetWriteId; label: string; title: string; run: () => void; disabled?: boolean };
+	type NeedAction = { id: FleetWriteId | 'ship'; label: string; title: string; run: () => void; disabled?: boolean };
 
 	function rowBumpKind(row: Project): BumpKind {
 		return bumpKind[row.id] ?? 'patch';
@@ -2300,6 +2393,14 @@
 			if (afterPub >= 0) acts.splice(afterPub + 1, 0, pushAct);
 			else acts.unshift(pushAct);
 		}
+		if (canShip(row) && !acts.some((act) => act.id === 'ship')) {
+			acts.push({
+				id: 'ship',
+				label: 'Ship',
+				title: `Runs pnpm ship in ${row.ship?.dir === 'site' ? 'site/' : 'the repo root'} (${row.id}). Confirm in the modal. Not FilePress Land.`,
+				run: () => void startShip([row.id]),
+			});
+		}
 		return acts;
 	}
 
@@ -2329,6 +2430,7 @@
 			bits.push(
 				'This is the enrolled fleet, not a short shelf list. Hidden archived rows stay off.',
 				'Check rows like Fleet. Add labels runs the AppFacts generator for repos with no APP_FACTS.md. Refresh rewrites an existing label. Confirm in the modal.',
+				'Ship runs that repo’s pnpm ship script (wrangler / Pages). Same job as Fleet Ship. Not FilePress Land.',
 			);
 		}
 		bits.push('Check rows, then run a job on the selection.');
@@ -2935,6 +3037,15 @@
 							</button>
 							<button
 								class="btn btn-write"
+								disabled={Boolean(busy) || !checkedShipIds.length}
+								onclick={() => void startShip(checkedShipIds)}
+								title="Runs pnpm ship for checked repos that have the script (wrangler / Pages). Confirm in the modal. Not FilePress Land."
+							>
+								<Icon icon="lucide:ship" />
+								Ship{checkedShipIds.length ? ` (${checkedShipIds.length})` : ''}
+							</button>
+							<button
+								class="btn btn-write"
 								disabled={Boolean(busy) || !checkedIds.length}
 								onclick={() => startUnenroll()}
 								title="Shows which fleet rows would be removed. Confirm in the modal. Never deletes a folder."
@@ -3090,7 +3201,7 @@
 					</div>
 
 					<p class="legend">
-						Check rows for bulk bump, push, publish, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
+						Check rows for bulk bump, push, publish, ship, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
 						Publish bumps if local is already on npm, pushes if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
 					</p>
 				</section>

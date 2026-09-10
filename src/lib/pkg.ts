@@ -6,11 +6,26 @@ export type PkgJson = {
 	name?: string;
 	version?: string;
 	private?: boolean;
+	scripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
 	peerDependencies?: Record<string, string>;
 	optionalDependencies?: Record<string, string>;
 };
+
+export type ShipDir = 'root' | 'site';
+
+export function pkgHasShipScript(pkg: PkgJson | undefined | null): boolean {
+	const ship = pkg?.scripts?.ship;
+	return typeof ship === 'string' && ship.trim().length > 0;
+}
+
+/** Root `scripts.ship` wins. FilePress-style repos often keep ship under `site/`. */
+export function shipScriptTarget(rootPkg?: PkgJson, sitePkg?: PkgJson): { dir: ShipDir } | undefined {
+	if (pkgHasShipScript(rootPkg)) return { dir: 'root' };
+	if (pkgHasShipScript(sitePkg)) return { dir: 'site' };
+	return undefined;
+}
 
 export async function readPkg(filePath: string): Promise<PkgJson | { error: string }> {
 	try {

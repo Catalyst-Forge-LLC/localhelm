@@ -229,7 +229,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Dirty repos get **Commit** on Today and Fleet (and a checked-row toolbar). The confirm lists files plus an editable message. **ollanet** finds Ollama (local first, then the network; LAN only if needed) and drafts the text; otherwise a fallback. Confirm is git add + git commit only — no push. CLI: `localhelm commit <id>... [--message TEXT] [--apply]`.
 - Add projects lists folders A–Z, ignoring case, with nested folders under their parent. Default string sort put `FocusFreely` above `acmegeek`.
 - Needs you head has bulk Commit dirty / Publish unpublished / Push ahead / Cut versions, not only Publish unpublished.
-- xFacts labels lists the enrolled fleet (not a 13-name shelf). Check rows like Fleet; Add labels / Refresh creates or rewrites APP_FACTS.md.
+- xFacts labels lists the enrolled fleet (not a 13-name shelf). Check rows like Fleet; Add labels / Refresh creates or rewrites APP_FACTS.md. Ship appears when that repo has `scripts.ship`.
 
 ### Session 28 — 2026-09-05
 
@@ -239,3 +239,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 29 — 2026-09-09
 
 - Multi-repo Commit drafts one Ollama message at a time (one GPU). The “Asking Ollama…” hint and roster spinner stay up until the last repo lands; each textarea updates as soon as that draft returns. They were never concurrent, and the old hint cleared after the first reply.
+
+### Session 30 — 2026-09-10
+
+- Fleet / Today **Ship** and CLI `localhelm ship <id>...` run `pnpm ship` for enrolled projects that have the script (root or `site/package.json`). Same for xFacts rows. This is wrangler / Pages, not FilePress Land. Named ids on apply. Never `--force`. Not a gold Today need.

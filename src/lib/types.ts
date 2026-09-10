@@ -72,6 +72,8 @@ export type ProjectStatus = {
 	unpublishedAhead: boolean;
 	/** Commits on origin after the last local/npm version bump (or v-tag). Null if we cannot tell. */
 	commitsSinceNpm?: number | null;
+	/** Present when root or site/package.json has scripts.ship (wrangler, Pages, …). Not FilePress Land. */
+	ship?: { dir: 'root' | 'site' };
 	error?: string;
 };
 

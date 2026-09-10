@@ -3,7 +3,7 @@ import type { LoadedManifest } from './manifest.js';
 import { clearNpmCache, liftLatestIfVersionExists, npmLatest } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pinsFromPkg } from './pins.js';
-import { collectDeps, pathExists, readPkg, rootPkgPath, sitePkgPath, type PkgJson } from './pkg.js';
+import { collectDeps, pathExists, readPkg, rootPkgPath, shipScriptTarget, sitePkgPath, type PkgJson } from './pkg.js';
 import { compareSemver } from './semver.js';
 import type { FleetDigest, FleetInventory, PinEdge, ProjectStatus } from './types.js';
 
@@ -24,6 +24,7 @@ type Prepared = {
 	rootPkg?: PkgJson;
 	rootError?: string;
 	sitePkg?: PkgJson;
+	ship?: { dir: 'root' | 'site' };
 };
 
 export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions = {}): Promise<FleetInventory> {
@@ -71,6 +72,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			rootPkg,
 			rootError,
 			sitePkg,
+			ship: shipScriptTarget(rootPkg, sitePkg),
 		});
 	}
 
@@ -158,6 +160,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 				publishedVersion && git.repo && git.branch
 					? countCommitsSinceVersion(row.absPath, publishedVersion, git.branch)
 					: null,
+			ship: row.ship,
 		};
 		if (row.rootError) status.error = row.rootError;
 		projects.push(status);

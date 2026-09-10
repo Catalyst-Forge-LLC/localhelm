@@ -13,6 +13,7 @@ import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublis
 import { archiveIds, readArchive, restoreIds } from '../lib/archive.js';
 import { buildBrief } from '../lib/brief.js';
 import { applyLand, planLandMany, requireLandSiteIds } from '../lib/land.js';
+import { applyScriptShip, isShippedReason, planScriptShip, requireShipIds } from '../lib/scriptShip.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
@@ -43,6 +44,8 @@ Usage:
   localhelm auth
   localhelm cascade <id> [--to V] [--apply] [--no-commit]
   localhelm land <site-id>... [--apply]
+  localhelm ship [id...]                 # plan pnpm ship
+  localhelm ship <id>... --apply         # named ids; never --force
   localhelm brief [--json]
   localhelm archive [id...] [--apply] [--restore]
   localhelm plugins
@@ -719,6 +722,59 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 			}
 		} finally {
 			await lock.release();
+		}
+		return;
+	}
+
+	if (cmd === 'ship') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		if (argv.some((a) => a === '--force' || a === '-f' || a === '--force-with-lease')) {
+			fail('localhelm never force-ships or force-pushes');
+		}
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		const loaded = await requireManifest();
+		let ids: string[] | undefined;
+		if (apply) {
+			try {
+				ids = requireShipIds(argv);
+			} catch (err) {
+				fail(err instanceof Error ? err.message : String(err));
+			}
+		} else if (argv.length) {
+			ids = argv;
+		}
+		const planned = await planScriptShip(loaded, ids);
+		let rows = planned;
+		if (apply) {
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				rows = [];
+				for (const row of planned) {
+					rows.push(await applyScriptShip(loaded, row));
+				}
+			} finally {
+				await lock.release();
+			}
+		}
+		if (json) printJson({ rows, writes: apply });
+		else {
+			for (const row of rows) {
+				if (row.action !== 'ship') {
+					process.stdout.write(`${row.id}\tskip\t${row.reason ?? ''}\n`);
+					continue;
+				}
+				const where = row.dir ?? 'root';
+				process.stdout.write(`${row.id}\tship\t${where}\t${row.reason ?? `pnpm run ship (${where})`}\n`);
+			}
+			if (!apply) {
+				process.stdout.write(
+					'Nothing written. Re-run with the same id(s) and --apply to run pnpm ship. Never --force.\n',
+				);
+			} else if (rows.some((row) => row.action === 'ship' && !isShippedReason(row.reason))) {
+				process.exitCode = 1;
+			}
 		}
 		return;
 	}

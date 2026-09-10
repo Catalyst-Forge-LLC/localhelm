@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
 	canCutVersion,
+	canShip,
 	commitCountLabel,
 	fleetWriteIds,
 	fleetWriteLabel,
+	landPluginApplyOk,
 	plainGitError,
 	plainPluginError,
 	plainPublishError,
@@ -216,5 +218,33 @@ describe('writableCascadeCount', () => {
 			},
 		];
 		assert.equal(writableCascadeCount('lib', projects), 1);
+	});
+});
+
+describe('canShip', () => {
+	it('is optional and never a gold write', () => {
+		assert.equal(canShip({ missing: false, ship: { dir: 'root' } }), true);
+		assert.equal(canShip({ missing: false, ship: { dir: 'site' } }), true);
+		assert.equal(canShip({ missing: true, ship: { dir: 'root' } }), false);
+		assert.equal(canShip({ missing: false }), false);
+		assert.ok(!fleetWriteIds(row()).includes('ship' as never));
+	});
+});
+
+describe('landPluginApplyOk', () => {
+	it('reads FilePress results and xFacts rows', () => {
+		assert.deepEqual(landPluginApplyOk({ results: [{ id: 'site', ok: true }] }), { ok: true, reason: 'done' });
+		assert.equal(
+			landPluginApplyOk({
+				rows: [{ id: 'x-facts', ok: false, detail: '✘ [ERROR] Authentication error [code: 10000]' }],
+			}).ok,
+			false,
+		);
+		assert.match(
+			landPluginApplyOk({
+				rows: [{ id: 'x-facts', ok: false, detail: '✘ [ERROR] Authentication error [code: 10000]' }],
+			}).reason,
+			/Authentication error/,
+		);
 	});
 });

@@ -30,6 +30,8 @@ localhelm publish my-lib                # plan
 localhelm auth                          # npm whoami + token hint
 localhelm publish my-lib --apply
 localhelm publish my-lib --apply --otp 123456
+localhelm ship x-facts catalyst-forge   # plan pnpm ship (wrangler / Pages)
+localhelm ship x-facts --apply          # named ids; never --force
 localhelm cascade my-lib                # plan pin updates; --apply writes
 localhelm plugins
 localhelm plugin filepress              # FilePress plugin, if present
@@ -38,7 +40,7 @@ localhelm plugin xfacts                 # xFacts labels board, if enrolled
 localhelm serve                         # :4321 on all interfaces
 ```
 
-`scan` never writes. Other commands print a plan; `--apply` writes. `publish` and `push` need named ids. Never `--force`.
+`scan` never writes. Other commands print a plan; `--apply` writes. `publish`, `push`, and `ship` need named ids. Never `--force`.
 
 `localhelm serve` opens the dashboard on port 4321. Same library as the CLI. Writes stay on loopback.
 
