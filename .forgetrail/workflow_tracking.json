@@ -1289,6 +1289,20 @@
         "Give FilePress all leftover space and keep Ports auto"
       ],
       "status": "active"
+    },
+    {
+      "id": "d92",
+      "timestamp": "2026-09-10T20:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 33,
+      "decision": "Commit drafts prefer a live network/dedicated Ollama host over this machine (self/localhost last). Status fetches npm latest in a pool of 8 with a 5-minute in-process cache (Refresh and fetch remotes clear it). Plugin boards load in parallel. Status/plugin reads show a status line and do not disable the header. Commit confirm already opens on fallbacks, then drafts fill in one repo at a time.",
+      "rationale": "Operator 2026-09-10: this Windows box is usually bogged down; the MacBook is a dedicated Ollama host. Initial dashboard load was ~36s status + ~13s plugins with the chrome locked. Local model stays; host preference flips.",
+      "alternatives_considered": [
+        "Pin LOCALHELM_OLLAMA_MACHINE only and keep localhost-first discovery",
+        "Keep sequential npm latest and only unlock the chrome",
+        "Pull a smaller model on the Mac before changing host preference"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

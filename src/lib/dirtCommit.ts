@@ -128,7 +128,7 @@ export function isLocalOllanetServer(server: Pick<ScannedServer, 'self' | 'sourc
 
 export function pickOllanetServer(servers: readonly ScannedServer[]): ScannedServer | undefined {
 	const ok = servers.filter((server) => server.models.some((model) => model.name.trim()));
-	return ok.find(isLocalOllanetServer) ?? ok[0];
+	return ok.find((server) => !isLocalOllanetServer(server)) ?? ok[0];
 }
 
 export function ollanetMachineLabel(server: ScannedServer): string {

@@ -22,7 +22,15 @@ export {
 	secretCommitSkip,
 } from './dirtCommit.js';
 export type { CommitDraftApi, DirtCommitPlan, DirtCommitRow, DirtFile } from './dirtCommit.js';
-export { clearNpmCache, liftLatestIfVersionExists, npmHasVersion, npmLatest, withPublishedLocal } from './npm.js';
+export {
+	clearNpmCache,
+	liftLatestIfVersionExists,
+	mapPool,
+	npmHasVersion,
+	npmLatest,
+	npmLatestMany,
+	withPublishedLocal,
+} from './npm.js';
 export { retargetSpecifier } from './pinwrite.js';
 export { fleetReady } from './ready.js';
 export type { ReadyView } from './ready.js';

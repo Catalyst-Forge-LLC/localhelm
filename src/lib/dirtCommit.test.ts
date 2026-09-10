@@ -87,13 +87,21 @@ describe('dirtCommit helpers', () => {
 		assert.equal(cleanSuggestedMessage('Here is a commit message:\n\nFix the bind.'), 'Fix the bind.');
 	});
 
-	it('prefers a live local Ollama host over a network one', () => {
+	it('prefers a live network Ollama host over this machine', () => {
 		const remote = fakeServer();
-		assert.equal(pickOllanetServer([remote, localServer]), localServer);
-		assert.equal(pickOllanetServer([remote]), remote);
+		const selfTailscale = fakeServer({
+			hostname: 'MYCROFTONE',
+			dnsName: 'mycroftone.tail78ca25.ts.net',
+			ip: '100.74.12.14',
+			self: true,
+			endpoint: 'http://100.74.12.14:11434',
+		});
+		assert.equal(pickOllanetServer([localServer, selfTailscale, remote]), remote);
+		assert.equal(pickOllanetServer([remote, localServer]), remote);
+		assert.equal(pickOllanetServer([localServer]), localServer);
 	});
 
-	it('asks ollanet for localhost first and skips LAN when a host is live', async () => {
+	it('uses a live local host and skips LAN when no remote is up', async () => {
 		const seen: Array<{ lanScan?: boolean; save?: boolean }> = [];
 		const picked = await discoverOllanetServer({
 			scanNetwork: async (opts) => {

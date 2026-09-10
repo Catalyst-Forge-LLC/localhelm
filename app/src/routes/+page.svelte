@@ -245,6 +245,7 @@
 
 	let entries = $state<LogEntry[]>([]);
 	let busy = $state('');
+	let statusNote = $state('');
 	let error = $state('');
 
 	const enrolledIds = $derived(new Set((inventory ? inventory.projects : roster).map((p) => p.id)));
@@ -873,11 +874,17 @@
 		}
 	}
 
-	async function loadStatus(opts: { fetchRemotes?: boolean; ids?: string[]; extras?: boolean } = {}): Promise<void> {
+	async function loadStatus(opts: {
+		fetchRemotes?: boolean;
+		ids?: string[];
+		extras?: boolean;
+		freshNpm?: boolean;
+	} = {}): Promise<void> {
 		const ids = opts.ids?.filter(Boolean) ?? [];
 		const scoped = ids.length > 0;
 		const query = new URLSearchParams();
 		if (opts.fetchRemotes) query.set('fetch', '1');
+		if (opts.freshNpm) query.set('fresh', '1');
 		const csv = scoped ? serializeListParam(ids) : null;
 		if (csv) query.set('ids', csv);
 		const suffix = query.toString() ? `?${query}` : '';
@@ -914,19 +921,32 @@
 		}
 	}
 
+	async function readQuiet(label: string, fn: () => Promise<void>): Promise<void> {
+		statusNote = label;
+		error = '';
+		try {
+			await fn();
+		} catch (err) {
+			error = err instanceof Error ? err.message : String(err);
+		} finally {
+			statusNote = '';
+		}
+	}
+
 	async function refresh(fetchRemotes = false, extras = true): Promise<void> {
-		await run(fetchRemotes ? 'fetching remotes, then reading status' : 'reading status', async () => {
+		await readQuiet(fetchRemotes ? 'fetching remotes, then reading status' : 'reading status', async () => {
 			const fleet = inventory?.projects.map((row) => row.id) ?? [];
 			if (fetchRemotes && fleet.length) {
-				await eachNamed('fetching remotes', fleet, async (id) => {
+				for (const id of fleet) {
+					statusNote = `fetching remotes (${id})`;
 					await call('/api/fetch', { method: 'POST', body: JSON.stringify({ ids: [id] }) });
-				});
+				}
 				fetchedAt = new Date().toLocaleTimeString();
-				busy = 'reading status';
-				await loadStatus({ extras });
+				statusNote = 'reading status';
+				await loadStatus({ extras, freshNpm: true });
 				return;
 			}
-			await loadStatus({ fetchRemotes, extras });
+			await loadStatus({ fetchRemotes, extras, freshNpm: true });
 		});
 	}
 
@@ -938,8 +958,8 @@
 		}
 		const label =
 			named.length === 1 ? `reading ${named[0]}` : `reading ${named.length} projects`;
-		await run(fetchRemotes ? `fetching remotes, then ${label}` : label, async () => {
-			await loadStatus({ fetchRemotes, ids: named, extras: false });
+		await readQuiet(fetchRemotes ? `fetching remotes, then ${label}` : label, async () => {
+			await loadStatus({ fetchRemotes, ids: named, extras: false, freshNpm: fetchRemotes });
 		});
 	}
 
@@ -1396,7 +1416,7 @@
 				offerConfirm({
 					title: can.length === 1 ? `Commit ${can[0]?.id}?` : can.length ? `Commit ${can.length} repos?` : 'Nothing to commit',
 					hint: can.length
-						? 'ollanet looks for Ollama (local first, then the network). Edit the draft, then Confirm runs git add and git commit. Secrets stay out. No push.'
+						? 'Fallback messages are ready to edit. ollanet drafts on a network Ollama host when one is up (this machine is last). Confirm runs git add and git commit. Secrets stay out. No push.'
 						: data.rows[0]?.reason ?? 'Nothing dirty to commit.',
 					items,
 					itemKeys,
@@ -2496,7 +2516,7 @@
 		void loadActivity();
 		void loadRoster();
 		void loadPluginBoards();
-		void refresh(false, false);
+		void readQuiet('reading status', () => loadStatus({ extras: false }));
 	});
 </script>
 
@@ -2593,6 +2613,8 @@
 		<div class="status-rail" aria-live="polite">
 			{#if busy}
 				<p class="line busy">Working: {busy}…</p>
+			{:else if statusNote}
+				<p class="line info">{statusNote}…</p>
 			{:else if error}
 				<p class="line err">{error}</p>
 			{:else if staleRemotes}

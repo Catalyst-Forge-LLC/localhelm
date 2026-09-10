@@ -1,15 +1,41 @@
 import { compareSemver } from './semver.js';
 import type { NpmCell } from './types.js';
 
-const cache = new Map<string, NpmCell>();
+const TTL_MS = 5 * 60_000;
+const DEFAULT_CONCURRENCY = 8;
+
+type CacheEntry = { cell: NpmCell; at: number };
+
+const cache = new Map<string, CacheEntry>();
 
 function encodeName(name: string): string {
 	return name.startsWith('@') ? name.replace('/', '%2f') : name;
 }
 
+/** Run `fn` over items with a fixed worker pool. Order of results matches `items`. */
+export async function mapPool<T, R>(
+	items: readonly T[],
+	concurrency: number,
+	fn: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+	const results = new Array<R>(items.length);
+	if (!items.length) return results;
+	let next = 0;
+	const workers = Math.min(Math.max(1, concurrency), items.length);
+	await Promise.all(
+		Array.from({ length: workers }, async () => {
+			while (next < items.length) {
+				const index = next++;
+				results[index] = await fn(items[index] as T, index);
+			}
+		}),
+	);
+	return results;
+}
+
 export async function npmLatest(name: string): Promise<NpmCell> {
 	const hit = cache.get(name);
-	if (hit) return hit;
+	if (hit && Date.now() - hit.at < TTL_MS) return hit.cell;
 	const url = `https://registry.npmjs.org/${encodeName(name)}/latest`;
 	try {
 		const res = await fetch(url, {
@@ -18,12 +44,12 @@ export async function npmLatest(name: string): Promise<NpmCell> {
 		});
 		if (res.status === 404) {
 			const cell: NpmCell = { name, status: 'none' };
-			cache.set(name, cell);
+			cache.set(name, { cell, at: Date.now() });
 			return cell;
 		}
 		if (!res.ok) {
 			const cell: NpmCell = { name, status: 'error', error: `npm HTTP ${res.status} for ${name}` };
-			cache.set(name, cell);
+			cache.set(name, { cell, at: Date.now() });
 			return cell;
 		}
 		const body: unknown = await res.json();
@@ -33,11 +59,11 @@ export async function npmLatest(name: string): Promise<NpmCell> {
 				: undefined;
 		if (!version) {
 			const cell: NpmCell = { name, status: 'error', error: `npm latest missing version for ${name}` };
-			cache.set(name, cell);
+			cache.set(name, { cell, at: Date.now() });
 			return cell;
 		}
 		const cell: NpmCell = { name, latest: version, status: 'ok' };
-		cache.set(name, cell);
+		cache.set(name, { cell, at: Date.now() });
 		return cell;
 	} catch (err) {
 		const cell: NpmCell = {
@@ -45,9 +71,18 @@ export async function npmLatest(name: string): Promise<NpmCell> {
 			status: 'error',
 			error: err instanceof Error ? err.message : String(err),
 		};
-		cache.set(name, cell);
+		cache.set(name, { cell, at: Date.now() });
 		return cell;
 	}
+}
+
+export async function npmLatestMany(
+	names: Iterable<string>,
+	concurrency = DEFAULT_CONCURRENCY,
+): Promise<Map<string, NpmCell>> {
+	const list = [...new Set([...names].map((name) => name.trim()).filter(Boolean))];
+	const cells = await mapPool(list, concurrency, (name) => npmLatest(name));
+	return new Map(list.map((name, i) => [name, cells[i] as NpmCell]));
 }
 
 export async function npmHasVersion(name: string, version: string): Promise<NpmCell> {
@@ -67,7 +102,11 @@ export async function npmHasVersion(name: string, version: string): Promise<NpmC
 		if (!found) return { name, status: 'error', error: `npm missing version for ${name}@${version}` };
 		return { name, latest: found, status: 'ok' };
 	} catch (err) {
-		return { name, status: 'error', error: err instanceof Error ? err.message : String(err) };
+		return {
+			name,
+			status: 'error',
+			error: err instanceof Error ? err.message : String(err),
+		};
 	}
 }
 

@@ -43,6 +43,50 @@ describe('plugins', () => {
 		assert.equal(dash.boards.length, 0);
 	});
 
+	it('loads enabled plugin boards in parallel', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-plug-par-'));
+		const g = globalThis as { __helmPlugOrder?: string[] };
+		g.__helmPlugOrder = [];
+		for (const id of ['alpha', 'beta']) {
+			const proj = path.join(root, id);
+			await mkdir(proj);
+			await writeFile(
+				path.join(proj, 'localhelm.plugin.mjs'),
+				`export default {
+  id: '${id}',
+  label: '${id}',
+  async board() {
+    globalThis.__helmPlugOrder ??= [];
+    globalThis.__helmPlugOrder.push('start:${id}');
+    await new Promise((r) => setTimeout(r, 80));
+    globalThis.__helmPlugOrder.push('end:${id}');
+    return { plugin: '${id}', title: '${id}', columns: [], rows: [] };
+  }
+};
+`,
+			);
+		}
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: {
+				workspaceRoot: '.',
+				projects: [
+					{ id: 'alpha', path: 'alpha' },
+					{ id: 'beta', path: 'beta' },
+				],
+			},
+		};
+		const dash = await loadPluginDashboard(loaded);
+		assert.deepEqual(
+			dash.boards.map((board) => board.title).sort(),
+			['alpha', 'beta'],
+		);
+		const order = g.__helmPlugOrder ?? [];
+		const firstEnd = order.findIndex((step) => step.startsWith('end:'));
+		assert.ok(firstEnd >= 2, `expected both starts before either end, got ${order.join(',')}`);
+	});
+
 	it('reads write ids from a plugin plan and ignores already-current rows', () => {
 		assert.deepEqual(
 			pluginPlanWriteIds({

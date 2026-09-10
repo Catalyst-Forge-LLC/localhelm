@@ -42,9 +42,18 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 
 **Project pointer:** LocalHelm `app/vite.config.ts` + `src/lib/fetchError.ts`; FilePress `localhelm.plugin.mjs`.
 
+### 5. Dashboard boot must not serialize independent I/O or lock the chrome
+
+**What went wrong:** A fleet status route awaited `npm view`-style registry calls one package at a time (~33 sequential `registry.npmjs.org` hits → ~36s). Plugin `board()` hooks ran in a `for`/`await` loop (~13s). The client set `busy` for that read, which disabled the header and tabs until both finished. Roster JSON was already 4ms.
+
+**Suggested Lite change:** In dashboard / Phase 2 spine notes (§4.2): independent reads (registry, plugin boards, git) should fan out with a small pool; cache short-TTL process state across refresh. Do not disable navigation/chrome for a read — show an inline “reading…” line. Writes can still take the lock. Prefer a dedicated/network LLM host when the operator’s workstation is the busy box (ollanet-style discovery: remote first, localhost last).
+
+**Project pointer:** LocalHelm `src/lib/npm.ts` `npmLatestMany`, `src/lib/plugin.ts` `loadPluginDashboard`, `app/src/routes/+page.svelte` `readQuiet`.
+
 | Topic | Lite § to patch |
 | --- | --- |
 | Node builtins in Svelte client graph | §4.2 / anti-patterns |
 | Vite allowedHosts vs Tailscale `*.ts.net` | §4.2 / anti-patterns |
 | Private GitHub README images on npmjs | npm / README |
 | Long Vite plugin jobs / Failed to fetch | §4.2 / anti-patterns |
+| Serial dashboard I/O + chrome lock | §4.2 / anti-patterns |

@@ -10,10 +10,9 @@ export async function loadVisitorSnapshot(): Promise<VisitorSnapshot> {
 	const loaded = await loadOptional();
 	if (!loaded) return empty;
 	const plugins = await loadPlugins(loaded);
-	const boards = [];
-	for (const plug of plugins) {
-		boards.push(...asPluginBoards(await plug.plugin.board()));
-	}
+	const boards = (
+		await Promise.all(plugins.map(async (plug) => asPluginBoards(await plug.plugin.board())))
+	).flat();
 	const helmPort = Number(process.env.LOCALHELM_PORT);
 	return visitorSnapshotFromBoards(boards, {
 		helmPort: Number.isInteger(helmPort) ? helmPort : undefined,

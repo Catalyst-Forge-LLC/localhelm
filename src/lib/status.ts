@@ -1,6 +1,6 @@
 import { countCommitsSinceVersion, readGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { clearNpmCache, liftLatestIfVersionExists, npmLatest } from './npm.js';
+import { clearNpmCache, liftLatestIfVersionExists, npmLatest, npmLatestMany } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pinsFromPkg } from './pins.js';
 import { collectDeps, pathExists, readPkg, rootPkgPath, shipScriptTarget, sitePkgPath, type PkgJson } from './pkg.js';
@@ -11,6 +11,8 @@ export type StatusOptions = {
 	fetch?: boolean;
 	/** When set, only these project ids are read (npm + git). Faster for Land. */
 	onlyIds?: string[];
+	/** Drop the in-process npm latest cache (Refresh / fetch remotes). */
+	refreshNpm?: boolean;
 };
 
 type Prepared = {
@@ -28,8 +30,7 @@ type Prepared = {
 };
 
 export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions = {}): Promise<FleetInventory> {
-	// One request per package name *per run*. A long-lived `serve` must not keep yesterday's latest.
-	clearNpmCache();
+	if (options.refreshNpm || options.fetch) clearNpmCache();
 	const prepared: Prepared[] = [];
 	const names = new Set<string>();
 	const only = options.onlyIds?.length ? new Set(options.onlyIds) : null;
@@ -91,8 +92,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 	}
 
 	const latestByName = new Map<string, string>();
-	for (const name of names) {
-		const cell = await npmLatest(name);
+	for (const [name, cell] of await npmLatestMany(names)) {
 		if (cell.status === 'ok' && cell.latest) latestByName.set(name, cell.latest);
 	}
 

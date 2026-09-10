@@ -123,10 +123,9 @@ export async function loadPluginDashboard(loaded: LoadedManifest): Promise<{
 		source: plug.source,
 		enabled: isPluginEnabled(plug.id, prefs),
 	}));
-	const boards: PluginBoard[] = [];
-	for (const plug of found) {
-		if (!isPluginEnabled(plug.id, prefs)) continue;
-		boards.push(...asPluginBoards(await plug.plugin.board()));
-	}
+	const enabled = found.filter((plug) => isPluginEnabled(plug.id, prefs));
+	const boards = (
+		await Promise.all(enabled.map(async (plug) => asPluginBoards(await plug.plugin.board())))
+	).flat();
 	return { plugins, boards };
 }

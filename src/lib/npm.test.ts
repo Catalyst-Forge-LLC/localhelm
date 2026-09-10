@@ -1,6 +1,19 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { withPublishedLocal } from './npm.js';
+import { mapPool, withPublishedLocal } from './npm.js';
+
+describe('mapPool', () => {
+	it('keeps order and runs more than one worker', async () => {
+		const seen: number[] = [];
+		const out = await mapPool([3, 1, 2], 2, async (n) => {
+			seen.push(n);
+			await new Promise((resolve) => setTimeout(resolve, n * 15));
+			return n * 10;
+		});
+		assert.deepEqual(out, [30, 10, 20]);
+		assert.equal(seen.length, 3);
+	});
+});
 
 describe('withPublishedLocal', () => {
 	it('lifts latest when local is already on npm but /latest lagged', () => {
