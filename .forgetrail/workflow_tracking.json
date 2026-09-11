@@ -1343,6 +1343,20 @@
         "Tell operators to run serve only from a checkout"
       ],
       "status": "active"
+    },
+    {
+      "id": "d96",
+      "timestamp": "2026-09-11T10:40:00Z",
+      "phase": "2-scaffolding",
+      "session": 36,
+      "decision": "localhelm serve probes the chosen host:port before spawn. A busy port prints the LISTENING pid and command. Nothing is killed until --free-port. Never --force. No interactive y/n.",
+      "rationale": "Operator 2026-09-11: leftover Vite survived a closed terminal (EADDRINUSE). They asked to check reliably and confirm before freeing the port.",
+      "alternatives_considered": [
+        "Interactive y/n when stdin is a TTY",
+        "Always kill a leftover Vite/localhelm listener",
+        "Only print EADDRINUSE from the child process"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

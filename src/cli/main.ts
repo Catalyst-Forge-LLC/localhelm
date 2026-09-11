@@ -53,7 +53,8 @@ Usage:
   localhelm archive [id...] [--apply] [--restore]
   localhelm plugins
   localhelm plugin <id> [action] [name...] [--apply] [--no-commit]
-  localhelm serve [--host ADDR] [--port N]   default 0.0.0.0 (all interfaces)
+  localhelm serve [--host ADDR] [--port N] [--free-port]
+                                 default 0.0.0.0 (all interfaces)
 
 scan never writes. Mutating commands print a plan; pass --apply to write.
 Scan also reads .localhelmignore (and ~/.localhelm/ignore).
@@ -953,12 +954,16 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 	if (cmd === 'serve') {
 		const host = takeHostFlag(argv);
 		const portRaw = takeOpt(argv, '--port');
+		const freePort = takeFlag(argv, '--free-port');
+		if (argv.some((a) => a === '--force' || a === '-f' || a === '--force-with-lease')) {
+			fail('localhelm never force-stops a port. Use --free-port after serve names the pid.');
+		}
 		const leftovers = argv.filter((a) => a.startsWith('-'));
 		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
-		if (argv.length) fail('usage: localhelm serve [--host ADDR] [--port N]');
+		if (argv.length) fail('usage: localhelm serve [--host ADDR] [--port N] [--free-port]');
 		const port = portRaw ? Number(portRaw) : undefined;
 		if (portRaw && (!Number.isFinite(port) || (port as number) <= 0)) fail('--port must be a positive number');
-		await serveDashboard({ host, port });
+		await serveDashboard({ host, port, freePort });
 		return;
 	}
 

@@ -265,3 +265,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - **Install global** / **Update global** is its own write (`pnpm add -g name@version`, npm if pnpm is missing). Fleet toolbar + row button when a package has a `bin` and this machine is missing or behind. After a laptop npm publish (`published …`), confirm offers to install that version. GitHub-OIDC-only publishes skip the prompt. Named ids on apply. Never `--force`. Not a gold Today need. CLI: `localhelm global <id>...`.
 - A published `localhelm` tarball includes a built `dashboard/` (adapter-node). Checkout `localhelm serve` still uses Vite. Global 0.1.9 stays broken until the next publish.
+
+### Session 36 — 2026-09-11
+
+- `localhelm serve` probes the chosen port before spawning. If it is busy, it names the LISTENING pid and command (leftover Vite included). Nothing is stopped until `--free-port`. Never `--force`.

@@ -2,6 +2,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ensureServePort } from './servePort.js';
 
 export const DEFAULT_DASHBOARD_PORT = 4321;
 export const DEFAULT_DASHBOARD_HOST = '0.0.0.0';
@@ -60,9 +61,15 @@ function serveEnv(host: string, port: number, source: PortSource): NodeJS.Proces
 	};
 }
 
-export async function serveDashboard(opts: { host?: string; port?: number } = {}): Promise<void> {
+export async function serveDashboard(
+	opts: { host?: string; port?: number; freePort?: boolean } = {},
+): Promise<void> {
 	const host = opts.host ?? DEFAULT_DASHBOARD_HOST;
 	const { port, source } = choosePort(opts.port);
+	const { freed } = await ensureServePort(host, port, Boolean(opts.freePort));
+	if (freed.length) {
+		console.error(`stopped ${freed.map((row) => `pid ${row.pid}`).join(', ')} on ${port}`);
+	}
 	const dash = resolveDashboard(packageRoot());
 	const env = serveEnv(host, port, source);
 	const child =

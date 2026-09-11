@@ -190,6 +190,12 @@ export {
 	serveDashboard,
 } from './serve.js';
 export type { DashboardStart } from './serve.js';
+export {
+	parseLsofListeningPids,
+	parseNetstatListeningPids,
+	portBusyMessage,
+} from './servePort.js';
+export type { PortOccupant } from './servePort.js';
 export { fleetStatus } from './status.js';
 export { operatorCwd } from './workspace.js';
 export type { BumpKind } from './semver.js';
