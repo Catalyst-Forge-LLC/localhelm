@@ -9,6 +9,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			apply?: boolean;
 			ids?: string[];
 			versions?: Record<string, string>;
+			wait?: boolean;
 		};
 		const loaded = await loadRequired();
 		const ids = body.apply ? requireGlobalIds(body.ids ?? []) : body.ids?.length ? body.ids : undefined;
@@ -17,7 +18,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			? await withLockAt(loaded.workspaceRoot, async () => {
 					const out = [];
 					for (const row of planned) {
-						out.push(await applyGlobalInstall(row));
+						out.push(await applyGlobalInstall(row, undefined, { wait: Boolean(body.wait) }));
 					}
 					return out;
 				})

@@ -21,7 +21,10 @@
 		canShip,
 		globalInstallLine,
 		globalWriteLabel,
+		isNpmNotReadyReason,
 		needsGlobal,
+		npmNotReadyHint,
+		npmNotReadyTitle,
 		shipConfirmLine,
 		commitCountLabel,
 		fleetWriteIds,
@@ -246,6 +249,8 @@
 	let confirmWriteIds = $state<string[]>([]);
 	let confirmExcluded = $state<string[]>([]);
 	let confirmRun = $state<((includedIds: string[]) => void) | null>(null);
+	let confirmAltLabel = $state('');
+	let confirmAlt = $state<((includedIds: string[]) => void) | null>(null);
 	let statusReady = $state(false);
 	let rosterReady = $state(false);
 	let pluginsReady = $state(false);
@@ -735,6 +740,8 @@
 			if (opts?.closeConfirm !== false) {
 				confirmOpen = false;
 				confirmRun = null;
+				confirmAlt = null;
+				confirmAltLabel = '';
 			}
 		}
 	}
@@ -997,7 +1004,9 @@
 		showOtp?: boolean;
 		messages?: Record<string, string>;
 		draftHint?: string;
+		altLabel?: string;
 		run?: (includedIds: string[]) => void;
+		alt?: (includedIds: string[]) => void;
 	}): void {
 		confirmTitle = spec.title;
 		confirmHint = spec.hint;
@@ -1019,6 +1028,8 @@
 		confirmDraftIds = [];
 		confirmMessageTouched = {};
 		confirmRun = spec.canApply && spec.run ? spec.run : null;
+		confirmAltLabel = spec.altLabel ?? '';
+		confirmAlt = spec.canApply && spec.alt ? spec.alt : null;
 		confirmOpen = true;
 	}
 
@@ -1910,7 +1921,7 @@
 								? `Install ${eligible.length} CLIs globally?`
 								: 'Nothing to install globally',
 					hint: eligible.length
-						? `${skipNote}Runs pnpm add -g (npm if pnpm is missing). Confirm to install on this machine. Never --force.`
+						? `${skipNote}Confirm checks npm for that version, then runs pnpm add -g (npm if pnpm is missing). A new publish can take a minute to show up. Never --force.`
 						: onlyIds?.length === 1
 							? `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'no CLI to install'}`
 							: named
@@ -1935,30 +1946,66 @@
 		);
 	}
 
-	async function applyGlobal(ids: string[], versions?: Record<string, string>): Promise<void> {
-		await run(bulkProgressLabel('installing global', 1, ids.length, ids[0]), async () => {
-			const rows: GlobalInstallRow[] = [];
-			await eachNamed('installing global', ids, async (id) => {
-				const data = (await call('/api/global', {
-					method: 'POST',
-					body: JSON.stringify({ apply: true, ids: [id], versions }),
-				})) as { rows: GlobalInstallRow[] };
-				rows.push(...data.rows);
-			});
-			const eligible = rows.filter((r) => r.action === 'global');
-			const failed = eligible.filter((r) => !r.reason?.startsWith('installed global '));
-			const ok = eligible.length - failed.length;
-			note(
-				failed.length
-					? `global --apply — ${ok} installed, ${failed.length} failed: ${failed.map((r) => `${r.id}: ${r.reason ?? 'install failed'}`).join(' · ')}`
-					: `global --apply — ${ok} installed`,
-				{ rows },
-			);
-			await loadStatus({ ids });
-			if (failed.length) {
-				error = failed.map((r) => `${r.id}: ${r.reason ?? 'install failed'}`).join(' · ');
-			}
+	function offerNpmWait(rows: GlobalInstallRow[], versions?: Record<string, string>): void {
+		const ids = rows.map((row) => row.id);
+		offerConfirm({
+			title: npmNotReadyTitle(rows),
+			hint: npmNotReadyHint(),
+			items: globalItems(rows),
+			itemKeys: ids,
+			confirmLabel: 'Wait',
+			altLabel: 'Try again',
+			canApply: true,
+			applyIds: ids,
+			run: (included) => void applyGlobal(included, versions, { wait: true }),
+			alt: (included) => void applyGlobal(included, versions),
 		});
+	}
+
+	async function applyGlobal(
+		ids: string[],
+		versions?: Record<string, string>,
+		opts?: { wait?: boolean },
+	): Promise<void> {
+		const wait = Boolean(opts?.wait);
+		const verb = wait ? 'Waiting for npm' : 'installing global';
+		await run(
+			wait && ids.length === 1 ? 'Waiting for npm…' : bulkProgressLabel(verb, 1, ids.length, ids[0]),
+			async () => {
+				const rows: GlobalInstallRow[] = [];
+				await eachNamed(verb, ids, async (id) => {
+					const data = (await call('/api/global', {
+						method: 'POST',
+						body: JSON.stringify({ apply: true, ids: [id], versions, wait }),
+					})) as { rows: GlobalInstallRow[] };
+					rows.push(...data.rows);
+				});
+				const eligible = rows.filter((r) => r.action === 'global');
+				const waiting = eligible.filter((r) => isNpmNotReadyReason(r.reason));
+				const failed = eligible.filter(
+					(r) => !r.reason?.startsWith('installed global ') && !isNpmNotReadyReason(r.reason),
+				);
+				const ok = eligible.length - failed.length - waiting.length;
+				note(
+					waiting.length
+						? `global — ${waiting.map((r) => r.reason ?? 'not on npm yet').join(' · ')}`
+						: failed.length
+							? `global --apply — ${ok} installed, ${failed.length} failed: ${failed.map((r) => `${r.id}: ${r.reason ?? 'install failed'}`).join(' · ')}`
+							: `global --apply — ${ok} installed`,
+					{ rows },
+				);
+				await loadStatus({ ids });
+				if (waiting.length) {
+					offerNpmWait(waiting, versions);
+					return;
+				}
+				if (failed.length) {
+					error = failed.map((r) => `${r.id}: ${r.reason ?? 'install failed'}`).join(' · ');
+				}
+				confirmOpen = false;
+			},
+			{ closeConfirm: false },
+		);
 	}
 
 	function publishItems(row: PublishRow, named: boolean): string[] {
@@ -2109,7 +2156,7 @@
 					installable.length === 1
 						? `Install ${installable[0]?.npm ?? installable[0]?.id}@${installable[0]?.version} globally?`
 						: `Install ${installable.length} CLIs globally?`,
-				hint: 'That version is on npm. Confirm runs pnpm add -g on this machine (npm if pnpm is missing). Never --force.',
+				hint: 'Confirm checks npm for that version, then runs pnpm add -g (npm if pnpm is missing). A new publish can take a minute to show up. Never --force.',
 				items: installable.map((row) =>
 					globalInstallLine({ ...row, action: 'global' }, installable.length > 1),
 				),
@@ -4068,9 +4115,17 @@
 	}}
 	applyIds={confirmWriteIds}
 	bind:excludedIds={confirmExcluded}
+	altLabel={confirmAltLabel}
 	onconfirm={(included) => {
 		const fn = confirmRun;
 		confirmRun = null;
+		confirmAlt = null;
+		fn?.(included);
+	}}
+	onalt={(included) => {
+		const fn = confirmAlt;
+		confirmRun = null;
+		confirmAlt = null;
 		fn?.(included);
 	}}
 >

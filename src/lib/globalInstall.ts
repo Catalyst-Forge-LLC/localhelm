@@ -1,8 +1,11 @@
 import { spawn, spawnSync } from 'node:child_process';
 import type { LoadedManifest } from './manifest.js';
+import { npmHasVersion, waitForNpmVersion, type WaitForNpmVersionOpts } from './npm.js';
+import type { NpmCell } from './types.js';
 import { joinRoot } from './paths.js';
 import { pathExists, pkgBinNames, readPkg, rootPkgPath } from './pkg.js';
 import { compareSemver } from './semver.js';
+import { npmNotReadyReason } from './writeGate.js';
 
 const TTL_MS = 2 * 60_000;
 const INSTALL_MS = 180_000;
@@ -21,6 +24,11 @@ export type GlobalInstallRow = {
 
 export type GlobalInstallResult = { ok: boolean; stdout: string; stderr: string; missing?: boolean };
 export type GlobalInstallRunner = (name: string, version: string) => Promise<GlobalInstallResult>;
+export type GlobalInstallApplyOpts = {
+	wait?: boolean;
+	probe?: (name: string, version: string) => Promise<NpmCell>;
+	waitOpts?: WaitForNpmVersionOpts;
+};
 
 let cached: { at: number; versions: Map<string, string> } | null = null;
 
@@ -200,8 +208,19 @@ export async function planGlobalInstall(
 export async function applyGlobalInstall(
 	row: GlobalInstallRow,
 	runner: GlobalInstallRunner = defaultGlobalInstallRunner,
+	opts: GlobalInstallApplyOpts = {},
 ): Promise<GlobalInstallRow> {
 	if (row.action !== 'global' || !row.npm || !row.version) return row;
+	const probe = opts.probe ?? npmHasVersion;
+	let cell = await probe(row.npm, row.version);
+	if (cell.status !== 'ok' && opts.wait) {
+		cell = await waitForNpmVersion(row.npm, row.version, { ...opts.waitOpts, probe });
+	}
+	if (cell.status !== 'ok') {
+		const reason =
+			cell.status === 'none' ? npmNotReadyReason(row.npm, row.version) : (cell.error ?? 'npm lookup failed');
+		return { ...row, reason, stderr: cell.error };
+	}
 	const result = await runner(row.npm, row.version);
 	clearGlobalCache();
 	if (!result.ok) {

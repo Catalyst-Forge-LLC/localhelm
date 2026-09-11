@@ -26,7 +26,7 @@ The same product can appear on three tabs. **Also on** chips jump and check that
 
 Header **Refresh** re-reads enrolled projects, Sites, and Ports. Row refresh is the same for one id. **Fetch remotes** runs `git fetch` and clears the five-minute npm cache. Those are observations plus a remote update. They do not publish.
 
-Start and stop on Ports ask LocalSlip. Push, Publish, Ship, Install global, Write pins, enroll, and plugin jobs open a plan modal. Confirm applies. Close leaves disk unchanged. Publish covers both an already-bumped version and a bump plus npm when origin has commits since the last published version. After a laptop npm publish, confirm can offer to install that CLI globally.
+Start and stop on Ports ask LocalSlip. Push, Publish, Ship, Install global, Write pins, enroll, and plugin jobs open a plan modal. Confirm applies. Close leaves disk unchanged. Publish covers both an already-bumped version and a bump plus npm when origin has commits since the last published version. After a laptop npm publish, confirm can offer to install that CLI globally. Install checks that exact version on npm first; if a new publish is not visible yet, confirm offers Wait or Try again.
 
 Publish OTP lives in the confirm modal. Never `--force`.
 

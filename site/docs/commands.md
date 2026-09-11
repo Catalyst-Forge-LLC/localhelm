@@ -20,7 +20,7 @@ title: Commands
 | `localhelm cascade <id> [--apply]` | Retarget dependents to `^V` |
 | `localhelm land <site-id> [--apply]` | Sync getfilepress on the site, then Push → Ship |
 | `localhelm ship <id>… [--apply]` | Run `pnpm ship` (wrangler / Pages); named ids |
-| `localhelm global <id>… [--apply]` | `pnpm add -g` for a CLI; named ids |
+| `localhelm global <id>… [--apply]` | `pnpm add -g` for a CLI; named ids. `--apply` waits if that version is not on npm yet |
 | `localhelm brief` | Markdown of Today + listening Ports |
 | `localhelm archive [id…] [--apply]` | Hide on Today; folder stays |
 | `localhelm plugins` | Loaded `localhelm.plugin.mjs` hosts |

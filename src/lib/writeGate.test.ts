@@ -7,6 +7,9 @@ import {
 	commitCountLabel,
 	confirmNamedLine,
 	globalInstallLine,
+	isNpmNotReadyReason,
+	npmNotReadyReason,
+	npmNotReadyTitle,
 	globalWriteLabel,
 	shipConfirmLine,
 	needsGlobal,
@@ -265,6 +268,16 @@ describe('confirmNamedLine', () => {
 				true,
 			),
 			'filepress  pnpm add -g getfilepress@0.1.29 (have 0.1.28)',
+		);
+		assert.equal(npmNotReadyReason('localhelm', '0.1.12'), 'localhelm@0.1.12 is not on npm yet');
+		assert.equal(isNpmNotReadyReason('localhelm@0.1.12 is not on npm yet'), true);
+		assert.equal(npmNotReadyTitle([{ npm: 'localhelm', version: '0.1.12' }]), 'npm does not have localhelm@0.1.12 yet');
+		assert.equal(
+			npmNotReadyTitle([
+				{ npm: 'localhelm', version: '0.1.12' },
+				{ npm: 'localslip', version: '0.2.0' },
+			]),
+			'npm does not have 2 new versions yet',
 		);
 	});
 });

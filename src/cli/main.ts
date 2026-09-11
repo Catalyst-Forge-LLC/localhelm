@@ -809,7 +809,10 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 			try {
 				rows = [];
 				for (const row of planned) {
-					rows.push(await applyGlobalInstall(row));
+					if (row.action === 'global' && row.npm && row.version) {
+						process.stderr.write(`checking npm ${row.npm}@${row.version}\n`);
+					}
+					rows.push(await applyGlobalInstall(row, undefined, { wait: true }));
 				}
 			} finally {
 				await lock.release();

@@ -29,6 +29,7 @@ export {
 	npmHasVersion,
 	npmLatest,
 	npmLatestMany,
+	waitForNpmVersion,
 	withPublishedLocal,
 } from './npm.js';
 export { retargetSpecifier } from './pinwrite.js';
@@ -125,7 +126,11 @@ export {
 	confirmNamedLine,
 	globalInstallLine,
 	globalWriteLabel,
+	isNpmNotReadyReason,
 	needsGlobal,
+	npmNotReadyHint,
+	npmNotReadyReason,
+	npmNotReadyTitle,
 	shipConfirmLine,
 	commitCountLabel,
 	fleetWriteIds,

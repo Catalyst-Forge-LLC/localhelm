@@ -85,6 +85,38 @@ export async function npmLatestMany(
 	return new Map(list.map((name, i) => [name, cells[i] as NpmCell]));
 }
 
+export type WaitForNpmVersionOpts = {
+	timeoutMs?: number;
+	intervalMs?: number;
+	now?: () => number;
+	sleep?: (ms: number) => Promise<void>;
+	probe?: (name: string, version: string) => Promise<NpmCell>;
+};
+
+/** Poll until this exact version is on the registry. `/latest` can lag a just-published tarball. */
+export async function waitForNpmVersion(
+	name: string,
+	version: string,
+	opts: WaitForNpmVersionOpts = {},
+): Promise<NpmCell> {
+	const timeoutMs = opts.timeoutMs ?? 90_000;
+	const intervalMs = opts.intervalMs ?? 2_000;
+	const now = opts.now ?? Date.now;
+	const sleep = opts.sleep ?? ((ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));
+	const probe = opts.probe ?? npmHasVersion;
+	const deadline = now() + timeoutMs;
+	let last = await probe(name, version);
+	while (last.status !== 'ok' && now() < deadline) {
+		await sleep(Math.min(intervalMs, Math.max(0, deadline - now())));
+		last = await probe(name, version);
+	}
+	if (last.status === 'ok') return last;
+	if (last.status === 'none') {
+		return { name, status: 'none', error: `${name}@${version} is not on npm yet` };
+	}
+	return last;
+}
+
 export async function npmHasVersion(name: string, version: string): Promise<NpmCell> {
 	const url = `https://registry.npmjs.org/${encodeName(name)}/${encodeURIComponent(version)}`;
 	try {

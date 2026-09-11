@@ -1370,9 +1370,31 @@
         "Ship app/node_modules inside the tarball"
       ],
       "status": "active"
+    },
+    {
+      "id": "d98",
+      "timestamp": "2026-09-11T11:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 36,
+      "decision": "Global install probes name@version on the registry before pnpm add -g. If the version is missing, the dashboard offers Wait (poll up to 90s) or Try again. CLI --apply waits. Never install latest unpinned.",
+      "rationale": "Operator 2026-09-11: installing globally right after publish often misses the new version because npm takes seconds to a minute to show it.",
+      "alternatives_considered": [
+        "Install from the local tarball left by npm publish",
+        "Always sleep a fixed delay after publish",
+        "Leave the operator to wait and click Install again"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-11T11:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 36,
+      "issue": "npm can take seconds to a minute after publish before name@version is fetchable. Immediate pnpm add -g then 404s or looks like it failed.",
+      "resolution": "Probe the version document first. Dashboard offers Wait or Try again. CLI --apply polls up to 90s.",
+      "category": "tooling"
+    },
     {
       "timestamp": "2026-09-11T10:46:00Z",
       "phase": "2-scaffolding",

@@ -263,7 +263,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 35 — 2026-09-10
 
-- **Install global** / **Update global** is its own write (`pnpm add -g name@version`, npm if pnpm is missing). Fleet toolbar + row button when a package has a `bin` and this machine is missing or behind. After a laptop npm publish (`published …`), confirm offers to install that version. GitHub-OIDC-only publishes skip the prompt. Named ids on apply. Never `--force`. Not a gold Today need. CLI: `localhelm global <id>...`.
+- **Install global** / **Update global** is its own write (`pnpm add -g name@version`, npm if pnpm is missing). Fleet toolbar + row button when a package has a `bin` and this machine is missing or behind. After a laptop npm publish (`published …`), confirm offers to install that version. Confirm checks that exact version on npm first; if it is not there yet, offer Wait (poll) or Try again. CLI `--apply` waits. GitHub-OIDC-only publishes skip the prompt. Named ids on apply. Never `--force`. Not a gold Today need. CLI: `localhelm global <id>...`.
 - A published `localhelm` tarball includes a built `dashboard/` (adapter-node). Checkout `localhelm serve` still uses Vite. Global 0.1.9 stays broken until the next publish.
 
 ### Session 36 — 2026-09-11
@@ -272,3 +272,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Packaged `dashboard/` SSR must bundle app deps (`ssr.noExternal`). 0.1.10 left `@iconify-json/lucide` external, so global `GET /` 500ed.
 - Confirm lines prefix the fleet id only when several subjects are listed. A lone Ship or Install global line is just the command (`pnpm run ship (root)`), not `localhelm pnpm run ship`. Publish, Land, and Commit already did this. Plugin jobs follow the same rule.
 - Commit draft hint: one repo is `Asking Ollama…` (no `1 of 1`). Drop “One at a time.” A batch still shows `N of M (id)`.
+- Global install checks `name@version` on the registry before `pnpm add -g`. A just-published version can take a minute. Confirm offers Wait or Try again instead of a 404.

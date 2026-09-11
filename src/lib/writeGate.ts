@@ -311,6 +311,29 @@ export function globalInstallLine(row: GlobalInstallLineRow, named = false): str
 	return confirmNamedLine(row.id, `pnpm add -g ${spec}${have}`, named);
 }
 
+export function npmNotReadyReason(name: string, version: string): string {
+	return `${name}@${version} is not on npm yet`;
+}
+
+export function isNpmNotReadyReason(reason: string | undefined): boolean {
+	return Boolean(reason?.includes(' is not on npm yet'));
+}
+
+export function npmNotReadyTitle(rows: ReadonlyArray<{ npm?: string; version?: string | null }>): string {
+	if (rows.length === 1) {
+		const row = rows[0];
+		return `npm does not have ${row?.npm ?? 'package'}@${row?.version ?? '?'} yet`;
+	}
+	return `npm does not have ${rows.length} new versions yet`;
+}
+
+export const NPM_NOT_READY_HINT =
+	'A new publish can take a minute to show up. Wait for the registry, or try again now.';
+
+export function npmNotReadyHint(): string {
+	return NPM_NOT_READY_HINT;
+}
+
 /** Writes Today and Fleet both offer. Order is the gold-write priority. */
 export function fleetWriteIds(row: PublishGateRow, writablePins = 0): FleetWriteId[] {
 	const ids: FleetWriteId[] = [];

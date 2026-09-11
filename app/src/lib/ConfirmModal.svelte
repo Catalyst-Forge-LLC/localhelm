@@ -29,8 +29,10 @@
 		draftNoteById?: Record<string, string>;
 		children?: Snippet;
 		onconfirm: (includedIds: string[]) => void;
+		onalt?: (includedIds: string[]) => void;
 		oncancel?: () => void;
 		ondraft?: (id: string) => void;
+		altLabel?: string;
 	};
 
 	let {
@@ -55,8 +57,10 @@
 		draftNoteById = {},
 		children,
 		onconfirm,
+		onalt,
 		oncancel,
 		ondraft,
+		altLabel = '',
 	}: Props = $props();
 
 	const showPhases = $derived(itemPhases.some((phase) => phase !== 'pending'));
@@ -151,6 +155,13 @@
 		event.stopPropagation();
 		if (busy) return;
 		onconfirm(includedApply);
+	}
+
+	function alt(event: MouseEvent): void {
+		event.preventDefault();
+		event.stopPropagation();
+		if (busy) return;
+		onalt?.(includedApply);
 	}
 
 	function itemLink(item: string): { before: string; href: string; after: string } | null {
@@ -323,6 +334,9 @@
 		{/if}
 		<div class="actions">
 			<button type="button" class="btn" disabled={busy} onclick={cancel}>{canApply ? cancelLabel : 'Close'}</button>
+			{#if canApply && altLabel && onalt}
+				<button type="button" class="btn" disabled={busy || !draftsReady} onclick={alt}>{altLabel}</button>
+			{/if}
 			{#if canApply}
 				<button
 					type="button"

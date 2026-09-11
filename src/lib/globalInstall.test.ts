@@ -97,28 +97,70 @@ describe('planGlobalInstall', () => {
 });
 
 describe('applyGlobalInstall', () => {
+	const row = {
+		id: 'localhelm',
+		path: 'localhelm',
+		npm: 'localhelm',
+		version: '0.2.0',
+		action: 'global' as const,
+	};
+	const onNpm = async () => ({ name: 'localhelm', latest: '0.2.0', status: 'ok' as const });
+
 	it('records installed global or the runner error', async () => {
-		const row = {
-			id: 'localhelm',
-			path: 'localhelm',
-			npm: 'localhelm',
-			version: '0.2.0',
-			action: 'global' as const,
-		};
-		const ok = await applyGlobalInstall(row, async (name, version) => {
-			assert.equal(name, 'localhelm');
-			assert.equal(version, '0.2.0');
-			return { ok: true, stdout: 'Done', stderr: '' };
-		});
+		const ok = await applyGlobalInstall(
+			row,
+			async (name, version) => {
+				assert.equal(name, 'localhelm');
+				assert.equal(version, '0.2.0');
+				return { ok: true, stdout: 'Done', stderr: '' };
+			},
+			{ probe: onNpm },
+		);
 		assert.equal(ok.reason, 'installed global localhelm@0.2.0');
 		assert.equal(isInstalledGlobalReason(ok.reason), true);
-		const fail = await applyGlobalInstall(row, async () => ({
-			ok: false,
-			stdout: '',
-			stderr: '404 Not Found - GET https://registry.npmjs.org/localhelm',
-		}));
+		const fail = await applyGlobalInstall(
+			row,
+			async () => ({
+				ok: false,
+				stdout: '',
+				stderr: '404 Not Found - GET https://registry.npmjs.org/localhelm',
+			}),
+			{ probe: onNpm },
+		);
 		assert.equal(fail.action, 'global');
 		assert.match(fail.reason ?? '', /404 Not Found/);
 		assert.equal(isInstalledGlobalReason(fail.reason), false);
+	});
+
+	it('does not install until the version is on npm', async () => {
+		let ran = 0;
+		const missing = await applyGlobalInstall(
+			row,
+			async () => {
+				ran += 1;
+				return { ok: true, stdout: 'Done', stderr: '' };
+			},
+			{ probe: async () => ({ name: 'localhelm', status: 'none' }) },
+		);
+		assert.equal(ran, 0);
+		assert.match(missing.reason ?? '', /is not on npm yet/);
+
+		let tries = 0;
+		const waited = await applyGlobalInstall(
+			row,
+			async () => ({ ok: true, stdout: 'Done', stderr: '' }),
+			{
+				wait: true,
+				probe: async () => {
+					tries += 1;
+					return tries < 3
+						? { name: 'localhelm', status: 'none' }
+						: { name: 'localhelm', latest: '0.2.0', status: 'ok' };
+				},
+				waitOpts: { intervalMs: 0, timeoutMs: 1_000, sleep: async () => undefined },
+			},
+		);
+		assert.equal(tries, 3);
+		assert.equal(waited.reason, 'installed global localhelm@0.2.0');
 	});
 });
