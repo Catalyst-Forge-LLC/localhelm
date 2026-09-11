@@ -122,6 +122,7 @@ export {
 	canGlobal,
 	canPublish,
 	canShip,
+	globalInstallLine,
 	globalWriteLabel,
 	needsGlobal,
 	commitCountLabel,

@@ -5,6 +5,7 @@ import {
 	canGlobal,
 	canShip,
 	commitCountLabel,
+	globalInstallLine,
 	globalWriteLabel,
 	needsGlobal,
 	fleetWriteIds,
@@ -243,6 +244,26 @@ describe('needsGlobal', () => {
 		assert.equal(canGlobal({ ...cli, bin: [] }), false);
 		assert.equal(needsGlobal({ ...cli, private: true }), false);
 		assert.ok(!fleetWriteIds(row()).includes('global' as never));
+	});
+});
+
+describe('globalInstallLine', () => {
+	it('does not repeat the id when it is the package name', () => {
+		assert.equal(
+			globalInstallLine({ id: 'localhelm', action: 'global', npm: 'localhelm', version: '0.1.11' }),
+			'pnpm add -g localhelm@0.1.11',
+		);
+		assert.equal(
+			globalInstallLine({
+				id: 'filepress',
+				action: 'global',
+				npm: 'getfilepress',
+				version: '0.1.29',
+				have: '0.1.28',
+			}),
+			'filepress  pnpm add -g getfilepress@0.1.29 (have 0.1.28)',
+		);
+		assert.equal(globalInstallLine({ id: 'lib', action: 'skip', reason: 'no bin (not a CLI)' }), 'lib  no bin (not a CLI)');
 	});
 });
 

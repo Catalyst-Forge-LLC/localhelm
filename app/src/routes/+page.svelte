@@ -19,6 +19,7 @@
 		canCommit,
 		canPublish,
 		canShip,
+		globalInstallLine,
 		globalWriteLabel,
 		needsGlobal,
 		commitCountLabel,
@@ -1880,12 +1881,7 @@
 	}
 
 	function globalItems(rows: GlobalInstallRow[]): string[] {
-		return rows.map((row) => {
-			if (row.action !== 'global') return `${row.id}  ${row.reason ?? 'skipped'}`;
-			const spec = `${row.npm ?? row.id}@${row.version ?? '?'}`;
-			const have = row.have ? ` (have ${row.have})` : '';
-			return `${row.id}  pnpm add -g ${spec}${have}`;
-		});
+		return rows.map((row) => globalInstallLine(row));
 	}
 
 	async function startGlobal(onlyIds?: string[], versions?: Record<string, string>): Promise<void> {
@@ -1927,8 +1923,8 @@
 					itemKeys: listed.map((row) => row.id),
 					confirmLabel:
 						eligible.length === 1
-							? `${eligible[0]?.have ? 'Update' : 'Install'} global ${eligible[0]?.version}`
-							: `Install global ${eligible.length}`,
+							? `${eligible[0]?.have ? 'Update' : 'Install'} ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version}`
+							: `Install ${eligible.length} globally`,
 					canApply: eligible.length > 0,
 					applyIds: eligible.map((row) => row.id),
 					run: (included) =>
@@ -2117,10 +2113,12 @@
 						? `Install ${installable[0]?.npm ?? installable[0]?.id}@${installable[0]?.version} globally?`
 						: `Install ${installable.length} CLIs globally?`,
 				hint: 'That version is on npm. Confirm runs pnpm add -g on this machine (npm if pnpm is missing). Never --force.',
-				items: installable.map((row) => `${row.id}  pnpm add -g ${row.npm ?? row.id}@${row.version}`),
+				items: installable.map((row) => globalInstallLine({ ...row, action: 'global' })),
 				itemKeys: installable.map((row) => row.id),
 				confirmLabel:
-					installable.length === 1 ? `Install global ${installable[0]?.version}` : `Install global ${installable.length}`,
+					installable.length === 1
+						? `Install ${installable[0]?.npm ?? installable[0]?.id}@${installable[0]?.version}`
+						: `Install ${installable.length} globally`,
 				canApply: true,
 				applyIds: installable.map((row) => row.id),
 				run: (included) => void applyGlobal(included, versions),

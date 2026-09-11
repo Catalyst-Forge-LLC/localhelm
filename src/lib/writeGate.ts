@@ -280,6 +280,25 @@ export function globalWriteLabel(row: GlobalGateRow): string {
 	return 'Install global';
 }
 
+export type GlobalInstallLineRow = {
+	id: string;
+	action?: string;
+	reason?: string;
+	npm?: string;
+	version?: string | null;
+	have?: string | null;
+};
+
+/** Confirm line. Do not prefix the fleet id when it matches the package — that reads as `localhelm pnpm add -g …`. */
+export function globalInstallLine(row: GlobalInstallLineRow): string {
+	if (row.action && row.action !== 'global') return `${row.id}  ${row.reason ?? 'skipped'}`;
+	const name = row.npm ?? row.id;
+	const spec = `${name}@${row.version ?? '?'}`;
+	const have = row.have ? ` (have ${row.have})` : '';
+	if (row.id === name) return `pnpm add -g ${spec}${have}`;
+	return `${row.id}  pnpm add -g ${spec}${have}`;
+}
+
 /** Writes Today and Fleet both offer. Order is the gold-write priority. */
 export function fleetWriteIds(row: PublishGateRow, writablePins = 0): FleetWriteId[] {
 	const ids: FleetWriteId[] = [];
