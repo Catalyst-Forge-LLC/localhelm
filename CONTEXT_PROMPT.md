@@ -18,7 +18,7 @@ _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking
 src/lib/     fleet, scan, git, npm, pins, status, deps, bump, export, lock, cascade, ready, activity
 src/cli/     localhelm commands
 bin/         localhelm.mjs → dist
-app/         SvelteKit dashboard (checkout only; localhelm serve)
+app/         SvelteKit dashboard (Vite in a checkout). `pnpm dashboard:build` writes `dashboard/` into the npm tarball so `localhelm serve` works from a global install.
 site/        FilePress explainer + /docs (localhelm.dev; not in the npm tarball)
 ```
 
@@ -260,3 +260,8 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 34 — 2026-09-10
 
 - **Publish** is the only version write. It covers an already-bumped local version (`Publish 0.1.0`) and a bump plus npm when origin has work since the last published version (`Publish 0.1.1 · 3 commits`). Cut is gone from Today filters, bulk buttons, and row actions. Same `localhelm publish` plan as before. `?need=cut` still opens the Publish filter.
+
+### Session 35 — 2026-09-10
+
+- **Install global** / **Update global** is its own write (`pnpm add -g name@version`, npm if pnpm is missing). Fleet toolbar + row button when a package has a `bin` and this machine is missing or behind. After a laptop npm publish (`published …`), confirm offers to install that version. GitHub-OIDC-only publishes skip the prompt. Named ids on apply. Never `--force`. Not a gold Today need. CLI: `localhelm global <id>...`.
+- A published `localhelm` tarball includes a built `dashboard/` (adapter-node). Checkout `localhelm serve` still uses Vite. Global 0.1.9 stays broken until the next publish.

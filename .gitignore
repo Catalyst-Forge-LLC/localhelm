@@ -3,6 +3,7 @@ node_modules/
 .pnpm-store/
 /build/
 /dist/
+/dashboard/
 site/docs/dist/
 site/build/
 .svelte-kit/

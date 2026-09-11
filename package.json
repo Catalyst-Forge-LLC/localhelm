@@ -18,6 +18,7 @@
   "files": [
     "bin",
     "dist",
+    "dashboard",
     "LICENSE",
     "NOTICE",
     "README.md",
@@ -48,7 +49,8 @@
     "cli": "tsx src/cli/main.ts",
     "serve": "tsx src/cli/main.ts serve",
     "test": "tsx --test src/lib/*.test.ts",
-    "prepublishOnly": "tsc -p tsconfig.json",
+    "dashboard:build": "pnpm --dir app build",
+    "prepublishOnly": "tsc -p tsconfig.json && pnpm --dir app build",
     "site:dev": "pnpm --dir site dev",
     "site:build": "pnpm --dir site build",
     "site:check": "pnpm --dir site check",

@@ -14,6 +14,7 @@ import { archiveIds, readArchive, restoreIds } from '../lib/archive.js';
 import { buildBrief } from '../lib/brief.js';
 import { applyLand, planLandMany, requireLandSiteIds } from '../lib/land.js';
 import { applyScriptShip, isShippedReason, planScriptShip, requireShipIds } from '../lib/scriptShip.js';
+import { applyGlobalInstall, isInstalledGlobalReason, planGlobalInstall, requireGlobalIds } from '../lib/globalInstall.js';
 import { acquireJobLock } from '../lib/lock.js';
 import { findManifest, requireManifest } from '../lib/manifest.js';
 import { scanFolders } from '../lib/scan.js';
@@ -46,6 +47,8 @@ Usage:
   localhelm land <site-id>... [--apply]
   localhelm ship [id...]                 # plan pnpm ship
   localhelm ship <id>... --apply         # named ids; never --force
+  localhelm global [id...]               # plan pnpm add -g for CLIs
+  localhelm global <id>... --apply       # named ids; never --force
   localhelm brief [--json]
   localhelm archive [id...] [--apply] [--restore]
   localhelm plugins
@@ -773,6 +776,60 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 					'Nothing written. Re-run with the same id(s) and --apply to run pnpm ship. Never --force.\n',
 				);
 			} else if (rows.some((row) => row.action === 'ship' && !isShippedReason(row.reason))) {
+				process.exitCode = 1;
+			}
+		}
+		return;
+	}
+
+	if (cmd === 'global') {
+		const apply = takeFlag(argv, '--apply');
+		const json = takeFlag(argv, '--json');
+		if (argv.some((a) => a === '--force' || a === '-f' || a === '--force-with-lease')) {
+			fail('localhelm never force-installs globally or force-pushes');
+		}
+		const leftovers = argv.filter((a) => a.startsWith('-'));
+		if (leftovers.length) fail(`unknown flag: ${leftovers[0]}`);
+		const loaded = await requireManifest();
+		let ids: string[] | undefined;
+		if (apply) {
+			try {
+				ids = requireGlobalIds(argv);
+			} catch (err) {
+				fail(err instanceof Error ? err.message : String(err));
+			}
+		} else if (argv.length) {
+			ids = argv;
+		}
+		const planned = await planGlobalInstall(loaded, ids);
+		let rows = planned;
+		if (apply) {
+			const lock = await acquireJobLock(loaded.workspaceRoot);
+			try {
+				rows = [];
+				for (const row of planned) {
+					rows.push(await applyGlobalInstall(row));
+				}
+			} finally {
+				await lock.release();
+			}
+		}
+		if (json) printJson({ rows, writes: apply });
+		else {
+			for (const row of rows) {
+				if (row.action !== 'global') {
+					process.stdout.write(`${row.id}\tskip\t${row.reason ?? ''}\n`);
+					continue;
+				}
+				process.stdout.write(
+					`${row.id}\tglobal\t${row.npm ?? ''}@${row.version ?? ''}\t${row.reason ?? ''}\n`,
+				);
+			}
+			if (!apply) {
+				process.stdout.write(
+					'Nothing written. Re-run with the same id(s) and --apply to run pnpm add -g. Never --force.\n',
+				);
+			} else if (rows.some((row) => row.action === 'global' && !isInstalledGlobalReason(row.reason))) {
 				process.exitCode = 1;
 			}
 		}

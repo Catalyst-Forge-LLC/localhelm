@@ -74,6 +74,10 @@ export type ProjectStatus = {
 	commitsSinceNpm?: number | null;
 	/** Present when root or site/package.json has scripts.ship (wrangler, Pages, …). Not FilePress Land. */
 	ship?: { dir: 'root' | 'site' };
+	/** CLI names from package.json bin. Empty/missing means not a global-install candidate. */
+	bin?: string[];
+	/** This machine's global copy of npm.name, if any. */
+	global?: { version: string | null };
 	error?: string;
 };
 

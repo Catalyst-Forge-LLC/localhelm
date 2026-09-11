@@ -76,5 +76,7 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Add labels writes missing SkillFacts next to SKILL.md packs; tool/agent/model stay source-backed _(2026-09-05)_
 - [x] Multi-repo Commit keeps Asking Ollama up until every draft lands; one repo at a time _(2026-09-09)_
 - [x] Ship for enrolled `scripts.ship` (facts, catalyst-forge, …); Fleet + xFacts + CLI; not FilePress Land _(2026-09-10)_
+- [x] Install / Update global for CLIs (`pnpm add -g`); after-publish prompt; not a gold Today need _(2026-09-10)_
+- [x] Packaged `dashboard/` in the npm tarball so global `localhelm serve` does not need `app/` _(2026-09-10)_
 - [x] Multi confirm can uncheck repos, sites, or leases to leave them out _(2026-09-10)_
 - [x] Today FilePress Sites fills the right-column space next to Needs you _(2026-09-10)_

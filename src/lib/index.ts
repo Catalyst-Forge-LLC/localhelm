@@ -39,6 +39,16 @@ export { applyPublish, extractNpmAuthUrl, NPM_PUBLISH_AUTH_HINT, npmWhoami, plan
 export type { PublishRow, PublishStep, PublishStepEvent } from './publish.js';
 export { applyScriptShip, isShippedReason, planScriptShip, requireShipIds } from './scriptShip.js';
 export type { ScriptShipRow } from './scriptShip.js';
+export {
+	applyGlobalInstall,
+	clearGlobalCache,
+	isInstalledGlobalReason,
+	parseGlobalVersions,
+	planGlobalInstall,
+	readGlobalVersions,
+	requireGlobalIds,
+} from './globalInstall.js';
+export type { GlobalInstallRow } from './globalInstall.js';
 export { applyConfirmStep, commitDraftProgressHint, emptyConfirmPhases, markConfirmKey } from './confirmProgress.js';
 export type { ConfirmPhase } from './confirmProgress.js';
 export {
@@ -109,8 +119,11 @@ export { applyExport, defaultExportPath, planExport } from './export.js';
 export type { ExportPlan } from './export.js';
 export {
 	canCommit,
+	canGlobal,
 	canPublish,
 	canShip,
+	globalWriteLabel,
+	needsGlobal,
 	commitCountLabel,
 	fleetWriteIds,
 	fleetWriteLabel,
@@ -169,7 +182,14 @@ export {
 export { visitorSnapshotFromBoards } from './visitorMachine.js';
 export { visitorTilesFromBoards } from './visitorTiles.js';
 export type { VisitorSnapshot, VisitorTile } from './visitorTiles.js';
-export { DEFAULT_DASHBOARD_HOST, DEFAULT_DASHBOARD_PORT, serveDashboard } from './serve.js';
+export {
+	DEFAULT_DASHBOARD_HOST,
+	DEFAULT_DASHBOARD_PORT,
+	packageRoot,
+	resolveDashboard,
+	serveDashboard,
+} from './serve.js';
+export type { DashboardStart } from './serve.js';
 export { fleetStatus } from './status.js';
 export { operatorCwd } from './workspace.js';
 export type { BumpKind } from './semver.js';

@@ -6,6 +6,7 @@ export type PkgJson = {
 	name?: string;
 	version?: string;
 	private?: boolean;
+	bin?: string | Record<string, string>;
 	scripts?: Record<string, string>;
 	dependencies?: Record<string, string>;
 	devDependencies?: Record<string, string>;
@@ -14,6 +15,20 @@ export type PkgJson = {
 };
 
 export type ShipDir = 'root' | 'site';
+
+export function pkgBinNames(pkg: PkgJson | undefined | null): string[] {
+	const bin = pkg?.bin;
+	if (typeof bin === 'string' && bin.trim()) {
+		const name = pkg?.name?.trim();
+		if (!name) return [];
+		const slash = name.lastIndexOf('/');
+		return [slash >= 0 ? name.slice(slash + 1) : name];
+	}
+	if (bin && typeof bin === 'object' && !Array.isArray(bin)) {
+		return Object.keys(bin).map((name) => name.trim()).filter(Boolean);
+	}
+	return [];
+}
 
 export function pkgHasShipScript(pkg: PkgJson | undefined | null): boolean {
 	const ship = pkg?.scripts?.ship;

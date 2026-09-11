@@ -32,6 +32,8 @@ localhelm publish my-lib --apply
 localhelm publish my-lib --apply --otp 123456
 localhelm ship x-facts catalyst-forge   # plan pnpm ship (wrangler / Pages)
 localhelm ship x-facts --apply          # named ids; never --force
+localhelm global localhelm              # plan pnpm add -g for a CLI
+localhelm global localhelm --apply      # named ids; never --force
 localhelm cascade my-lib                # plan pin updates; --apply writes
 localhelm plugins
 localhelm plugin filepress              # FilePress plugin, if present
@@ -40,9 +42,9 @@ localhelm plugin xfacts                 # xFacts labels board, if enrolled
 localhelm serve                         # :4321 on all interfaces
 ```
 
-`scan` never writes. Other commands print a plan; `--apply` writes. `publish`, `push`, and `ship` need named ids. Never `--force`.
+`scan` never writes. Other commands print a plan; `--apply` writes. `publish`, `push`, `ship`, and `global` need named ids. Never `--force`.
 
-`localhelm serve` opens the dashboard on port 4321. Same library as the CLI. Writes stay on loopback.
+`localhelm serve` opens the dashboard on port 4321. A global install runs the packaged board. A checkout still uses Vite. Writes stay on loopback.
 
 Skip folders with `.localhelmignore` at the workspace, or `~/.localhelm/ignore`.
 

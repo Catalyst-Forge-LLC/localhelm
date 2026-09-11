@@ -12,7 +12,7 @@ You have a folder of repos. `git status` in one of them answers that repo. Scan,
 | --- | --- | --- |
 | Observation | `scan`, `status`, `deps`, `ready`, `brief`, `plugins`, `auth` | Read disk, git, or npm. `scan` never writes |
 | Remote refresh | `fetch` | `git fetch` on enrolled remotes. Clears a stale ahead/behind read |
-| Plan, then write | `enroll`, `unenroll`, `bump`, `pull`, `push`, `export`, `publish`, `cascade`, `archive`, `plugin`, `land`, `ship` | Prints a plan. `--apply` writes. `publish`, `push`, and `ship` need named ids |
+| Plan, then write | `enroll`, `unenroll`, `bump`, `pull`, `push`, `export`, `publish`, `cascade`, `archive`, `plugin`, `land`, `ship`, `global` | Prints a plan. `--apply` writes. `publish`, `push`, `ship`, and `global` need named ids |
 
 Passive inspection does not publish, bump, or repair projects. npm latest is a remote check with a five-minute cache, not a local file. Local dirty state is always from this machine.
 

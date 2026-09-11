@@ -2,8 +2,11 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
 	canPublish,
+	canGlobal,
 	canShip,
 	commitCountLabel,
+	globalWriteLabel,
+	needsGlobal,
 	fleetWriteIds,
 	fleetWriteLabel,
 	landPluginApplyOk,
@@ -218,6 +221,28 @@ describe('writableCascadeCount', () => {
 			},
 		];
 		assert.equal(writableCascadeCount('lib', projects), 1);
+	});
+});
+
+describe('needsGlobal', () => {
+	it('is optional and never a gold write', () => {
+		const cli = {
+			missing: false,
+			private: false,
+			unpublishedAhead: false,
+			localVersion: '0.2.0',
+			npm: { name: 'localhelm', latest: '0.2.0' },
+			bin: ['localhelm'],
+			global: { version: null as string | null },
+		};
+		assert.equal(canGlobal(cli), true);
+		assert.equal(needsGlobal(cli), true);
+		assert.equal(globalWriteLabel(cli), 'Install global 0.2.0');
+		assert.equal(needsGlobal({ ...cli, global: { version: '0.2.0' } }), false);
+		assert.equal(globalWriteLabel({ ...cli, global: { version: '0.1.9' } }), 'Update global 0.2.0');
+		assert.equal(canGlobal({ ...cli, bin: [] }), false);
+		assert.equal(needsGlobal({ ...cli, private: true }), false);
+		assert.ok(!fleetWriteIds(row()).includes('global' as never));
 	});
 });
 

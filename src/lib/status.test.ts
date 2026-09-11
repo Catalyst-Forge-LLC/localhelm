@@ -62,4 +62,20 @@ describe('fleetStatus onlyIds', () => {
 		assert.deepEqual(inventory.projects.find((row) => row.id === 'forge')?.ship, { dir: 'root' });
 		assert.equal(inventory.projects.find((row) => row.id === 'plain')?.ship, undefined);
 	});
+
+	it('lists package.json bin names on CLI packages', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-status-bin-'));
+		await mkdir(path.join(root, 'cli'));
+		await writeFile(
+			path.join(root, 'cli', 'package.json'),
+			'{\n  "name": "localhelm",\n  "version": "0.1.9",\n  "bin": { "localhelm": "./bin/localhelm.mjs" }\n}\n',
+		);
+		const inventory = await fleetStatus({
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: { workspaceRoot: '.', projects: [{ id: 'localhelm', path: 'cli', npm: 'localhelm' }] },
+		});
+		assert.deepEqual(inventory.projects[0]?.bin, ['localhelm']);
+		assert.ok(inventory.projects[0]?.global);
+	});
 });

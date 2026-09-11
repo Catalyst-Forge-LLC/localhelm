@@ -19,6 +19,8 @@
 		canCommit,
 		canPublish,
 		canShip,
+		globalWriteLabel,
+		needsGlobal,
 		commitCountLabel,
 		fleetWriteIds,
 		fleetWriteLabel,
@@ -132,6 +134,8 @@
 		};
 		pins: Pin[];
 		ship?: { dir: 'root' | 'site' };
+		bin?: string[];
+		global?: { version: string | null };
 	};
 	type ScriptShipRow = {
 		id: string;
@@ -139,6 +143,14 @@
 		reason?: string;
 		dir?: 'root' | 'site';
 		cwd?: string;
+	};
+	type GlobalInstallRow = {
+		id: string;
+		action: string;
+		reason?: string;
+		npm?: string;
+		version?: string | null;
+		have?: string | null;
 	};
 	type Inventory = {
 		manifestPath: string;
@@ -392,6 +404,10 @@
 	const checkedShipIds = $derived(checkedIds.filter((id) => {
 		const row = inventory?.projects.find((p) => p.id === id);
 		return row ? canShip(row) : false;
+	}));
+	const checkedGlobalIds = $derived(checkedIds.filter((id) => {
+		const row = inventory?.projects.find((p) => p.id === id);
+		return row ? needsGlobal(row) : false;
 	}));
 	const needPublishIds = $derived(visibleProjects.filter((row) => canPublish(row)).map((row) => row.id));
 	const needCommitIds = $derived(visibleProjects.filter((row) => canCommit(row)).map((row) => row.id));
@@ -1863,6 +1879,95 @@
 		});
 	}
 
+	function globalItems(rows: GlobalInstallRow[]): string[] {
+		return rows.map((row) => {
+			if (row.action !== 'global') return `${row.id}  ${row.reason ?? 'skipped'}`;
+			const spec = `${row.npm ?? row.id}@${row.version ?? '?'}`;
+			const have = row.have ? ` (have ${row.have})` : '';
+			return `${row.id}  pnpm add -g ${spec}${have}`;
+		});
+	}
+
+	async function startGlobal(onlyIds?: string[], versions?: Record<string, string>): Promise<void> {
+		if (onlyIds) {
+			onlyIds = readyNamed(onlyIds);
+			if (!onlyIds.length) return;
+		}
+		const scope = onlyIds?.length === 1 ? onlyIds[0] : onlyIds?.length ? `${onlyIds.length} repos` : 'all';
+		await run(
+			`planning global ${scope}`,
+			async () => {
+				const data = (await call('/api/global', {
+					method: 'POST',
+					body: JSON.stringify({ apply: false, ids: onlyIds, versions }),
+				})) as { rows: GlobalInstallRow[] };
+				const eligible = data.rows.filter((r) => r.action === 'global');
+				const named = Boolean(onlyIds?.length);
+				const listed = named ? data.rows : eligible;
+				note(`global plan — ${eligible.length} of ${data.rows.length} need a global CLI, nothing written`, data);
+				const skipNote =
+					named && listed.length > eligible.length
+						? `${eligible.length} of ${listed.length} checked are missing or behind. `
+						: '';
+				offerConfirm({
+					title:
+						eligible.length === 1
+							? `${eligible[0]?.have ? 'Update' : 'Install'} ${eligible[0]?.npm ?? eligible[0]?.id}@${eligible[0]?.version} globally?`
+							: eligible.length
+								? `Install ${eligible.length} CLIs globally?`
+								: 'Nothing to install globally',
+					hint: eligible.length
+						? `${skipNote}Runs pnpm add -g (npm if pnpm is missing). Confirm to install on this machine. Never --force.`
+						: onlyIds?.length === 1
+							? `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'no CLI to install'}`
+							: named
+								? 'None of the checked repos have a CLI that is missing or behind on this machine.'
+								: 'Nothing enrolled has a bin that is missing or behind globally.',
+					items: listed.length ? globalItems(listed) : ['Nothing to install globally.'],
+					itemKeys: listed.map((row) => row.id),
+					confirmLabel:
+						eligible.length === 1
+							? `${eligible[0]?.have ? 'Update' : 'Install'} global ${eligible[0]?.version}`
+							: `Install global ${eligible.length}`,
+					canApply: eligible.length > 0,
+					applyIds: eligible.map((row) => row.id),
+					run: (included) =>
+						void applyGlobal(
+							eligible.map((row) => row.id).filter((id) => included.includes(id)),
+							versions,
+						),
+				});
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	async function applyGlobal(ids: string[], versions?: Record<string, string>): Promise<void> {
+		await run(bulkProgressLabel('installing global', 1, ids.length, ids[0]), async () => {
+			const rows: GlobalInstallRow[] = [];
+			await eachNamed('installing global', ids, async (id) => {
+				const data = (await call('/api/global', {
+					method: 'POST',
+					body: JSON.stringify({ apply: true, ids: [id], versions }),
+				})) as { rows: GlobalInstallRow[] };
+				rows.push(...data.rows);
+			});
+			const eligible = rows.filter((r) => r.action === 'global');
+			const failed = eligible.filter((r) => !r.reason?.startsWith('installed global '));
+			const ok = eligible.length - failed.length;
+			note(
+				failed.length
+					? `global --apply — ${ok} installed, ${failed.length} failed: ${failed.map((r) => `${r.id}: ${r.reason ?? 'install failed'}`).join(' · ')}`
+					: `global --apply — ${ok} installed`,
+				{ rows },
+			);
+			await loadStatus({ ids });
+			if (failed.length) {
+				error = failed.map((r) => `${r.id}: ${r.reason ?? 'install failed'}`).join(' · ');
+			}
+		});
+	}
+
 	function publishItems(row: PublishRow, named: boolean): string[] {
 		return row.steps.map((step, i) => {
 			const line = `${i + 1}. ${publishStepLabel(step)}`;
@@ -1996,6 +2101,32 @@
 		const failed = rows.filter((row) => !isPublishedReason(row.reason));
 		const github = rows.filter((row) => isGithubPublishReason(row.reason));
 		const npmOk = rows.filter((row) => row.reason?.startsWith('published '));
+		const installable = npmOk.filter((row) => {
+			const project = inventory?.projects.find((item) => item.id === row.id);
+			return Boolean(project?.bin?.length);
+		});
+		const versions = Object.fromEntries(
+			installable
+				.filter((row) => row.version)
+				.map((row) => [row.id, row.version as string]),
+		);
+		if (!failed.length && installable.length) {
+			offerConfirm({
+				title:
+					installable.length === 1
+						? `Install ${installable[0]?.npm ?? installable[0]?.id}@${installable[0]?.version} globally?`
+						: `Install ${installable.length} CLIs globally?`,
+				hint: 'That version is on npm. Confirm runs pnpm add -g on this machine (npm if pnpm is missing). Never --force.',
+				items: installable.map((row) => `${row.id}  pnpm add -g ${row.npm ?? row.id}@${row.version}`),
+				itemKeys: installable.map((row) => row.id),
+				confirmLabel:
+					installable.length === 1 ? `Install global ${installable[0]?.version}` : `Install global ${installable.length}`,
+				canApply: true,
+				applyIds: installable.map((row) => row.id),
+				run: (included) => void applyGlobal(included, versions),
+			});
+			return;
+		}
 		offerConfirm({
 			title: failed.length
 				? failed.length === rows.length
@@ -2369,7 +2500,7 @@
 		return pin.onLatest === false ? 'pin-behind' : 'pin-ok';
 	}
 
-	type NeedAction = { id: FleetWriteId | 'ship'; label: string; title: string; run: () => void; disabled?: boolean };
+	type NeedAction = { id: FleetWriteId | 'ship' | 'global'; label: string; title: string; run: () => void; disabled?: boolean };
 
 	function rowBumpKind(row: Project): BumpKind {
 		return bumpKind[row.id] ?? 'patch';
@@ -2453,6 +2584,16 @@
 				label: 'Ship',
 				title: `Runs pnpm ship in ${row.ship?.dir === 'site' ? 'site/' : 'the repo root'} (${row.id}). Confirm in the modal. Not FilePress Land.`,
 				run: () => void startShip([row.id]),
+			});
+		}
+		if (needsGlobal(row) && !acts.some((act) => act.id === 'global')) {
+			acts.push({
+				id: 'global',
+				label: globalWriteLabel(row),
+				title: row.global?.version
+					? `This machine has ${row.npm.name}@${row.global.version}. Confirm updates it with pnpm add -g. Never --force.`
+					: `This machine does not have ${row.npm.name ?? row.id} globally. Confirm installs it with pnpm add -g. Never --force.`,
+				run: () => void startGlobal([row.id]),
 			});
 		}
 		return acts;
@@ -3088,6 +3229,15 @@
 							</button>
 							<button
 								class="btn btn-write"
+								disabled={Boolean(busy) || !checkedGlobalIds.length}
+								onclick={() => void startGlobal(checkedGlobalIds)}
+								title="Installs or updates the checked CLIs on this machine (pnpm add -g). Confirm in the modal. Never --force."
+							>
+								<Icon icon="lucide:hard-drive-download" />
+								Install global{checkedGlobalIds.length ? ` (${checkedGlobalIds.length})` : ''}
+							</button>
+							<button
+								class="btn btn-write"
 								disabled={Boolean(busy) || !checkedIds.length}
 								onclick={() => startUnenroll()}
 								title="Shows which fleet rows would be removed. Confirm in the modal. Never deletes a folder."
@@ -3243,7 +3393,7 @@
 					</div>
 
 					<p class="legend">
-						Check rows for bulk bump, push, publish, ship, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
+						Check rows for bulk bump, push, publish, ship, install global, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
 						Publish bumps if local is already on npm, pushes if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
 					</p>
 				</section>

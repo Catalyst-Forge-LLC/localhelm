@@ -245,6 +245,41 @@ export function canShip(row: { missing?: boolean; ship?: { dir: string } }): boo
 	return Boolean(!row.missing && row.ship);
 }
 
+export type GlobalGateRow = {
+	missing?: boolean;
+	private?: boolean;
+	unpublishedAhead?: boolean;
+	localVersion: string | null;
+	npm: { name?: string; latest?: string };
+	bin?: string[];
+	global?: { version: string | null };
+};
+
+export function canGlobal(row: GlobalGateRow): boolean {
+	return Boolean(!row.missing && !row.private && row.npm.name && row.bin?.length);
+}
+
+export function globalTargetVersion(row: GlobalGateRow): string | undefined {
+	if (row.unpublishedAhead && row.localVersion) return row.localVersion;
+	return row.npm.latest ?? row.localVersion ?? undefined;
+}
+
+/** Global copy missing or behind the version this machine should run. Not a gold Today need. */
+export function needsGlobal(row: GlobalGateRow): boolean {
+	if (!canGlobal(row)) return false;
+	const want = globalTargetVersion(row);
+	if (!want) return false;
+	return (row.global?.version ?? null) !== want;
+}
+
+export function globalWriteLabel(row: GlobalGateRow): string {
+	const want = globalTargetVersion(row);
+	const have = row.global?.version;
+	if (want && have) return `Update global ${want}`;
+	if (want) return `Install global ${want}`;
+	return 'Install global';
+}
+
 /** Writes Today and Fleet both offer. Order is the gold-write priority. */
 export function fleetWriteIds(row: PublishGateRow, writablePins = 0): FleetWriteId[] {
 	const ids: FleetWriteId[] = [];

@@ -3,7 +3,8 @@ import type { LoadedManifest } from './manifest.js';
 import { clearNpmCache, liftLatestIfVersionExists, npmLatest, npmLatestMany } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pinsFromPkg } from './pins.js';
-import { collectDeps, pathExists, readPkg, rootPkgPath, shipScriptTarget, sitePkgPath, type PkgJson } from './pkg.js';
+import { clearGlobalCache, readGlobalVersions } from './globalInstall.js';
+import { collectDeps, pathExists, pkgBinNames, readPkg, rootPkgPath, shipScriptTarget, sitePkgPath, type PkgJson } from './pkg.js';
 import { compareSemver } from './semver.js';
 import type { FleetDigest, FleetInventory, PinEdge, ProjectStatus } from './types.js';
 
@@ -30,7 +31,10 @@ type Prepared = {
 };
 
 export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions = {}): Promise<FleetInventory> {
-	if (options.refreshNpm || options.fetch) clearNpmCache();
+	if (options.refreshNpm || options.fetch) {
+		clearNpmCache();
+		clearGlobalCache();
+	}
 	const prepared: Prepared[] = [];
 	const names = new Set<string>();
 	const only = options.onlyIds?.length ? new Set(options.onlyIds) : null;
@@ -91,6 +95,8 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 		}
 	}
 
+	const needsGlobalRead = prepared.some((row) => pkgBinNames(row.rootPkg).length > 0);
+	const globals = needsGlobalRead ? readGlobalVersions(Boolean(options.refreshNpm || options.fetch)) : new Map<string, string>();
 	const latestByName = new Map<string, string>();
 	for (const [name, cell] of await npmLatestMany(names)) {
 		if (cell.status === 'ok' && cell.latest) latestByName.set(name, cell.latest);
@@ -161,6 +167,8 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 					? countCommitsSinceVersion(row.absPath, publishedVersion, git.branch)
 					: null,
 			ship: row.ship,
+			bin: pkgBinNames(row.rootPkg),
+			global: row.npmName ? { version: globals.get(row.npmName) ?? null } : undefined,
 		};
 		if (row.rootError) status.error = row.rootError;
 		projects.push(status);

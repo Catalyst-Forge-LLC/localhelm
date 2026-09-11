@@ -1316,6 +1316,33 @@
         "Rename Cut to Publish next without merging the filters"
       ],
       "status": "active"
+    },
+    {
+      "id": "d94",
+      "timestamp": "2026-09-11T03:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 35,
+      "decision": "Install/Update global is a separate write (pnpm add -g name@version, npm if pnpm is missing). Show it when package.json has a bin and this machine is missing or behind. After a successful laptop npm publish, confirm offers that version. Skip the prompt for GitHub-OIDC-only publishes. Named ids on apply. Never --force. Not a gold Today need and not a step inside the publish pipeline.",
+      "rationale": "Operator 2026-09-10: pick B (separate write) and also the after-publish prompt. House package manager is pnpm.",
+      "alternatives_considered": [
+        "Fold global install into the publish pipeline",
+        "Auto-install after publish without confirm",
+        "npm-only global install"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "d95",
+      "timestamp": "2026-09-11T03:58:00Z",
+      "phase": "2-scaffolding",
+      "session": 35,
+      "decision": "npm localhelm ships a built SvelteKit adapter-node board in dashboard/. Checkout serve still uses Vite against app/. A global install without dashboard/ explains that the release is missing the board.",
+      "rationale": "Operator 2026-09-10: global localhelm serve failed because app/ is not in the npm files list and they do not want a checkout extra step.",
+      "alternatives_considered": [
+        "Keep shipping app/ source and run Vite from a global install",
+        "Tell operators to run serve only from a checkout"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

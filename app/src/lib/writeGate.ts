@@ -1,7 +1,10 @@
 export {
 	canCommit,
+	canGlobal,
 	canPublish,
 	canShip,
+	globalWriteLabel,
+	needsGlobal,
 	commitCountLabel,
 	fleetWriteIds,
 	fleetWriteLabel,
