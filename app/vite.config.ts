@@ -41,4 +41,8 @@ export default defineConfig({
 			$helm: path.join(repoRoot, 'src/lib'),
 		},
 	},
+	// Packaged `localhelm serve` ships dashboard/ without app/node_modules.
+	ssr: {
+		noExternal: true,
+	},
 });

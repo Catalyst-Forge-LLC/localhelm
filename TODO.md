@@ -79,5 +79,6 @@ See [`docs/specs/cheap-surfaces.md`](docs/specs/cheap-surfaces.md).
 - [x] Install / Update global for CLIs (`pnpm add -g`); after-publish prompt; not a gold Today need _(2026-09-10)_
 - [x] Packaged `dashboard/` in the npm tarball so global `localhelm serve` does not need `app/` _(2026-09-10)_
 - [x] Serve names a busy port’s pid; `--free-port` stops it after that plan _(2026-09-11)_
+- [x] Bundle dashboard SSR deps so global serve does not need `@iconify-json/lucide` _(2026-09-11)_
 - [x] Multi confirm can uncheck repos, sites, or leases to leave them out _(2026-09-10)_
 - [x] Today FilePress Sites fills the right-column space next to Needs you _(2026-09-10)_

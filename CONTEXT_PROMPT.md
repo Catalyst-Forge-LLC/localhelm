@@ -269,3 +269,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 36 — 2026-09-11
 
 - `localhelm serve` probes the chosen port before spawning. If it is busy, it names the LISTENING pid and command (leftover Vite included). Nothing is stopped until `--free-port`. Never `--force`.
+- Packaged `dashboard/` SSR must bundle app deps (`ssr.noExternal`). 0.1.10 left `@iconify-json/lucide` external, so global `GET /` 500ed.

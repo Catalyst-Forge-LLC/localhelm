@@ -1357,9 +1357,38 @@
         "Only print EADDRINUSE from the child process"
       ],
       "status": "active"
+    },
+    {
+      "id": "d97",
+      "timestamp": "2026-09-11T10:46:00Z",
+      "phase": "2-scaffolding",
+      "session": 36,
+      "decision": "adapter-node dashboard SSR uses Vite ssr.noExternal so a global install does not need app/ dependencies. A test fails the build if dashboard/ still has bare npm imports.",
+      "rationale": "Operator 2026-09-11: localhelm@0.1.10 served (packaged) then GET / 500ed — Cannot find package @iconify-json/lucide.",
+      "alternatives_considered": [
+        "Add @iconify-json/lucide to the root package dependencies",
+        "Ship app/node_modules inside the tarball"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-11T10:46:00Z",
+      "phase": "2-scaffolding",
+      "session": 36,
+      "issue": "Published 0.1.10 dashboard started, then GET / 500ed: @iconify-json/lucide was an external SSR import. Global install has no app/ deps.",
+      "resolution": "vite ssr.noExternal: true. Test scans dashboard/ for bare npm imports.",
+      "category": "tooling"
+    },
+    {
+      "timestamp": "2026-09-11T10:40:00Z",
+      "phase": "2-scaffolding",
+      "session": 36,
+      "issue": "Aborting a checkout pnpm serve (Cursor background shell) left Vite listening on 4321. localhelm serve then crashed with EADDRINUSE and no pid.",
+      "resolution": "Probe the port before spawn. Print the LISTENING pid and command. --free-port stops it. Never --force.",
+      "category": "tooling"
+    },
     {
       "timestamp": "2026-08-28T22:40:00Z",
       "phase": "2-scaffolding",

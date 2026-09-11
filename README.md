@@ -45,7 +45,7 @@ localhelm serve --free-port             # stop the named pid on that port, then 
 
 `scan` never writes. Other commands print a plan; `--apply` writes. `publish`, `push`, `ship`, and `global` need named ids. Never `--force`.
 
-`localhelm serve` opens the dashboard on port 4321. A global install runs the packaged board. A checkout still uses Vite. If that port is already taken, serve names the pid and stops. Re-run with `--free-port` to stop it and bind. Never `--force`. Writes stay on loopback.
+`localhelm serve` opens the dashboard on port 4321. A global install runs the packaged board (SSR deps are bundled; no `app/` needed). A checkout still uses Vite. If that port is already taken, serve names the pid and stops. Re-run with `--free-port` to stop it and bind. Never `--force`. Writes stay on loopback.
 
 Skip folders with `.localhelmignore` at the workspace, or `~/.localhelm/ignore`.
 

@@ -190,6 +190,7 @@ export {
 	serveDashboard,
 } from './serve.js';
 export type { DashboardStart } from './serve.js';
+export { npmBareImports } from './dashboardBundle.js';
 export {
 	parseLsofListeningPids,
 	parseNetstatListeningPids,
