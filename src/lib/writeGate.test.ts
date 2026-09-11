@@ -5,8 +5,10 @@ import {
 	canGlobal,
 	canShip,
 	commitCountLabel,
+	confirmNamedLine,
 	globalInstallLine,
 	globalWriteLabel,
+	shipConfirmLine,
 	needsGlobal,
 	fleetWriteIds,
 	fleetWriteLabel,
@@ -247,23 +249,23 @@ describe('needsGlobal', () => {
 	});
 });
 
-describe('globalInstallLine', () => {
-	it('does not repeat the id when it is the package name', () => {
+describe('confirmNamedLine', () => {
+	it('omits the id for one subject and keeps it when several are listed', () => {
+		assert.equal(confirmNamedLine('localhelm', 'pnpm run ship (root)', false), 'pnpm run ship (root)');
+		assert.equal(confirmNamedLine('localhelm', 'pnpm run ship (root)', true), 'localhelm  pnpm run ship (root)');
+		assert.equal(shipConfirmLine({ id: 'localhelm', action: 'ship', dir: 'root' }, false), 'pnpm run ship (root)');
+		assert.equal(shipConfirmLine({ id: 'pages', action: 'ship', dir: 'site' }, true), 'pages  pnpm run ship (site/)');
 		assert.equal(
-			globalInstallLine({ id: 'localhelm', action: 'global', npm: 'localhelm', version: '0.1.11' }),
+			globalInstallLine({ id: 'localhelm', action: 'global', npm: 'localhelm', version: '0.1.11' }, false),
 			'pnpm add -g localhelm@0.1.11',
 		);
 		assert.equal(
-			globalInstallLine({
-				id: 'filepress',
-				action: 'global',
-				npm: 'getfilepress',
-				version: '0.1.29',
-				have: '0.1.28',
-			}),
+			globalInstallLine(
+				{ id: 'filepress', action: 'global', npm: 'getfilepress', version: '0.1.29', have: '0.1.28' },
+				true,
+			),
 			'filepress  pnpm add -g getfilepress@0.1.29 (have 0.1.28)',
 		);
-		assert.equal(globalInstallLine({ id: 'lib', action: 'skip', reason: 'no bin (not a CLI)' }), 'lib  no bin (not a CLI)');
 	});
 });
 

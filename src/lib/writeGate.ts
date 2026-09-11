@@ -289,14 +289,26 @@ export type GlobalInstallLineRow = {
 	have?: string | null;
 };
 
-/** Confirm line. Do not prefix the fleet id when it matches the package — that reads as `localhelm pnpm add -g …`. */
-export function globalInstallLine(row: GlobalInstallLineRow): string {
+/** Prefix the id only when several subjects are listed. A lone `localhelm  pnpm …` reads like a CLI. */
+export function confirmNamedLine(id: string, detail: string, named: boolean): string {
+	return named ? `${id}  ${detail}` : detail;
+}
+
+export function shipConfirmLine(
+	row: { id: string; action?: string; reason?: string; dir?: 'root' | 'site' },
+	named: boolean,
+): string {
+	if (row.action && row.action !== 'ship') return `${row.id}  ${row.reason ?? 'skipped'}`;
+	const where = row.dir === 'site' ? 'site/' : 'root';
+	return confirmNamedLine(row.id, `pnpm run ship (${where})`, named);
+}
+
+export function globalInstallLine(row: GlobalInstallLineRow, named = false): string {
 	if (row.action && row.action !== 'global') return `${row.id}  ${row.reason ?? 'skipped'}`;
 	const name = row.npm ?? row.id;
 	const spec = `${name}@${row.version ?? '?'}`;
 	const have = row.have ? ` (have ${row.have})` : '';
-	if (row.id === name) return `pnpm add -g ${spec}${have}`;
-	return `${row.id}  pnpm add -g ${spec}${have}`;
+	return confirmNamedLine(row.id, `pnpm add -g ${spec}${have}`, named);
 }
 
 /** Writes Today and Fleet both offer. Order is the gold-write priority. */

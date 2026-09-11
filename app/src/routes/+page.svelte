@@ -22,6 +22,7 @@
 		globalInstallLine,
 		globalWriteLabel,
 		needsGlobal,
+		shipConfirmLine,
 		commitCountLabel,
 		fleetWriteIds,
 		fleetWriteLabel,
@@ -1803,13 +1804,8 @@
 	}
 
 	function shipItems(rows: ScriptShipRow[]): string[] {
-		return rows.map((row) => {
-			if (row.action !== 'ship') {
-				return `${row.id}  ${row.reason ?? 'skipped'}`;
-			}
-			const where = row.dir === 'site' ? 'site/' : 'root';
-			return `${row.id}  pnpm run ship (${where})`;
-		});
+		const named = rows.length > 1;
+		return rows.map((row) => shipConfirmLine(row, named));
 	}
 
 	async function startShip(onlyIds?: string[]): Promise<void> {
@@ -1881,7 +1877,8 @@
 	}
 
 	function globalItems(rows: GlobalInstallRow[]): string[] {
-		return rows.map((row) => globalInstallLine(row));
+		const named = rows.length > 1;
+		return rows.map((row) => globalInstallLine(row, named));
 	}
 
 	async function startGlobal(onlyIds?: string[], versions?: Record<string, string>): Promise<void> {
@@ -2113,7 +2110,9 @@
 						? `Install ${installable[0]?.npm ?? installable[0]?.id}@${installable[0]?.version} globally?`
 						: `Install ${installable.length} CLIs globally?`,
 				hint: 'That version is on npm. Confirm runs pnpm add -g on this machine (npm if pnpm is missing). Never --force.',
-				items: installable.map((row) => globalInstallLine({ ...row, action: 'global' })),
+				items: installable.map((row) =>
+					globalInstallLine({ ...row, action: 'global' }, installable.length > 1),
+				),
 				itemKeys: installable.map((row) => row.id),
 				confirmLabel:
 					installable.length === 1

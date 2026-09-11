@@ -143,7 +143,7 @@ describe('plugins', () => {
 					},
 				],
 			}),
-			['aibreze-site  stop pid 48376'],
+			['stop pid 48376'],
 		);
 	});
 
@@ -162,7 +162,7 @@ describe('plugins', () => {
 					},
 				],
 			}),
-			['localberth\nin sites/localberth\npnpm ship'],
+			['in sites/localberth\npnpm ship'],
 		);
 		assert.deepEqual(
 			formatPluginPlanLines({
@@ -177,7 +177,7 @@ describe('plugins', () => {
 					},
 				],
 			}),
-			['localberth  push  2 on main → https://github.com/example/localberth.git'],
+			['push  2 on main → https://github.com/example/localberth.git'],
 		);
 		assert.deepEqual(
 			formatPluginPlanLines({
@@ -192,7 +192,7 @@ describe('plugins', () => {
 					},
 				],
 			}),
-			['localberth  sync  pnpm update getfilepress  (0.1.10 → 0.1.11)'],
+			['sync  pnpm update getfilepress  (0.1.10 → 0.1.11)'],
 		);
 	});
 });

@@ -71,34 +71,36 @@ export function pluginPlanLineKeys(data: unknown): string[] {
 
 /** Confirm lines for plugin plans. Start/recipe rows include PORT/HOST. Stop/park do not. */
 export function formatPluginPlanLines(data: unknown): string[] {
-	return pluginPlanRows(data).map((row) => {
+	const rows = pluginPlanRows(data);
+	const named = rows.length > 1;
+	return rows.map((row) => {
 		const id = pluginRowId(row);
-			const recipe = typeof row.recipe === 'string' ? row.recipe.trim() : '';
-			const proposedCwd = typeof row.proposedCwd === 'string' ? row.proposedCwd.trim() : '';
-			const proposedCommand = typeof row.proposedCommand === 'string' ? row.proposedCommand.trim() : '';
-			const rowAction = typeof row.action === 'string' ? row.action : '';
-			const showStartRecipe = Boolean(recipe) && (!rowAction || rowAction === 'start' || rowAction === 'recipe');
-			if (showStartRecipe) {
-				return planBlock([id, cwdLine(proposedCwd), recipe, envBits(row)]);
-			}
-			if (rowAction === 'skip') {
-				const why =
-					typeof row.reason === 'string'
-						? row.reason.replace(/\s+—\s+(localslip|localberth) recipe.*$/, '')
-						: 'nothing to do';
-				return `${id}  —  ${why}`;
-			}
-			const detail = jobDetail(row, rowAction);
-			const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
-			const to = typeof row.to === 'string' ? row.to : typeof row.toSpec === 'string' ? row.toSpec : '';
-			const range = from && to ? `${from} → ${to}` : from || to;
-			const parsed = splitCommandCwd(detail);
-			const cwd = proposedCwd || parsed.cwd;
-			const command = proposedCommand || parsed.command;
-			const showAction = Boolean(rowAction) && rowAction !== 'ship' && !command.startsWith(rowAction);
-			const bits = [id, showAction ? rowAction : '', range, cwdLine(cwd), command];
-			return cwd ? planBlock(bits) : bits.filter(Boolean).join('  ');
-		});
+		const recipe = typeof row.recipe === 'string' ? row.recipe.trim() : '';
+		const proposedCwd = typeof row.proposedCwd === 'string' ? row.proposedCwd.trim() : '';
+		const proposedCommand = typeof row.proposedCommand === 'string' ? row.proposedCommand.trim() : '';
+		const rowAction = typeof row.action === 'string' ? row.action : '';
+		const showStartRecipe = Boolean(recipe) && (!rowAction || rowAction === 'start' || rowAction === 'recipe');
+		if (showStartRecipe) {
+			return planBlock([named ? id : '', cwdLine(proposedCwd), recipe, envBits(row)]);
+		}
+		if (rowAction === 'skip') {
+			const why =
+				typeof row.reason === 'string'
+					? row.reason.replace(/\s+—\s+(localslip|localberth) recipe.*$/, '')
+					: 'nothing to do';
+			return named ? `${id}  —  ${why}` : why;
+		}
+		const detail = jobDetail(row, rowAction);
+		const from = typeof row.from === 'string' ? row.from : typeof row.fromSpec === 'string' ? row.fromSpec : '';
+		const to = typeof row.to === 'string' ? row.to : typeof row.toSpec === 'string' ? row.toSpec : '';
+		const range = from && to ? `${from} → ${to}` : from || to;
+		const parsed = splitCommandCwd(detail);
+		const cwd = proposedCwd || parsed.cwd;
+		const command = proposedCommand || parsed.command;
+		const showAction = Boolean(rowAction) && rowAction !== 'ship' && !command.startsWith(rowAction);
+		const bits = [named ? id : '', showAction ? rowAction : '', range, cwdLine(cwd), command];
+		return cwd ? planBlock(bits) : bits.filter(Boolean).join('  ');
+	});
 }
 
 /** If the plan lists `writes` on rows, return only those ids. `null` means the shape is unknown. */
