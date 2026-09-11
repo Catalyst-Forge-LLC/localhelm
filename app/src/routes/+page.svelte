@@ -728,7 +728,52 @@
 		);
 	}
 
-	async function run(label: string, fn: () => Promise<void>, opts?: { closeConfirm?: boolean }): Promise<void> {
+	function beginConfirm(spec: { title: string; hint?: string; itemKeys?: string[] }): void {
+		const keys = spec.itemKeys?.filter(Boolean) ?? [];
+		confirmTitle = spec.title;
+		confirmHint = spec.hint ?? 'Nothing is written until you confirm.';
+		confirmItems = keys.slice();
+		confirmItemKeys = keys.slice();
+		confirmWriteIds = [];
+		confirmExcluded = [];
+		confirmPhases = emptyConfirmPhases(keys.length);
+		confirmLabel = 'Confirm';
+		confirmVariant = 'write';
+		confirmCanApply = false;
+		confirmShowOtp = false;
+		confirmMessages = {};
+		confirmDraftHint = '';
+		confirmDrafting = [];
+		confirmDraftNotes = {};
+		confirmDraftIds = [];
+		confirmMessageTouched = {};
+		confirmRun = null;
+		confirmAltLabel = '';
+		confirmAlt = null;
+		error = '';
+		confirmOpen = true;
+	}
+
+	function planOpts(title: string, itemKeys?: string[]): {
+		closeConfirm: false;
+		openConfirm: { title: string; itemKeys?: string[] };
+	} {
+		return { closeConfirm: false, openConfirm: { title, ...(itemKeys?.length ? { itemKeys } : {}) } };
+	}
+
+	async function run(
+		label: string,
+		fn: () => Promise<void>,
+		opts?: { closeConfirm?: boolean; openConfirm?: boolean | { title?: string; hint?: string; itemKeys?: string[] } },
+	): Promise<void> {
+		if (opts?.openConfirm) {
+			const spec = opts.openConfirm === true ? {} : opts.openConfirm;
+			beginConfirm({
+				title: spec.title ?? label,
+				hint: spec.hint,
+				itemKeys: spec.itemKeys,
+			});
+		}
 		busy = label;
 		error = '';
 		try {
@@ -1248,7 +1293,7 @@
 					},
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Add to fleet', paths),
 		);
 	}
 
@@ -1303,7 +1348,7 @@
 					},
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Remove from fleet', ids),
 		);
 	}
 
@@ -1335,11 +1380,17 @@
 					const job = jobs[i];
 					if (!job) continue;
 					busy = bulkProgressLabel('planning bump', i + 1, jobs.length, job.id);
+					if (confirmItemKeys.includes(job.id)) {
+						confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, job.id, 'current');
+					}
 					const plan = (await call('/api/bump', {
 						method: 'POST',
 						body: JSON.stringify({ id: job.id, kind: job.kind, apply: false }),
 					})) as BumpPlan;
 					plans.push(plan);
+					if (confirmItemKeys.includes(job.id)) {
+						confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, job.id, 'done');
+					}
 					note(
 						plan.action === 'bump'
 							? `bump plan ${job.id} ${plan.from} → ${plan.to}, nothing written`
@@ -1379,7 +1430,7 @@
 						),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Bump', ids),
 		);
 	}
 
@@ -1450,7 +1501,7 @@
 				});
 				if (can.length) void suggestCommitDrafts(can.map((row) => row.id));
 			},
-			{ closeConfirm: false },
+			planOpts('Commit', ids),
 		);
 	}
 
@@ -1716,7 +1767,7 @@
 					run: (included) => void applyPull(eligible.map((row) => row.id).filter((id) => included.includes(id))),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Pull'),
 		);
 	}
 
@@ -1784,7 +1835,7 @@
 					run: (included) => void applyPush(eligible.map((row) => row.id).filter((id) => included.includes(id))),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Push', onlyIds),
 		);
 	}
 
@@ -1857,7 +1908,7 @@
 					run: (included) => void applyShip(eligible.map((row) => row.id).filter((id) => included.includes(id))),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Ship', onlyIds),
 		);
 	}
 
@@ -1942,7 +1993,7 @@
 						),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Install globally', onlyIds),
 		);
 	}
 
@@ -2085,7 +2136,7 @@
 					run: (included) => void applyPublish(eligible.map((row) => row.id).filter((id) => included.includes(id))),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Publish', ids),
 		);
 	}
 
@@ -2230,7 +2281,7 @@
 					run: (included) => void applyPluginJob(plugin, action, applyIds.filter((id) => included.includes(id))),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts(label, ids),
 		);
 	}
 
@@ -2326,7 +2377,7 @@
 					run: (included) => void applyLand(work.map((plan) => plan.siteId).filter((id) => included.includes(id))),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Land', ids),
 		);
 	}
 
@@ -2402,7 +2453,7 @@
 					run: () => void applyCascade(id),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Cascade', [id]),
 		);
 	}
 
@@ -2435,7 +2486,7 @@
 					run: () => void applyExport(),
 				});
 			},
-			{ closeConfirm: false },
+			planOpts('Export'),
 		);
 	}
 

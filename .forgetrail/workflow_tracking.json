@@ -1384,9 +1384,30 @@
         "Leave the operator to wait and click Install again"
       ],
       "status": "active"
+    },
+    {
+      "id": "d99",
+      "timestamp": "2026-09-11T11:28:00Z",
+      "phase": "2-scaffolding",
+      "session": 36,
+      "decision": "Any write that will confirm opens the modal immediately with the busy line (and known subject names when we have them). The plan replaces that skeleton when the API returns. Confirm stays disabled until the plan is ready.",
+      "rationale": "Operator 2026-09-11: header loader appears first, but the confirm modal itself is delayed, so the board looks stuck.",
+      "alternatives_considered": [
+        "Keep the header-only Working line until the plan returns",
+        "A separate progress toast beside the modal"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-11T11:28:00Z",
+      "phase": "2-scaffolding",
+      "session": 36,
+      "issue": "Plan requests can take a second or more. The header showed Working, but the confirm stayed closed until the API returned.",
+      "resolution": "Open the confirm immediately with a spinner and the busy label. Seed known ids. Fill the plan when ready.",
+      "category": "ux"
+    },
     {
       "timestamp": "2026-09-11T11:10:00Z",
       "phase": "2-scaffolding",

@@ -206,6 +206,12 @@
 		{#if displayHint}
 			<p class="hint">{displayHint}</p>
 		{/if}
+		{#if busy && busyLabel}
+			<p class="working" class:solo={!items.length} role="status" aria-live="polite">
+				<Icon icon="lucide:loader-circle" class="icon spin" />
+				<span>{busyLabel}</span>
+			</p>
+		{/if}
 		{#if groups && selected}
 			<div class="split">
 				<div class="roster" bind:this={rosterEl} role="listbox" aria-label="Items in this confirm">
@@ -346,7 +352,7 @@
 					disabled={busy || !draftsReady || (canExclude && includedApply.length === 0)}
 					onclick={confirm}
 				>
-					{busy ? busyLabel || 'Working…' : displayLabel}
+					{busy ? 'Working…' : displayLabel}
 				</button>
 			{/if}
 		</div>
@@ -422,6 +428,22 @@
 		color: #a1a1aa;
 		font-size: 0.82rem;
 		line-height: 1.4;
+	}
+
+	.working {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		flex-shrink: 0;
+		margin: 0.75rem 0 0;
+		color: #e4e4e7;
+		font-size: 0.88rem;
+		line-height: 1.4;
+	}
+
+	.working.solo {
+		min-height: 3.25rem;
+		padding: 0.35rem 0 0.15rem;
 	}
 
 	.split {
