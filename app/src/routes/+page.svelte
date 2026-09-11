@@ -34,7 +34,11 @@
 		nextCutVersion,
 		plainGitError,
 		publishApplyTitle,
+		orderPublishResults,
+		publishResultHint,
 		publishResultLine,
+		publishResultPhase,
+		publishResultTitle,
 		landPluginApplyOk,
 		whyNotPublish,
 		whyNotPush,
@@ -1050,6 +1054,7 @@
 		messages?: Record<string, string>;
 		draftHint?: string;
 		altLabel?: string;
+		itemPhases?: ConfirmPhase[];
 		run?: (includedIds: string[]) => void;
 		alt?: (includedIds: string[]) => void;
 	}): void {
@@ -1061,7 +1066,10 @@
 			(spec.applyIds?.length === spec.items.length ? spec.applyIds : spec.items.map((_, i) => String(i)));
 		confirmWriteIds = spec.applyIds ?? [];
 		confirmExcluded = [];
-		confirmPhases = emptyConfirmPhases(spec.items.length);
+		confirmPhases =
+			spec.itemPhases && spec.itemPhases.length === spec.items.length
+				? spec.itemPhases.slice()
+				: emptyConfirmPhases(spec.items.length);
 		confirmLabel = spec.confirmLabel;
 		confirmVariant = spec.variant ?? 'write';
 		confirmCanApply = spec.canApply;
@@ -2222,26 +2230,13 @@
 			});
 			return;
 		}
+		const ordered = orderPublishResults(rows);
 		offerConfirm({
-			title: failed.length
-				? failed.length === rows.length
-					? 'Nothing reached npm'
-					: `${failed.length} of ${rows.length} did not finish`
-				: github.length && !npmOk.length
-					? rows.length === 1
-						? 'Open GitHub to publish'
-						: `Open GitHub for ${github.length} packages`
-					: rows.length === 1
-						? `Published ${rows[0]?.reason?.replace(/^published /, '') ?? rows[0]?.id}`
-						: `Published ${npmOk.length} packages`,
-			hint: failed.length
-				? 'Those packages did not finish. Fix the line below, then try those ids again.'
-				: github.length && !npmOk.length
-					? 'Laptop npm publish is blocked (OIDC provenance). Click the GitHub Publish link and run the workflow.'
-					: github.length
-						? 'Packages that reached npm are listed. Click any GitHub Publish link to run that workflow.'
-						: 'All listed packages reached npm.',
-			items: rows.map(publishResultLine),
+			title: publishResultTitle(rows),
+			hint: publishResultHint(rows),
+			items: ordered.map(publishResultLine),
+			itemKeys: ordered.map((row) => row.id),
+			itemPhases: ordered.map((row) => publishResultPhase(row.reason)),
 			confirmLabel: 'OK',
 			canApply: false,
 		});

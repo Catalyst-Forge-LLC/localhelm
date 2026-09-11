@@ -9,7 +9,7 @@ import { bumpTriple, type BumpKind } from './semver.js';
 import { detectGithubPublish } from './githubPublish.js';
 import { fleetStatus } from './status.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
-import { plainPublishError, whyNotPublish } from './writeGate.js';
+import { plainCommitError, plainPublishError, whyNotPublish } from './writeGate.js';
 
 export type { PublishStep } from './publishTypes.js';
 import type { PublishStep } from './publishTypes.js';
@@ -276,7 +276,7 @@ export async function applyPublish(
 			const committed = commitPaths(abs, files, step.message);
 			if (!committed.ok) {
 				emit(index, step.kind, 'fail');
-				return { ...row, reason: `commit: ${committed.error}` };
+				return { ...row, reason: `commit: ${plainCommitError(committed.error ?? 'commit failed')}` };
 			}
 		} else if (step.kind === 'push') {
 			const git = readGit(abs);
@@ -307,11 +307,12 @@ export async function applyPublish(
 			if (!result.ok) {
 				emit(index, step.kind, 'fail');
 				const stderr = result.stderr.trim();
+				const stdout = result.stdout.trim();
 				return {
 					...row,
-					stdout: result.stdout.trim() || undefined,
+					stdout: stdout || undefined,
 					stderr: stderr || undefined,
-					reason: plainPublishError(stderr || 'npm publish failed'),
+					reason: plainPublishError([stderr, stdout].filter(Boolean).join('\n') || 'npm publish failed'),
 				};
 			}
 			emit(index, step.kind, 'done');

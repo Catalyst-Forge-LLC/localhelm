@@ -18,8 +18,13 @@ import {
 	landPluginApplyOk,
 	plainGitError,
 	plainPluginError,
+	plainCommitError,
 	plainPublishError,
 	publishApplyTitle,
+	orderPublishResults,
+	publishResultHint,
+	publishResultPhase,
+	publishResultTitle,
 	publishResultLine,
 	whyNotPublish,
 	whyNotPush,
@@ -113,6 +118,28 @@ describe('plainPublishError', () => {
 		].join('\n');
 		assert.equal(plainPublishError(raw), 'skill facts still 0.1.9 (package 0.1.10)');
 	});
+
+	it('does not collapse a test script to prepublish failed: failed', () => {
+		const raw = [
+			'npm notice',
+			'npm notice package: detangler@0.1.8',
+			'npm error command failed',
+			'npm error command C:\\Windows\\system32\\cmd.exe /d /s /c pnpm test',
+			'# fail 2',
+		].join('\n');
+		assert.equal(plainPublishError(raw), 'pnpm test failed (2 tests)');
+	});
+});
+
+describe('plainCommitError', () => {
+	it('names a gitignored path', () => {
+		const raw = [
+			'The following paths are ignored by one of your .gitignore files:',
+			'site/static/skills',
+			'hint: Use -f if you really want to add them.',
+		].join('\n');
+		assert.equal(plainCommitError(raw), 'site/static/skills is gitignored');
+	});
 });
 
 describe('publishApplyTitle', () => {
@@ -131,6 +158,19 @@ describe('publishApplyTitle', () => {
 			publishResultLine({ id: 'aibreze', reason: 'skill facts still 0.1.9 (package 0.1.10)' }),
 			'aibreze  skill facts still 0.1.9 (package 0.1.10)',
 		);
+		const mixed = orderPublishResults([
+			{ id: 'forgetrail', reason: 'published forgetrail@0.4.7' },
+			{ id: 'coldeye', reason: 'commit: site/static/skills is gitignored' },
+			{ id: 'finetuna', reason: 'open GitHub Publish finetuna@1.1.8  https://example.test' },
+		]);
+		assert.deepEqual(
+			mixed.map((row) => row.id),
+			['coldeye', 'finetuna', 'forgetrail'],
+		);
+		assert.equal(publishResultTitle(mixed), '1 of 3 failed');
+		assert.match(publishResultHint(mixed), /Failed names are first/);
+		assert.equal(publishResultPhase(mixed[0]?.reason), 'fail');
+		assert.equal(publishResultPhase(mixed[2]?.reason), 'done');
 	});
 });
 

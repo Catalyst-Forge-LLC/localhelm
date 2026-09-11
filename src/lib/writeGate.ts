@@ -25,9 +25,19 @@ export type PublishGateRow = {
 };
 
 const PUBLISH_NOISE =
-	/^(npm warn Unknown |npm warn publish |npm notice |npm error A complete log|npm error code \d|Waiting for the debugger)/i;
+	/^(npm warn\b|npm notice\b|npm error A complete log|npm error code \d|npm error path |npm error errno |npm error command failed\s*$|npm error$|Waiting for the debugger)/i;
 
-/** Short line for npm publish stderr. Keep the raw dump in stderr / Activity. */
+function publishScript(text: string): string | undefined {
+	const win = /npm error command .+?[\\/]c\s+(.+)/i.exec(text);
+	if (win?.[1]) return win[1].replace(/^"+|"+$/g, '').trim();
+	for (const line of text.split(/\r?\n/)) {
+		const match = /^npm error command (?!failed\b)(.+)/i.exec(line.trim());
+		if (match?.[1]) return match[1].trim();
+	}
+	return undefined;
+}
+
+/** Short line for npm publish stderr/stdout. Keep the raw dump in Activity. */
 export function plainPublishError(raw: string): string {
 	const text = raw.trim();
 	if (!text) return 'npm publish failed';
@@ -51,14 +61,36 @@ export function plainPublishError(raw: string): string {
 	const assertion = /AssertionError[^\n]+/.exec(text);
 	if (assertion?.[0]) return assertion[0].replace(/\s+/g, ' ').slice(0, 160);
 
-	const cmd = /npm error command (?!failed$)(.+)/.exec(text);
-	if (cmd?.[1]) return `prepublish failed: ${cmd[1].slice(0, 120)}`;
+	const script = publishScript(text);
+	const failCount = /# fail (\d+)/i.exec(text);
+	if (failCount?.[1] && failCount[1] !== '0') {
+		return script ? `${script} failed (${failCount[1]} tests)` : `tests failed (${failCount[1]})`;
+	}
+	const testFiles = /Test Files\s+(\d+) failed/i.exec(text);
+	if (testFiles?.[1] && testFiles[1] !== '0') {
+		return script ? `${script} failed (${testFiles[1]} files)` : `tests failed (${testFiles[1]} files)`;
+	}
 
 	const first = text
 		.split(/\r?\n/)
 		.map((line) => line.trim())
-		.find((line) => line.length > 0 && !PUBLISH_NOISE.test(line));
-	return (first ?? 'npm publish failed').slice(0, 160);
+		.find((line) => line.length > 0 && !PUBLISH_NOISE.test(line) && !/^npm error command /i.test(line));
+	if (first && first !== 'failed') return first.slice(0, 160);
+	if (script) return `${script} failed`;
+	return 'npm publish failed';
+}
+
+/** Short line for a git add/commit failure during Publish or Bump. */
+export function plainCommitError(raw: string): string {
+	const text = raw.trim();
+	if (!text) return 'commit failed';
+	const ignored = /ignored by one of your \.gitignore files:\s*(\S+)/i.exec(text);
+	if (ignored?.[1]) return `${ignored[1]} is gitignored`;
+	const first = text
+		.split(/\r?\n/)
+		.map((line) => line.trim())
+		.find((line) => line.length > 0 && !/^hint:/i.test(line));
+	return (first ?? 'commit failed').slice(0, 160);
 }
 
 export function isGithubPublishReason(reason: string | undefined): boolean {
@@ -85,6 +117,50 @@ export function publishApplyTitle(rows: ReadonlyArray<{ id: string; reason?: str
 
 export function publishResultLine(row: { id: string; reason?: string }): string {
 	return `${row.id}  ${row.reason ?? 'no result'}`;
+}
+
+export function orderPublishResults<T extends { reason?: string }>(rows: readonly T[]): T[] {
+	const rank = (reason?: string): number => {
+		if (!isPublishedReason(reason)) return 0;
+		if (isGithubPublishReason(reason)) return 1;
+		return 2;
+	};
+	return [...rows].sort((a, b) => rank(a.reason) - rank(b.reason));
+}
+
+export function publishResultTitle(rows: ReadonlyArray<{ id?: string; reason?: string }>): string {
+	const failed = rows.filter((row) => !isPublishedReason(row.reason));
+	const github = rows.filter((row) => isGithubPublishReason(row.reason)).length;
+	const published = rows.filter((row) => row.reason?.startsWith('published ')).length;
+	if (!rows.length) return 'Nothing published';
+	if (failed.length === rows.length) {
+		return rows.length === 1 ? 'Nothing reached npm' : `Nothing reached npm (${rows.length} failed)`;
+	}
+	if (failed.length) return `${failed.length} of ${rows.length} failed`;
+	if (github && !published) {
+		return rows.length === 1 ? 'Open GitHub to publish' : `Open GitHub for ${github} packages`;
+	}
+	if (rows.length === 1) {
+		return `Published ${rows[0]?.reason?.replace(/^published /, '') ?? rows[0]?.id}`;
+	}
+	if (github) return `Published ${published}, opened GitHub for ${github}`;
+	return `Published ${published} packages`;
+}
+
+export function publishResultHint(rows: ReadonlyArray<{ reason?: string }>): string {
+	const failed = rows.some((row) => !isPublishedReason(row.reason));
+	const github = rows.some((row) => isGithubPublishReason(row.reason));
+	const published = rows.some((row) => row.reason?.startsWith('published '));
+	if (failed) return 'Failed names are first. Click one to see why. Activity keeps the full npm log.';
+	if (github && !published) {
+		return 'Laptop npm publish is blocked (OIDC provenance). Click the GitHub Publish link and run the workflow.';
+	}
+	if (github) return 'Packages that reached npm are listed. Click any GitHub Publish link to run that workflow.';
+	return 'All listed packages reached npm.';
+}
+
+export function publishResultPhase(reason: string | undefined): 'done' | 'fail' {
+	return isPublishedReason(reason) ? 'done' : 'fail';
 }
 
 /** Short line for fetch/push stderr. Keep the raw text in stderr / titles. */

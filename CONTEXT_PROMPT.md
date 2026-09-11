@@ -274,3 +274,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Commit draft hint: one repo is `Asking Ollama…` (no `1 of 1`). Drop “One at a time.” A batch still shows `N of M (id)`.
 - Global install checks `name@version` on the registry before `pnpm add -g`. A just-published version can take a minute. Confirm offers Wait or Try again instead of a 404.
 - A write that will confirm opens the modal immediately with a spinner and the busy line (and known names when we have them). The plan fills in when the API returns. Bump ticks each id while planning.
+- After a batch publish, the confirm lists failures first with a real why (not `prepublish failed: failed`). Click a name. Activity still has the full npm log.
