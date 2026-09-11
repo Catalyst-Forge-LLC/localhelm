@@ -27,21 +27,19 @@ describe('confirmProgress', () => {
 
 	it('keeps Asking Ollama up until the last draft, then summarizes', () => {
 		const ids = ['coldeye', 'engram', 'x-facts'];
-		assert.equal(
-			commitDraftProgressHint({ ids, pending: ids }),
-			'Asking Ollama… 1 of 3 (coldeye). One at a time.',
-		);
+		assert.equal(commitDraftProgressHint({ ids: ['localslip'], pending: ['localslip'] }), 'Asking Ollama…');
+		assert.equal(commitDraftProgressHint({ ids, pending: ids }), 'Asking Ollama… 1 of 3 (coldeye).');
 		assert.equal(
 			commitDraftProgressHint({ ids, pending: ['engram', 'x-facts'] }),
-			'Asking Ollama… 2 of 3 (engram). One at a time.',
+			'Asking Ollama… 2 of 3 (engram).',
 		);
 		assert.equal(
 			commitDraftProgressHint({ ids, pending: ['x-facts'], selected: 'coldeye' }),
-			'Asking Ollama… 3 of 3 (x-facts). One at a time.',
+			'Asking Ollama… 3 of 3 (x-facts).',
 		);
 		assert.equal(
 			commitDraftProgressHint({ ids, pending: ['x-facts'], selected: 'x-facts' }),
-			'Asking Ollama… 3 of 3 (x-facts). One at a time.',
+			'Asking Ollama… 3 of 3 (x-facts).',
 		);
 		assert.equal(
 			commitDraftProgressHint({

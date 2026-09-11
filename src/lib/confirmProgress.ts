@@ -18,7 +18,7 @@ export function markConfirmKey(keys: string[], phases: ConfirmPhase[], key: stri
 	return next;
 }
 
-/** One Ollama chat at a time. Hint stays up until the last draft lands. */
+/** Hint stays up until the last draft lands. */
 export function commitDraftProgressHint(opts: {
 	ids: readonly string[];
 	pending: readonly string[];
@@ -32,12 +32,13 @@ export function commitDraftProgressHint(opts: {
 	if (!total) return '';
 	if (pending.length) {
 		const now = pending[0] ?? '';
+		if (total === 1) return 'Asking Ollama…';
 		const n = total - pending.length + 1;
 		const selected = opts.selected && pending.includes(opts.selected) ? opts.selected : now;
 		if (selected && selected !== now) {
 			return `Queued for Ollama… ${n} of ${total} (now ${now}).`;
 		}
-		return `Asking Ollama… ${n} of ${total}${now ? ` (${now})` : ''}. One at a time.`;
+		return `Asking Ollama… ${n} of ${total}${now ? ` (${now})` : ''}.`;
 	}
 	if (opts.selected && notes[opts.selected]) return notes[opts.selected];
 	const ollama = Object.values(notes).filter((note) => /^Ollama \(/.test(note)).length;
