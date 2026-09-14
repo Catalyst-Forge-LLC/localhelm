@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import {
 	isLoopbackClient,
 	isOperatorFace,
+	readClientAddress,
 	visitorFaviconHost,
 	visitorHttpUrl,
 	visitorPageHost,
@@ -24,6 +25,17 @@ describe('loopback face', () => {
 		assert.equal(isOperatorFace('127.0.0.1', '100.64.1.2:4321'), false);
 		assert.equal(isOperatorFace('192.168.1.9', '192.168.1.9:4321'), false);
 		assert.equal(isOperatorFace('100.64.1.2', 'mycroftone.tail1234.ts.net:4321'), false);
+		assert.equal(isOperatorFace(null, '127.0.0.1:4321'), true);
+		assert.equal(isOperatorFace(null, 'localhost:4321'), true);
+		assert.equal(isOperatorFace(null, '100.64.1.2:4321'), false);
+		assert.equal(isOperatorFace(null, null), false);
+		assert.equal(readClientAddress(() => '127.0.0.1'), '127.0.0.1');
+		assert.equal(
+			readClientAddress(() => {
+				throw new Error('Could not determine clientAddress');
+			}),
+			null,
+		);
 	});
 
 	it('rewrites Open links onto the Host the phone already typed', () => {

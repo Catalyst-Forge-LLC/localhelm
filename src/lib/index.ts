@@ -200,6 +200,7 @@ export { compareScanPath, scanFolders } from './scan.js';
 export {
 	isOperatorFace,
 	isLoopbackClient,
+	readClientAddress,
 	visitorFaviconHost,
 	visitorHttpUrl,
 	visitorPageHost,

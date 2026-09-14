@@ -57,14 +57,28 @@ export function isLoopbackPageHost(hostHeader: string | null | undefined): boole
 	return Boolean(host && isLoopbackBind(host));
 }
 
+/** Vite checkout SSR can throw `Could not determine clientAddress` after a dep reload. */
+export function readClientAddress(getClientAddress: () => string): string | null {
+	try {
+		const addr = getClientAddress();
+		return addr?.trim() ? addr : null;
+	} catch {
+		return null;
+	}
+}
+
 /** Operator board only when the TCP peer is loopback and Host is too (or omitted). */
 export function isOperatorFace(
 	peer: string | null | undefined,
 	hostHeader: string | null | undefined,
 ): boolean {
-	if (!isLoopbackClient(peer)) return false;
-	if (!hostHeader?.trim()) return true;
-	return isLoopbackPageHost(hostHeader);
+	if (isLoopbackClient(peer)) {
+		if (!hostHeader?.trim()) return true;
+		return isLoopbackPageHost(hostHeader);
+	}
+	// No socket (Vite HMR / dep optimize): never trust a LAN Host. Loopback Host only.
+	if (!peer && isLoopbackPageHost(hostHeader)) return true;
+	return false;
 }
 
 export function visitorHttpUrl(pageHost: string, port: number): string | null {

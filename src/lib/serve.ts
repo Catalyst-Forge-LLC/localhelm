@@ -28,12 +28,29 @@ export function resolveDashboard(root: string): DashboardStart {
 	);
 }
 
+function quoteWinArg(value: string): string {
+	if (!/[ \t"]/.test(value)) return value;
+	return `"${value.replace(/"/g, '\\"')}"`;
+}
+
+/** Windows: one shell string. `shell: true` plus an args array trips Node DEP0190. */
+function spawnWinShell(bin: string, args: string[], opts: { stdio?: 'inherit'; env?: NodeJS.ProcessEnv }) {
+	const line = [bin, ...args].map(quoteWinArg).join(' ');
+	return spawn(line, { ...opts, windowsHide: true, shell: true });
+}
+
 function tryLeasePort(bin: string): number | null {
-	const result = spawnSync(bin, ['get', 'localhelm'], {
-		encoding: 'utf8',
-		windowsHide: true,
-		shell: process.platform === 'win32',
-	});
+	const result =
+		process.platform === 'win32'
+			? spawnSync([bin, 'get', 'localhelm'].map(quoteWinArg).join(' '), {
+					encoding: 'utf8',
+					windowsHide: true,
+					shell: true,
+				})
+			: spawnSync(bin, ['get', 'localhelm'], {
+					encoding: 'utf8',
+					windowsHide: true,
+				});
 	if (result.status !== 0) return null;
 	const n = Number((result.stdout ?? '').trim());
 	return Number.isFinite(n) && n > 0 ? n : null;
@@ -81,13 +98,12 @@ export async function serveDashboard(
 	}
 	const dash = resolveDashboard(packageRoot());
 	const env = serveEnv(host, port, source);
+	const viteArgs = ['--dir', dash.appDir, 'exec', 'vite', 'dev', '--host', host, '--port', String(port), '--strictPort'];
 	const child =
 		dash.mode === 'dev'
-			? spawn(
-					process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
-					['--dir', dash.appDir, 'exec', 'vite', 'dev', '--host', host, '--port', String(port), '--strictPort'],
-					{ stdio: 'inherit', windowsHide: true, shell: process.platform === 'win32', env },
-				)
+			? process.platform === 'win32'
+				? spawnWinShell('pnpm.cmd', viteArgs, { stdio: 'inherit', env })
+				: spawn('pnpm', viteArgs, { stdio: 'inherit', windowsHide: true, env })
 			: spawn(process.execPath, [dash.entry], {
 					stdio: 'inherit',
 					windowsHide: true,

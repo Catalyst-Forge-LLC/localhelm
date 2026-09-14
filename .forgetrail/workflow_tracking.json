@@ -1463,9 +1463,30 @@
         "Continue CLI land --apply after a failure"
       ],
       "status": "active"
+    },
+    {
+      "id": "d105",
+      "timestamp": "2026-09-14T22:15:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "decision": "getClientAddress is wrapped. If Vite has no socket (dep optimize reload), operator APIs still allow a loopback Host only — never a LAN Host, never X-Forwarded-For. Windows serve spawns pnpm as one shell string so Node DEP0190 is not raised.",
+      "rationale": "Operator 2026-09-14: after Vite optimized dependencies changed / reloading, GET /api/plugins and /api/status 500ed Could not determine clientAddress from hooks.server.ts.",
+      "alternatives_considered": [
+        "Fail closed when the peer is missing (board stays 403 after reload)",
+        "Trust X-Forwarded-For"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-14T22:15:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "issue": "Vite checkout SSR throws Could not determine clientAddress after optimized dependencies changed. reloading. The operator hook did not catch it, so /api/status and /api/plugins 500ed.",
+      "resolution": "readClientAddress swallows the throw. Missing peer + loopback Host is still the operator face. LAN Host stays Deck-only.",
+      "category": "ux"
+    },
     {
       "timestamp": "2026-09-14T19:45:00Z",
       "phase": "2-scaffolding",
