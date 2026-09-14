@@ -1502,6 +1502,19 @@
         "Resume the in-flight site automatically"
       ],
       "status": "active"
+    },
+    {
+      "id": "d108",
+      "timestamp": "2026-09-15T00:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 40,
+      "decision": "writeGate.ts is a re-export barrel. plainError.ts holds stderr shorteners and landPluginApplyOk; publishResults.ts holds publish outcome copy; fleetWrites.ts holds gates, labels, global install copy, and pin helpers. No node:* in any of them. Existing writeGate imports stay.",
+      "rationale": "Code review Step 4. The 550-line writeGate mixed error parsing, result copy, and write eligibility.",
+      "alternatives_considered": [
+        "Move tests onto the new files and drop the barrel",
+        "Split into six smaller modules"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

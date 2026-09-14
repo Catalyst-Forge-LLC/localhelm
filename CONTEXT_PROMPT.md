@@ -296,3 +296,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 39 — 2026-09-14
 
 - Land apply is saved to sessionStorage like publish. A reload keeps finished sites and leftover names. Confirm can Land remaining. Failed ship still stays pending on Today Land.
+
+### Session 40 — 2026-09-14
+
+- `writeGate.ts` is a barrel. Copy and gates live in `plainError.ts`, `publishResults.ts`, and `fleetWrites.ts`. None import `node:*`. Callers still import `writeGate`.
