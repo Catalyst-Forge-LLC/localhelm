@@ -31,8 +31,12 @@
 		onconfirm: (includedIds: string[]) => void;
 		onalt?: (includedIds: string[]) => void;
 		oncancel?: () => void;
+		onstop?: () => void;
 		ondraft?: (id: string) => void;
 		altLabel?: string;
+		/** Multi-id apply is running; Stop finishes the current item and skips the rest. */
+		canStop?: boolean;
+		stopping?: boolean;
 	};
 
 	let {
@@ -59,8 +63,11 @@
 		onconfirm,
 		onalt,
 		oncancel,
+		onstop,
 		ondraft,
 		altLabel = '',
+		canStop = false,
+		stopping = false,
 	}: Props = $props();
 
 	const showPhases = $derived(itemPhases.some((phase) => phase !== 'pending'));
@@ -145,9 +152,17 @@
 	});
 
 	function cancel(): void {
-		if (busy) return;
+		if (busy) {
+			if (canStop && !stopping) onstop?.();
+			return;
+		}
 		open = false;
 		oncancel?.();
+	}
+
+	function stop(): void {
+		if (!canStop || stopping) return;
+		onstop?.();
 	}
 
 	function confirm(event: MouseEvent): void {
@@ -191,13 +206,17 @@
 		if (!open) return;
 		if (busy) {
 			dialogEl?.showModal();
+			if (canStop && !stopping) onstop?.();
 			return;
 		}
 		open = false;
 		oncancel?.();
 	}}
 	onkeydown={(event) => {
-		if (event.key === 'Escape' && busy) event.preventDefault();
+		if (event.key === 'Escape' && busy) {
+			event.preventDefault();
+			if (canStop && !stopping) onstop?.();
+		}
 	}}
 >
 	<div class="panel">
@@ -339,7 +358,14 @@
 			></textarea>
 		{/if}
 		<div class="actions">
-			<button type="button" class="btn" disabled={busy} onclick={cancel}>{canApply ? cancelLabel : 'Close'}</button>
+			<button
+				type="button"
+				class="btn"
+				disabled={busy && (!canStop || stopping)}
+				onclick={busy && canStop ? stop : cancel}
+			>
+				{busy && canStop ? (stopping ? 'Stopping…' : 'Stop') : canApply ? cancelLabel : 'Close'}
+			</button>
 			{#if canApply && altLabel && onalt}
 				<button type="button" class="btn" disabled={busy || !draftsReady} onclick={alt}>{altLabel}</button>
 			{/if}

@@ -184,7 +184,8 @@ export { applyFetch, applyPull, applyPush, countCommitsSinceVersion, planFetch, 
 export type { GitJobRow } from './git.js';
 export { IGNORE_FILE_NAME, loadScanIgnore } from './ignorefile.js';
 export { resolveUserPath } from './paths.js';
-export { acquireJobLock } from './lock.js';
+export { JobCancelledError, isJobCancelled, stoppedJobMessage } from './jobCancel.js';
+export { acquireJobLock, clearStaleJobLock, isPidAlive } from './lock.js';
 export { compareScanPath, scanFolders } from './scan.js';
 export {
 	isOperatorFace,

@@ -48,6 +48,7 @@
 	} from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
+	import { JobCancelledError, isJobCancelled } from '$lib/jobCancel';
 	import { applyConfirmStep, commitDraftProgressHint, emptyConfirmPhases, markConfirmKey, publishNeedsGithub, publishNeedsNpm, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
 	import { landConfirmItems } from '$lib/landDisplay';
 	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
@@ -256,6 +257,9 @@
 	let confirmRun = $state<((includedIds: string[]) => void) | null>(null);
 	let confirmAltLabel = $state('');
 	let confirmAlt = $state<((includedIds: string[]) => void) | null>(null);
+	let jobCancel = $state(false);
+	let jobCanStop = $state(false);
+	let jobStopped = $state(false);
 	let statusReady = $state(false);
 	let rosterReady = $state(false);
 	let pluginsReady = $state(false);
@@ -781,13 +785,21 @@
 		}
 		busy = label;
 		error = '';
+		jobCancel = false;
+		jobStopped = false;
 		try {
 			await fn();
 		} catch (err) {
-			error = err instanceof Error ? err.message : String(err);
+			if (isJobCancelled(err)) {
+				jobStopped = true;
+				error = err.message;
+			} else {
+				error = err instanceof Error ? err.message : String(err);
+			}
 		} finally {
 			busy = '';
-			if (opts?.closeConfirm !== false) {
+			jobCanStop = false;
+			if (opts?.closeConfirm !== false && !jobStopped) {
 				confirmOpen = false;
 				confirmRun = null;
 				confirmAlt = null;
@@ -797,9 +809,11 @@
 	}
 
 	async function eachNamed(verb: string, names: string[], fn: (name: string) => Promise<void>): Promise<void> {
+		jobCanStop = names.length >= 2;
 		for (let i = 0; i < names.length; i++) {
 			const name = names[i];
 			if (!name) continue;
+			if (jobCancel) throw new JobCancelledError(i, names.length);
 			busy = bulkProgressLabel(verb, i + 1, names.length, name);
 			if (confirmItemKeys.includes(name)) {
 				confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'current');
@@ -2195,6 +2209,7 @@
 			{ closeConfirm: false },
 		);
 		if (!rows.length) {
+			if (jobStopped) return;
 			confirmOpen = false;
 			return;
 		}
@@ -2210,7 +2225,12 @@
 				.filter((row) => row.version)
 				.map((row) => [row.id, row.version as string]),
 		);
-		if (!failed.length && installable.length && canSkipPublishResultsForGlobalInstall(rows)) {
+		if (
+			!jobStopped &&
+			!failed.length &&
+			installable.length &&
+			canSkipPublishResultsForGlobalInstall(rows)
+		) {
 			offerConfirm({
 				title:
 					installable.length === 1
@@ -2232,10 +2252,11 @@
 			return;
 		}
 		const ordered = orderPublishResults(rows);
-		const offerInstall = Boolean(!failed.length && installable.length && github.length);
+		const offerInstall = Boolean(!jobStopped && !failed.length && installable.length && github.length);
 		offerConfirm({
-			title: publishResultTitle(rows),
+			title: jobStopped ? 'Stopped' : publishResultTitle(rows),
 			hint: [
+				jobStopped ? error : '',
 				publishResultHint(rows),
 				offerInstall
 					? 'Install globally is for the laptop npm publishes after you open each GitHub Publish link.'
@@ -4165,8 +4186,13 @@
 	confirmLabel={confirmLabel}
 	variant={confirmVariant}
 	busy={Boolean(busy)}
-	busyLabel={busy}
+	busyLabel={jobCancel && busy ? `Stopping after this one… ${busy}` : busy}
 	canApply={confirmCanApply}
+	canStop={jobCanStop}
+	stopping={jobCancel}
+	onstop={() => {
+		jobCancel = true;
+	}}
 	items={confirmItems}
 	itemKeys={confirmItemKeys}
 	itemPhases={confirmPhases}

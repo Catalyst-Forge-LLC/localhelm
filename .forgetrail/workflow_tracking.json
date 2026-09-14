@@ -1410,9 +1410,31 @@
         "Show results first, then a second Install modal on Close"
       ],
       "status": "active"
+    },
+    {
+      "id": "d101",
+      "timestamp": "2026-09-14T13:55:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "decision": "job.lock is stolen when the recorded pid is gone. Serve clears a leftover lock on start. A live holder is named in the error. Multi-id confirms offer Stop: finish the current id, do not start the rest. Never --force. Do not abort an in-flight npm/ship.",
+      "rationale": "Operator 2026-09-14: killed serve to avoid publishing an unintended package, then could not start again (stale lock). They also asked to cancel a multi-site run once started.",
+      "alternatives_considered": [
+        "Always delete job.lock on serve",
+        "Abort the in-flight HTTP/npm process",
+        "Keep Cancel disabled while busy"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-14T13:55:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "issue": "Ctrl+C mid-publish leaves .localhelm/job.lock. The next write (or a dashboard action after serve) says another job holds the lock even though the process is gone. Confirm Cancel is also disabled while busy, so the only abort was killing serve.",
+      "resolution": "Steal the lock when the pid is dead. Serve clears leftovers. Multi-id confirms get Stop after the current item.",
+      "category": "ux"
+    },
     {
       "timestamp": "2026-09-14T13:50:00Z",
       "phase": "2-scaffolding",

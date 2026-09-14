@@ -2,6 +2,8 @@ import { spawn, spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { clearStaleJobLock } from './lock.js';
+import { findManifest } from './manifest.js';
 import { ensureServePort } from './servePort.js';
 
 export const DEFAULT_DASHBOARD_PORT = 4321;
@@ -69,6 +71,13 @@ export async function serveDashboard(
 	const { freed } = await ensureServePort(host, port, Boolean(opts.freePort));
 	if (freed.length) {
 		console.error(`stopped ${freed.map((row) => `pid ${row.pid}`).join(', ')} on ${port}`);
+	}
+	const loaded = await findManifest(process.cwd());
+	if (loaded) {
+		const stale = await clearStaleJobLock(loaded.workspaceRoot);
+		if (stale.cleared) {
+			console.error(`cleared leftover ${stale.path} (pid ${stale.pid} is gone)`);
+		}
 	}
 	const dash = resolveDashboard(packageRoot());
 	const env = serveEnv(host, port, source);
