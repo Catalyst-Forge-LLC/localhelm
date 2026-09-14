@@ -26,6 +26,9 @@ import {
 	publishResultPhase,
 	publishResultTitle,
 	publishResultLine,
+	behindPinPublisherIds,
+	isPublishedReason,
+	publishApplyHadFailure,
 	canSkipPublishResultsForGlobalInstall,
 	whyNotPublish,
 	whyNotPush,
@@ -172,6 +175,38 @@ describe('publishApplyTitle', () => {
 		assert.match(publishResultHint(mixed), /Failed names are first/);
 		assert.equal(publishResultPhase(mixed[0]?.reason), 'fail');
 		assert.equal(publishResultPhase(mixed[2]?.reason), 'done');
+	});
+});
+
+describe('isPublishedReason', () => {
+	it('treats GitHub OIDC success as published so a batch can continue', () => {
+		assert.equal(isPublishedReason('published foo@1.0.0'), true);
+		assert.equal(isPublishedReason('open GitHub Publish foo@1.0.0  https://example.test'), true);
+		assert.equal(isPublishedReason('dirty'), false);
+		assert.equal(isPublishedReason(undefined), false);
+		assert.equal(
+			publishApplyHadFailure([
+				{ action: 'skip', reason: 'already on npm' },
+				{ action: 'publish', reason: 'open GitHub Publish foo@1.0.0  https://example.test' },
+			]),
+			false,
+		);
+		assert.equal(publishApplyHadFailure([{ action: 'publish', reason: 'prepublish failed' }]), true);
+	});
+});
+
+describe('behindPinPublisherIds', () => {
+	it('lists enrolled publishers for behind registry pins', () => {
+		assert.deepEqual(
+			behindPinPublisherIds([
+				{ kind: 'registry', onLatest: false, targetId: 'ollanet' },
+				{ kind: 'registry', onLatest: false, targetId: 'ollanet' },
+				{ kind: 'registry', onLatest: true, targetId: 'filepress' },
+				{ kind: 'link', onLatest: false, targetId: 'smellcheck' },
+				{ kind: 'registry', onLatest: false },
+			]),
+			['ollanet'],
+		);
 	});
 });
 

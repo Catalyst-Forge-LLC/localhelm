@@ -32,6 +32,7 @@
 		isGithubPublishReason,
 		isPublishedReason,
 		canSkipPublishResultsForGlobalInstall,
+		behindPinPublisherIds,
 		nextCutVersion,
 		plainGitError,
 		publishApplyTitle,
@@ -48,7 +49,8 @@
 	} from '$lib/writeGate';
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
-	import { JobCancelledError, isJobCancelled } from '$lib/jobCancel';
+	import { isJobCancelled } from '$lib/jobCancel';
+	import { joinBatchFailures, runNamedBatch } from '$lib/batchApply';
 	import {
 		clearPublishBatch,
 		loadPublishBatch,
@@ -284,11 +286,15 @@
 		),
 	);
 	const filteredAttentionRows = $derived(attentionRows.filter((row) => rowHasNeed(row, needFilter)));
-	const filteredCascadeRows = $derived(needFilter === 'all' ? cascadeOnlyRows : []);
+	const filteredCascadeRows = $derived(
+		needFilter === 'all' || needFilter === 'pins' ? cascadeOnlyRows : [],
+	);
 	const needFilterCounts = $derived({
 		all: attentionRows.length + cascadeOnlyRows.length,
 		publish: attentionRows.filter((row) => rowHasNeed(row, 'publish')).length,
 		push: attentionRows.filter((row) => rowHasNeed(row, 'push')).length,
+		pins:
+			attentionRows.filter((row) => row.cascadeBehind > 0).length + cascadeOnlyRows.length,
 	});
 	const todayCount = $derived(
 		attentionRows.length +
@@ -361,13 +367,14 @@
 
 	function parseNeedFilter(raw: string | null): NeedFilter | null {
 		if (raw === 'cut') return 'publish';
-		if (raw === 'all' || raw === 'publish' || raw === 'push') return raw;
+		if (raw === 'all' || raw === 'publish' || raw === 'push' || raw === 'pins') return raw;
 		return null;
 	}
 
 	function rowHasNeed(row: Project, filter: NeedFilter): boolean {
 		if (filter === 'all') return true;
 		if (filter === 'publish') return canPublish(row);
+		if (filter === 'pins') return row.cascadeBehind > 0;
 		return canPush(row);
 	}
 
@@ -702,29 +709,29 @@
 
 	async function eachNamed(verb: string, names: string[], fn: (name: string) => Promise<void>): Promise<void> {
 		jobCanStop = names.length >= 2;
-		for (let i = 0; i < names.length; i++) {
-			const name = names[i];
-			if (!name) continue;
-			if (jobCancel) throw new JobCancelledError(i, names.length);
-			busy = bulkProgressLabel(verb, i + 1, names.length, name);
-			if (confirmItemKeys.includes(name)) {
-				confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'current');
-			}
-			try {
-				await fn(name);
+		const failed = await runNamedBatch(names, fn, {
+			shouldStop: () => jobCancel,
+			onStart: (name, i, total) => {
+				busy = bulkProgressLabel(verb, i + 1, total, name);
+				if (confirmItemKeys.includes(name)) {
+					confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'current');
+				}
+			},
+			onDone: (name) => {
 				if (confirmItemKeys.includes(name)) {
 					const at = confirmItemKeys.indexOf(name);
 					if (confirmPhases[at] !== 'fail') {
 						confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'done');
 					}
 				}
-			} catch (err) {
+			},
+			onFail: (name) => {
 				if (confirmItemKeys.includes(name)) {
 					confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'fail');
 				}
-				throw err;
-			}
-		}
+			},
+		});
+		if (failed.length) error = joinBatchFailures(failed);
 	}
 
 	function shellProject(row: RosterRow): Project {
@@ -1497,52 +1504,46 @@
 		if (!named.length) return;
 		confirmDrafting = [];
 		await run(bulkProgressLabel('committing', 1, named.length, named[0]), async () => {
-			for (let i = 0; i < named.length; i++) {
-				const id = named[i];
-				if (!id) continue;
-				busy = bulkProgressLabel('committing', i + 1, named.length, id);
+			await eachNamed('committing', named, async (id) => {
 				confirmPhases = markCommitKeys(id, 'current');
-				try {
-					const data = (await call('/api/commit', {
-						method: 'POST',
-						body: JSON.stringify({
-							ids: [id],
-							apply: true,
-							messages: { [id]: confirmMessages[id] ?? '' },
-						}),
-					})) as { rows: DirtCommitRow[] };
-					const row = data.rows[0];
-					if (row?.action !== 'commit' || row.reason) {
-						throw new Error(row?.reason ?? `commit ${id} failed`);
-					}
-					note(`commit --apply ${id}`, row);
-					confirmPhases = markCommitKeys(id, 'done');
-				} catch (err) {
-					confirmPhases = markCommitKeys(id, 'fail');
-					throw err;
+				const data = (await call('/api/commit', {
+					method: 'POST',
+					body: JSON.stringify({
+						ids: [id],
+						apply: true,
+						messages: { [id]: confirmMessages[id] ?? '' },
+					}),
+				})) as { rows: DirtCommitRow[] };
+				const row = data.rows[0];
+				if (row?.action !== 'commit' || row.reason) {
+					throw new Error(row?.reason ?? `commit ${id} failed`);
 				}
-			}
+				note(`commit --apply ${id}`, row);
+				confirmPhases = markCommitKeys(id, 'done');
+			});
 			await loadStatus({ ids: named, extras: false });
 		});
 	}
 
 	async function applyBumps(jobs: { id: string; kind: BumpKind }[]): Promise<void> {
+		const kinds = new Map(jobs.map((job) => [job.id, job.kind]));
 		await run(bulkProgressLabel('bumping', 1, jobs.length, jobs[0]?.id), async () => {
-			for (let i = 0; i < jobs.length; i++) {
-				const job = jobs[i];
-				if (!job) continue;
-				busy = bulkProgressLabel('bumping', i + 1, jobs.length, job.id);
-				const plan = (await call('/api/bump', {
-					method: 'POST',
-					body: JSON.stringify({ id: job.id, kind: job.kind, apply: true }),
-				})) as BumpPlan;
-				note(
-					plan.commit === 'commit'
-						? `bumped ${job.id} to ${plan.to} and committed`
-						: `bumped ${job.id} to ${plan.to}${plan.commitReason ? ` (no commit — ${plan.commitReason})` : ''}`,
-					plan,
-				);
-			}
+			await eachNamed(
+				'bumping',
+				jobs.map((job) => job.id),
+				async (id) => {
+					const plan = (await call('/api/bump', {
+						method: 'POST',
+						body: JSON.stringify({ id, kind: kinds.get(id) ?? 'patch', apply: true }),
+					})) as BumpPlan;
+					note(
+						plan.commit === 'commit'
+							? `bumped ${id} to ${plan.to} and committed`
+							: `bumped ${id} to ${plan.to}${plan.commitReason ? ` (no commit — ${plan.commitReason})` : ''}`,
+						plan,
+					);
+				},
+			);
 			await loadStatus({ ids: jobs.map((job) => job.id) });
 		});
 	}
@@ -2310,8 +2311,7 @@
 			note(`${verb} --apply ${id}`, data);
 			const check = landPluginApplyOk(data);
 			if (!check.ok) {
-				error = `${id}: ${check.reason}`;
-				throw new Error(error);
+				throw new Error(check.reason);
 			}
 		});
 	}
@@ -2537,11 +2537,17 @@
 	}
 
 	function todayBadges(row: Project): Badge[] {
+		const acts = needActions(row);
 		return badges(row).filter((badge) => {
 			if (badge.text === 'nothing to do') return false;
 			if (canCommit(row) && badge.text.startsWith('dirty')) return false;
 			if (row.unpublishedAhead && (badge.text.includes('unpublished') || badge.text.includes('never published'))) return false;
 			if ((row.git.ahead ?? 0) > 0 && badge.text.includes('to push')) return false;
+			if (
+				acts.some((act) => act.id === 'pins' || act.id.startsWith('cascade:')) &&
+				badge.text.includes('pin')
+			)
+				return false;
 			return true;
 		});
 	}
@@ -2616,7 +2622,7 @@
 		return pin.onLatest === false ? 'pin-behind' : 'pin-ok';
 	}
 
-	type NeedAction = { id: FleetWriteId | 'ship' | 'global'; label: string; title: string; run: () => void; disabled?: boolean };
+	type NeedAction = { id: string; label: string; title: string; run: () => void; disabled?: boolean };
 
 	function rowBumpKind(row: Project): BumpKind {
 		return bumpKind[row.id] ?? 'patch';
@@ -2712,6 +2718,19 @@
 				run: () => void startGlobal([row.id]),
 			});
 		}
+		const projects = inventory?.projects ?? [];
+		for (const publisherId of behindPinPublisherIds(row.pins)) {
+			if (publisherId === row.id) continue;
+			const n = writableCascadeCount(publisherId, projects);
+			if (n <= 0) continue;
+			if (acts.some((act) => act.id === `cascade:${publisherId}`)) continue;
+			acts.push({
+				id: `cascade:${publisherId}`,
+				label: n === 1 ? `Write ${publisherId} pin` : `Write ${publisherId} pins`,
+				title: `Cascade from ${publisherId}: retarget this repo and any other clean dependents to the published version. Confirm in the modal. FilePress sites still use Land / Sync engine.`,
+				run: () => void startCascade(publisherId),
+			});
+		}
 		return acts;
 	}
 
@@ -2721,7 +2740,11 @@
 			if (badge.text === 'nothing to do') return acts.length === 0;
 			if (acts.some((act) => act.id === 'publish') && badge.text.includes('unpublished')) return false;
 			if (acts.some((act) => act.id === 'push') && badge.text.includes('to push')) return false;
-			if (acts.some((act) => act.id === 'pins') && badge.text.includes('pin')) return false;
+			if (
+				acts.some((act) => act.id === 'pins' || act.id.startsWith('cascade:')) &&
+				badge.text.includes('pin')
+			)
+				return false;
 			if (acts.some((act) => act.id === 'commit') && badge.text.startsWith('dirty')) return false;
 			return true;
 		});
@@ -2800,7 +2823,10 @@
 									class:warm={chip.tone === 'warm'}
 									class:bad={chip.tone === 'bad'}
 									title="Open Today"
-									onclick={() => setTab(chip.tab)}
+									onclick={() => {
+										setTab(chip.tab);
+										if (chip.id === 'pins') needFilter = 'pins';
+									}}
 								>
 									{chip.label}
 								</button>
@@ -2926,6 +2952,7 @@
 									{ id: 'all' as const, label: 'All' },
 									{ id: 'publish' as const, label: 'Publish' },
 									{ id: 'push' as const, label: 'Push' },
+									{ id: 'pins' as const, label: 'Pins' },
 								] as chip (chip.id)}
 									<button
 										type="button"
@@ -2987,6 +3014,8 @@
 							<p class="dim small">
 								{#if needFilter === 'publish'}
 									Nothing waiting to publish. All still shows dirty trees and Write pins.
+								{:else if needFilter === 'pins'}
+									No pins behind. Cascade from the published package (Write pins), not the consumer. FilePress sites still use Land / Sync engine.
 								{:else}
 									Nothing to push. All still shows Publish and Write pins.
 								{/if}

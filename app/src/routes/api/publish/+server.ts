@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublishIds } from '../../../../../src/lib/index.js';
-import { isPublishedReason } from '../../../../../src/lib/writeGate.js';
 import type { BumpKind } from '../../../../../src/lib/index.js';
 import { errJson, loadRequired, withLockAt } from '$lib/server/helm';
 
@@ -42,7 +41,6 @@ export const POST: RequestHandler = async ({ request }) => {
 								onStep: (event) => send({ type: 'step', ...event }),
 							});
 							out.push(next);
-							if (row.action === 'publish' && !isPublishedReason(next.reason)) break;
 						}
 						return out;
 					});

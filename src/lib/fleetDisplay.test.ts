@@ -59,5 +59,15 @@ describe('fleetDisplay', () => {
 				{ id: 'dirty', label: '1 dirty', tone: 'warm', tab: 'today' },
 			],
 		);
+		assert.deepEqual(
+			headerNeedChips({
+				unpublishedAhead: 0,
+				dirty: 0,
+				cascadeBehind: 3,
+				missing: 0,
+				npmErrors: 0,
+			}),
+			[{ id: 'pins', label: '3 pins behind', tone: 'warm', tab: 'today' }],
+		);
 	});
 });

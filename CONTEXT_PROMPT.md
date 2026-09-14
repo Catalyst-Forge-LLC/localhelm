@@ -290,3 +290,5 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 38 — 2026-09-14
 
 - Land **localslip** sync failed `ERR_PNPM_UNEXPECTED_VIRTUAL_STORE` because `site/node_modules` still recorded `Z:\\workspace\\localberth` after the rename. Reinstalled from `localslip/site`. FilePress `applyUpdate` now reinstalls when the virtual store path is stale, then retries `pnpm update getfilepress`. Do not bake shop folder names into Helm.
+- Registry **pin behind** is Cascade from the **published** package (`localhelm cascade <id> --apply`, Today → Pins / Write pins). FilePress Land / Sync engine is only getfilepress on sites (then push + ship). A consumer row can offer Write {publisher} pin when that cascade is writable. Dirty consumers are skipped.
+- Dashboard named applies continue after one id fails (`runNamedBatch`). Stop still aborts the rest. CLI `publish --apply` uses `isPublishedReason` (GitHub OIDC counts), continues the batch, and exits 1 if a publish row failed. CLI `land --apply` still stops.

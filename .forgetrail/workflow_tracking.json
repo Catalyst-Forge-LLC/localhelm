@@ -1476,6 +1476,19 @@
         "Trust X-Forwarded-For"
       ],
       "status": "active"
+    },
+    {
+      "id": "d106",
+      "timestamp": "2026-09-15T00:35:00Z",
+      "phase": "2-scaffolding",
+      "session": 38,
+      "decision": "Dashboard named applies (publish, Land, plugin jobs, pull, push, ship, commit, bump) continue after one id fails. runNamedBatch honors Stop. CLI publish --apply continues and uses isPublishedReason (GitHub OIDC is success); exit 1 if any publish row failed. CLI land --apply still stops. Pin behind is cascade from the publisher; FilePress Land stays getfilepress sites only.",
+      "rationale": "Code review Step 2 plus operator: pin-behind items had FilePress sync but looked like no general update. Cascade already existed on the publisher; consumers now get Write {id} pin when writable.",
+      "alternatives_considered": [
+        "Keep eachNamed fail-fast",
+        "Add a consumer-only pnpm update that bypasses cascade"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

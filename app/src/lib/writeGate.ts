@@ -28,6 +28,8 @@ export {
 	publishResultLine,
 	isGithubPublishReason,
 	isPublishedReason,
+	publishApplyHadFailure,
+	behindPinPublisherIds,
 	canSkipPublishResultsForGlobalInstall,
 	whyNotPublish,
 	whyNotPush,

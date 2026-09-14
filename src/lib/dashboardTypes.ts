@@ -34,4 +34,4 @@ export type LogEntry = { at: string; time: string; title: string; body: string }
 
 export type PortPane = 'leases' | 'stacks' | 'observed';
 
-export type NeedFilter = 'all' | 'publish' | 'push';
+export type NeedFilter = 'all' | 'publish' | 'push' | 'pins';

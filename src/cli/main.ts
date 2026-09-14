@@ -10,6 +10,7 @@ import { applyExport, planExport } from '../lib/export.js';
 import { applyDirtCommit, dirtFileLine, planDirtCommit, requireCommitIds } from '../lib/dirtCommit.js';
 import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
 import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublishIds, type PublishRow } from '../lib/publish.js';
+import { publishApplyHadFailure } from '../lib/writeGate.js';
 import { archiveIds, readArchive, restoreIds } from '../lib/archive.js';
 import { buildBrief } from '../lib/brief.js';
 import { applyLand, planLandMany, requireLandSiteIds } from '../lib/land.js';
@@ -587,13 +588,13 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 				for (const row of planned) {
 					const next = await applyPublish(loaded, row, { otp });
 					rows.push(next);
-					if (row.action === 'publish' && !next.reason?.startsWith('published ')) break;
 				}
 			} finally {
 				await lock.release();
 			}
 		}
 		const npmUser = json || !apply ? npmWhoami() : null;
+		if (apply && publishApplyHadFailure(rows)) process.exitCode = 1;
 		if (json) printJson({ rows, writes: apply, npmUser });
 		else {
 			process.stdout.write(formatPublishRows(rows));

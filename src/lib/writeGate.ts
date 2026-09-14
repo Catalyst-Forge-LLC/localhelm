@@ -142,6 +142,28 @@ export function isPublishedReason(reason: string | undefined): boolean {
 	return Boolean(reason?.startsWith('published ') || isGithubPublishReason(reason));
 }
 
+/** A publish apply row that did not reach npm or open a GitHub Publish link. */
+export function publishApplyHadFailure(
+	rows: ReadonlyArray<{ action: string; reason?: string }>,
+): boolean {
+	return rows.some((row) => row.action === 'publish' && !isPublishedReason(row.reason));
+}
+
+/** Enrolled publishers whose registry pin on this consumer is behind npm latest. */
+export function behindPinPublisherIds(
+	pins: ReadonlyArray<{ kind: string; onLatest?: boolean; targetId?: string }>,
+): string[] {
+	const ids: string[] = [];
+	const seen = new Set<string>();
+	for (const pin of pins) {
+		if (pin.kind !== 'registry' || pin.onLatest !== false || !pin.targetId) continue;
+		if (seen.has(pin.targetId)) continue;
+		seen.add(pin.targetId);
+		ids.push(pin.targetId);
+	}
+	return ids;
+}
+
 /**
  * After a laptop-only npm publish, the confirm may jump to Install globally.
  * Do not skip when any row still needs a GitHub Publish click (OIDC / mixed batch).
