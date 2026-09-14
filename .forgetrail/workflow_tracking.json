@@ -1397,9 +1397,30 @@
         "A separate progress toast beside the modal"
       ],
       "status": "active"
+    },
+    {
+      "id": "d100",
+      "timestamp": "2026-09-14T13:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "decision": "After publish apply, jump to Install globally only when every listed row reached npm on the laptop. If any row still needs a GitHub Publish click, keep the result list (Actions links). Mixed success may offer Install on that same confirm; GitHub-OIDC-only still skips the prompt.",
+      "rationale": "Operator 2026-09-14: after publishing multiple (including GitHub-OIDC packages), the confirm switched to Install globally and skipped the GitHub Publish links.",
+      "alternatives_considered": [
+        "Keep jumping to Install whenever any laptop CLI published",
+        "Show results first, then a second Install modal on Close"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-14T13:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "issue": "A mixed publish batch treats GitHub opens as success. If any laptop npm publish had a bin, the confirm jumped to Install globally and hid the GitHub Publish links.",
+      "resolution": "Skip to Install globally only when every row published on the laptop. Mixed or GitHub-only batches keep the result list; mixed success can still Install from that confirm.",
+      "category": "ux"
+    },
     {
       "timestamp": "2026-09-11T11:28:00Z",
       "phase": "2-scaffolding",

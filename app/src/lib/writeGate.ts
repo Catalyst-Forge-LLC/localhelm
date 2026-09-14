@@ -28,6 +28,7 @@ export {
 	publishResultLine,
 	isGithubPublishReason,
 	isPublishedReason,
+	canSkipPublishResultsForGlobalInstall,
 	whyNotPublish,
 	whyNotPush,
 	writableCascadeCount,

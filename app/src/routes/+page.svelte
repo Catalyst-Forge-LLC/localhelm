@@ -31,6 +31,7 @@
 		fleetWriteLabel,
 		isGithubPublishReason,
 		isPublishedReason,
+		canSkipPublishResultsForGlobalInstall,
 		nextCutVersion,
 		plainGitError,
 		publishApplyTitle,
@@ -2209,7 +2210,7 @@
 				.filter((row) => row.version)
 				.map((row) => [row.id, row.version as string]),
 		);
-		if (!failed.length && installable.length) {
+		if (!failed.length && installable.length && canSkipPublishResultsForGlobalInstall(rows)) {
 			offerConfirm({
 				title:
 					installable.length === 1
@@ -2231,14 +2232,32 @@
 			return;
 		}
 		const ordered = orderPublishResults(rows);
+		const offerInstall = Boolean(!failed.length && installable.length && github.length);
 		offerConfirm({
 			title: publishResultTitle(rows),
-			hint: publishResultHint(rows),
+			hint: [
+				publishResultHint(rows),
+				offerInstall
+					? 'Install globally is for the laptop npm publishes after you open each GitHub Publish link.'
+					: '',
+			]
+				.filter(Boolean)
+				.join(' '),
 			items: ordered.map(publishResultLine),
 			itemKeys: ordered.map((row) => row.id),
 			itemPhases: ordered.map((row) => publishResultPhase(row.reason)),
-			confirmLabel: 'OK',
-			canApply: false,
+			confirmLabel: offerInstall
+				? installable.length === 1
+					? `Install ${installable[0]?.npm ?? installable[0]?.id}@${installable[0]?.version}`
+					: `Install ${installable.length} globally`
+				: 'OK',
+			canApply: offerInstall,
+			run: offerInstall
+				? () => void applyGlobal(
+						installable.map((row) => row.id),
+						versions,
+					)
+				: undefined,
 		});
 	}
 

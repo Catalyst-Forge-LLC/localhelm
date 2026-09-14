@@ -263,7 +263,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 35 — 2026-09-10
 
-- **Install global** / **Update global** is its own write (`pnpm add -g name@version`, npm if pnpm is missing). Fleet toolbar + row button when a package has a `bin` and this machine is missing or behind. After a laptop npm publish (`published …`), confirm offers to install that version. Confirm checks that exact version on npm first; if it is not there yet, offer Wait (poll) or Try again. CLI `--apply` waits. GitHub-OIDC-only publishes skip the prompt. Named ids on apply. Never `--force`. Not a gold Today need. CLI: `localhelm global <id>...`.
+- **Install global** / **Update global** is its own write (`pnpm add -g name@version`, npm if pnpm is missing). Fleet toolbar + row button when a package has a `bin` and this machine is missing or behind. After a laptop-only npm publish (`published …`), confirm offers to install that version. A mixed batch that still needs GitHub Publish keeps the result list (clickable Actions links) and only then offers Install. Confirm checks that exact version on npm first; if it is not there yet, offer Wait (poll) or Try again. CLI `--apply` waits. GitHub-OIDC-only publishes skip the prompt. Named ids on apply. Never `--force`. Not a gold Today need. CLI: `localhelm global <id>...`.
 - A published `localhelm` tarball includes a built `dashboard/` (adapter-node). Checkout `localhelm serve` still uses Vite. Global 0.1.9 stays broken until the next publish.
 
 ### Session 36 — 2026-09-11
@@ -275,3 +275,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Global install checks `name@version` on the registry before `pnpm add -g`. A just-published version can take a minute. Confirm offers Wait or Try again instead of a 404.
 - A write that will confirm opens the modal immediately with a spinner and the busy line (and known names when we have them). The plan fills in when the API returns. Bump ticks each id while planning.
 - After a batch publish, the confirm lists failures first with a real why (not `prepublish failed: failed`). Click a name. Activity still has the full npm log.
+
+### Session 37 — 2026-09-14
+
+- After-publish Install globally no longer replaces the result list when any package still needs a GitHub Actions click. Mixed batches keep the links; Install stays on that same confirm.

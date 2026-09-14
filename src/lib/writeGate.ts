@@ -101,6 +101,19 @@ export function isPublishedReason(reason: string | undefined): boolean {
 	return Boolean(reason?.startsWith('published ') || isGithubPublishReason(reason));
 }
 
+/**
+ * After a laptop-only npm publish, the confirm may jump to Install globally.
+ * Do not skip when any row still needs a GitHub Publish click (OIDC / mixed batch).
+ */
+export function canSkipPublishResultsForGlobalInstall(
+	rows: ReadonlyArray<{ reason?: string }>,
+): boolean {
+	if (!rows.length) return false;
+	if (rows.some((row) => !isPublishedReason(row.reason))) return false;
+	if (rows.some((row) => isGithubPublishReason(row.reason))) return false;
+	return true;
+}
+
 export function publishApplyTitle(rows: ReadonlyArray<{ id: string; reason?: string }>): string {
 	const github = rows.filter((row) => isGithubPublishReason(row.reason)).length;
 	const published = rows.filter((row) => row.reason?.startsWith('published ')).length;

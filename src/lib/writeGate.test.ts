@@ -26,6 +26,7 @@ import {
 	publishResultPhase,
 	publishResultTitle,
 	publishResultLine,
+	canSkipPublishResultsForGlobalInstall,
 	whyNotPublish,
 	whyNotPush,
 	writableCascadeCount,
@@ -171,6 +172,30 @@ describe('publishApplyTitle', () => {
 		assert.match(publishResultHint(mixed), /Failed names are first/);
 		assert.equal(publishResultPhase(mixed[0]?.reason), 'fail');
 		assert.equal(publishResultPhase(mixed[2]?.reason), 'done');
+	});
+});
+
+describe('canSkipPublishResultsForGlobalInstall', () => {
+	it('skips only when every row reached npm on the laptop', () => {
+		assert.equal(canSkipPublishResultsForGlobalInstall([{ reason: 'published foo@1.0.0' }]), true);
+		assert.equal(
+			canSkipPublishResultsForGlobalInstall([
+				{ reason: 'open GitHub Publish bar@1.0.0  https://example.test' },
+			]),
+			false,
+		);
+		assert.equal(
+			canSkipPublishResultsForGlobalInstall([
+				{ reason: 'published foo@1.0.0' },
+				{ reason: 'open GitHub Publish bar@1.0.0  https://example.test' },
+			]),
+			false,
+		);
+		assert.equal(
+			canSkipPublishResultsForGlobalInstall([{ reason: 'published foo@1.0.0' }, { reason: 'dirty' }]),
+			false,
+		);
+		assert.equal(canSkipPublishResultsForGlobalInstall([]), false);
 	});
 });
 
