@@ -78,8 +78,18 @@ export {
 } from './land.js';
 export { landConfirmItems } from './landDisplay.js';
 export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from './land.js';
-export { landShipsPath, readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
-export type { LandShipRecord } from './landShips.js';
+export {
+	landShipsPath,
+	markLandShipFailed,
+	readLandPendingReasons,
+	readLandPendingSiteIds,
+	readLandShipFingerprint,
+	readLandShipRecord,
+	readLandShips,
+	recordLandShip,
+	shipUnchanged,
+} from './landShips.js';
+export type { LandShipRecord, LandShipsFile } from './landShips.js';
 export { asPluginBoards, loadPluginDashboard, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
 export type { PluginListing } from './plugin.js';
 export {

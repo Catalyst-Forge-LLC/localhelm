@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { fleetStatus, npmWhoami } from '../../../../../src/lib/index.js';
+import { fleetStatus, npmWhoami, readLandPendingReasons, readLandPendingSiteIds } from '../../../../../src/lib/index.js';
 import { errJson, loadOptional, operatorCwd } from '$lib/server/helm';
 
 let lastNpmUser: { user: string; at: number } | null = null;
@@ -38,13 +38,15 @@ export const GET: RequestHandler = async ({ url }) => {
 		const fetchRemotes = url.searchParams.get('fetch') === '1';
 		const refreshNpm = url.searchParams.get('fresh') === '1' || fetchRemotes;
 		const onlyIds = url.searchParams.get('ids')?.split(',').map((id) => id.trim()).filter(Boolean);
-		const [inventory, npmUser] = await Promise.all([
+		const [inventory, npmUser, landPending, landPendingReasons] = await Promise.all([
 			fleetStatus(loaded, {
 				fetch: fetchRemotes,
 				refreshNpm,
 				onlyIds: onlyIds?.length ? onlyIds : undefined,
 			}),
 			npmUserP,
+			readLandPendingSiteIds(loaded.workspaceRoot),
+			readLandPendingReasons(loaded.workspaceRoot),
 		]);
 		return json({
 			inventory,
@@ -53,6 +55,8 @@ export const GET: RequestHandler = async ({ url }) => {
 			cwd,
 			fetched: fetchRemotes,
 			npmUser,
+			landPending,
+			landPendingReasons,
 			...listen(),
 		});
 	} catch (err) {

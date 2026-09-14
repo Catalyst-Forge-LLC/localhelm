@@ -1450,9 +1450,30 @@
         "Keep fail-fast and only persist"
       ],
       "status": "active"
+    },
+    {
+      "id": "d104",
+      "timestamp": "2026-09-14T19:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "decision": "A failed Land/ship does not write the success fingerprint in land-ships.json. The site is marked pending and stays on Today Land until ship succeeds. Dashboard multi-site Land continues after one site fails. CLI land --apply still stops. Skip ship only when the tree matches the last successful ship and the site is not pending.",
+      "rationale": "Operator 2026-09-14: after a 24-site Land, detangler failed ship (YAML) and vanished from the next Land 20 because sync had succeeded. They asked that an error must not mark the site done.",
+      "alternatives_considered": [
+        "Keep Land candidates as engine-sync-only and require naming the failed site",
+        "Continue CLI land --apply after a failure"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-14T19:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "issue": "Land Today/Land N is the FilePress engine-sync list. After sync succeeds and ship fails, the site drops off Land and looks shipped even though land-ships.json was not updated.",
+      "resolution": "Mark pending on failed ship without changing the last success fingerprint. Union pending ids into Today Land. Continue the dashboard batch after one site fails.",
+      "category": "ux"
+    },
     {
       "timestamp": "2026-09-14T18:15:00Z",
       "phase": "2-scaffolding",

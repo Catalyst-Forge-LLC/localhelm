@@ -116,6 +116,15 @@ describe('landStepsFromPluginRow', () => {
 			).length,
 			0,
 		);
+		assert.equal(
+			landStepsFromPluginRow(
+				'smellcheck',
+				{ ship: { writes: true, fingerprint: 'abc' } },
+				'abc',
+				true,
+			).some((s) => s.kind === 'ship'),
+			true,
+		);
 	});
 });
 
@@ -188,5 +197,6 @@ describe('shipUnchanged', () => {
 		assert.equal(shipUnchanged('abc:def', 'abc:xyz'), false);
 		assert.equal(shipUnchanged(null, 'abc:def'), false);
 		assert.equal(shipUnchanged('abc:def', null), false);
+		assert.equal(shipUnchanged('abc:def', 'abc:def', true), false);
 	});
 });

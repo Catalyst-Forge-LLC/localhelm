@@ -4,7 +4,7 @@ import { loadPlugins, requirePlugin } from './plugin.js';
 import type { PublishRow } from './publish.js';
 import type { ProjectStatus } from './types.js';
 import { landPluginApplyOk, whyNotPublish } from './writeGate.js';
-import { readLandShipFingerprint, recordLandShip, shipUnchanged } from './landShips.js';
+import { markLandShipFailed, readLandShips, recordLandShip, shipUnchanged } from './landShips.js';
 
 export { landPluginApplyOk };
 
@@ -96,6 +96,7 @@ export function landStepsFromPluginRow(
 	siteId: string,
 	row: LandPluginRow | null | undefined,
 	lastShipFingerprint: string | null,
+	pendingShip = false,
 ): LandStep[] {
 	if (!row) return [];
 	const steps: LandStep[] = [];
@@ -119,7 +120,7 @@ export function landStepsFromPluginRow(
 	}
 	if (row.ship?.writes) {
 		const fingerprint = row.ship.fingerprint ?? null;
-		if (shipUnchanged(lastShipFingerprint, fingerprint)) {
+		if (!pendingShip && shipUnchanged(lastShipFingerprint, fingerprint)) {
 			/* already shipped this tree — skip */
 		} else {
 			steps.push({
@@ -173,9 +174,16 @@ export async function planLandMany(loaded: LoadedManifest, idsRaw: readonly stri
 	const plug = requirePlugin(await loadPlugins(loaded), LAND_PLUGIN_ID);
 	const planned = plug.plugin.plan ? await plug.plugin.plan('land', siteIds) : null;
 	const rows = pluginLandRows(planned);
-	const lasts = await Promise.all(siteIds.map((id) => readLandShipFingerprint(loaded.workspaceRoot, id)));
-	return siteIds.map((siteId, i) => {
-		const steps = landStepsFromPluginRow(siteId, rowForSite(rows, siteId, siteIds.length), lasts[i] ?? null);
+	const ships = await readLandShips(loaded.workspaceRoot);
+	return siteIds.map((siteId) => {
+		const rec = ships.sites[siteId];
+		const last = rec?.fingerprint?.trim() || null;
+		const steps = landStepsFromPluginRow(
+			siteId,
+			rowForSite(rows, siteId, siteIds.length),
+			last,
+			Boolean(rec?.pending),
+		);
 		return landPlanForSite(siteId, enrolledAll, steps);
 	});
 }
@@ -227,6 +235,14 @@ export async function applyLand(
 			if (!check.ok) {
 				out.ok = false;
 				out.stoppedAt = step.label;
+				if (step.pluginAction === 'ship') {
+					await markLandShipFailed(
+						loaded.workspaceRoot,
+						plan.siteId,
+						step.shipFingerprint ?? '',
+						check.reason,
+					);
+				}
 				return out;
 			}
 			if (step.pluginAction === 'ship' && step.shipFingerprint) {

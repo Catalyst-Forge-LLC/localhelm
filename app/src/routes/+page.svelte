@@ -285,6 +285,8 @@
 	let busy = $state('');
 	let statusNote = $state('');
 	let error = $state('');
+	let landPendingIds = $state<string[]>([]);
+	let landPendingReasons = $state<Record<string, string>>({});
 
 	const enrolledIds = $derived(new Set((inventory ? inventory.projects : roster).map((p) => p.id)));
 	const archivedSet = $derived(new Set(archivedIds));
@@ -360,7 +362,14 @@
 	const siteBoards = $derived(pluginBoards.filter((board) => board.plugin === canonicalizeTab(tab) && !isPortsPluginTab(tab)));
 	const portBoards = $derived(pluginBoards.filter((board) => board.plugin === 'localslip' || board.tab === 'ports'));
 	const filepressBoard = $derived(pluginBoards.find((board) => board.plugin === 'filepress') ?? null);
-	const sitesNeedingYou = $derived((filepressBoard?.rows ?? []).filter((row) => siteNeedsYou(row.cells)));
+	const landPendingSet = $derived(new Set(landPendingIds));
+	const sitesNeedingSync = $derived((filepressBoard?.rows ?? []).filter((row) => siteNeedsEngineSync(row.cells)));
+	const sitesNeedingLand = $derived(
+		(filepressBoard?.rows ?? []).filter(
+			(row) => siteNeedsEngineSync(row.cells) || landPendingSet.has(row.id),
+		),
+	);
+	const sitesNeedingYou = $derived(sitesNeedingLand);
 	const leaseBoardAll = $derived(portBoards.find((board) => board.title === 'Leases') ?? portBoards[0] ?? null);
 	const parkedLeaseCount = $derived((leaseBoardAll?.rows ?? []).filter((row) => row.cells.parked === 'yes').length);
 	const leaseBoard = $derived(
@@ -414,7 +423,8 @@
 			portsNeedingYou.length +
 			portLookCards.length,
 	);
-	const filepressSyncIds = $derived(sitesNeedingYou.map((row) => row.id));
+	const filepressSyncIds = $derived(sitesNeedingSync.map((row) => row.id));
+	const filepressLandIds = $derived(sitesNeedingLand.map((row) => row.id));
 	const checkedPublishIds = $derived(checkedIds.filter((id) => {
 		const row = inventory?.projects.find((p) => p.id === id);
 		return row ? !whyNotPublish(row) : false;
@@ -585,11 +595,7 @@
 		return badges(row).some((badge) => badge.text !== 'nothing to do') || writesFor(row).length > 0;
 	}
 
-	function siteNeedsYou(cells: Record<string, string>): boolean {
-		return siteNeedsEngineSync(cells);
-	}
-
-	function siteNeedReason(cells: Record<string, string>): string {
+	function siteNeedReason(siteId: string, cells: Record<string, string>): string {
 		const update = (cells.update ?? '').trim();
 		const headers = (cells.headers ?? '').trim();
 		const updateLc = update.toLowerCase();
@@ -598,7 +604,9 @@
 			parts.push(update);
 		}
 		if (headers.toLowerCase().startsWith('merge')) parts.push(headers);
-		return parts.join(' · ') || update || '—';
+		const pending = landPendingReasons[siteId];
+		if (pending) parts.push(pending);
+		return parts.join(' · ') || pending || update || '—';
 	}
 
 	function portNeedsYou(cells: Record<string, string>): boolean {
@@ -990,6 +998,8 @@
 			port: string | null;
 			portSource: string | null;
 			npmUser?: string | null;
+			landPending?: string[];
+			landPendingReasons?: Record<string, string>;
 		};
 		if (scoped && inventory && data.inventory) inventory = mergeInventory(inventory, data.inventory);
 		else inventory = data.inventory;
@@ -1000,6 +1010,10 @@
 		if (data.npmUser) {
 			npmUser = data.npmUser;
 			persistNpmUser(data.npmUser);
+		}
+		if (Array.isArray(data.landPending)) landPendingIds = data.landPending;
+		if (data.landPendingReasons && typeof data.landPendingReasons === 'object') {
+			landPendingReasons = data.landPendingReasons;
 		}
 		if (opts.fetchRemotes && !scoped) fetchedAt = new Date().toLocaleTimeString();
 		if (!candidates.length) scanRoot = data.scanRoot;
@@ -2513,41 +2527,47 @@
 			const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
 			try {
 				await eachNamed('landing', ids, async (siteId) => {
-					const data = (await callNdjson(
-						'/api/land',
-						{
-							method: 'POST',
-							body: JSON.stringify({ apply: true, siteId, otp }),
-						},
-						(event) => {
-							if (event.type !== 'step') return;
-							confirmPhases = applyConfirmStep(confirmItemKeys, confirmPhases, {
-								id: String(event.id ?? siteId),
-								index: Number(event.index),
-								status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
-							});
-							if (event.status === 'fail' && event.reason) {
-								error = String(event.reason);
-							}
-						},
-					)) as {
-						result: {
-							ok: boolean;
-							stoppedAt?: string;
-							steps: { ok: boolean; label: string; reason: string }[];
+					try {
+						const data = (await callNdjson(
+							'/api/land',
+							{
+								method: 'POST',
+								body: JSON.stringify({ apply: true, siteId, otp }),
+							},
+							(event) => {
+								if (event.type !== 'step') return;
+								confirmPhases = applyConfirmStep(confirmItemKeys, confirmPhases, {
+									id: String(event.id ?? siteId),
+									index: Number(event.index),
+									status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
+								});
+								if (event.status === 'fail' && event.reason) {
+									error = String(event.reason);
+								}
+							},
+						)) as {
+							result: {
+								ok: boolean;
+								stoppedAt?: string;
+								steps: { ok: boolean; label: string; reason: string }[];
+							};
 						};
-					};
-					const ok = data.result.steps.filter((s) => s.ok).length;
-					const failed = data.result.steps.filter((s) => !s.ok);
-					note(
-						data.result.ok
-							? `land --apply ${siteId} — ${ok} step(s) ok`
-							: `land --apply ${siteId} — stopped: ${data.result.stoppedAt ?? failed[0]?.label ?? 'failed'}`,
-						data,
-					);
-					if (!data.result.ok) {
-						error = failed.map((s) => `${s.label}: ${s.reason}`).join(' · ') || data.result.stoppedAt || 'land failed';
-						throw new Error(error);
+						const ok = data.result.steps.filter((s) => s.ok).length;
+						const failed = data.result.steps.filter((s) => !s.ok);
+						note(
+							data.result.ok
+								? `land --apply ${siteId} — ${ok} step(s) ok`
+								: `land --apply ${siteId} — stopped: ${data.result.stoppedAt ?? failed[0]?.label ?? 'failed'}`,
+							data,
+						);
+						if (!data.result.ok) {
+							error = failed.map((s) => `${s.label}: ${s.reason}`).join(' · ') || data.result.stoppedAt || 'land failed';
+						}
+					} catch (err) {
+						if (isJobCancelled(err)) throw err;
+						const reason = err instanceof Error ? err.message : String(err);
+						error = reason;
+						note(`land --apply ${siteId} — stopped: ${reason}`, { error: reason });
 					}
 				});
 			} finally {
@@ -3233,10 +3253,15 @@
 							<div>
 								<h2>FilePress Sites</h2>
 								<p class="hint">
-									{#if filepressBoard && sitesNeedingYou.length}
-										{sitesNeedingYou.length} of {filepressBoard.rows.length} need an engine write. Land does Sync, then Push and Ship.
+									{#if filepressBoard && sitesNeedingLand.length}
+										{sitesNeedingLand.length} of {filepressBoard.rows.length} need Land.
+										{#if landPendingIds.length}
+											A failed ship stays here until it succeeds.
+										{:else}
+											Land does Sync, then Push and Ship.
+										{/if}
 									{:else if filepressBoard}
-										{filepressBoard.rows.length} sites · none waiting on an engine sync.
+										{filepressBoard.rows.length} sites · none waiting on Land.
 									{:else if !pluginsReady}
 										Reading sites…
 									{:else}
@@ -3245,16 +3270,18 @@
 								</p>
 							</div>
 							<div class="group-buttons">
-								{#if filepressSyncIds.length}
+								{#if filepressLandIds.length}
 									<button
 										class="btn btn-write btn-sm"
 										disabled={Boolean(busy)}
-										onclick={() => startLand(filepressSyncIds)}
-										title="Plans Land for every site that needs an engine write. Confirm in the modal."
+										onclick={() => startLand(filepressLandIds)}
+										title="Plans Land for every site that needs an engine write or a finished ship. Confirm in the modal."
 									>
 										<Icon icon="lucide:plane-landing" />
-										Land{filepressSyncIds.length > 1 ? ` ${filepressSyncIds.length}` : ''}
+										Land{filepressLandIds.length > 1 ? ` ${filepressLandIds.length}` : ''}
 									</button>
+								{/if}
+								{#if filepressSyncIds.length}
 									<button
 										class="btn btn-write btn-sm"
 										disabled={Boolean(busy)}
@@ -3275,7 +3302,7 @@
 										<li class="need-card">
 											<div class="need-main">
 												<div class="id">{site.id}</div>
-												<div class="dim small">{siteNeedReason(site.cells)}</div>
+												<div class="dim small">{siteNeedReason(site.id, site.cells)}</div>
 											</div>
 											<div class="need-tools">
 												<div class="need-actions">
