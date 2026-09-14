@@ -9,7 +9,7 @@ type CacheEntry = { cell: NpmCell; at: number };
 const cache = new Map<string, CacheEntry>();
 
 function encodeName(name: string): string {
-	return name.startsWith('@') ? name.replace('/', '%2f') : name;
+	return name.replaceAll('/', '%2f');
 }
 
 /** Run `fn` over items with a fixed worker pool. Order of results matches `items`. */

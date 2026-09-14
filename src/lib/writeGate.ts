@@ -27,12 +27,53 @@ export type PublishGateRow = {
 const PUBLISH_NOISE =
 	/^(npm warn\b|npm notice\b|npm error A complete log|npm error code \d|npm error path |npm error errno |npm error command failed\s*$|npm error$|Waiting for the debugger)/i;
 
+function stripEdgeQuotes(value: string): string {
+	let start = 0;
+	let end = value.length;
+	while (start < end && value[start] === '"') start += 1;
+	while (end > start && value[end - 1] === '"') end -= 1;
+	return value.slice(start, end).trim();
+}
+
+function afterCmdSwitch(line: string): string | undefined {
+	for (let i = 0; i < line.length - 1; i += 1) {
+		const slash = line[i] === '/' || line[i] === '\\';
+		const flag = line[i + 1] === 'c' || line[i + 1] === 'C';
+		if (!slash || !flag) continue;
+		let j = i + 2;
+		if (j >= line.length || (line[j] !== ' ' && line[j] !== '\t')) continue;
+		while (j < line.length && (line[j] === ' ' || line[j] === '\t')) j += 1;
+		const cmd = stripEdgeQuotes(line.slice(j));
+		if (cmd) return cmd;
+	}
+	return undefined;
+}
+
 function publishScript(text: string): string | undefined {
-	const win = /npm error command .+?[\\/]c\s+(.+)/i.exec(text);
-	if (win?.[1]) return win[1].replace(/^"+|"+$/g, '').trim();
-	for (const line of text.split(/\r?\n/)) {
-		const match = /^npm error command (?!failed\b)(.+)/i.exec(line.trim());
-		if (match?.[1]) return match[1].trim();
+	const prefix = 'npm error command ';
+	for (const rawLine of text.split(/\r?\n/)) {
+		const line = rawLine.trim();
+		if (!line.toLowerCase().startsWith(prefix)) continue;
+		const rest = line.slice(prefix.length);
+		if (rest.toLowerCase().startsWith('failed')) continue;
+		const win = afterCmdSwitch(rest);
+		if (win) return win;
+		if (rest) return rest.trim();
+	}
+	return undefined;
+}
+
+function firstShipFromCi(text: string): string | undefined {
+	const lower = text.toLowerCase();
+	let from = 0;
+	while (from < text.length) {
+		const ship = lower.indexOf('ship ', from);
+		if (ship < 0) return undefined;
+		const nl = text.indexOf('\n', ship);
+		const end = nl < 0 ? text.length : nl;
+		const line = text.slice(ship, end);
+		if (line.toLowerCase().indexOf(' from ci') >= 5) return line;
+		from = end + 1;
 	}
 	return undefined;
 }
@@ -49,8 +90,8 @@ export function plainPublishError(raw: string): string {
 	const provenance = /Provenance only works[^\n]+/i.exec(text);
 	if (provenance?.[0]) return provenance[0].replace(/\s+/g, ' ').slice(0, 160);
 
-	const shipCi = /Ship [^\n]+ from CI[^\n]*/i.exec(text);
-	if (shipCi?.[0]) return shipCi[0].replace(/\s+/g, ' ').slice(0, 160);
+	const shipCi = firstShipFromCi(text);
+	if (shipCi) return shipCi.replace(/\s+/g, ' ').slice(0, 160);
 
 	const expected = /regular expression \/version: "([^"]+)"\//.exec(text);
 	const actual = /\nversion: "([^"]+)"/.exec(text);

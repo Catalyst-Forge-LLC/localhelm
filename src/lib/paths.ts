@@ -3,10 +3,16 @@ import path from 'node:path';
 
 const MANIFEST_NAME = 'localhelm.fleet.json';
 
+function stripTrailingSlashes(path: string): string {
+	let end = path.length;
+	while (end > 0 && path[end - 1] === '/') end -= 1;
+	return end === 0 ? path : path.slice(0, end);
+}
+
 export function normalizePath(input: string): string {
-	const next = input.replace(/\\/g, '/');
+	const next = input.split('\\').join('/');
 	if (/^[A-Za-z]:\/?$/.test(next)) return `${next.slice(0, 2)}/`;
-	return next.replace(/\/+$/, '') || next;
+	return stripTrailingSlashes(next) || next;
 }
 
 export function isFsRoot(dir: string): boolean {
@@ -44,10 +50,18 @@ export function joinRoot(workspaceRoot: string, rel: string): string {
 }
 
 export function slugId(folderName: string): string {
-	const slug = folderName
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-+|-+$/g, '');
+	let slug = '';
+	let pendingDash = false;
+	for (const ch of folderName.toLowerCase()) {
+		const ok = (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9');
+		if (ok) {
+			if (pendingDash && slug) slug += '-';
+			slug += ch;
+			pendingDash = false;
+		} else {
+			pendingDash = true;
+		}
+	}
 	return slug || 'project';
 }
 

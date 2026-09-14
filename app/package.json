@@ -26,5 +26,10 @@
 		"@iconify-json/lucide": "^1.2.125",
 		"@iconify/svelte": "^5.2.2",
 		"tippy.js": "^6.3.7"
+	},
+	"pnpm": {
+		"overrides": {
+			"cookie@<0.7.0": "0.7.2"
+		}
 	}
 }

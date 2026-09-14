@@ -26,11 +26,37 @@ function cwdLine(cwd: string): string {
 	return cwd ? `in ${cwd}` : '';
 }
 
+function isSpace(ch: string | undefined): boolean {
+	return ch === ' ' || ch === '\t';
+}
+
 /** Pull a trailing ` in <folder>` off a command so the folder can sit on its own line. */
 export function splitCommandCwd(text: string): { command: string; cwd: string } {
-	const match = text.match(/^(.+?)\s+in\s+(\S+)$/);
-	if (!match?.[1] || !match[2]) return { command: text, cwd: '' };
-	return { command: match[1].trim(), cwd: match[2] };
+	let i = text.length - 1;
+	while (i >= 0 && !isSpace(text[i])) i -= 1;
+	const cwd = text.slice(i + 1);
+	if (!cwd) return { command: text, cwd: '' };
+	let j = i;
+	while (j >= 0 && isSpace(text[j])) j -= 1;
+	if (j < 1 || text[j] !== 'n' || text[j - 1] !== 'i') return { command: text, cwd: '' };
+	let k = j - 2;
+	if (k < 0 || !isSpace(text[k])) return { command: text, cwd: '' };
+	while (k >= 0 && isSpace(text[k])) k -= 1;
+	const command = text.slice(0, k + 1).trim();
+	if (!command) return { command: text, cwd: '' };
+	return { command, cwd };
+}
+
+function stripRecipeSuffix(reason: string): string {
+	const dash = reason.lastIndexOf('—');
+	if (dash < 1 || !isSpace(reason[dash - 1])) return reason;
+	let i = dash + 1;
+	while (i < reason.length && isSpace(reason[i])) i += 1;
+	const rest = reason.slice(i).toLowerCase();
+	if (!rest.startsWith('localslip recipe') && !rest.startsWith('localberth recipe')) return reason;
+	let j = dash - 1;
+	while (j >= 0 && isSpace(reason[j])) j -= 1;
+	return reason.slice(0, j + 1);
 }
 
 function planBlock(parts: Array<string | undefined>): string {
@@ -86,7 +112,7 @@ export function formatPluginPlanLines(data: unknown): string[] {
 		if (rowAction === 'skip') {
 			const why =
 				typeof row.reason === 'string'
-					? row.reason.replace(/\s+—\s+(localslip|localberth) recipe.*$/, '')
+					? stripRecipeSuffix(row.reason)
 					: 'nothing to do';
 			return named ? `${id}  —  ${why}` : why;
 		}

@@ -85,10 +85,19 @@ export function confirmApplyIds(keys: readonly string[], excluded: readonly stri
 	return out;
 }
 
+function replaceLastInteger(text: string, next: string): string {
+	let end = text.length - 1;
+	while (end >= 0 && (text[end]! < '0' || text[end]! > '9')) end -= 1;
+	if (end < 0) return text;
+	let start = end;
+	while (start > 0 && text[start - 1]! >= '0' && text[start - 1]! <= '9') start -= 1;
+	return `${text.slice(0, start)}${next}${text.slice(end + 1)}`;
+}
+
 /** Keep the original wording when nothing is left out; otherwise retarget the count. */
 export function confirmCountText(text: string, included: number, total: number): string {
 	if (total < 2 || included === total) return text;
-	const swapped = text.replace(/(\d+)(?!.*\d)/, String(included));
+	const swapped = replaceLastInteger(text, String(included));
 	if (swapped !== text) return swapped;
 	return `${text} (${included} of ${total})`;
 }

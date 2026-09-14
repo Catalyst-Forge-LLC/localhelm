@@ -74,8 +74,21 @@ export function secretCommitSkip(rel: string): string | undefined {
 	return SECRET_SKIP.find((rule) => rule.test(posix))?.reason;
 }
 
+function stripTrailingNuls(text: string): string {
+	let end = text.length;
+	while (end > 0 && text.charCodeAt(end - 1) === 0) end -= 1;
+	return text.slice(0, end);
+}
+
+function splitRenameArrow(rest: string): { from: string; to: string } {
+	const sep = ' -> ';
+	const at = rest.lastIndexOf(sep);
+	if (at < 0) return { from: rest, to: rest };
+	return { from: rest.slice(0, at), to: rest.slice(at + sep.length) };
+}
+
 export function parseStatusPorcelain(stdout: string): DirtFile[] {
-	const raw = stdout.replace(/\0+$/, '');
+	const raw = stripTrailingNuls(stdout);
 	if (!raw) return [];
 	const parts = raw.includes('\0') ? raw.split('\0') : raw.split(/\r?\n/).filter(Boolean);
 	const files: DirtFile[] = [];
@@ -91,9 +104,9 @@ export function parseStatusPorcelain(stdout: string): DirtFile[] {
 			if (raw.includes('\0') && parts[i + 1]) {
 				to = parts[++i] ?? '';
 			} else {
-				const arrow = /^(.*) -> (.*)$/.exec(rest);
-				from = arrow?.[1] ?? rest;
-				to = arrow?.[2] ?? rest;
+				const arrow = splitRenameArrow(rest);
+				from = arrow.from;
+				to = arrow.to;
 			}
 			if (!to) continue;
 			files.push({ code, path: toPosix(to), from: toPosix(from) });
