@@ -19,6 +19,8 @@ export type ScanCandidate = {
 	version?: string;
 	private?: boolean;
 	filepressSite?: boolean;
+	/** Absolute path. Dashboard scan adds this; CLI JSON may omit it. */
+	absPath?: string;
 };
 
 export type PinKind = 'registry' | 'link' | 'file' | 'workspace' | 'git';
@@ -62,6 +64,8 @@ export type ProjectStatus = {
 	id: string;
 	path: string;
 	absPath: string;
+	/** Dashboard-only: roster shell before status lands. */
+	pending?: boolean;
 	missing: boolean;
 	localVersion: string | null;
 	private: boolean;

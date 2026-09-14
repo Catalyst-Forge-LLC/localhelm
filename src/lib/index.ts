@@ -236,3 +236,10 @@ export type {
 	ProjectStatus,
 	ScanCandidate,
 } from './types.js';
+export type {
+	CascadeTarget,
+	LogEntry,
+	NeedFilter,
+	PortPane,
+	ScanListRow,
+} from './dashboardTypes.js';

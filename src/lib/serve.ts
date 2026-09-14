@@ -39,6 +39,13 @@ function spawnWinShell(bin: string, args: string[], opts: { stdio?: 'inherit'; e
 	return spawn(line, { ...opts, windowsHide: true, shell: true });
 }
 
+function spawnViteDev(appDir: string, host: string, port: number, env: NodeJS.ProcessEnv) {
+	const viteArgs = ['--dir', appDir, 'exec', 'vite', 'dev', '--host', host, '--port', String(port), '--strictPort'];
+	return process.platform === 'win32'
+		? spawnWinShell('pnpm.cmd', viteArgs, { stdio: 'inherit', env })
+		: spawn('pnpm', viteArgs, { stdio: 'inherit', windowsHide: true, env });
+}
+
 function tryLeasePort(bin: string): number | null {
 	const result =
 		process.platform === 'win32'
@@ -98,17 +105,14 @@ export async function serveDashboard(
 	}
 	const dash = resolveDashboard(packageRoot());
 	const env = serveEnv(host, port, source);
-	const viteArgs = ['--dir', dash.appDir, 'exec', 'vite', 'dev', '--host', host, '--port', String(port), '--strictPort'];
 	const child =
-		dash.mode === 'dev'
-			? process.platform === 'win32'
-				? spawnWinShell('pnpm.cmd', viteArgs, { stdio: 'inherit', env })
-				: spawn('pnpm', viteArgs, { stdio: 'inherit', windowsHide: true, env })
-			: spawn(process.execPath, [dash.entry], {
+		dash.mode === 'built'
+			? spawn(process.execPath, [dash.entry], {
 					stdio: 'inherit',
 					windowsHide: true,
 					env,
-				});
+				})
+			: spawnViteDev(dash.appDir, host, port, env);
 	const how = source === 'localslip' ? ' (LocalSlip lease)' : source === 'flag' ? ' (--port)' : '';
 	const where =
 		host === '0.0.0.0' || host === '::'

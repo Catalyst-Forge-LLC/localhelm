@@ -12,7 +12,7 @@ function currentNpmUser(): string | null {
 	return user ?? lastNpmUser?.user ?? null;
 }
 
-function listen(): { port: string | null; portSource: string | null } {
+function listen(): { host: string | null; port: string | null; portSource: string | null } {
 	return {
 		host: process.env.LOCALHELM_HOST ?? null,
 		port: process.env.LOCALHELM_PORT ?? null,

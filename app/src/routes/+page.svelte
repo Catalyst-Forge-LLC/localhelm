@@ -80,138 +80,24 @@
 		selectionToIds,
 		serializeListParam,
 	} from '$lib/urlListParam';
-	type BumpKind = 'patch' | 'minor' | 'major';
-	type Pin = {
-		name: string;
-		spec: string;
-		kind: string;
-		fromFile: 'root' | 'site';
-		targetId?: string;
-		onLatest?: boolean;
-		note?: string;
-	};
-	type PublishStep =
-		| { kind: 'github'; name: string; version: string; url: string; workflow?: string }
-		| { kind: 'bump'; from: string; to: string; bumpKind: BumpKind }
-		| { kind: 'commit'; message: string }
-		| { kind: 'push'; branch: string; origin: string }
-		| { kind: 'publish'; name: string; version: string };
-	type PublishRow = {
-		id: string;
-		action: string;
-		reason?: string;
-		version: string | null;
-		npm?: string;
-		steps: PublishStep[];
-	};
-	type CascadeTarget = { id: string; npm: string; latest: string; behind: number; linked: number; writable: number };
-	type PluginBoard = {
-		plugin: string;
-		title: string;
-		note?: string;
-		tab?: 'sites' | 'ports';
-		rowLabel?: string;
-		columns: { id: string; label: string }[];
-		rows: {
-			id: string;
-			label?: string;
-			href?: string;
-			links?: Record<string, string>;
-			linkGroups?: Record<string, { label: string; href?: string }[]>;
-			cells: Record<string, string>;
-			actions: { id: string; label: string; write: boolean; icon?: string }[];
-		}[];
-	};
-	type RosterRow = { id: string; path: string; npm?: string; group?: string };
-	type Project = {
-		id: string;
-		path: string;
-		pending?: boolean;
-		localVersion: string | null;
-		private: boolean;
-		missing: boolean;
-		unpublishedAhead: boolean;
-		commitsSinceNpm?: number | null;
-		cascadeBehind: number;
-		error?: string;
-		npm: { name?: string; status: string; latest?: string; error?: string };
-		git: {
-			repo: boolean;
-			dirty: boolean;
-			branch?: string;
-			staged: number;
-			unstaged: number;
-			untracked: number;
-			ahead: number | null;
-			behind: number | null;
-			origin?: string;
-			busy?: string;
-			detached?: boolean;
-			fetchError?: string;
-			error?: string;
-		};
-		pins: Pin[];
-		ship?: { dir: 'root' | 'site' };
-		bin?: string[];
-		global?: { version: string | null };
-	};
-	type ScriptShipRow = {
-		id: string;
-		action: string;
-		reason?: string;
-		dir?: 'root' | 'site';
-		cwd?: string;
-	};
-	type GlobalInstallRow = {
-		id: string;
-		action: string;
-		reason?: string;
-		npm?: string;
-		version?: string | null;
-		have?: string | null;
-	};
-	type Inventory = {
-		manifestPath: string;
-		digest: {
-			projects: number;
-			dirty: number;
-			unpublishedAhead: number;
-			cascadeBehind: number;
-			missing: number;
-			npmErrors: number;
-		};
-		projects: Project[];
-	};
-	type Candidate = {
-		path: string;
-		absPath: string;
-		id: string;
-		npmName?: string;
-		version?: string;
-		git: boolean;
-		private?: boolean;
-	};
-	type GitRow = {
-		id: string;
-		action: string;
-		reason?: string;
-		origin?: string;
-		branch?: string;
-		ahead?: number | null;
-	};
-	type BumpPlan = {
-		id: string;
-		from: string | null;
-		to: string | null;
-		action: string;
-		reason?: string;
-		commit?: 'commit' | 'skip';
-		commitMessage?: string;
-		commitReason?: string;
-	};
-	type LogEntry = { at: string; time: string; title: string; body: string };
-	type PortPane = 'leases' | 'stacks' | 'observed';
-	type NeedFilter = 'all' | 'publish' | 'push';
+	import type {
+		BumpKind,
+		BumpPlan,
+		CascadeTarget,
+		GitRow,
+		GlobalInstallRow,
+		Inventory,
+		LogEntry,
+		NeedFilter,
+		Pin,
+		PluginBoard,
+		PortPane,
+		Project,
+		PublishRow,
+		RosterRow,
+		ScanListRow,
+		ScriptShipRow,
+	} from '$lib/dashboardTypes';
 
 	let inventory = $state<Inventory | null>(null);
 	let tab = $state('today');
@@ -227,7 +113,7 @@
 	let fetchedAt = $state<string | null>(null);
 
 	let scanRoot = $state('..');
-	let candidates = $state<Candidate[]>([]);
+	let candidates = $state<ScanListRow[]>([]);
 	let addOpen = $state(false);
 	let selectedScan = $state<Record<string, boolean>>({});
 	let selectedIds = $state<Record<string, boolean>>({});
@@ -845,13 +731,14 @@
 		return {
 			id: row.id,
 			path: row.path,
+			absPath: row.path,
 			pending: true,
 			localVersion: null,
 			private: false,
 			missing: false,
 			unpublishedAhead: false,
 			cascadeBehind: 0,
-			npm: { name: row.npm, status: 'pending' },
+			npm: { name: row.npm, status: 'none' },
 			git: {
 				repo: false,
 				dirty: false,
@@ -1064,7 +951,7 @@
 			const data = (await call('/api/scan', {
 				method: 'POST',
 				body: JSON.stringify({ roots: [scanRoot] }),
-			})) as { candidates: Candidate[] };
+			})) as { candidates: ScanListRow[] };
 			candidates = data.candidates;
 			selectedScan = {};
 			note(`scan ${scanRoot} — ${data.candidates.length} candidate(s), nothing written`, data);
@@ -2354,7 +2241,7 @@
 						rows.push(...(data.rows ?? []));
 					} catch (err) {
 						const reason = err instanceof Error ? err.message : String(err);
-						rows.push({ id, action: 'publish', version: null, steps: [], reason });
+						rows.push({ id, path: '', action: 'publish', version: null, steps: [], reason });
 						error = reason;
 						if (confirmItemKeys.includes(id)) {
 							confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, id, 'fail');
@@ -2643,7 +2530,7 @@
 		return parts.join(' · ');
 	}
 
-	function candidateFolderLabel(row: Candidate): string {
+	function candidateFolderLabel(row: ScanListRow): string {
 		const rel = row.path.replace(/\\/g, '/');
 		if (!rel || rel === '.') return row.absPath;
 		return rel;
@@ -3269,7 +3156,7 @@
 										Land{filepressLandIds.length > 1 ? ` ${filepressLandIds.length}` : ''}
 									</button>
 								{/if}
-								{#if filepressSyncIds.length}
+								{#if filepressBoard && filepressSyncIds.length}
 									<button
 										class="btn btn-write btn-sm"
 										disabled={Boolean(busy)}
