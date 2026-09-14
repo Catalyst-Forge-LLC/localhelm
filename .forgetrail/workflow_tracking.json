@@ -1437,9 +1437,30 @@
         "Load ignore via createRequire"
       ],
       "status": "active"
+    },
+    {
+      "id": "d103",
+      "timestamp": "2026-09-14T18:15:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "decision": "A multi-id publish continues after a per-id failure and writes each result to sessionStorage. Vite checkout watch ignores dashboard/, dist/, and .svelte-kit output/generated so publishing localhelm does not full-reload the serving board. A reload restores the result modal including leftover GitHub Publish links.",
+      "rationale": "Operator 2026-09-14: after publishing many (including GitHub-OIDC), the page refreshed mid-batch and the GitHub-link modal never appeared. Serve log showed Vite page reload of .svelte-kit/generated during localhelm prepublishOnly.",
+      "alternatives_considered": [
+        "Refuse to publish localhelm while serve is from this checkout",
+        "Keep fail-fast and only persist"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-14T18:15:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "issue": "Publishing localhelm from the same checkout that is serving runs app build. Vite saw .svelte-kit/generated change and full-reloaded. The in-memory confirm (and remaining GitHub links) vanished. Activity had only the plan, no apply note.",
+      "resolution": "Ignore generated/dashboard/dist in Vite watch. Persist each publish id. Restore the result modal on load. Continue the batch after a per-id failure.",
+      "category": "ux"
+    },
     {
       "timestamp": "2026-09-14T17:40:00Z",
       "phase": "2-scaffolding",

@@ -35,6 +35,16 @@ export default defineConfig(({ command }) => ({
 		// Write APIs stay loopback-only in hooks.server.ts.
 		allowedHosts: true,
 		fs: { allow: [repoRoot] },
+		// Publishing this checkout runs `pnpm --dir app build` (prepublishOnly) and
+		// rewrites dashboard/ + .svelte-kit. A full reload would drop the publish modal.
+		watch: {
+			ignored: [
+				path.join(repoRoot, 'dashboard/**'),
+				path.join(repoRoot, 'dist/**'),
+				'**/.svelte-kit/output/**',
+				'**/.svelte-kit/generated/**',
+			],
+		},
 	},
 	resolve: {
 		alias: {

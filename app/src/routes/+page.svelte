@@ -49,6 +49,13 @@
 	import { bulkProgressLabel } from '$lib/bulkProgress';
 	import { plainFetchError } from '$lib/fetchError';
 	import { JobCancelledError, isJobCancelled } from '$lib/jobCancel';
+	import {
+		clearPublishBatch,
+		loadPublishBatch,
+		remainingAfter,
+		savePublishBatch,
+		type PublishBatchRow,
+	} from '$lib/publishBatch';
 	import { applyConfirmStep, commitDraftProgressHint, emptyConfirmPhases, markConfirmKey, publishNeedsGithub, publishNeedsNpm, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
 	import { landConfirmItems } from '$lib/landDisplay';
 	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
@@ -85,6 +92,7 @@
 	};
 	type ReadyRow = { id: string; localVersion: string | null; npmLatest?: string; reason?: string };
 	type PublishStep =
+		| { kind: 'github'; name: string; version: string; url: string; workflow?: string }
 		| { kind: 'bump'; from: string; to: string; bumpKind: BumpKind }
 		| { kind: 'commit'; message: string }
 		| { kind: 'push'; branch: string; origin: string }
@@ -257,9 +265,11 @@
 	let confirmRun = $state<((includedIds: string[]) => void) | null>(null);
 	let confirmAltLabel = $state('');
 	let confirmAlt = $state<((includedIds: string[]) => void) | null>(null);
+	let confirmOnCancel = $state<(() => void) | null>(null);
 	let jobCancel = $state(false);
 	let jobCanStop = $state(false);
 	let jobStopped = $state(false);
+	let lastPublishPlan: PublishRow[] = [];
 	let statusReady = $state(false);
 	let rosterReady = $state(false);
 	let pluginsReady = $state(false);
@@ -821,7 +831,10 @@
 			try {
 				await fn(name);
 				if (confirmItemKeys.includes(name)) {
-					confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'done');
+					const at = confirmItemKeys.indexOf(name);
+					if (confirmPhases[at] !== 'fail') {
+						confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'done');
+					}
 				}
 			} catch (err) {
 				if (confirmItemKeys.includes(name)) {
@@ -1072,6 +1085,7 @@
 		itemPhases?: ConfirmPhase[];
 		run?: (includedIds: string[]) => void;
 		alt?: (includedIds: string[]) => void;
+		oncancel?: () => void;
 	}): void {
 		confirmTitle = spec.title;
 		confirmHint = spec.hint;
@@ -1098,6 +1112,7 @@
 		confirmRun = spec.canApply && spec.run ? spec.run : null;
 		confirmAltLabel = spec.altLabel ?? '';
 		confirmAlt = spec.canApply && spec.alt ? spec.alt : null;
+		confirmOnCancel = spec.oncancel ?? null;
 		confirmOpen = true;
 	}
 
@@ -2116,6 +2131,7 @@
 					npmUser = null;
 				}
 				const eligible = data.rows.filter((r) => r.action === 'publish');
+				lastPublishPlan = eligible;
 				const cuttingNew = eligible.some((row) => row.steps.some((step) => step.kind === 'bump'));
 				const githubOnly = eligible.length > 0 && eligible.every((row) => publishNeedsGithub(row.steps) && !publishNeedsNpm(row.steps));
 				const needsNpm = eligible.some((row) => publishNeedsNpm(row.steps));
@@ -2163,58 +2179,64 @@
 		);
 	}
 
-	function slimPublishRows(rows: PublishRow[]): unknown[] {
+	function slimPublishRows(rows: PublishBatchRow[]): unknown[] {
 		return rows.map((row) => ({
 			id: row.id,
 			action: row.action,
 			version: row.version,
 			reason: row.reason,
-			stderr: isPublishedReason(row.reason) ? undefined : row.stderr?.slice(0, 2500),
 		}));
 	}
 
-	async function applyPublish(ids: string[]): Promise<void> {
-		const rows: PublishRow[] = [];
-		await run(
-			bulkProgressLabel('publishing', 1, ids.length, ids[0]),
-			async () => {
-				const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
-				await eachNamed('publishing', ids, async (id) => {
-					const data = (await callNdjson(
-						'/api/publish',
-						{
-							method: 'POST',
-							body: JSON.stringify({
-								apply: true,
-								ids: [id],
-								kind: bumpKind[id] ?? 'patch',
-								otp,
-							}),
-						},
-						(event) => {
-							if (event.type !== 'step') return;
-							confirmPhases = applyConfirmStep(confirmItemKeys, confirmPhases, {
-								id: String(event.id ?? id),
-								index: Number(event.index),
-								status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
-							});
-						},
-					)) as { rows?: PublishRow[] };
-					rows.push(...(data.rows ?? []));
-				});
-				note(publishApplyTitle(rows), { rows: slimPublishRows(rows) });
-				publishOtp = '';
-				await loadStatus({ ids });
-			},
-			{ closeConfirm: false },
-		);
-		if (!rows.length) {
+	function githubPendingRows(plan: PublishRow[], remaining: string[]): PublishBatchRow[] {
+		const want = new Set(remaining);
+		return plan
+			.filter((row) => want.has(row.id) && publishNeedsGithub(row.steps))
+			.map((row) => {
+				const step = row.steps.find((item) => item.kind === 'github');
+				const url = step?.kind === 'github' ? step.url : '';
+				return {
+					id: row.id,
+					action: 'publish',
+					version: row.version,
+					npm: row.npm,
+					reason: url
+						? `open GitHub Publish ${row.npm ?? row.id}@${row.version}  ${url}`
+						: `GitHub Publish ${row.id} was not opened`,
+				};
+			});
+	}
+
+	function persistPublishBatch(
+		ids: string[],
+		rows: PublishBatchRow[],
+		opts?: { done?: boolean; error?: string },
+	): void {
+		const remaining = remainingAfter(ids, rows);
+		savePublishBatch({
+			ids,
+			rows,
+			remaining,
+			githubPending: githubPendingRows(lastPublishPlan, remaining),
+			error: opts?.error,
+			done: Boolean(opts?.done),
+		});
+	}
+
+	function offerPublishOutcome(
+		rows: PublishBatchRow[],
+		opts?: { interrupted?: boolean; leftover?: PublishBatchRow[]; error?: string },
+	): void {
+		const leftover = opts?.leftover?.filter((row) => !rows.some((item) => item.id === row.id)) ?? [];
+		const shown = [...rows, ...leftover];
+		if (!shown.length) {
 			if (jobStopped) return;
 			confirmOpen = false;
+			clearPublishBatch();
 			return;
 		}
 		const failed = rows.filter((row) => !isPublishedReason(row.reason));
-		const github = rows.filter((row) => isGithubPublishReason(row.reason));
+		const github = shown.filter((row) => isGithubPublishReason(row.reason));
 		const npmOk = rows.filter((row) => row.reason?.startsWith('published '));
 		const installable = npmOk.filter((row) => {
 			const project = inventory?.projects.find((item) => item.id === row.id);
@@ -2225,12 +2247,15 @@
 				.filter((row) => row.version)
 				.map((row) => [row.id, row.version as string]),
 		);
-		if (
+		const skipToInstall =
+			!opts?.interrupted &&
 			!jobStopped &&
 			!failed.length &&
+			!leftover.length &&
 			installable.length &&
-			canSkipPublishResultsForGlobalInstall(rows)
-		) {
+			canSkipPublishResultsForGlobalInstall(rows);
+		if (skipToInstall) {
+			clearPublishBatch();
 			offerConfirm({
 				title:
 					installable.length === 1
@@ -2251,13 +2276,22 @@
 			});
 			return;
 		}
-		const ordered = orderPublishResults(rows);
-		const offerInstall = Boolean(!jobStopped && !failed.length && installable.length && github.length);
+		const ordered = orderPublishResults(shown);
+		const offerInstall = Boolean(
+			!opts?.interrupted &&
+				!jobStopped &&
+				!failed.length &&
+				installable.length &&
+				github.length,
+		);
 		offerConfirm({
-			title: jobStopped ? 'Stopped' : publishResultTitle(rows),
+			title: opts?.interrupted ? 'Publish interrupted' : jobStopped ? 'Stopped' : publishResultTitle(shown),
 			hint: [
-				jobStopped ? error : '',
-				publishResultHint(rows),
+				opts?.interrupted
+					? 'The board reloaded or a later package failed. Finished rows are listed. GitHub links that never ran are included so you can still open them.'
+					: '',
+				jobStopped || opts?.error ? (opts?.error ?? error) : '',
+				publishResultHint(shown),
 				offerInstall
 					? 'Install globally is for the laptop npm publishes after you open each GitHub Publish link.'
 					: '',
@@ -2273,12 +2307,69 @@
 					: `Install ${installable.length} globally`
 				: 'OK',
 			canApply: offerInstall,
+			oncancel: () => clearPublishBatch(),
 			run: offerInstall
-				? () => void applyGlobal(
-						installable.map((row) => row.id),
-						versions,
-					)
+				? () => {
+						clearPublishBatch();
+						void applyGlobal(
+							installable.map((row) => row.id),
+							versions,
+						);
+					}
 				: undefined,
+		});
+	}
+
+	async function applyPublish(ids: string[]): Promise<void> {
+		const rows: PublishRow[] = [];
+		persistPublishBatch(ids, [], { done: false });
+		await run(
+			bulkProgressLabel('publishing', 1, ids.length, ids[0]),
+			async () => {
+				const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
+				await eachNamed('publishing', ids, async (id) => {
+					try {
+						const data = (await callNdjson(
+							'/api/publish',
+							{
+								method: 'POST',
+								body: JSON.stringify({
+									apply: true,
+									ids: [id],
+									kind: bumpKind[id] ?? 'patch',
+									otp,
+								}),
+							},
+							(event) => {
+								if (event.type !== 'step') return;
+								confirmPhases = applyConfirmStep(confirmItemKeys, confirmPhases, {
+									id: String(event.id ?? id),
+									index: Number(event.index),
+									status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
+								});
+							},
+						)) as { rows?: PublishRow[] };
+						rows.push(...(data.rows ?? []));
+					} catch (err) {
+						const reason = err instanceof Error ? err.message : String(err);
+						rows.push({ id, action: 'publish', version: null, steps: [], reason });
+						error = reason;
+						if (confirmItemKeys.includes(id)) {
+							confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, id, 'fail');
+						}
+					}
+					persistPublishBatch(ids, rows, { error: error || undefined });
+				});
+				note(publishApplyTitle(rows), { rows: slimPublishRows(rows) });
+				publishOtp = '';
+				await loadStatus({ ids: rows.map((row) => row.id) });
+			},
+			{ closeConfirm: false },
+		);
+		persistPublishBatch(ids, rows, { done: !jobStopped, error: error || undefined });
+		offerPublishOutcome(rows, {
+			leftover: githubPendingRows(lastPublishPlan, remainingAfter(ids, rows)),
+			error: error || undefined,
 		});
 	}
 
@@ -2772,6 +2863,14 @@
 			/* ignore */
 		}
 		urlSyncReady = true;
+		const interrupted = loadPublishBatch();
+		if (interrupted && (interrupted.rows.length || interrupted.githubPending.length)) {
+			offerPublishOutcome(interrupted.rows, {
+				interrupted: !interrupted.done,
+				leftover: interrupted.githubPending,
+				error: interrupted.error,
+			});
+		}
 		void loadActivity();
 		void loadRoster();
 		void loadPluginBoards();
@@ -4218,6 +4317,11 @@
 		confirmRun = null;
 		confirmAlt = null;
 		fn?.(included);
+	}}
+	oncancel={() => {
+		const fn = confirmOnCancel;
+		confirmOnCancel = null;
+		fn?.();
 	}}
 >
 	{#if confirmShowOtp}
