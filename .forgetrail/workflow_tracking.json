@@ -1480,6 +1480,14 @@
   ],
   "gotchas": [
     {
+      "timestamp": "2026-09-15T00:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 38,
+      "issue": "Land localslip sync engine failed ERR_PNPM_UNEXPECTED_VIRTUAL_STORE. site/node_modules/.modules.yaml still pointed at Z:\\workspace\\localberth after the rename.",
+      "resolution": "Reinstalled localslip/site. FilePress applyUpdate reinstalls when virtualStoreDir is stale, then retries pnpm update. Not a Helm path allowlist.",
+      "category": "deps"
+    },
+    {
       "timestamp": "2026-09-14T22:15:00Z",
       "phase": "2-scaffolding",
       "session": 37,

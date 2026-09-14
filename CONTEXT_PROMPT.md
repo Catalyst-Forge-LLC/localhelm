@@ -286,3 +286,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - A failed Land/ship does not record the tree as shipped. The site stays pending on Today Land (engine sync can already be current). The dashboard continues the rest of the batch after one site fails.
 - Vite checkout can throw `Could not determine clientAddress` after `optimized dependencies changed. reloading`. Hooks swallow that and still treat loopback Host as the operator board. LAN Host stays Deck-only. Never X-Forwarded-For.
 - Dashboard job types live in `src/lib/dashboardTypes.ts` (`$lib/dashboardTypes`). Do not redeclare Project / PublishRow / PluginBoard on the page.
+
+### Session 38 — 2026-09-14
+
+- Land **localslip** sync failed `ERR_PNPM_UNEXPECTED_VIRTUAL_STORE` because `site/node_modules` still recorded `Z:\\workspace\\localberth` after the rename. Reinstalled from `localslip/site`. FilePress `applyUpdate` now reinstalls when the virtual store path is stale, then retries `pnpm update getfilepress`. Do not bake shop folder names into Helm.

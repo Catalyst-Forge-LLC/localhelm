@@ -58,6 +58,14 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 
 **Project pointer:** LocalHelm `app/vite.config.ts`.
 
+### 7. pnpm virtual store after a folder rename
+
+**What went wrong:** A FilePress site (`localslip/site`) still had `node_modules` from when the repo was named `localberth`. `pnpm update getfilepress` failed with `ERR_PNPM_UNEXPECTED_VIRTUAL_STORE` because `.modules.yaml` recorded `Z:\workspace\localberth\site\node_modules\.pnpm`.
+
+**Suggested Lite change:** In pnpm / monorepo notes (near §4 or anti-patterns): renaming or moving a checkout leaves an absolute `virtualStoreDir` in `node_modules/.modules.yaml`. Delete `node_modules` and `pnpm install` from the lockfile directory. Tools that run `pnpm update` in a sibling should detect this error (or the stale path) and reinstall once instead of failing the whole batch.
+
+**Project pointer:** FilePress `scripts/siblings/lib.ts` `staleVirtualStoreDir`; LocalHelm Land sync of `localslip`.
+
 | Topic | Lite § to patch |
 | --- | --- |
 | Node builtins in Svelte client graph | §4.2 / anti-patterns |
@@ -66,3 +74,4 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 | Long Vite plugin jobs / Failed to fetch | §4.2 / anti-patterns |
 | Serial dashboard I/O + chrome lock | §4.2 / anti-patterns |
 | Vite 8 noExternal + CJS in vite dev | §4.2 / anti-patterns |
+| pnpm virtual store after folder rename | §4 / anti-patterns |
