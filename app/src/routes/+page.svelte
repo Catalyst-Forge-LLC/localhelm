@@ -58,8 +58,19 @@
 		savePublishBatch,
 		type PublishBatchRow,
 	} from '$lib/publishBatch';
+	import { clearLandBatch, loadLandBatch, persistLandSnap } from '$lib/landBatch';
 	import { applyConfirmStep, commitDraftProgressHint, emptyConfirmPhases, markConfirmKey, publishNeedsGithub, publishNeedsNpm, publishStepLabel, type ConfirmPhase } from '$lib/confirmProgress';
-	import { landConfirmItems } from '$lib/landDisplay';
+	import {
+		landApplyTitle,
+		landConfirmItems,
+		landResultHint,
+		landResultLine,
+		landResultPhase,
+		landResultTitle,
+		landRowFromApply,
+		orderLandResults,
+		type LandBatchRow,
+	} from '$lib/landDisplay';
 	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
@@ -2343,6 +2354,62 @@
 		authHint?: string;
 	};
 
+	function persistLandBatch(
+		ids: string[],
+		rows: LandBatchRow[],
+		opts?: { done?: boolean; error?: string },
+	): void {
+		persistLandSnap(ids, rows, opts);
+	}
+
+	function offerLandOutcome(
+		rows: LandBatchRow[],
+		opts?: { interrupted?: boolean; leftover?: string[]; error?: string },
+	): void {
+		const leftover = (opts?.leftover ?? []).filter((id) => !rows.some((row) => row.id === id));
+		const ordered = orderLandResults(rows);
+		const items = [
+			...ordered.map(landResultLine),
+			...leftover.map((id) => `${id}  not started`),
+		];
+		if (!items.length) {
+			if (jobStopped) return;
+			confirmOpen = false;
+			clearLandBatch();
+			return;
+		}
+		offerConfirm({
+			title: landResultTitle(ordered, { interrupted: opts?.interrupted, stopped: jobStopped }),
+			hint: [
+				opts?.interrupted
+					? 'The board reloaded. Finished sites are listed. Names that never ran are at the bottom.'
+					: '',
+				jobStopped || opts?.error ? (opts?.error ?? error) : '',
+				landResultHint(ordered),
+				leftover.length ? 'Land remaining continues those sites only.' : '',
+			]
+				.filter(Boolean)
+				.join(' '),
+			items,
+			itemKeys: [...ordered.map((row) => row.id), ...leftover],
+			itemPhases: [...ordered.map(landResultPhase), ...leftover.map(() => 'pending' as const)],
+			confirmLabel: leftover.length
+				? leftover.length === 1
+					? `Land ${leftover[0]}`
+					: `Land ${leftover.length} remaining`
+				: 'OK',
+			canApply: leftover.length > 0,
+			applyIds: leftover,
+			oncancel: () => clearLandBatch(),
+			run: leftover.length
+				? (included) => {
+						clearLandBatch();
+						void applyLand(included);
+					}
+				: undefined,
+		});
+	}
+
 	async function startLand(siteIds: string[]): Promise<void> {
 		const ids = [...new Set(siteIds.map((id) => id.trim()).filter(Boolean))];
 		if (!ids.length) return;
@@ -2398,58 +2465,72 @@
 
 	async function applyLand(siteIds: string[]): Promise<void> {
 		const ids = [...new Set(siteIds.map((id) => id.trim()).filter(Boolean))];
-		await run(bulkProgressLabel('landing', 1, ids.length, ids[0]), async () => {
-			const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
-			try {
-				await eachNamed('landing', ids, async (siteId) => {
-					try {
-						const data = (await callNdjson(
-							'/api/land',
-							{
-								method: 'POST',
-								body: JSON.stringify({ apply: true, siteId, otp }),
-							},
-							(event) => {
-								if (event.type !== 'step') return;
-								confirmPhases = applyConfirmStep(confirmItemKeys, confirmPhases, {
-									id: String(event.id ?? siteId),
-									index: Number(event.index),
-									status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
-								});
-								if (event.status === 'fail' && event.reason) {
-									error = String(event.reason);
-								}
-							},
-						)) as {
-							result: {
-								ok: boolean;
-								stoppedAt?: string;
-								steps: { ok: boolean; label: string; reason: string }[];
+		const rows: LandBatchRow[] = [];
+		persistLandBatch(ids, [], { done: false });
+		await run(
+			bulkProgressLabel('landing', 1, ids.length, ids[0]),
+			async () => {
+				const otp = publishOtp.trim() ? publishOtp.trim() : undefined;
+				try {
+					await eachNamed('landing', ids, async (siteId) => {
+						try {
+							const data = (await callNdjson(
+								'/api/land',
+								{
+									method: 'POST',
+									body: JSON.stringify({ apply: true, siteId, otp }),
+								},
+								(event) => {
+									if (event.type !== 'step') return;
+									confirmPhases = applyConfirmStep(confirmItemKeys, confirmPhases, {
+										id: String(event.id ?? siteId),
+										index: Number(event.index),
+										status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
+									});
+									if (event.status === 'fail' && event.reason) {
+										error = String(event.reason);
+									}
+								},
+							)) as {
+								result: {
+									ok: boolean;
+									stoppedAt?: string;
+									steps: { ok: boolean; label: string; reason: string }[];
+								};
 							};
-						};
-						const ok = data.result.steps.filter((s) => s.ok).length;
-						const failed = data.result.steps.filter((s) => !s.ok);
-						note(
-							data.result.ok
-								? `land --apply ${siteId} — ${ok} step(s) ok`
-								: `land --apply ${siteId} — stopped: ${data.result.stoppedAt ?? failed[0]?.label ?? 'failed'}`,
-							data,
-						);
-						if (!data.result.ok) {
-							error = failed.map((s) => `${s.label}: ${s.reason}`).join(' · ') || data.result.stoppedAt || 'land failed';
+							const row = landRowFromApply(siteId, data.result);
+							rows.push(row);
+							const ok = data.result.steps.filter((s) => s.ok).length;
+							const failed = data.result.steps.filter((s) => !s.ok);
+							note(
+								data.result.ok
+									? `land --apply ${siteId} — ${ok} step(s) ok`
+									: `land --apply ${siteId} — stopped: ${data.result.stoppedAt ?? failed[0]?.label ?? 'failed'}`,
+								data,
+							);
+							if (!row.ok) error = row.reason ?? 'land failed';
+						} catch (err) {
+							if (isJobCancelled(err)) throw err;
+							const reason = err instanceof Error ? err.message : String(err);
+							rows.push({ id: siteId, ok: false, reason });
+							error = reason;
+							note(`land --apply ${siteId} — stopped: ${reason}`, { error: reason });
 						}
-					} catch (err) {
-						if (isJobCancelled(err)) throw err;
-						const reason = err instanceof Error ? err.message : String(err);
-						error = reason;
-						note(`land --apply ${siteId} — stopped: ${reason}`, { error: reason });
-					}
-				});
-			} finally {
-				publishOtp = '';
-				await loadPluginBoards();
-				await loadStatus({ ids });
-			}
+						persistLandBatch(ids, rows, { error: error || undefined });
+					});
+					note(landApplyTitle(rows), { rows });
+				} finally {
+					publishOtp = '';
+					await loadPluginBoards();
+					await loadStatus({ ids });
+				}
+			},
+			{ closeConfirm: false },
+		);
+		persistLandBatch(ids, rows, { done: !jobStopped, error: error || undefined });
+		offerLandOutcome(rows, {
+			leftover: remainingAfter(ids, rows),
+			error: error || undefined,
 		});
 	}
 
@@ -2788,6 +2869,15 @@
 				leftover: interrupted.githubPending,
 				error: interrupted.error,
 			});
+		} else {
+			const landSnap = loadLandBatch();
+			if (landSnap && (landSnap.rows.length || landSnap.remaining.length)) {
+				offerLandOutcome(landSnap.rows, {
+					interrupted: !landSnap.done,
+					leftover: landSnap.remaining,
+					error: landSnap.error,
+				});
+			}
 		}
 		void loadActivity();
 		void loadRoster();

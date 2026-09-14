@@ -76,7 +76,18 @@ export {
 	requireLandSiteId,
 	requireLandSiteIds,
 } from './land.js';
-export { landConfirmItems } from './landDisplay.js';
+export {
+	landApplyTitle,
+	landBatchSnap,
+	landConfirmItems,
+	landResultHint,
+	landResultLine,
+	landResultPhase,
+	landResultTitle,
+	landRowFromApply,
+	orderLandResults,
+} from './landDisplay.js';
+export type { LandBatchRow } from './landDisplay.js';
 export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from './land.js';
 export {
 	landShipsPath,

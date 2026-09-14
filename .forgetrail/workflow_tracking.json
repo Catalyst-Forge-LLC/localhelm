@@ -1489,6 +1489,19 @@
         "Add a consumer-only pnpm update that bypasses cascade"
       ],
       "status": "active"
+    },
+    {
+      "id": "d107",
+      "timestamp": "2026-09-15T00:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 39,
+      "decision": "Dashboard Land apply persists each finished site to sessionStorage (localhelm.landBatch). A reload restores the result list plus leftover ids. Confirm can Land remaining. Publish restore still wins if both snaps exist. CLI land --apply is unchanged.",
+      "rationale": "Code review Step 3. Mid-batch reload already dropped publish results until d103; Land had the same hole.",
+      "alternatives_considered": [
+        "Only keep land-ships.json pending (no modal restore)",
+        "Resume the in-flight site automatically"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
