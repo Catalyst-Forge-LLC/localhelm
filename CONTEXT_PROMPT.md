@@ -281,3 +281,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - After-publish Install globally no longer replaces the result list when any package still needs a GitHub Actions click. Mixed batches keep the links; Install stays on that same confirm.
 - Killing serve mid-write can leave `.localhelm/job.lock`. Serve and the next write steal that file when the recorded pid is gone. A live holder is named (`pid N since …`).
 - A multi-id confirm (Publish, Land, Push, Ship, …) shows **Stop** while it runs. The current item finishes; the rest are not started. One-id applies still have to finish.
+- Checkout `vite dev` must not set `ssr.noExternal` (Vite 8/Rolldown also rejects `false`). Vite 8 inlines CJS `ignore` and `/api/status` 500s with `module is not defined`. Bundle-everything stays on `vite build` only.

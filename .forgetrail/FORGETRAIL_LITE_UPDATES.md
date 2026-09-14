@@ -50,6 +50,14 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 
 **Project pointer:** LocalHelm `src/lib/npm.ts` `npmLatestMany`, `src/lib/plugin.ts` `loadPluginDashboard`, `app/src/routes/+page.svelte` `readQuiet`.
 
+### 6. Vite 8 `ssr.noExternal: true` breaks CJS in `vite dev`
+
+**What went wrong:** A packaged SvelteKit adapter-node board needs `ssr.noExternal: true` so a global install does not import bare npm names. The same flag in `vite.config` also applies to checkout `vite dev`. Vite 8’s SSR module runner then inlines CommonJS (`ignore`’s `module.exports`) as ESM and API routes 500 with `ReferenceError: module is not defined`.
+
+**Suggested Lite change:** In Vite / SvelteKit serve notes (§4.2): `ssr.noExternal: true` is a **build** setting. Omit the key during `vite dev` (Vite 8 / Rolldown rejects `noExternal: false`; it only accepts `true` or an array). Leave node_modules external in checkout serve so CJS packages load through Node.
+
+**Project pointer:** LocalHelm `app/vite.config.ts`.
+
 | Topic | Lite § to patch |
 | --- | --- |
 | Node builtins in Svelte client graph | §4.2 / anti-patterns |
@@ -57,3 +65,4 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 | Private GitHub README images on npmjs | npm / README |
 | Long Vite plugin jobs / Failed to fetch | §4.2 / anti-patterns |
 | Serial dashboard I/O + chrome lock | §4.2 / anti-patterns |
+| Vite 8 noExternal + CJS in vite dev | §4.2 / anti-patterns |

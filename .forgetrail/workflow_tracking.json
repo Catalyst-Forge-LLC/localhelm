@@ -1424,9 +1424,30 @@
         "Keep Cancel disabled while busy"
       ],
       "status": "active"
+    },
+    {
+      "id": "d102",
+      "timestamp": "2026-09-14T17:40:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "decision": "ssr.noExternal is only for vite build (packaged dashboard/). Checkout vite dev leaves node_modules external so CJS packages like ignore load through Node.",
+      "rationale": "Operator 2026-09-14: GET /api/status, /api/plugins, and /api/roster 500ed with module is not defined inside ignore@7 (Vite 8 SSR inliner).",
+      "alternatives_considered": [
+        "ssr.external: ['ignore'] while keeping noExternal in dev",
+        "Load ignore via createRequire"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-14T17:40:00Z",
+      "phase": "2-scaffolding",
+      "session": 37,
+      "issue": "Vite 8 checkout serve inlined CJS ignore as ESM. /api/status, /api/plugins, and /api/roster returned 500 module is not defined.",
+      "resolution": "ssr.noExternal only when command === 'build'. Packaged board still bundles; vite dev uses Node for node_modules.",
+      "category": "tooling"
+    },
     {
       "timestamp": "2026-09-14T13:55:00Z",
       "phase": "2-scaffolding",

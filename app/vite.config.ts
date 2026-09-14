@@ -7,7 +7,7 @@ import { defineConfig } from 'vite';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
 	plugins: [
 		{
 			name: 'localhelm-long-jobs',
@@ -41,8 +41,8 @@ export default defineConfig({
 			$helm: path.join(repoRoot, 'src/lib'),
 		},
 	},
-	// Packaged `localhelm serve` ships dashboard/ without app/node_modules.
-	ssr: {
-		noExternal: true,
-	},
-});
+	// Packaged `localhelm serve` ships dashboard/ without app/node_modules (d97).
+	// Vite 8's *dev* SSR runner inlines CJS (`ignore`) as ESM and throws `module is not defined`.
+	// Rolldown rejects `noExternal: false` — omit the key during vite dev.
+	...(command === 'build' ? { ssr: { noExternal: true as const } } : {}),
+}));
