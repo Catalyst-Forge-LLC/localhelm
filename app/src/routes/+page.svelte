@@ -90,7 +90,6 @@
 		onLatest?: boolean;
 		note?: string;
 	};
-	type ReadyRow = { id: string; localVersion: string | null; npmLatest?: string; reason?: string };
 	type PublishStep =
 		| { kind: 'github'; name: string; version: string; url: string; workflow?: string }
 		| { kind: 'bump'; from: string; to: string; bumpKind: BumpKind }
@@ -328,17 +327,6 @@
 		return `${where}${lease}`;
 	});
 	const needChips = $derived(inventory ? headerNeedChips(inventory.digest) : []);
-	const readyRows = $derived(
-		(inventory?.projects ?? [])
-			.filter((row) => row.unpublishedAhead && !whyNotPublish(row))
-			.map(
-				(row): ReadyRow => ({
-					id: row.id,
-					localVersion: row.localVersion,
-					npmLatest: row.npm.latest,
-				}),
-			),
-	);
 	const cascadeTargets = $derived.by((): CascadeTarget[] => {
 		const projects = inventory?.projects ?? [];
 		return projects
