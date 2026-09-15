@@ -300,3 +300,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 40 — 2026-09-14
 
 - `writeGate.ts` is a barrel. Copy and gates live in `plainError.ts`, `publishResults.ts`, and `fleetWrites.ts`. None import `node:*`. Callers still import `writeGate`.
+
+### Session 41 — 2026-09-14
+
+- Fleet, Land, and plugin start/apply pairs live in `createDashboardWrites` (`fleetWriteActions.ts` + `siteWriteActions.ts`). Confirm copy helpers are in `writeConfirm.ts`. ConfirmModal, URL state, `loadStatus`, enroll/unenroll/archive/export, and Today markup stay on `+page.svelte`. No `node:*` in the new modules. Ports family start/stop still calls `startPluginJob`.

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { joinBatchFailures, runNamedBatch } from './batchApply.js';
+import { joinBatchFailures, remainingAfter, runNamedBatch } from './batchApply.js';
 import { JobCancelledError } from './jobCancel.js';
 
 describe('runNamedBatch', () => {
@@ -27,6 +27,11 @@ describe('runNamedBatch', () => {
 			(err: unknown) => err instanceof JobCancelledError && err.done === 1,
 		);
 		assert.deepEqual(seen, ['a']);
+	});
+
+	it('remainingAfter drops ids that already have a row', () => {
+		assert.deepEqual(remainingAfter(['a', 'b', 'c'], [{ id: 'a' }, { id: 'c' }]), ['b']);
+		assert.deepEqual(remainingAfter(['a'], [{ id: 'a' }]), []);
 	});
 
 	it('rethrows JobCancelledError from the item fn', async () => {

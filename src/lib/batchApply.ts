@@ -40,3 +40,9 @@ export async function runNamedBatch(
 export function joinBatchFailures(failed: readonly NamedBatchFailure[]): string {
 	return failed.map((row) => `${row.name}: ${row.reason}`).join(' · ');
 }
+
+/** Ids that do not yet have a result row (reload leftover / Land remaining). */
+export function remainingAfter(ids: string[], rows: ReadonlyArray<{ id: string }>): string[] {
+	const done = new Set(rows.map((row) => row.id));
+	return ids.filter((id) => !done.has(id));
+}

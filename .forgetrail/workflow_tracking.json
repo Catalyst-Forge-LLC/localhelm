@@ -1515,6 +1515,19 @@
         "Split into six smaller modules"
       ],
       "status": "active"
+    },
+    {
+      "id": "d109",
+      "timestamp": "2026-09-15T01:15:00Z",
+      "phase": "2-scaffolding",
+      "session": 41,
+      "decision": "Dashboard fleet, Land, and plugin start/apply pairs are createDashboardWrites(host). writeConfirm.ts holds confirm roster lines. ConfirmModal, URL state, loadStatus, enroll/unenroll/archive/export stay on +page.svelte. Ports family start/stop calls startPluginJob. No node:* in the new modules.",
+      "rationale": "Code review Step 5. One file still owned Today markup and CSS; peeling start/apply first keeps confirm ticks, Stop, and session restore on the page host.",
+      "alternatives_considered": [
+        "Rewrite the dashboard into tab components in one pass",
+        "Move ConfirmModal and loadStatus in the same slice"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

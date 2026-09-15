@@ -45,7 +45,4 @@ export function clearPublishBatch(): void {
 	}
 }
 
-export function remainingAfter(ids: string[], rows: ReadonlyArray<{ id: string }>): string[] {
-	const done = new Set(rows.map((row) => row.id));
-	return ids.filter((id) => !done.has(id));
-}
+export { remainingAfter } from '../../../src/lib/batchApply.js';
