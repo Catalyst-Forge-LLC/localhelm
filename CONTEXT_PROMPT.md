@@ -303,4 +303,8 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 41 — 2026-09-14
 
-- Fleet, Land, and plugin start/apply pairs live in `createDashboardWrites` (`fleetWriteActions.ts` + `siteWriteActions.ts`). Confirm copy helpers are in `writeConfirm.ts`. ConfirmModal, URL state, `loadStatus`, enroll/unenroll/archive/export, and Today markup stay on `+page.svelte`. No `node:*` in the new modules. Ports family start/stop still calls `startPluginJob`.
+- Fleet, Land, and plugin start/apply pairs live in `createDashboardWrites` (`fleetWriteActions.ts` + `siteWriteActions.ts`). Confirm copy helpers are in `writeConfirm.ts`. ConfirmModal, URL state, `loadStatus`, and enroll/unenroll/archive/export stay on `+page.svelte`. No `node:*` in the new modules. Ports family start/stop still calls `startPluginJob`.
+
+### Session 42 — 2026-09-14
+
+- Today markup is `TodayBoard.svelte`. Dashboard CSS is `app/src/lib/dashboard.css` (imported by `+page.svelte` only). ConfirmModal, URL state, and `loadStatus` stay on the page. Fleet / Sites / Ports tables stay there too.

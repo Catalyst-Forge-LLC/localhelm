@@ -1528,6 +1528,19 @@
         "Move ConfirmModal and loadStatus in the same slice"
       ],
       "status": "active"
+    },
+    {
+      "id": "d110",
+      "timestamp": "2026-09-15T01:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 42,
+      "decision": "Today markup is TodayBoard.svelte. Page CSS lives in app/src/lib/dashboard.css and is imported only from +page.svelte. ConfirmModal, URL state, and loadStatus stay on the page. Fleet/Sites/Ports tables were not moved.",
+      "rationale": "Code review Step 5 wrap-up. Peel Today and CSS last without rewriting confirm or loadStatus.",
+      "alternatives_considered": [
+        "Move Fleet/Sites/Ports tables in the same pass",
+        "Keep CSS scoped on +page.svelte"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
