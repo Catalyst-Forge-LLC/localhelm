@@ -37,7 +37,7 @@
 </script>
 
 <div class="visit helm-chart">
-	<header>
+	<header class="hud-frame">
 		<img class="mark" src="/logo.png" alt="" width="72" height="48" />
 		<span class="word">Deck</span>
 		{#if pageHost && isLoopbackBind(pageHost)}
@@ -84,14 +84,18 @@
 		flex-direction: column;
 	}
 	header {
+		--hud-fill: var(--glass-fill);
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 0.55rem 0.75rem;
 		padding: 0.65rem 1.1rem;
-		background: var(--well, #111114);
-		border-bottom: 1px solid var(--cyan-dim, #2e2e36);
-		box-shadow: 0 1px 14px var(--cyan-glow, transparent);
+		border: 0;
+		border-bottom: 1px solid var(--cyan-dim);
+		border-radius: 0;
+		backdrop-filter: var(--glass-blur);
+		-webkit-backdrop-filter: var(--glass-blur);
+		box-shadow: 0 1px 18px var(--cyan-glow);
 	}
 	.mark {
 		display: block;

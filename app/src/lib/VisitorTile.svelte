@@ -137,21 +137,42 @@
 <style>
 	.tile {
 		--tick: 0.7rem;
-		--hud-fill: var(--well, #2a2a32);
+		--hud-fill: var(--glass-fill);
 		display: flex;
 		min-height: 9.5rem;
 		flex-direction: column;
 		overflow: hidden;
-		border: 1px solid var(--steel, #3a3a42);
+		border: 1px solid var(--steel);
 		color: #ececef;
 		text-decoration: none;
 		text-align: center;
-		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+		backdrop-filter: var(--glass-blur);
+		-webkit-backdrop-filter: var(--glass-blur);
+		box-shadow:
+			inset 0 1px 0 rgb(126 244 255 / 0.2),
+			0 8px 20px rgb(0 0 0 / 0.32),
+			0 0 16px rgb(126 244 255 / 0.1);
+		transition:
+			transform var(--hud-fade) ease,
+			border-color var(--hud-fade) ease,
+			box-shadow var(--hud-fade) ease,
+			background-color var(--hud-fade) ease;
 		user-select: none;
 		-webkit-touch-callout: none;
 	}
 	a.tile:hover {
-		--hud-fill: rgb(126 244 255 / 0.06);
+		--hud-fill: rgb(18 36 58 / 0.62);
+		transform: translateY(-0.22rem);
+		border-color: var(--cyan-dim);
+		box-shadow: var(--overlay-glow), inset 0 1px 0 rgb(126 244 255 / 0.35);
+	}
+	a.tile:hover .face {
+		background: linear-gradient(180deg, rgb(126 244 255 / 0.2) 0%, rgb(201 162 39 / 0.06) 72%, transparent 100%);
+	}
+	a.tile:hover .band {
+		color: var(--gold-soft);
+		border-top-color: rgb(201 162 39 / 0.45);
+		box-shadow: 0 0 14px rgb(201 162 39 / 0.18);
 	}
 	.face {
 		display: flex;
@@ -161,21 +182,23 @@
 		justify-content: center;
 		gap: 0.5rem;
 		padding: 1rem 0.75rem 0.75rem;
+		background: linear-gradient(180deg, rgb(126 244 255 / 0.14) 0%, rgb(6 10 19 / 0.08) 68%, transparent 100%);
+		transition: background var(--hud-fade) ease;
 	}
 	.icon {
 		position: relative;
 		display: flex;
-		size: 3rem;
 		width: 3rem;
 		height: 3rem;
 		align-items: center;
 		justify-content: center;
 		overflow: hidden;
-		border-radius: var(--plate-radius, 0 0 8px 8px);
-		background: rgb(126 244 255 / 0.06);
+		border-radius: var(--plate-radius);
+		background: rgb(126 244 255 / 0.1);
+		box-shadow: 0 0 12px rgb(126 244 255 / 0.12);
 		font-size: 1.1rem;
 		font-weight: 600;
-		color: var(--dim, #b4b4bc);
+		color: var(--dim);
 	}
 	.icon img {
 		position: absolute;
@@ -198,10 +221,26 @@
 		width: 100%;
 		align-items: center;
 		justify-content: center;
-		background: var(--well, #111114);
-		border-top: 1px solid var(--cyan-dim, #2e2e36);
-		color: var(--cyan, #ececef);
+		background: rgb(3 6 12 / 0.45);
+		border-top: 1px solid var(--cyan-dim);
+		color: var(--cyan);
+		transition:
+			color var(--hud-fade) ease,
+			border-color var(--hud-fade) ease,
+			box-shadow var(--hud-fade) ease;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 		font-size: 0.875rem;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.tile,
+		.face,
+		.band {
+			transition: none;
+		}
+
+		a.tile:hover {
+			transform: none;
+		}
 	}
 </style>

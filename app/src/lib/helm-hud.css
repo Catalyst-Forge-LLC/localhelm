@@ -24,6 +24,8 @@
 		0 16px 36px rgb(0 0 0 / 0.45),
 		0 0 22px rgb(126 244 255 / 0.28),
 		0 0 48px rgb(126 244 255 / 0.14);
+	--glass-fill: rgb(12 22 40 / 0.52);
+	--glass-blur: blur(14px) saturate(1.2);
 }
 
 .helm-chart {
