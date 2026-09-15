@@ -2,7 +2,7 @@ import { readdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const FACTS_FILE = /^(APP|TOOL|SKILL)_FACTS\.md$/i;
-const SKIP_DIRS = new Set(['node_modules', 'dist', '.git', '.svelte-kit', '.localhelm']);
+const SKIP_DIRS = new Set(['node_modules', 'dist', 'build', '.git', '.svelte-kit', '.localhelm', '.filepress', '.filepress-genie']);
 
 function escapeRe(value: string): string {
 	return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

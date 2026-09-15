@@ -6,7 +6,7 @@ export { findManifest, requireManifest, validateManifest, writeManifest } from '
 export type { LoadedManifest } from './manifest.js';
 export { applyCascade, planCascade } from './cascade.js';
 export type { CascadePlan, CascadeRow } from './cascade.js';
-export { helmBumpMessage, helmRetargetMessage } from './commit.js';
+export { helmBumpMessage, helmRetargetMessage, isGitIgnored } from './commit.js';
 export {
 	applyDirtCommit,
 	dirtFileLine,

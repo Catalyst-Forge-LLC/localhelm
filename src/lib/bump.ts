@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import { commitPaths, helmBumpMessage } from './commit.js';
+import { commitPaths, helmBumpMessage, isGitIgnored } from './commit.js';
 import { listFactsFiles, rewriteFactsVersion } from './factsVersion.js';
 import { readGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
@@ -60,6 +60,8 @@ export async function applyBump(plan: BumpPlan): Promise<string[]> {
 	const files = [plan.file];
 	const scanRoot = plan.repo ?? plan.file.replace(/[/\\]package\.json$/i, '');
 	for (const facts of await listFactsFiles(scanRoot)) {
+		// FilePress copies skills into site/build and site/static/skills (gitignored).
+		if (plan.repo && isGitIgnored(plan.repo, facts)) continue;
 		const factsRaw = await readFile(facts, 'utf8');
 		const factsNext = rewriteFactsVersion(factsRaw, plan.from, plan.to);
 		if (!factsNext) continue;

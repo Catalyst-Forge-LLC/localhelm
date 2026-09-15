@@ -1580,6 +1580,19 @@
         "Fold stations (tabs) into the header in the same pass"
       ],
       "status": "active"
+    },
+    {
+      "id": "d114",
+      "timestamp": "2026-09-15T02:40:00Z",
+      "phase": "2-scaffolding",
+      "session": 45,
+      "decision": "applyBump skips SkillFacts under gitignored paths (git check-ignore). commitPaths also drops ignored paths. listFactsFiles skips build and FilePress site output dirs. Publish no longer fails when FilePress copies skills into site/build or site/static/skills.",
+      "rationale": "Operator: coldeye publish bumped version then failed commit with site/build or site/static/skills is gitignored — same bug, different path first.",
+      "alternatives_considered": [
+        "Force-add ignored files",
+        "Only skip site/build by hard-coded name"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

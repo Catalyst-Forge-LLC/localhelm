@@ -322,3 +322,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 45 — 2026-09-14
 
 - Bridge header IA/visual draft: `docs/specs/bridge-header.md`. Sea-space motif (not steampunk). Three bays (Ident / Situation / Conn) + always-on Keel. Spec only — no CSS/markup until locked and operator asks to build.
+- Publish bump skips gitignored SkillFacts copies (FilePress `site/build`, `site/static/skills`). ColdEye failed on `commit: site/… is gitignored` after the version rewrite; path differed by walk order.

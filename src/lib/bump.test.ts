@@ -91,6 +91,41 @@ describe('bump and export', () => {
 		assert.match(show.stdout, /SKILL_FACTS\.md/);
 	});
 
+	it('skips gitignored FilePress skill copies when bumping', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-bump-ignored-'));
+		const pkgDir = path.join(root, 'coldeye');
+		await mkdir(path.join(pkgDir, 'skills', 'cold-eye'), { recursive: true });
+		await mkdir(path.join(pkgDir, 'site', 'build', 'skills', 'cold-eye'), { recursive: true });
+		await mkdir(path.join(pkgDir, 'site', 'static', 'skills', 'cold-eye'), { recursive: true });
+		await writeFile(path.join(pkgDir, '.gitignore'), 'site/build/\nsite/static/skills/\n');
+		await writeFile(
+			path.join(pkgDir, 'package.json'),
+			'{\n  "name": "coldeye",\n  "version": "0.1.8",\n  "license": "MIT"\n}\n',
+		);
+		const factsBody = '---\nskill_facts_version: "0.1.0"\nversion: "0.1.8"\n---\n\n| **Version** | 0.1.8 |\n';
+		await writeFile(path.join(pkgDir, 'skills', 'cold-eye', 'SKILL_FACTS.md'), factsBody);
+		await writeFile(path.join(pkgDir, 'site', 'build', 'skills', 'cold-eye', 'SKILL_FACTS.md'), factsBody);
+		await writeFile(path.join(pkgDir, 'site', 'static', 'skills', 'cold-eye', 'SKILL_FACTS.md'), factsBody);
+		assert.equal(runGit(pkgDir, ['init']).ok, true);
+		assert.equal(runGit(pkgDir, ['add', '--', '.gitignore', 'package.json', 'skills']).ok, true);
+		assert.equal(runGit(pkgDir, ['-c', 'user.email=helm@test', '-c', 'user.name=Helm', 'commit', '-m', 'init']).ok, true);
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: { workspaceRoot: '.', projects: [{ id: 'coldeye', path: 'coldeye', npm: 'coldeye' }] },
+		};
+		const plan = await planBump(loaded, 'coldeye', 'patch');
+		const files = await applyBump(plan);
+		assert.equal(plan.to, '0.1.9');
+		assert.ok(files.every((file) => !file.includes(`${path.sep}site${path.sep}`)));
+		const log = runGit(pkgDir, ['log', '-1', '--pretty=%s']);
+		assert.match(log.stdout, /Helm: bump coldeye to 0\.1\.9/);
+		const show = runGit(pkgDir, ['show', '--name-only', '--pretty=format:']);
+		assert.match(show.stdout, /package\.json/);
+		assert.match(show.stdout, /skills\/cold-eye\/SKILL_FACTS\.md/);
+		assert.doesNotMatch(show.stdout, /site\//);
+	});
+
 	it('plans an export path', () => {
 		const plan = planExport('Z:/workspace');
 		assert.equal(plan.file, 'Z:/workspace/localhelm.status.json');
