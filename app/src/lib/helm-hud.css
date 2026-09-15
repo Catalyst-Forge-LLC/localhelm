@@ -1,5 +1,8 @@
 /* Shared HUD tokens. Imported by the operator board and Deck. */
+@import '@fontsource/syne/latin-700.css';
+
 :root {
+	--font-mark: Syne, ui-sans-serif, system-ui, sans-serif;
 	--hull: #03060c;
 	--hull-2: #1c1c21;
 	--hairline: #1f1f22;

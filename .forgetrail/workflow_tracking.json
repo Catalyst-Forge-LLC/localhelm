@@ -1776,6 +1776,19 @@
         "Keep a full npm status after Publish/Bump (registry did not change except the version we already know)"
       ],
       "status": "active"
+    },
+    {
+      "id": "d129",
+      "timestamp": "2026-09-15T21:52:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Ident wordmark uses Syne 700 (--font-mark), larger, not system ui-sans with 0.14em tracking. Counts and host:port stay mono. Not a Victorian serif.",
+      "rationale": "Operator 2026-09-15: LocalHelm next to the mark looked lame in the default sans; the ident bay has room.",
+      "alternatives_considered": [
+        "Orbitron / Oxanium (too costume HUD)",
+        "Playfair / Cinzel (Victorian serif — spec no)"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

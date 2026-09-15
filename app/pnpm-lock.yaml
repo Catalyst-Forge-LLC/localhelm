@@ -11,6 +11,9 @@ importers:
 
   .:
     dependencies:
+      '@fontsource/syne':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@iconify-json/lucide':
         specifier: ^1.2.125
         version: 1.2.125
@@ -50,6 +53,9 @@ importers:
         version: 8.2.2(jiti@2.7.0)
 
 packages:
+
+  '@fontsource/syne@5.3.0':
+    resolution: {integrity: sha512-kRWNVsrdYw+08I4EM1SYPe2JovdTzUI0kMVALVRsKmjRdkrVoun1qddSlDAglz5J9LbgUpJSkWmw6BYnmKdGuw==}
 
   '@iconify-json/lucide@1.2.125':
     resolution: {integrity: sha512-tOCk1QKMtKnCfPAgZRHgjRkQTP7wF5IO+iPKvvp8vxGZYPkSLhx4HTV3Ng0pIZ3wNWrS6kVpHkunJ1dc19L1og==}
@@ -944,6 +950,8 @@ packages:
     resolution: {integrity: sha512-B58NGBEoc8Y9MWWCQGl/gq9xBCe4IiKM0a2x7GZdQKOW5Exr8S1W24J6OgM1njK8xCRGvAJIL/MxXHf6SkmQKQ==}
 
 snapshots:
+
+  '@fontsource/syne@5.3.0': {}
 
   '@iconify-json/lucide@1.2.125':
     dependencies:

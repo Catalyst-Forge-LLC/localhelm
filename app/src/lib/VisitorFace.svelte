@@ -103,8 +103,9 @@
 		width: auto;
 	}
 	.word {
-		font-weight: 600;
-		letter-spacing: 0.14em;
+		font-family: var(--font-mark, Syne, ui-sans-serif, sans-serif);
+		font-weight: 700;
+		letter-spacing: 0.04em;
 		text-transform: uppercase;
 		color: var(--cyan, #ececef);
 		text-shadow: 0 0 10px var(--cyan-glow, transparent);

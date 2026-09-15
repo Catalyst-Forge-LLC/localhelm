@@ -142,9 +142,11 @@
 	}
 
 	.bridge h1 {
-		font-size: 1.22rem;
-		letter-spacing: 0.14em;
-		font-weight: 600;
+		font-family: var(--font-mark);
+		font-size: 1.85rem;
+		letter-spacing: 0.01em;
+		font-weight: 700;
+		line-height: 0.95;
 		color: #f2f0e8;
 		text-shadow: 0 0 16px rgb(126 244 255 / 0.28);
 	}

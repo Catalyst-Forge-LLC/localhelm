@@ -66,6 +66,7 @@ The center of the band is empty. The facts that tell you “where the helm is po
 - Instrument gold already on writes (`#c9a227` / `#fde68a`)
 - Cyan / ice for live instruments (`.info` is already `#93c5fd`)
 - Tight mono for counts and `host:port` (chart table, not display type)
+- Ident wordmark in **Syne** (display, `--font-mark`). System sans stays on body copy. Not Victorian serif.
 - Lamp dots as the motif element that carries meaning; **one** framing device — corner brackets (chosen 2026-09-15 over hairline dividers)
 - Chart-paper grid on the hull at about 11% cyan — brighter after the 2026-09-15 pass; still texture, not scanlines
 - Glow only where a light is on: lamp dots and counts, the keel rule and marker, Refresh, `host:port`. No hull glow, no page gradients.
