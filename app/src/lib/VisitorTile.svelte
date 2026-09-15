@@ -149,10 +149,10 @@
 			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
 			linear-gradient(var(--edge), var(--edge)) top right / var(--tick) 1px no-repeat,
 			linear-gradient(var(--edge), var(--edge)) top right / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) bottom left / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) bottom left / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) bottom right / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) bottom right / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) left var(--keel-radius, 8px) bottom / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) left bottom var(--keel-radius, 8px) / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) right var(--keel-radius, 8px) bottom / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) right bottom var(--keel-radius, 8px) / 1px var(--tick) no-repeat,
 			var(--well, #2a2a32);
 		color: #ececef;
 		text-decoration: none;
@@ -167,10 +167,10 @@
 			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
 			linear-gradient(var(--edge), var(--edge)) top right / var(--tick) 1px no-repeat,
 			linear-gradient(var(--edge), var(--edge)) top right / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) bottom left / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) bottom left / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) bottom right / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) bottom right / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) left var(--keel-radius, 8px) bottom / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) left bottom var(--keel-radius, 8px) / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) right var(--keel-radius, 8px) bottom / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) right bottom var(--keel-radius, 8px) / 1px var(--tick) no-repeat,
 			rgb(126 244 255 / 0.06);
 	}
 	.face {

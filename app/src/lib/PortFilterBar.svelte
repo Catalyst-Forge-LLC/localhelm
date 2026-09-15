@@ -133,7 +133,7 @@
 		margin: 0;
 		border: 1px solid var(--steel, #4c4c54);
 		background: none;
-		border-radius: var(--plate-radius, 0 0 8px 8px);
+		border-radius: var(--plate-radius-sm, 0 0 5px 5px);
 		padding: 0.15rem 0.65rem;
 		font: inherit;
 		font-size: 0.75rem;

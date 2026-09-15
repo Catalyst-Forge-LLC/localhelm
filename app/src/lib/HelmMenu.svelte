@@ -234,7 +234,7 @@
 		width: 100%;
 		padding: 0.4rem 0.45rem;
 		border: 0;
-		border-radius: var(--plate-radius, 0 0 8px 8px);
+		border-radius: var(--plate-radius-sm, 0 0 5px 5px);
 		background: none;
 		color: #ececef;
 		font-size: 0.88rem;
@@ -265,7 +265,7 @@
 		align-items: flex-start;
 		gap: 0.55rem;
 		padding: 0.4rem 0.45rem;
-		border-radius: var(--plate-radius, 0 0 8px 8px);
+		border-radius: var(--plate-radius-sm, 0 0 5px 5px);
 		cursor: pointer;
 	}
 
