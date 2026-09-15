@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 import type { LoadedManifest } from './manifest.js';
-import { fleetStatus } from './status.js';
+import { fleetStatus, needsCommitsSinceNpm } from './status.js';
 
 describe('fleetStatus onlyIds', () => {
 	it('reads only the named projects', async () => {
@@ -77,5 +77,32 @@ describe('fleetStatus onlyIds', () => {
 		});
 		assert.deepEqual(inventory.projects[0]?.bin, ['localhelm']);
 		assert.ok(inventory.projects[0]?.global);
+		assert.equal(inventory.projects[0]?.commitsSinceNpm ?? null, null);
+	});
+});
+
+describe('needsCommitsSinceNpm', () => {
+	const git = { repo: true, branch: 'main', dirty: false };
+
+	it('skips private, dirty, unpublished-ahead, and behind npm', () => {
+		const row = { privatePkg: false, npmName: 'widget', localVersion: '1.0.0' };
+		const npm = { status: 'ok' as const, latest: '1.0.0' };
+		assert.equal(needsCommitsSinceNpm({ ...row, privatePkg: true }, npm, false, git), false);
+		assert.equal(needsCommitsSinceNpm(row, npm, true, git), false);
+		assert.equal(needsCommitsSinceNpm(row, npm, false, { ...git, dirty: true }), false);
+		assert.equal(needsCommitsSinceNpm(row, { status: 'ok', latest: '1.1.0' }, false, git), false);
+		assert.equal(needsCommitsSinceNpm(row, { status: 'none' }, false, git), false);
+	});
+
+	it('counts only when local already matches a published latest', () => {
+		assert.equal(
+			needsCommitsSinceNpm(
+				{ privatePkg: false, npmName: 'widget', localVersion: '1.0.0' },
+				{ status: 'ok', latest: '1.0.0' },
+				false,
+				git,
+			),
+			true,
+		);
 	});
 });

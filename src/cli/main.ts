@@ -8,10 +8,10 @@ import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { applyExport, planExport } from '../lib/export.js';
 import { applyDirtCommit, dirtFileLine, planDirtCommit, requireCommitIds } from '../lib/dirtCommit.js';
-import { applyFetch, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
+import { applyFetches, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
 import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublishIds, type PublishRow } from '../lib/publish.js';
 import { publishApplyHadFailure } from '../lib/writeGate.js';
-import { archiveIds, readArchive, restoreIds } from '../lib/archive.js';
+import { archiveIds, planArchive, readArchive, restoreIds } from '../lib/archive.js';
 import { buildBrief } from '../lib/brief.js';
 import { applyLand, planLandMany, requireLandSiteIds } from '../lib/land.js';
 import { applyScriptShip, isShippedReason, planScriptShip, requireShipIds } from '../lib/scriptShip.js';
@@ -406,7 +406,7 @@ async function main(): Promise<void> {
 		const lock = await acquireJobLock(loaded.workspaceRoot);
 		let rows: GitJobRow[];
 		try {
-			rows = planned.map((row) => applyFetch(loaded.workspaceRoot, row));
+			rows = await applyFetches(loaded.workspaceRoot, planned);
 		} finally {
 			await lock.release();
 		}
@@ -710,7 +710,6 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 				}
 				const result = await applyLand(loaded, plan, { otp });
 				results.push(result);
-				if (!result.ok) break;
 			}
 			if (json) printJson({ plans, results, writes: true });
 			else {
@@ -872,7 +871,16 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 				: `Archive ${ids.join(', ')} hides them on Today. Folder and port stay.\n`,
 		);
 		if (!apply) {
-			process.stdout.write('Nothing written. Re-run with --apply to confirm.\n');
+			const rows = await planArchive(loaded.workspaceRoot, ids, restore);
+			if (json) printJson({ rows, writes: false });
+			else {
+				for (const row of rows) {
+					process.stdout.write(
+						row.action === 'skip' ? `${row.id}\tskip\t${row.reason ?? ''}\n` : `${row.id}\t${row.action}\n`,
+					);
+				}
+				process.stdout.write('Nothing written. Re-run with --apply to confirm.\n');
+			}
 			return;
 		}
 		const file = restore ? await restoreIds(loaded.workspaceRoot, ids) : await archiveIds(loaded.workspaceRoot, ids);

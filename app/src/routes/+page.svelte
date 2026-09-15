@@ -902,10 +902,8 @@
 		await readQuiet(fetchRemotes ? 'fetching remotes, then reading status' : 'reading status', async () => {
 			const fleet = inventory?.projects.map((row) => row.id) ?? [];
 			if (fetchRemotes && fleet.length) {
-				for (const id of fleet) {
-					statusNote = `fetching remotes (${id})`;
-					await call('/api/fetch', { method: 'POST', body: JSON.stringify({ ids: [id] }) });
-				}
+				statusNote = 'fetching remotes';
+				await call('/api/fetch', { method: 'POST', body: JSON.stringify({ ids: fleet }) });
 				fetchedAt = new Date().toLocaleTimeString();
 				statusNote = 'reading status';
 				await loadStatus({ extras, freshNpm: true });
@@ -1201,7 +1199,7 @@
 		void startPluginJob(leaseBoard?.plugin ?? 'localslip', action, ids, action === 'start' ? 'Start family' : 'Stop family');
 	}
 
-	function startArchive(ids: string[], restore: boolean): void {
+	async function startArchive(ids: string[], restore: boolean): Promise<void> {
 		if (!ids.length) return;
 		const parkIds = restore
 			? []
@@ -1215,37 +1213,72 @@
 						),
 					),
 				];
-		offerConfirm({
-			title: restore ? 'Restore on Today?' : 'Hide on Today?',
-			hint: restore
-				? 'Puts these fleet rows back on Today. Folder was never moved. Does not unpark.'
-				: 'Hides on Today. Folder and port stay. Matching leases can be parked on the slip (port stays).',
-			items: [
-				...ids.map((id) => (restore ? `restore ${id}` : `hide ${id}`)),
-				...parkIds.map((id) => `park ${id} — port stays`),
-			],
-			itemKeys: [...ids, ...parkIds],
-			applyIds: [...ids, ...parkIds],
-			confirmLabel: restore ? 'Restore' : parkIds.length ? 'Hide and park' : 'Hide',
-			canApply: true,
-			run: (included) =>
-				void applyArchive(
-					ids.filter((id) => included.includes(id)),
-					restore,
-					parkIds.filter((id) => included.includes(id)),
-				),
-		});
+		await run(
+			restore ? 'planning restore' : 'planning hide',
+			async () => {
+				const data = (await call('/api/archive', {
+					method: 'POST',
+					body: JSON.stringify({ ids, restore, apply: false }),
+				})) as { rows?: { id: string; action: string; reason?: string }[] };
+				const rows = Array.isArray(data.rows) ? data.rows : [];
+				const work = rows.filter((row) => row.action !== 'skip').map((row) => row.id);
+				const items = [
+					...rows.map((row) =>
+						row.action === 'skip'
+							? `skip ${row.id} — ${row.reason ?? ''}`
+							: row.action === 'restore'
+								? `restore ${row.id}`
+								: `hide ${row.id}`,
+					),
+					...parkIds.map((id) => `park ${id} — port stays`),
+				];
+				const canApply = work.length > 0 || parkIds.length > 0;
+				note(
+					restore
+						? `restore plan ${ids.join(', ')} — nothing written`
+						: `hide plan ${ids.join(', ')} — nothing written`,
+					data,
+				);
+				offerConfirm({
+					title: restore ? 'Restore on Today?' : 'Hide on Today?',
+					hint: restore
+						? 'Puts these fleet rows back on Today. Folder was never moved. Does not unpark.'
+						: 'Hides on Today. Folder and port stay. Matching leases can be parked on the slip (port stays).',
+					items: items.length ? items : [restore ? 'Nothing to restore.' : 'Nothing to hide.'],
+					itemKeys: [...rows.map((row) => row.id), ...parkIds],
+					applyIds: [...work, ...parkIds],
+					confirmLabel: restore ? 'Restore' : parkIds.length ? 'Hide and park' : 'Hide',
+					canApply,
+					run: canApply
+						? (included) =>
+								void applyArchive(
+									work.filter((id) => included.includes(id)),
+									restore,
+									parkIds.filter((id) => included.includes(id)),
+								)
+						: undefined,
+				});
+			},
+			planOpts(restore ? 'Restore on Today' : 'Hide on Today', ids),
+		);
 	}
 
 	async function applyArchive(ids: string[], restore: boolean, parkIds: string[]): Promise<void> {
 		const verb = restore ? 'restoring' : 'hiding';
-		await run(bulkProgressLabel(verb, 1, ids.length, ids[0]), async () => {
-			const data = (await call('/api/archive', {
-				method: 'POST',
-				body: JSON.stringify({ ids, restore }),
-			})) as { ids?: string[] };
-			archivedIds = Array.isArray(data.ids) ? data.ids : [];
-			note(restore ? `restore ${ids.join(', ')}` : `archive ${ids.join(', ')}`, data);
+		const label = ids.length
+			? bulkProgressLabel(verb, 1, ids.length, ids[0])
+			: parkIds.length
+				? 'parking'
+				: verb;
+		await run(label, async () => {
+			if (ids.length) {
+				const data = (await call('/api/archive', {
+					method: 'POST',
+					body: JSON.stringify({ ids, restore, apply: true }),
+				})) as { ids?: string[] };
+				archivedIds = Array.isArray(data.ids) ? data.ids : [];
+				note(restore ? `restore ${ids.join(', ')}` : `archive ${ids.join(', ')}`, data);
+			}
 			if (parkIds.length && leaseBoardAll) {
 				await applyPluginItems(leaseBoardAll.plugin, 'park', parkIds);
 			}
@@ -2011,7 +2044,7 @@
 							<button
 								class="btn"
 								disabled={Boolean(busy) || !checkedIds.length}
-								onclick={() => startArchive(checkedIds, showArchived)}
+								onclick={() => void startArchive(checkedIds, showArchived)}
 								title={showArchived ? 'Puts checked rows back on Today. Folder was never moved.' : 'Hides checked rows on Today. Folder and port stay.'}
 							>
 								<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />

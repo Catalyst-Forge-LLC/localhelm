@@ -81,3 +81,29 @@ export async function restoreIds(workspaceRoot: string, ids: string[]): Promise<
 export function isArchived(id: string, archived: Iterable<string>): boolean {
 	return new Set(archived).has(id);
 }
+
+export type ArchivePlanRow = {
+	id: string;
+	action: 'hide' | 'restore' | 'skip';
+	reason?: string;
+};
+
+export async function planArchive(
+	workspaceRoot: string,
+	ids: string[],
+	restore: boolean,
+): Promise<ArchivePlanRow[]> {
+	const current = await readArchive(workspaceRoot);
+	const hidden = new Set(current.ids);
+	const rows: ArchivePlanRow[] = [];
+	for (const raw of ids) {
+		const id = raw.trim();
+		if (!id) continue;
+		if (restore) {
+			rows.push(hidden.has(id) ? { id, action: 'restore' } : { id, action: 'skip', reason: 'not archived' });
+			continue;
+		}
+		rows.push(hidden.has(id) ? { id, action: 'skip', reason: 'already hidden' } : { id, action: 'hide' });
+	}
+	return rows;
+}

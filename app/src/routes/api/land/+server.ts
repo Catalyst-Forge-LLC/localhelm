@@ -51,7 +51,6 @@ export const POST: RequestHandler = async ({ request }) => {
 								onStep: (event) => send({ type: 'step', ...event }),
 							});
 							out.push(result);
-							if (!result.ok) break;
 						}
 						return out;
 					});

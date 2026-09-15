@@ -1,11 +1,16 @@
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import type { LoadedManifest } from './manifest.js';
+import { mapPool } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pathExists } from './pkg.js';
 import type { GitCell } from './types.js';
 import { commitCountLabel, plainGitError, whyNotPush } from './writeGate.js';
 
-export function runGit(cwd: string, args: string[]): { ok: boolean; stdout: string; stderr: string } {
+export const GIT_POOL = 8;
+
+export type GitRun = { ok: boolean; stdout: string; stderr: string };
+
+export function runGit(cwd: string, args: string[]): GitRun {
 	const result = spawnSync('git', ['-C', cwd, ...args], {
 		encoding: 'utf8',
 		windowsHide: true,
@@ -21,6 +26,36 @@ export function runGit(cwd: string, args: string[]): { ok: boolean; stdout: stri
 	return { ok: true, stdout, stderr };
 }
 
+export function runGitAsync(cwd: string, args: string[]): Promise<GitRun> {
+	return new Promise((resolve) => {
+		const child = spawn('git', ['-C', cwd, ...args], { windowsHide: true });
+		const out: Buffer[] = [];
+		const err: Buffer[] = [];
+		child.stdout?.on('data', (chunk: Buffer) => {
+			out.push(chunk);
+		});
+		child.stderr?.on('data', (chunk: Buffer) => {
+			err.push(chunk);
+		});
+		child.on('error', (error) => {
+			resolve({ ok: false, stdout: '', stderr: error.message });
+		});
+		child.on('close', (code) => {
+			const stdout = Buffer.concat(out).toString('utf8');
+			const stderr = Buffer.concat(err).toString('utf8');
+			if (code !== 0) {
+				resolve({
+					ok: false,
+					stdout,
+					stderr: stderr.trim() || `git ${args.join(' ')} exited ${code}`,
+				});
+				return;
+			}
+			resolve({ ok: true, stdout, stderr });
+		});
+	});
+}
+
 function parseAheadBehind(header: string): { ahead: number | null; behind: number | null } {
 	const ahead = /ahead (\d+)/.exec(header);
 	const behind = /behind (\d+)/.exec(header);
@@ -31,17 +66,12 @@ function parseAheadBehind(header: string): { ahead: number | null; behind: numbe
 	};
 }
 
-export function readGit(projectRoot: string, fetch = false): GitCell {
-	// A failed fetch must not hide the local truth (branch, dirt, ahead/behind).
-	let fetchError: string | undefined;
-	if (fetch) {
-		const fetched = runGit(projectRoot, ['fetch', '--quiet', 'origin']);
-		if (!fetched.ok && !/no such remote|does not exist/i.test(fetched.stderr)) {
-			fetchError = fetched.stderr;
-		}
-	}
+function fetchFailedReason(fetched: GitRun): string | undefined {
+	if (!fetched.ok && !/no such remote|does not exist/i.test(fetched.stderr)) return fetched.stderr;
+	return undefined;
+}
 
-	const status = runGit(projectRoot, ['status', '--porcelain=v1', '-b']);
+function gitFromStatus(status: GitRun, remotes: GitRun, fetchError?: string): GitCell {
 	if (!status.ok) {
 		if (/not a git repository/i.test(status.stderr)) {
 			return { repo: false, dirty: false, staged: 0, unstaged: 0, untracked: 0, ahead: null, behind: null };
@@ -76,7 +106,6 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 		if (y !== ' ' && y !== '?') unstaged += 1;
 	}
 
-	const remotes = runGit(projectRoot, ['remote', '-v']);
 	let origin: string | undefined;
 	let backup: string | undefined;
 	if (remotes.ok) {
@@ -111,6 +140,23 @@ export function readGit(projectRoot: string, fetch = false): GitCell {
 		busy,
 		...(fetchError ? { fetchError } : {}),
 	};
+}
+
+export function readGit(projectRoot: string, fetch = false): GitCell {
+	// A failed fetch must not hide the local truth (branch, dirt, ahead/behind).
+	let fetchError: string | undefined;
+	if (fetch) fetchError = fetchFailedReason(runGit(projectRoot, ['fetch', '--quiet', 'origin']));
+	const status = runGit(projectRoot, ['status', '--porcelain=v1', '-b']);
+	const remotes = status.ok ? runGit(projectRoot, ['remote', '-v']) : { ok: false, stdout: '', stderr: '' };
+	return gitFromStatus(status, remotes, fetchError);
+}
+
+export async function readGitAsync(projectRoot: string, fetch = false): Promise<GitCell> {
+	let fetchError: string | undefined;
+	if (fetch) fetchError = fetchFailedReason(await runGitAsync(projectRoot, ['fetch', '--quiet', 'origin']));
+	const status = await runGitAsync(projectRoot, ['status', '--porcelain=v1', '-b']);
+	const remotes = status.ok ? await runGitAsync(projectRoot, ['remote', '-v']) : { ok: false, stdout: '', stderr: '' };
+	return gitFromStatus(status, remotes, fetchError);
 }
 
 function resolveVersionCommit(cwd: string, version: string): string | null {
@@ -196,6 +242,21 @@ export function applyFetch(workspaceRoot: string, row: GitJobRow): GitJobRow {
 	const abs = joinRoot(workspaceRoot, row.path);
 	const result = runGit(abs, ['fetch', 'origin']);
 	return { ...row, stdout: result.stdout.trim(), stderr: result.stderr, reason: result.ok ? 'fetched' : result.stderr };
+}
+
+export async function applyFetchAsync(workspaceRoot: string, row: GitJobRow): Promise<GitJobRow> {
+	if (row.action !== 'fetch') return row;
+	const abs = joinRoot(workspaceRoot, row.path);
+	const result = await runGitAsync(abs, ['fetch', 'origin']);
+	return { ...row, stdout: result.stdout.trim(), stderr: result.stderr, reason: result.ok ? 'fetched' : result.stderr };
+}
+
+export async function applyFetches(
+	workspaceRoot: string,
+	rows: GitJobRow[],
+	concurrency = GIT_POOL,
+): Promise<GitJobRow[]> {
+	return mapPool(rows, concurrency, (row) => applyFetchAsync(workspaceRoot, row));
 }
 
 export async function planPull(loaded: LoadedManifest, onlyIds?: string[]): Promise<GitJobRow[]> {

@@ -120,8 +120,8 @@ export {
 	pluginTabMetas,
 } from './dashboardTabs.js';
 export type { PluginTabMeta } from './dashboardTabs.js';
-export { archiveIds, archivePath, isArchived, readArchive, restoreIds } from './archive.js';
-export type { ArchiveFile } from './archive.js';
+export { archiveIds, archivePath, isArchived, planArchive, readArchive, restoreIds } from './archive.js';
+export type { ArchiveFile, ArchivePlanRow } from './archive.js';
 export { fleetRoster } from './roster.js';
 export type { FleetRosterRow } from './roster.js';
 export { buildBrief, formatBrief } from './brief.js';
@@ -203,7 +203,17 @@ export {
 	rowMatchesPortFilters,
 } from './portFilters.js';
 export type { PortBoardFilters, PortFirewallFilter } from './portFilters.js';
-export { applyFetch, applyPull, applyPush, countCommitsSinceVersion, planFetch, planPull, planPush, requirePushIds } from './git.js';
+export {
+	applyFetch,
+	applyFetches,
+	applyPull,
+	applyPush,
+	countCommitsSinceVersion,
+	planFetch,
+	planPull,
+	planPush,
+	requirePushIds,
+} from './git.js';
 export type { GitJobRow } from './git.js';
 export { IGNORE_FILE_NAME, loadScanIgnore } from './ignorefile.js';
 export { resolveUserPath } from './paths.js';

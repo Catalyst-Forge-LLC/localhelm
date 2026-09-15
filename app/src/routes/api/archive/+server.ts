@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { archiveIds, readArchive, restoreIds } from '../../../../../src/lib/index.js';
+import { archiveIds, planArchive, readArchive, restoreIds } from '../../../../../src/lib/index.js';
 import { errJson, loadOptional, operatorCwd } from '$lib/server/helm';
 
 async function archiveRoot(): Promise<string> {
@@ -21,11 +21,16 @@ export const POST: RequestHandler = async ({ request }) => {
 		const body = (await request.json().catch(() => ({}))) as {
 			ids?: unknown;
 			restore?: unknown;
+			apply?: unknown;
 		};
 		const ids = Array.isArray(body.ids) ? body.ids.filter((id): id is string => typeof id === 'string') : [];
 		if (!ids.length) return errJson(new Error('ids required'));
 		const root = await archiveRoot();
-		const file = body.restore ? await restoreIds(root, ids) : await archiveIds(root, ids);
+		const restore = Boolean(body.restore);
+		if (body.apply === false) {
+			return json({ rows: await planArchive(root, ids, restore), writes: false });
+		}
+		const file = restore ? await restoreIds(root, ids) : await archiveIds(root, ids);
 		return json(file);
 	} catch (err) {
 		return errJson(err);

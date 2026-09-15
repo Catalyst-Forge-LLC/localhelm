@@ -3,7 +3,19 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
-import { applyPush, countCommitsSinceVersion, planFetch, planPull, planPush, readGit, requirePushIds, runGit } from './git.js';
+import {
+	applyFetches,
+	applyPush,
+	countCommitsSinceVersion,
+	planFetch,
+	planPull,
+	planPush,
+	readGit,
+	readGitAsync,
+	requirePushIds,
+	runGit,
+	runGitAsync,
+} from './git.js';
 import type { LoadedManifest } from './manifest.js';
 
 async function gitRepo(dir: string): Promise<void> {
@@ -68,6 +80,24 @@ describe('git jobs', () => {
 		assert.ok(cell.branch);
 		assert.ok(cell.fetchError);
 		assert.equal(cell.error, undefined);
+		const asyncCell = await readGitAsync(root, true);
+		assert.equal(asyncCell.repo, true);
+		assert.equal(asyncCell.dirty, true);
+		assert.ok(asyncCell.fetchError);
+	});
+
+	it('applies skip fetch rows and runs git async', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-fetch-pool-'));
+		const status = await runGitAsync(root, ['--version']);
+		assert.equal(status.ok, true);
+		const rows = await applyFetches(root, [
+			{ id: 'missing', path: 'nope', action: 'skip', reason: 'missing' },
+			{ id: 'also', path: 'also', action: 'skip', reason: 'no origin' },
+		]);
+		assert.deepEqual(
+			rows.map((row) => row.reason),
+			['missing', 'no origin'],
+		);
 	});
 
 	it('requires named ids before apply', () => {

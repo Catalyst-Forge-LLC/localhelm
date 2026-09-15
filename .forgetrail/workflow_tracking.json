@@ -1541,6 +1541,19 @@
         "Keep CSS scoped on +page.svelte"
       ],
       "status": "active"
+    },
+    {
+      "id": "d111",
+      "timestamp": "2026-09-15T01:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 43,
+      "decision": "git fetch and git status use async spawn + mapPool (8). Dashboard fetch remotes is one POST with the fleet ids. Status reuses the npmLatestMany map and skips git log for commitsSinceNpm unless Publish still needs a bump count. CLI land --apply continues after one site fails (exit 1 if any failed). Archive has planArchive; apply:false plans, omit/true writes.",
+      "rationale": "Dashboard batches already continued; CLI land and per-id fetch were the remaining serial/fail-fast spots. spawnSync cannot overlap in a pool.",
+      "alternatives_considered": [
+        "Keep sync git and only batch the HTTP calls",
+        "Treat omitted apply as archive plan (would break existing POST writers)"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

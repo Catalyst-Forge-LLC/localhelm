@@ -291,7 +291,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - Land **localslip** sync failed `ERR_PNPM_UNEXPECTED_VIRTUAL_STORE` because `site/node_modules` still recorded `Z:\\workspace\\localberth` after the rename. Reinstalled from `localslip/site`. FilePress `applyUpdate` now reinstalls when the virtual store path is stale, then retries `pnpm update getfilepress`. Do not bake shop folder names into Helm.
 - Registry **pin behind** is Cascade from the **published** package (`localhelm cascade <id> --apply`, Today → Pins / Write pins). FilePress Land / Sync engine is only getfilepress on sites (then push + ship). A consumer row can offer Write {publisher} pin when that cascade is writable. Dirty consumers are skipped.
-- Dashboard named applies continue after one id fails (`runNamedBatch`). Stop still aborts the rest. CLI `publish --apply` uses `isPublishedReason` (GitHub OIDC counts), continues the batch, and exits 1 if a publish row failed. CLI `land --apply` still stops.
+- Dashboard named applies continue after one id fails (`runNamedBatch`). Stop still aborts the rest. CLI `publish --apply` uses `isPublishedReason` (GitHub OIDC counts), continues the batch, and exits 1 if a publish row failed. CLI `land --apply` continues the rest of the named sites and exits 1 if any failed.
 
 ### Session 39 — 2026-09-14
 
@@ -308,3 +308,9 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 42 — 2026-09-14
 
 - Today markup is `TodayBoard.svelte`. Dashboard CSS is `app/src/lib/dashboard.css` (imported by `+page.svelte` only). ConfirmModal, URL state, and `loadStatus` stay on the page. Fleet / Sites / Ports tables stay there too.
+
+### Session 43 — 2026-09-14
+
+- Fetch remotes is one HTTP call and a pool of 8 async `git fetch` (CLI + `/api/fetch`). Status reads git with the same pool. Publish `commitsSinceNpm` skips `git log` unless a bump is still in play. npm latest uses the existing `npmLatestMany` map (no second per-row fetch).
+- CLI `land --apply` continues after one site fails (exit 1 if any failed). Dashboard already did this one-id-at-a-time.
+- Archive dry-run: `planArchive`. CLI without `--apply` prints hide/restore/skip rows. `POST /api/archive` with `apply: false` plans; omit or `apply: true` writes. Hide/Restore confirm plans first. Park-on-hide stays dashboard-only.

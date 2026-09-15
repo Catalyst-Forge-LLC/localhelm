@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { applyFetch, planFetch } from '../../../../../src/lib/index.js';
+import { applyFetches, planFetch } from '../../../../../src/lib/index.js';
 import { errJson, withJobLock } from '$lib/server/helm';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -9,7 +9,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json(
 			await withJobLock(async (loaded) => {
 				const planned = await planFetch(loaded, body.ids?.length ? body.ids : undefined);
-				const rows = planned.map((row) => applyFetch(loaded.workspaceRoot, row));
+				const rows = await applyFetches(loaded.workspaceRoot, planned);
 				return { rows };
 			}),
 		);

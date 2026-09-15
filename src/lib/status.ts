@@ -1,12 +1,38 @@
-import { countCommitsSinceVersion, readGit } from './git.js';
+import { countCommitsSinceVersion, GIT_POOL, readGitAsync } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { clearNpmCache, liftLatestIfVersionExists, npmLatest, npmLatestMany } from './npm.js';
+import { clearNpmCache, liftLatestIfVersionExists, mapPool, npmLatestMany } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pinsFromPkg } from './pins.js';
 import { clearGlobalCache, readGlobalVersions } from './globalInstall.js';
 import { collectDeps, pathExists, pkgBinNames, readPkg, rootPkgPath, shipScriptTarget, sitePkgPath, type PkgJson } from './pkg.js';
 import { compareSemver } from './semver.js';
-import type { FleetDigest, FleetInventory, PinEdge, ProjectStatus } from './types.js';
+import type { FleetDigest, FleetInventory, GitCell, NpmCell, PinEdge, ProjectStatus } from './types.js';
+
+const EMPTY_GIT: GitCell = {
+	repo: false,
+	dirty: false,
+	staged: 0,
+	unstaged: 0,
+	untracked: 0,
+	ahead: null,
+	behind: null,
+};
+
+/** Publish only needs this count when a bump is still in play (local already matches npm). */
+export function needsCommitsSinceNpm(
+	row: { privatePkg: boolean; npmName?: string; localVersion: string | null },
+	npm: Pick<NpmCell, 'status' | 'latest'>,
+	unpublishedAhead: boolean,
+	git: Pick<GitCell, 'repo' | 'branch' | 'busy' | 'detached' | 'dirty'>,
+): boolean {
+	if (row.privatePkg || unpublishedAhead) return false;
+	if (!row.npmName || !row.localVersion) return false;
+	if (npm.status !== 'ok' || !npm.latest) return false;
+	if (!git.repo || !git.branch || git.busy || git.detached || git.dirty) return false;
+	const cmp = compareSemver(row.localVersion, npm.latest);
+	if (cmp !== null && cmp < 0) return false;
+	return true;
+}
 
 export type StatusOptions = {
 	fetch?: boolean;
@@ -97,13 +123,19 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 
 	const needsGlobalRead = prepared.some((row) => pkgBinNames(row.rootPkg).length > 0);
 	const globals = needsGlobalRead ? readGlobalVersions(Boolean(options.refreshNpm || options.fetch)) : new Map<string, string>();
+	const npmByName = await npmLatestMany(names);
 	const latestByName = new Map<string, string>();
-	for (const [name, cell] of await npmLatestMany(names)) {
+	for (const [name, cell] of npmByName) {
 		if (cell.status === 'ok' && cell.latest) latestByName.set(name, cell.latest);
 	}
 
+	const gitCells = await mapPool(prepared, GIT_POOL, async (row) =>
+		row.missing ? EMPTY_GIT : readGitAsync(row.absPath, options.fetch === true),
+	);
+
 	const projects: ProjectStatus[] = [];
-	for (const row of prepared) {
+	for (const [index, row] of prepared.entries()) {
+		const git = gitCells[index] ?? EMPTY_GIT;
 		if (row.missing) {
 			projects.push({
 				id: row.id,
@@ -113,7 +145,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 				localVersion: null,
 				private: false,
 				npm: { name: row.npmName, status: 'none' },
-				git: { repo: false, dirty: false, staged: 0, unstaged: 0, untracked: 0, ahead: null, behind: null },
+				git: EMPTY_GIT,
 				pins: [],
 				cascadeBehind: 0,
 				unpublishedAhead: false,
@@ -121,11 +153,11 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			continue;
 		}
 
-		let npm = row.privatePkg
-			? { name: row.npmName, status: 'private' as const }
+		let npm: NpmCell = row.privatePkg
+			? { name: row.npmName, status: 'private' }
 			: row.npmName
-				? await npmLatest(row.npmName)
-				: { status: 'none' as const };
+				? (npmByName.get(row.npmName) ?? { name: row.npmName, status: 'none' })
+				: { status: 'none' };
 		if (!row.privatePkg && row.npmName && row.localVersion && npm.status === 'ok') {
 			npm = await liftLatestIfVersionExists(row.npmName, row.localVersion, npm);
 			if (npm.latest) latestByName.set(row.npmName, npm.latest);
@@ -147,7 +179,6 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			unpublishedAhead = true;
 		}
 
-		const git = readGit(row.absPath, options.fetch === true);
 		const publishedVersion =
 			!row.privatePkg && npm.status === 'ok' && npm.latest ? npm.latest : row.localVersion;
 		const status: ProjectStatus = {
@@ -163,7 +194,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			cascadeBehind: pins.filter((pin) => pin.kind === 'registry' && pin.onLatest === false).length,
 			unpublishedAhead,
 			commitsSinceNpm:
-				publishedVersion && git.repo && git.branch
+				needsCommitsSinceNpm(row, npm, unpublishedAhead, git) && publishedVersion
 					? countCommitsSinceVersion(row.absPath, publishedVersion, git.branch)
 					: null,
 			ship: row.ship,
