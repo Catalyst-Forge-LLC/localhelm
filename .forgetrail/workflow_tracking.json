@@ -1567,6 +1567,19 @@
         "Split Refresh into several HTTP calls"
       ],
       "status": "active"
+    },
+    {
+      "id": "d113",
+      "timestamp": "2026-09-15T02:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 45,
+      "decision": "Dashboard header becomes a Bridge (Ident / Situation / Conn + always-on Keel). Voice is sea-space, not steampunk. Spec at docs/specs/bridge-header.md is Draft until operator locks. No CSS or markup in this pass.",
+      "rationale": "Operator asked to rethink the header as the helm command center and to write a spec first.",
+      "alternatives_considered": [
+        "Build visual chrome without a written spec",
+        "Fold stations (tabs) into the header in the same pass"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

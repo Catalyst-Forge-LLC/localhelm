@@ -318,3 +318,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 44 — 2026-09-14
 
 - Header Refresh streams `/api/status?progress=1` (NDJSON). The rail names the live step: packages, npm, git, optional globals, then Sites and Ports. Plain `GET /api/status` is still JSON.
+
+### Session 45 — 2026-09-14
+
+- Bridge header IA/visual draft: `docs/specs/bridge-header.md`. Sea-space motif (not steampunk). Three bays (Ident / Situation / Conn) + always-on Keel. Spec only — no CSS/markup until locked and operator asks to build.
