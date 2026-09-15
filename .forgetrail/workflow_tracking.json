@@ -1711,6 +1711,19 @@
         "Keep Confirm and close Add first"
       ],
       "status": "active"
+    },
+    {
+      "id": "d124",
+      "timestamp": "2026-09-15T18:55:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "planEnroll resolves relative paths against workspaceRoot. Dashboard enroll reports skip reasons and does not close Add or claim success when nothing was added.",
+      "rationale": "Operator 2026-09-15: Add acmegeek did not appear on Fleet. Serve cwd is the Helm checkout, so relative acmegeek looked for localhelm/acmegeek and skipped, then rewrote the manifest anyway.",
+      "alternatives_considered": [
+        "Only fix the checkbox to send absPath",
+        "Change LOCALHELM_CWD to the workspace parent"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

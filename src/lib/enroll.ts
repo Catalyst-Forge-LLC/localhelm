@@ -22,6 +22,13 @@ export function inferManifestPath(absPaths: string[], cwd: string): string {
 	return toPosix(path.join(cwd, manifestName()));
 }
 
+/** Relative enroll names are workspace folders, not folders under the Helm checkout. */
+export function enrollResolvePath(raw: string, workspaceRoot: string, cwd: string): string {
+	const posix = toPosix(raw);
+	const absolute = path.isAbsolute(raw) || /^[A-Za-z]:\//.test(posix);
+	return resolveUserPath(raw, absolute ? cwd : workspaceRoot);
+}
+
 function nextId(base: string, used: Set<string>): string {
 	if (!used.has(base)) return base;
 	let i = 2;
@@ -46,7 +53,7 @@ export async function planEnroll(req: EnrollRequest, existing: LoadedManifest | 
 	}
 
 	for (const raw of req.paths) {
-		const abs = resolveUserPath(raw, cwd);
+		const abs = enrollResolvePath(raw, workspaceRoot, cwd);
 		if (!(await isDir(abs))) {
 			rows.push({ action: 'skip', id: slugId(path.basename(abs)), path: raw, reason: `not a directory: ${abs}` });
 			continue;

@@ -24,6 +24,24 @@ describe('manifest and enroll', () => {
 		assert.equal(found, null);
 	});
 
+	it('resolves a relative enroll name against the workspace, not the Helm cwd', async () => {
+		const ws = await mkdtemp(path.join(tmpdir(), 'localhelm-ws-'));
+		const helm = path.join(ws, 'localhelm');
+		const sibling = path.join(ws, 'acmegeek');
+		await mkdir(helm);
+		await mkdir(sibling);
+		await writeFile(path.join(sibling, 'package.json'), JSON.stringify({ name: 'acmegeek', version: '0.0.1' }));
+		const existing = {
+			manifestPath: path.join(ws, 'localhelm.fleet.json'),
+			workspaceRoot: ws,
+			manifest: { workspaceRoot: '.' as const, projects: [{ id: 'localhelm', path: 'localhelm' }] },
+		};
+		const plan = await planEnroll({ paths: ['acmegeek'], cwd: helm }, existing);
+		assert.equal(plan.rows[0]?.action, 'add');
+		assert.equal(plan.rows[0]?.id, 'acmegeek');
+		assert.equal(plan.rows[0]?.path, 'acmegeek');
+	});
+
 	it('infers manifest at the shared parent of sibling folders', () => {
 		const ws = 'Z:/workspace';
 		const inferred = inferManifestPath([`${ws}/localhelm`, `${ws}/ollanet`], ws);

@@ -1342,15 +1342,33 @@
 	}
 
 	async function applyEnroll(paths: string[]): Promise<void> {
-		await run(paths.length === 1 ? 'enrolling' : `enrolling ${paths.length} projects`, async () => {
-			const plan = await call('/api/enroll', {
+		const named = paths.filter(Boolean);
+		if (!named.length) {
+			error = 'Check at least one scanned folder first.';
+			return;
+		}
+		await run(named.length === 1 ? 'enrolling' : `enrolling ${named.length} projects`, async () => {
+			const plan = (await call('/api/enroll', {
 				method: 'POST',
-				body: JSON.stringify({ paths, apply: true }),
-			});
-			note(`enrolled ${paths.length} project(s)`, plan);
+				body: JSON.stringify({ paths: named, apply: true }),
+			})) as { rows?: { action?: string; id?: string; path?: string; reason?: string }[] };
+			const rows = Array.isArray(plan.rows) ? plan.rows : [];
+			const added = rows.filter((row) => row.action === 'add');
+			const skipped = rows.filter((row) => row.action === 'skip');
+			if (!added.length) {
+				throw new Error(
+					skipped[0]?.reason ?? 'Nothing joined the fleet. The ticked folder was skipped.',
+				);
+			}
+			note(
+				skipped.length
+					? `enrolled ${added.length}, skipped ${skipped.length}`
+					: `enrolled ${added.length} project${added.length === 1 ? '' : 's'}`,
+				plan,
+			);
 			selectedScan = {};
-			candidates = [];
-			addOpen = false;
+			candidates = candidates.filter((row) => !added.some((hit) => hit.id === row.id || hit.path === row.path));
+			if (!scanCandidates.length) addOpen = false;
 			await refresh();
 		});
 	}
@@ -2747,7 +2765,10 @@
 					<input
 						type="checkbox"
 						aria-label={`enroll ${row.id}`}
-						bind:checked={selectedScan[row.absPath]}
+						checked={Boolean(selectedScan[row.absPath])}
+						onchange={(event) => {
+							selectedScan = { ...selectedScan, [row.absPath]: event.currentTarget.checked };
+						}}
 					/>
 					<div>
 						<div class="id">{row.id}</div>
@@ -2763,7 +2784,14 @@
 		</ul>
 		<div class="group-buttons">
 			<Tooltip title="Writes the ticked folders into localhelm.fleet.json. Does not copy or delete folders.">
-				<button class="btn btn-write" disabled={Boolean(busy) || !checkedScan.length} onclick={() => void applyEnroll(checkedScan)}>
+				<button
+					class="btn btn-write"
+					disabled={Boolean(busy) || !checkedScan.length}
+					onclick={() =>
+						void applyEnroll(
+							scanCandidates.filter((row) => selectedScan[row.absPath]).map((row) => row.absPath),
+						)}
+				>
 					<Icon icon="lucide:folder-plus" />
 					Add to fleet{checkedScan.length ? ` (${checkedScan.length})` : ''}
 				</button>

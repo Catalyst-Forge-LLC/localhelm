@@ -39,7 +39,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - DECIDED Phase 1: Public product CLI `localhelm`, never `helm`. WHY: name collisions; name reserved at 0.0.0.
 - DECIDED Phase 1: No shop shelf. Export generic JSON. WHY: public package; CF may consume later.
-- DECIDED Phase 1: Enroll is scan then confirm. WHY: fleet is chosen, not auto-enrolled. Dashboard Add: the tick list + Add to fleet is that confirm (d123). CLI still prints a plan and needs `--apply`.
+- DECIDED Phase 1: Enroll is scan then confirm. WHY: fleet is chosen, not auto-enrolled. Dashboard Add: the tick list + Add to fleet is that confirm (d123). CLI still prints a plan and needs `--apply`. Relative enroll paths resolve against the fleet workspace, not the Helm checkout cwd (a sibling named `acmegeek` is `workspace/acmegeek`, not `localhelm/acmegeek`). Skip reasons stay visible; do not claim enrolled when every row skipped.
 - DECIDED Phase 2: `.localhelmignore` (gitignore syntax) plus `~/.localhelm/ignore`. WHY: operator asked; scan must skip sandbox/noise folders. Hard skips still: `node_modules`, dot-dirs, `__*`.
 - DECIDED Phase 1: Apache-2.0. WHY: operator 2026-08-20.
 - DECIDED Phase 2: `push` is origin only, named ids on apply, dashboard confirm lists remotes. Never `--force`, never the backup remote. WHY: operator asked 2026-08-21; D13 later-milestone lifted.
