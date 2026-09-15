@@ -44,6 +44,54 @@ export type PortLookGroup = {
 	leaseIds: string[];
 };
 
+export type LookJumpId = 'ports' | 'stacks' | 'fleet' | 'add';
+
+export type LookJump = {
+	id: LookJumpId;
+	label: string;
+	title: string;
+};
+
+/** Where the operator can act — Ports cannot enroll, and claim stays on LocalSlip. */
+export function lookJump(kind: PortLookKind, opts?: { enrolled?: boolean }): LookJump {
+	if (kind === 'no-recipe') {
+		return { id: 'ports', label: 'Open Ports', title: 'Save a start recipe on this lease.' };
+	}
+	if (kind === 'family-split') {
+		return { id: 'stacks', label: 'Open Stacks', title: 'Start or stop the down members of this stack.' };
+	}
+	if (kind === 'lease-without-fleet') {
+		return { id: 'add', label: 'Add', title: 'This lease is not enrolled. Scan and enroll it from Add.' };
+	}
+	if (kind === 'fleet-without-lease') {
+		return {
+			id: 'ports',
+			label: 'Open Ports',
+			title: 'Helm does not claim ports. Ports shows the stack; claim the UI lease with localslip claim.',
+		};
+	}
+	if (kind === 'cwd-missing' && opts?.enrolled) {
+		return { id: 'fleet', label: 'Open Fleet', title: 'The recipe folder is missing. Fleet has the project path.' };
+	}
+	return {
+		id: 'ports',
+		label: 'Open Ports',
+		title: 'Recipe folder is missing. Ports shows the lease.',
+	};
+}
+
+export function lookJumpsFor(kinds: PortLookKind[], opts?: { enrolled?: boolean }): LookJump[] {
+	const seen = new Set<LookJumpId>();
+	const jumps: LookJump[] = [];
+	for (const kind of kinds) {
+		const jump = lookJump(kind, opts);
+		if (seen.has(jump.id)) continue;
+		seen.add(jump.id);
+		jumps.push(jump);
+	}
+	return jumps;
+}
+
 const SKIP_LEASE_WITHOUT_FLEET = new Set(['localslip', 'localberth']);
 
 function listeningOf(cells: Record<string, string>): boolean | null {

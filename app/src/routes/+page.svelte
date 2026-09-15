@@ -1953,6 +1953,9 @@
 				onSetTab={setTab}
 				onOpenCross={openCross}
 				onOpenPortsFamily={openPortsFamily}
+				onOpenAdd={() => {
+					addOpen = true;
+				}}
 				onOpenPortsStacks={openPortsStacks}
 			/>
 		{:else if tab === 'fleet'}

@@ -77,7 +77,7 @@ Cost: **Free** = format or filter existing JSON. **Cheap** = one extra local com
 - Lease with no recipe (from Ports plugin rows).
 - Recipe `cwd` missing (plugin cell or reason).
 - Family split: one sibling listening, another not.
-- Fleet id with no lease (and the reverse: lease with no fleet row) — **diff enroll vs slips**.
+- Fleet id with no lease (and the reverse: lease with no fleet row) — **diff enroll vs slips**. Jumps: recipe/split open Ports or Stacks; lease-without-fleet opens Add (Ports cannot enroll); missing cwd on an enrolled row opens Fleet.
 
 **F4. Publish confirm: commits since last npm.** We already have local version + `git`. `git log --oneline` from the tag or `v$local`..HEAD (skip if no tag). Stops “what am I shipping?” The confirm modal already lists rows. **Publish** uses the same count on origin (status `commitsSinceNpm`) and labels the next version (`Publish 0.1.17 · 4 commits`); hide the button and skip the plan when the count is 0.
 

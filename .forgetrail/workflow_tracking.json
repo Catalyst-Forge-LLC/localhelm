@@ -1685,6 +1685,19 @@
         "Keep one card per fact"
       ],
       "status": "active"
+    },
+    {
+      "id": "d122",
+      "timestamp": "2026-09-15T18:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Looks jumps follow the fact. Recipe and family-split open Ports or Stacks. Lease-without-fleet opens Add (Ports cannot enroll). Missing cwd on an enrolled row opens Fleet. Claim stays on LocalSlip.",
+      "rationale": "Operator 2026-09-15: Looks facts are not all actionable from the Ports tab (lease has no matching fleet row, and others).",
+      "alternatives_considered": [
+        "Keep a single Open Ports on every card",
+        "Hide the button when Ports cannot act"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

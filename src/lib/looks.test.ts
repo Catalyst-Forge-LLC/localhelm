@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { groupPortLooks, portFamilies, portLooks } from './looks.js';
+import { groupPortLooks, lookJump, lookJumpsFor, portFamilies, portLooks } from './looks.js';
 
 describe('port looks and families', () => {
 	it('groups a stack and reports listen bits', () => {
@@ -47,6 +47,17 @@ describe('port looks and families', () => {
 		assert.ok(acme.details.includes('No start recipe'));
 		assert.ok(acme.details.includes('Lease has no matching fleet row'));
 		assert.equal(grouped.filter((card) => card.title === 'acmegeek').length, 1);
+	});
+
+	it('sends enroll mismatches to Add, not Ports', () => {
+		assert.equal(lookJump('lease-without-fleet').id, 'add');
+		assert.equal(lookJump('no-recipe').id, 'ports');
+		assert.equal(lookJump('family-split').id, 'stacks');
+		assert.equal(lookJump('cwd-missing', { enrolled: true }).id, 'fleet');
+		assert.equal(lookJump('cwd-missing').id, 'ports');
+		assert.equal(lookJump('fleet-without-lease').id, 'ports');
+		const mixed = lookJumpsFor(['no-recipe', 'lease-without-fleet']);
+		assert.deepEqual(mixed.map((jump) => jump.id), ['ports', 'add']);
 	});
 
 	it('does not treat a -site lease as missing when the package is enrolled', () => {

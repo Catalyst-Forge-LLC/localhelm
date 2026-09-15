@@ -338,5 +338,5 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Deck tiles were disappearing into the hull (`--well` ≈ `--hull`). They now use frosted `--glass-fill` + blur, a cyan sheen, and a 125ms lift/glow hover. Still a phone tile grid.
 - Tooltips are Tippy throughout (`Tooltip` + `use:tip`). Native `title` help is gone. Helm theme is a HUD plate (ticks, `--hull-2`, overlay glow, 125ms fade).
 - Conn bay: 14-day write spark + caption under Refresh/Pull/Push (real activity counts). Activity drawer has a narrow day rail (Engram/Dictawhisper-style) that jumps the log.
-- Looks cards group by lease title. One row lists every fact for that id (recipe, cwd, enroll vs lease). Hint still counts facts.
+- Looks cards group by lease title. One row lists every fact for that id (recipe, cwd, enroll vs lease). Hint still counts facts. Jumps follow the fact: recipe/split → Ports or Stacks, missing folder on an enrolled row → Fleet, lease with no fleet row → Add. Claim stays on LocalSlip.
 - Chart grid stays on the whole shell. A cyan waterline plus a hull fade on the tab rail darkens stations without wiping the paper.

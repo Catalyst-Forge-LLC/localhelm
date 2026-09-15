@@ -6,7 +6,7 @@
 	import Tooltip from '$lib/Tooltip.svelte';
 	import type { CrossChip } from '$lib/crosswalk';
 	import type { CascadeTarget, NeedFilter, PluginBoard, PluginRow, Project } from '$lib/dashboardTypes';
-	import type { PortFamily, PortLookGroup } from '$lib/looks';
+	import { lookJumpsFor, type LookJump, type PortFamily, type PortLookGroup } from '$lib/looks';
 
 	export type TodayBadge = { text: string; tone: 'ship' | 'warn' | 'bad' | 'info'; title?: string };
 	export type TodayNeedAction = { id: string; label: string; title: string; run: () => void; disabled?: boolean };
@@ -52,6 +52,7 @@
 		onOpenCross,
 		onOpenPortsFamily,
 		onOpenPortsStacks,
+		onOpenAdd,
 	}: {
 		busy: boolean;
 		statusReady: boolean;
@@ -93,11 +94,33 @@
 		onOpenCross: (id: string, kind: 'fleet' | 'sites' | 'ports') => void;
 		onOpenPortsFamily: (ids: string[]) => void;
 		onOpenPortsStacks: () => void;
+		onOpenAdd: () => void;
 	} = $props();
 
 	const lookFactCount = $derived(
 		(portLookCards ?? []).reduce((n, card) => n + (card?.details?.length ?? 0), 0),
 	);
+
+	function lookJumps(look: PortLookGroup): LookJump[] {
+		const enrolled = chipsFor(look.title).some((chip) => chip.kind === 'fleet');
+		return lookJumpsFor(look.kinds ?? [], { enrolled });
+	}
+
+	function runLookJump(look: PortLookGroup, jump: LookJump): void {
+		if (jump.id === 'add') {
+			onOpenAdd();
+			return;
+		}
+		if (jump.id === 'stacks') {
+			onOpenPortsStacks();
+			return;
+		}
+		if (jump.id === 'fleet') {
+			onOpenCross(look.title, 'fleet');
+			return;
+		}
+		onOpenPortsFamily(look.leaseIds);
+	}
 </script>
 
 <div class="today-board">
@@ -267,7 +290,7 @@
 						{#if lookFactCount !== portLookCards.length}
 							on {portLookCards.length} lease{portLookCards.length === 1 ? '' : 's'}
 						{/if}
-						— missing recipe, split stack, or enroll vs lease. No gold write here.
+						— missing recipe, split stack, or enroll vs lease. Add enrolls; Ports does not.
 					{:else}
 						Ports facts (recipe, stack, enroll), not fleet writes.
 					{/if}
@@ -298,11 +321,13 @@
 							</div>
 							<div class="need-tools">
 								<div class="need-actions">
-									<Tooltip title="Opens Ports with these leases checked.">
-										<button type="button" class="btn btn-sm" onclick={() => onOpenPortsFamily(look.leaseIds)}>
-											Open Ports
-										</button>
-									</Tooltip>
+									{#each lookJumps(look) as jump (jump.id)}
+										<Tooltip title={jump.title}>
+											<button type="button" class="btn btn-sm" onclick={() => runLookJump(look, jump)}>
+												{jump.label}
+											</button>
+										</Tooltip>
+									{/each}
 								</div>
 							</div>
 						</li>
