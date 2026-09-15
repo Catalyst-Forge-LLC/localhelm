@@ -49,6 +49,8 @@ export type StatusOptions = {
 	onlyIds?: string[];
 	/** Drop the in-process npm latest cache (Refresh / fetch remotes). */
 	refreshNpm?: boolean;
+	/** After a git write: re-read ahead/behind only. Skip npm, globals, and commit-since-npm. */
+	gitOnly?: boolean;
 	onProgress?: (progress: StatusProgress) => void;
 };
 
@@ -92,6 +94,47 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 	const report = (phase: StatusPhase, done?: number, total?: number): void => {
 		options.onProgress?.({ phase, label: statusPhaseLabel(phase, done, total), done, total });
 	};
+	if (options.gitOnly) {
+		report('git', 0, listed.length);
+		const gitOnlyRows = listed.map((project) => ({
+			id: project.id,
+			path: project.path,
+			absPath: joinRoot(loaded.workspaceRoot, project.path),
+		}));
+		const exists = await mapPool(gitOnlyRows, GIT_POOL, async (row) => pathExists(row.absPath));
+		const gitCells = await mapPool(
+			gitOnlyRows,
+			GIT_POOL,
+			async (row, index) => (exists[index] ? readGitAsync(row.absPath, options.fetch === true) : EMPTY_GIT),
+			(done, total) => report('git', done, total),
+		);
+		const projects: ProjectStatus[] = gitOnlyRows.map((row, index) => ({
+			id: row.id,
+			path: row.path,
+			absPath: row.absPath,
+			missing: !exists[index],
+			localVersion: null,
+			private: false,
+			npm: { name: loaded.manifest.projects.find((project) => project.id === row.id)?.npm, status: 'none' },
+			git: gitCells[index] ?? EMPTY_GIT,
+			pins: [],
+			cascadeBehind: 0,
+			unpublishedAhead: false,
+		}));
+		return {
+			workspaceRoot: loaded.workspaceRoot,
+			manifestPath: loaded.manifestPath,
+			digest: {
+				projects: projects.length,
+				dirty: projects.filter((p) => p.git.dirty).length,
+				unpublishedAhead: 0,
+				cascadeBehind: 0,
+				missing: projects.filter((p) => p.missing).length,
+				npmErrors: 0,
+			},
+			projects,
+		};
+	}
 	report('packages', 0, listed.length);
 
 	for (const [index, project] of listed.entries()) {

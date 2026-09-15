@@ -30,6 +30,7 @@ export type DashboardJobHost = {
 		ids?: string[];
 		extras?: boolean;
 		freshNpm?: boolean;
+		gitOnly?: boolean;
 	}): Promise<void>;
 	loadPluginBoards(): Promise<void>;
 	readyNamed(ids: string[]): string[];

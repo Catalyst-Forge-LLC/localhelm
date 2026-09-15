@@ -801,9 +801,21 @@
 		};
 	}
 
-	function mergeInventory(prev: Inventory, next: Inventory): Inventory {
+	function mergeInventory(prev: Inventory, next: Inventory, gitOnly = false): Inventory {
 		const byId = new Map(prev.projects.map((row) => [row.id, row]));
-		for (const row of next.projects) byId.set(row.id, row);
+		for (const row of next.projects) {
+			const prior = byId.get(row.id);
+			if (gitOnly && prior) {
+				byId.set(row.id, {
+					...prior,
+					git: row.git,
+					missing: row.missing,
+					absPath: row.absPath || prior.absPath,
+				});
+				continue;
+			}
+			byId.set(row.id, row);
+		}
 		const order = prev.projects.map((row) => row.id);
 		const projects = [
 			...order.map((id) => byId.get(id)).filter((row): row is Project => Boolean(row)),
@@ -894,6 +906,7 @@
 		ids?: string[];
 		extras?: boolean;
 		freshNpm?: boolean;
+		gitOnly?: boolean;
 	} = {}): Promise<void> {
 		const ids = opts.ids?.filter(Boolean) ?? [];
 		const scoped = ids.length > 0;
@@ -901,11 +914,13 @@
 		query.set('progress', '1');
 		if (opts.fetchRemotes) query.set('fetch', '1');
 		if (opts.freshNpm) query.set('fresh', '1');
+		if (opts.gitOnly) query.set('git', '1');
 		const csv = scoped ? serializeListParam(ids) : null;
 		if (csv) query.set('ids', csv);
 		const data = (await callNdjson(`/api/status?${query}`, { method: 'GET' }, (event) => {
 			if (event.type === 'progress' && typeof event.label === 'string' && event.label.trim()) {
 				statusNote = event.label;
+				if (busy) busy = event.label;
 			}
 		})) as {
 			inventory: Inventory | null;
@@ -918,7 +933,7 @@
 			landPending?: string[];
 			landPendingReasons?: Record<string, string>;
 		};
-		if (scoped && inventory && data.inventory) inventory = mergeInventory(inventory, data.inventory);
+		if (scoped && inventory && data.inventory) inventory = mergeInventory(inventory, data.inventory, opts.gitOnly === true);
 		else inventory = data.inventory;
 		cwd = data.cwd;
 		host = data.host ?? null;

@@ -248,7 +248,8 @@ export function createFleetWrites(host: DashboardJobHost) {
 				host.note(`commit --apply ${id}`, row);
 				host.setConfirmPhases(markCommitKeys(id, 'done'));
 			});
-			await host.loadStatus({ ids: named, extras: false });
+			host.setBusy(named.length === 1 ? 'reading git' : `reading git (${named.length} projects)`);
+			await host.loadStatus({ ids: named, extras: false, gitOnly: true });
 		});
 	}
 
@@ -313,7 +314,8 @@ export function createFleetWrites(host: DashboardJobHost) {
 			});
 			const eligible = rows.filter((r) => r.action === 'pull');
 			host.note(`pull --apply — ${eligible.length} repo(s) fast-forwarded`, { rows });
-			await host.loadStatus({ ids });
+			host.setBusy(ids.length === 1 ? 'reading git' : `reading git (${ids.length} projects)`);
+			await host.loadStatus({ ids, extras: false, gitOnly: true });
 		});
 	}
 
@@ -378,7 +380,8 @@ export function createFleetWrites(host: DashboardJobHost) {
 					: `push --apply — ${ok} pushed`,
 				{ rows },
 			);
-			await host.loadStatus({ ids });
+			host.setBusy(ids.length === 1 ? 'reading git' : `reading git (${ids.length} projects)`);
+			await host.loadStatus({ ids, extras: false, gitOnly: true });
 			if (failed.length) {
 				host.setError(failed.map((r) => `${r.id}: ${r.reason ?? 'push failed'}`).join(' · '));
 			}

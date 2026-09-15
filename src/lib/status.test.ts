@@ -41,6 +41,31 @@ describe('fleetStatus onlyIds', () => {
 		assert.equal(one.digest.projects, 1);
 	});
 
+	it('gitOnly skips npm and commit-count phases', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-status-git-'));
+		await mkdir(path.join(root, 'solo'));
+		await writeFile(
+			path.join(root, 'solo', 'package.json'),
+			'{\n  "name": "solo",\n  "version": "0.0.1",\n  "private": true\n}\n',
+		);
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: { workspaceRoot: '.', projects: [{ id: 'solo', path: 'solo', npm: 'solo' }] },
+		};
+		const phases: string[] = [];
+		const inventory = await fleetStatus(loaded, {
+			gitOnly: true,
+			onProgress: (progress) => phases.push(progress.phase),
+		});
+		assert.deepEqual(inventory.projects.map((row) => row.id), ['solo']);
+		assert.ok(phases.includes('git'));
+		assert.ok(!phases.includes('npm'));
+		assert.ok(!phases.includes('packages'));
+		assert.equal(inventory.projects[0]?.npm.status, 'none');
+		assert.equal(inventory.projects[0]?.commitsSinceNpm ?? null, null);
+	});
+
 	it('marks scripts.ship on root or site package.json', async () => {
 		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-status-ship-'));
 		await mkdir(path.join(root, 'forge'));

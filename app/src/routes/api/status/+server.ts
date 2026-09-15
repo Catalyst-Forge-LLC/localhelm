@@ -7,6 +7,10 @@ type Loaded = NonNullable<Awaited<ReturnType<typeof loadOptional>>>;
 
 let lastNpmUser: { user: string; at: number } | null = null;
 
+function peekNpmUser(): string | null {
+	return lastNpmUser?.user ?? null;
+}
+
 function currentNpmUser(): string | null {
 	if (lastNpmUser && Date.now() - lastNpmUser.at < 5 * 60_000) return lastNpmUser.user;
 	const user = npmWhoami();
@@ -42,17 +46,19 @@ async function statusBody(
 	opts: {
 		fetchRemotes: boolean;
 		refreshNpm: boolean;
+		gitOnly?: boolean;
 		onlyIds?: string[];
 		onProgress?: (progress: { phase: string; label: string; done?: number; total?: number }) => void;
 	},
 ): Promise<StatusBody> {
-	const npmUserP = Promise.resolve().then(() => currentNpmUser());
+	const npmUserP = opts.gitOnly ? Promise.resolve(peekNpmUser()) : Promise.resolve().then(() => currentNpmUser());
 	const landP = readLandPendingSiteIds(loaded.workspaceRoot);
 	const reasonsP = readLandPendingReasons(loaded.workspaceRoot);
 	const inventory = await fleetStatus(loaded, {
 		fetch: opts.fetchRemotes,
 		refreshNpm: opts.refreshNpm,
 		onlyIds: opts.onlyIds,
+		gitOnly: opts.gitOnly,
 		onProgress: opts.onProgress,
 	});
 	const [npmUser, landPending, landPendingReasons] = await Promise.all([npmUserP, landP, reasonsP]);
@@ -85,10 +91,12 @@ export const GET: RequestHandler = async ({ url }) => {
 		}
 		const fetchRemotes = url.searchParams.get('fetch') === '1';
 		const refreshNpm = url.searchParams.get('fresh') === '1' || fetchRemotes;
+		const gitOnly = url.searchParams.get('git') === '1';
 		const onlyIds = url.searchParams.get('ids')?.split(',').map((id) => id.trim()).filter(Boolean);
 		const opts = {
 			fetchRemotes,
 			refreshNpm,
+			gitOnly,
 			onlyIds: onlyIds?.length ? onlyIds : undefined,
 		};
 		if (url.searchParams.get('progress') !== '1') {

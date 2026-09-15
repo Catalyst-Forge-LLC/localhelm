@@ -1750,6 +1750,19 @@
         "Relative README path (GitHub private; npmjs 404)"
       ],
       "status": "active"
+    },
+    {
+      "id": "d127",
+      "timestamp": "2026-09-15T21:38:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "After dashboard Push, Pull, and Commit, reload git only for those ids. Skip npm latest, whoami, and commitsSinceNpm. Confirm busy switches to reading git so 26 of 26 is not left on screen during the refresh.",
+      "rationale": "Operator 2026-09-15: pushing 26 repos sat on the last name for minutes after every row looked done; the modal did close later. Progress was real; the hang was a full status reread.",
+      "alternatives_considered": [
+        "Close the modal immediately and refresh in the background (ahead counts would lag)",
+        "Keep full status but only change the busy label (still minutes of npm + pickaxe)"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
