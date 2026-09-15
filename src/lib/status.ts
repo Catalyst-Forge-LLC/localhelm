@@ -56,6 +56,7 @@ export type StatusOptions = {
 	onProgress?: (progress: StatusProgress) => void;
 };
 
+/** Progress copy for the dashboard busy line. */
 export function statusPhaseLabel(phase: StatusPhase, done?: number, total?: number): string {
 	if (phase === 'globals') return 'checking global installs';
 	const counted = total != null && total > 0 && done != null;
