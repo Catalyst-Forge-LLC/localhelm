@@ -52,8 +52,7 @@ async function statusBody(
 		onProgress?: (progress: { phase: string; label: string; done?: number; total?: number }) => void;
 	},
 ): Promise<StatusBody> {
-	const npmUserP =
-		opts.gitOnly || opts.skipCommitCounts ? Promise.resolve(peekNpmUser()) : Promise.resolve().then(() => currentNpmUser());
+	const npmUser = opts.gitOnly || opts.skipCommitCounts ? peekNpmUser() : currentNpmUser();
 	const landP = readLandPendingSiteIds(loaded.workspaceRoot);
 	const reasonsP = readLandPendingReasons(loaded.workspaceRoot);
 	const inventory = await fleetStatus(loaded, {
@@ -62,9 +61,10 @@ async function statusBody(
 		onlyIds: opts.onlyIds,
 		gitOnly: opts.gitOnly,
 		skipCommitCounts: opts.skipCommitCounts,
+		npmUser,
 		onProgress: opts.onProgress,
 	});
-	const [npmUser, landPending, landPendingReasons] = await Promise.all([npmUserP, landP, reasonsP]);
+	const [landPending, landPendingReasons] = await Promise.all([landP, reasonsP]);
 	return {
 		inventory,
 		workspaceRoot: loaded.workspaceRoot,

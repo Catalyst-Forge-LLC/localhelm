@@ -1802,6 +1802,21 @@
         "Keep both in Syne"
       ],
       "status": "active"
+    },
+    {
+      "id": "d131",
+      "timestamp": "2026-09-15T22:05:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "npm latest uses CLI: one `npm search maintainer:<whoami>` then leftover `npm view <name> version`. No anonymous registry /latest fetch. There is no `npm view --owner`.",
+      "rationale": "Operator 2026-09-15: use npm view not the web; asked if we can request all packages by owner like npm view --owner acmegeek. Search returns versions for the logged-in maintainer; enrolled names not on that list still view. Fleet ids are not the same as npm usernames.",
+      "alternatives_considered": [
+        "N npm view CLI processes with no owner seed",
+        "pacote.manifest pool (same client as view, extra 90 deps)",
+        "Keep GET registry.npmjs.org/<name>/latest",
+        "Treat fleet/site id acmegeek as the npm owner without whoami"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

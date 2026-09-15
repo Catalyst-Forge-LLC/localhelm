@@ -29,11 +29,14 @@ describe('fleetStatus onlyIds', () => {
 			},
 		};
 		const phases: string[] = [];
-		const all = await fleetStatus(loaded, { onProgress: (progress) => phases.push(progress.phase) });
+		const all = await fleetStatus(loaded, {
+			npmUser: null,
+			onProgress: (progress) => phases.push(progress.phase),
+		});
 		assert.equal(all.projects.length, 2);
 		assert.ok(phases.includes('packages'));
 		assert.ok(phases.includes('git'));
-		const one = await fleetStatus(loaded, { onlyIds: ['beta'] });
+		const one = await fleetStatus(loaded, { onlyIds: ['beta'], npmUser: null });
 		assert.deepEqual(
 			one.projects.map((row) => row.id),
 			['beta'],
@@ -78,7 +81,7 @@ describe('fleetStatus onlyIds', () => {
 			workspaceRoot: root,
 			manifest: { workspaceRoot: '.', projects: [{ id: 'solo', path: 'solo', npm: 'solo' }] },
 		};
-		const inventory = await fleetStatus(loaded, { skipCommitCounts: true });
+		const inventory = await fleetStatus(loaded, { skipCommitCounts: true, npmUser: null });
 		assert.equal(inventory.projects[0]?.commitsSinceNpm ?? null, null);
 	});
 
@@ -102,7 +105,7 @@ describe('fleetStatus onlyIds', () => {
 				],
 			},
 		};
-		const inventory = await fleetStatus(loaded);
+		const inventory = await fleetStatus(loaded, { npmUser: null });
 		assert.deepEqual(inventory.projects.find((row) => row.id === 'forge')?.ship, { dir: 'root' });
 		assert.equal(inventory.projects.find((row) => row.id === 'plain')?.ship, undefined);
 	});
@@ -114,11 +117,14 @@ describe('fleetStatus onlyIds', () => {
 			path.join(root, 'cli', 'package.json'),
 			'{\n  "name": "localhelm",\n  "version": "0.1.9",\n  "bin": { "localhelm": "./bin/localhelm.mjs" }\n}\n',
 		);
-		const inventory = await fleetStatus({
-			manifestPath: path.join(root, 'localhelm.fleet.json'),
-			workspaceRoot: root,
-			manifest: { workspaceRoot: '.', projects: [{ id: 'localhelm', path: 'cli', npm: 'localhelm' }] },
-		});
+		const inventory = await fleetStatus(
+			{
+				manifestPath: path.join(root, 'localhelm.fleet.json'),
+				workspaceRoot: root,
+				manifest: { workspaceRoot: '.', projects: [{ id: 'localhelm', path: 'cli', npm: 'localhelm' }] },
+			},
+			{ npmUser: null },
+		);
 		assert.deepEqual(inventory.projects[0]?.bin, ['localhelm']);
 		assert.ok(inventory.projects[0]?.global);
 		assert.equal(inventory.projects[0]?.commitsSinceNpm ?? null, null);

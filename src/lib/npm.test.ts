@@ -1,6 +1,16 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { mapPool, waitForNpmVersion, withPublishedLocal } from './npm.js';
+import {
+	clearNpmCache,
+	mapPool,
+	npmCliNotFound,
+	npmHasVersion,
+	npmLatestMany,
+	parseMaintainerSearchJson,
+	parseNpmViewVersion,
+	waitForNpmVersion,
+	withPublishedLocal,
+} from './npm.js';
 
 describe('mapPool', () => {
 	it('keeps order and runs more than one worker', async () => {
@@ -70,5 +80,68 @@ describe('waitForNpmVersion', () => {
 		});
 		assert.equal(cell.status, 'none');
 		assert.match(cell.error ?? '', /is not on npm yet/);
+	});
+});
+
+describe('npm maintainer search + view', () => {
+	it('parses search hits and quoted view versions', () => {
+		assert.deepEqual(
+			parseMaintainerSearchJson(
+				JSON.stringify([
+					{ name: 'localhelm', version: '0.1.20' },
+					{ package: { name: 'getfilepress', version: '0.2.0' } },
+				]),
+			),
+			[
+				{ name: 'localhelm', version: '0.1.20' },
+				{ name: 'getfilepress', version: '0.2.0' },
+			],
+		);
+		assert.equal(parseNpmViewVersion('"1.2.3"\n'), '1.2.3');
+		assert.equal(parseNpmViewVersion(JSON.stringify({ version: '4.5.6' })), '4.5.6');
+		assert.equal(npmCliNotFound('npm ERR! code E404', 1), true);
+		assert.equal(npmCliNotFound('npm ERR! code E429', 1), false);
+	});
+
+	it('seeds latest from maintainer search and views only leftovers', async () => {
+		clearNpmCache();
+		const calls: string[][] = [];
+		const byName = await npmLatestMany(['localhelm', 'solo-pkg'], 2, undefined, {
+			owner: 'acmegeek',
+			run: async (args) => {
+				calls.push([...args]);
+				if (args[0] === 'search') {
+					return {
+						status: 0,
+						stdout: JSON.stringify([{ name: 'localhelm', version: '0.1.20' }]),
+						stderr: '',
+					};
+				}
+				if (args[0] === 'view' && args[1] === 'solo-pkg') {
+					return { status: 0, stdout: '"0.3.0"\n', stderr: '' };
+				}
+				return { status: 1, stdout: '', stderr: `unexpected ${args.join(' ')}` };
+			},
+		});
+		assert.equal(byName.get('localhelm')?.latest, '0.1.20');
+		assert.equal(byName.get('solo-pkg')?.latest, '0.3.0');
+		assert.equal(calls.filter((args) => args[0] === 'search').length, 1);
+		assert.equal(calls.filter((args) => args[0] === 'view').length, 1);
+		assert.deepEqual(calls.find((args) => args[0] === 'search')?.slice(0, 2), [
+			'search',
+			'maintainer:acmegeek',
+		]);
+	});
+
+	it('treats npm view 404 as unpublished', async () => {
+		clearNpmCache();
+		const cell = await npmHasVersion('missing-pkg', '1.0.0', {
+			run: async () => ({
+				status: 1,
+				stdout: '',
+				stderr: 'npm ERR! code E404\nnpm ERR! 404 Not Found',
+			}),
+		});
+		assert.equal(cell.status, 'none');
 	});
 });

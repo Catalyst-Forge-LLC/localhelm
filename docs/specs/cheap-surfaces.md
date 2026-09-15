@@ -45,7 +45,7 @@ This week proved the pattern: a missing recipe, a hyphenated folder, and a leake
 | IngotVault column | M4 | Compose; do not reimplement remotes. |
 | Tag on bump | Later | Fine after cheap Today work. |
 | Watch list (packages outside the fleet) | `IDEAS.md` | Keep. Cheap if it is names + `npm view`, not a second fleet. |
-| npm lookup progress line | `IDEAS.md` | Keep. Status already fans out one request per name. |
+| npm lookup progress line | `IDEAS.md` | Keep. Status seeds from `npm search maintainer:<whoami>`, then leftover `npm view`. |
 | Ports start/stop + recipe guess | Shipped | Hyphen fold + `-api` strip shipped 2026-08-25. |
 
 ---

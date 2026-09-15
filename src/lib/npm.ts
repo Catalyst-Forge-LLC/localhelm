@@ -1,16 +1,26 @@
+import { spawn, spawnSync } from 'node:child_process';
 import { compareSemver } from './semver.js';
 import type { NpmCell } from './types.js';
 
 const TTL_MS = 5 * 60_000;
-const DEFAULT_CONCURRENCY = 8;
+const ERROR_TTL_MS = 30_000;
+const DEFAULT_CONCURRENCY = 4;
+const SEARCH_LIMIT = '250';
+const VIEW_TIMEOUT_MS = 20_000;
+const SEARCH_TIMEOUT_MS = 45_000;
 
 type CacheEntry = { cell: NpmCell; at: number };
 
 const cache = new Map<string, CacheEntry>();
 
-function encodeName(name: string): string {
-	return name.replaceAll('/', '%2f');
-}
+export type NpmCliResult = { status: number; stdout: string; stderr: string };
+export type NpmCliRun = (args: readonly string[], timeoutMs: number) => Promise<NpmCliResult>;
+
+export type NpmLookupOpts = {
+	/** `npm whoami` user. Seeds latest via `npm search maintainer:<owner>` (there is no `npm view --owner`). */
+	owner?: string | null;
+	run?: NpmCliRun;
+};
 
 /** Run `fn` over items with a fixed worker pool. Order of results matches `items`. */
 export async function mapPool<T, R>(
@@ -37,57 +47,219 @@ export async function mapPool<T, R>(
 	return results;
 }
 
-export async function npmLatest(name: string): Promise<NpmCell> {
-	const hit = cache.get(name);
-	if (hit && Date.now() - hit.at < TTL_MS) return hit.cell;
-	const url = `https://registry.npmjs.org/${encodeName(name)}/latest`;
-	try {
-		const res = await fetch(url, {
-			headers: { accept: 'application/json' },
-			signal: AbortSignal.timeout(15_000),
+function npmBin(): string {
+	return process.platform === 'win32' ? 'npm.cmd' : 'npm';
+}
+
+export function parseNpmWhoami(stdout: string): string | null {
+	const user = stdout
+		.trim()
+		.split(/\r?\n/)
+		.map((line) => line.trim())
+		.find((line) => line.length > 0 && !line.startsWith('npm '));
+	return user || null;
+}
+
+export function npmWhoami(): string | null {
+	const win = process.platform === 'win32';
+	const result = spawnSync(npmBin(), ['whoami'], {
+		encoding: 'utf8',
+		windowsHide: true,
+		shell: win,
+		timeout: 15_000,
+	});
+	if (result.error || result.status !== 0) return null;
+	return parseNpmWhoami(result.stdout ?? '');
+}
+
+export function runNpmCli(args: readonly string[], timeoutMs: number): Promise<NpmCliResult> {
+	return new Promise((resolve) => {
+		const win = process.platform === 'win32';
+		const child = spawn(npmBin(), [...args], { windowsHide: true, shell: win });
+		const out: Buffer[] = [];
+		const err: Buffer[] = [];
+		const finish = (result: NpmCliResult): void => {
+			clearTimeout(timer);
+			resolve(result);
+		};
+		const timer = setTimeout(() => {
+			child.kill();
+			finish({ status: 1, stdout: '', stderr: `npm timed out after ${Math.round(timeoutMs / 1000)}s` });
+		}, timeoutMs);
+		child.stdout?.on('data', (chunk: Buffer) => {
+			out.push(chunk);
 		});
-		if (res.status === 404) {
-			const cell: NpmCell = { name, status: 'none' };
-			cache.set(name, { cell, at: Date.now() });
-			return cell;
+		child.stderr?.on('data', (chunk: Buffer) => {
+			err.push(chunk);
+		});
+		child.on('error', (error) => {
+			finish({ status: 1, stdout: '', stderr: error.message });
+		});
+		child.on('close', (code) => {
+			finish({
+				status: code ?? 1,
+				stdout: Buffer.concat(out).toString('utf8'),
+				stderr: Buffer.concat(err).toString('utf8'),
+			});
+		});
+	});
+}
+
+function runner(opts?: NpmLookupOpts): NpmCliRun {
+	return opts?.run ?? runNpmCli;
+}
+
+export function parseMaintainerSearchJson(stdout: string): { name: string; version: string }[] {
+	const trimmed = stdout.trim();
+	if (!trimmed) return [];
+	let body: unknown;
+	try {
+		body = JSON.parse(trimmed);
+	} catch {
+		return [];
+	}
+	const rows = Array.isArray(body)
+		? body
+		: body && typeof body === 'object' && 'objects' in body && Array.isArray(body.objects)
+			? body.objects
+			: [];
+	const hits: { name: string; version: string }[] = [];
+	for (const row of rows) {
+		if (!row || typeof row !== 'object') continue;
+		const rec = row as Record<string, unknown>;
+		const pkg =
+			rec.package && typeof rec.package === 'object' ? (rec.package as Record<string, unknown>) : rec;
+		const name = typeof pkg.name === 'string' ? pkg.name : undefined;
+		const version = typeof pkg.version === 'string' ? pkg.version : undefined;
+		if (name && version) hits.push({ name, version });
+	}
+	return hits;
+}
+
+export function parseNpmViewVersion(stdout: string): string | undefined {
+	const trimmed = stdout.trim();
+	if (!trimmed) return undefined;
+	try {
+		const body: unknown = JSON.parse(trimmed);
+		if (typeof body === 'string' && body) return body;
+		if (body && typeof body === 'object' && 'version' in body && typeof body.version === 'string') {
+			return body.version;
 		}
-		if (!res.ok) {
-			const cell: NpmCell = { name, status: 'error', error: `npm HTTP ${res.status} for ${name}` };
-			cache.set(name, { cell, at: Date.now() });
-			return cell;
-		}
-		const body: unknown = await res.json();
-		const version =
-			body && typeof body === 'object' && 'version' in body && typeof body.version === 'string'
-				? body.version
-				: undefined;
-		if (!version) {
-			const cell: NpmCell = { name, status: 'error', error: `npm latest missing version for ${name}` };
-			cache.set(name, { cell, at: Date.now() });
-			return cell;
-		}
-		const cell: NpmCell = { name, latest: version, status: 'ok' };
-		cache.set(name, { cell, at: Date.now() });
-		return cell;
+	} catch {
+		if (/^\d+\.\d+/.test(trimmed)) return trimmed;
+	}
+	return undefined;
+}
+
+export function npmCliNotFound(stderr: string, status: number): boolean {
+	if (status === 0) return false;
+	return /\bE404\b|\b404\b|no such package|not found/i.test(stderr);
+}
+
+function cliMessage(stderr: string, fallback: string): string {
+	const line = stderr
+		.split(/\r?\n/)
+		.map((part) => part.trim())
+		.reverse()
+		.find((part) => part.length > 0 && !part.startsWith('npm notice'));
+	return line || fallback;
+}
+
+function cacheTtl(cell: NpmCell): number {
+	return cell.status === 'error' ? ERROR_TTL_MS : TTL_MS;
+}
+
+function cached(name: string): NpmCell | undefined {
+	const hit = cache.get(name);
+	if (!hit) return undefined;
+	if (Date.now() - hit.at >= cacheTtl(hit.cell)) {
+		cache.delete(name);
+		return undefined;
+	}
+	return hit.cell;
+}
+
+function remember(name: string, cell: NpmCell): NpmCell {
+	cache.set(name, { cell, at: Date.now() });
+	return cell;
+}
+
+function cellFromView(name: string, result: NpmCliResult): NpmCell {
+	if (result.status === 0) {
+		const version = parseNpmViewVersion(result.stdout);
+		if (version) return { name, latest: version, status: 'ok' };
+		return { name, status: 'error', error: `npm view missing version for ${name}` };
+	}
+	if (npmCliNotFound(result.stderr, result.status)) return { name, status: 'none' };
+	return { name, status: 'error', error: cliMessage(result.stderr, `npm view failed for ${name}`) };
+}
+
+async function viewLatest(name: string, run: NpmCliRun): Promise<NpmCell> {
+	const hit = cached(name);
+	if (hit) return hit;
+	try {
+		const result = await run(['view', name, 'version', '--json', '--prefer-online'], VIEW_TIMEOUT_MS);
+		return remember(name, cellFromView(name, result));
 	} catch (err) {
-		const cell: NpmCell = {
+		return remember(name, {
 			name,
 			status: 'error',
 			error: err instanceof Error ? err.message : String(err),
-		};
-		cache.set(name, { cell, at: Date.now() });
-		return cell;
+		});
 	}
+}
+
+async function seedMaintainerLatest(owner: string, run: NpmCliRun): Promise<void> {
+	const user = owner.trim();
+	if (!/^[a-z0-9._-]+$/i.test(user)) return;
+	try {
+		const result = await run(
+			['search', `maintainer:${user}`, '--json', '--searchlimit', SEARCH_LIMIT, '--prefer-online', '--no-description'],
+			SEARCH_TIMEOUT_MS,
+		);
+		if (result.status !== 0) return;
+		for (const hit of parseMaintainerSearchJson(result.stdout)) {
+			if (cached(hit.name)) continue;
+			remember(hit.name, { name: hit.name, latest: hit.version, status: 'ok' });
+		}
+	} catch {
+		// Leftover `npm view` fills the enrolled names.
+	}
+}
+
+export async function npmLatest(name: string, opts?: NpmLookupOpts): Promise<NpmCell> {
+	return viewLatest(name, runner(opts));
 }
 
 export async function npmLatestMany(
 	names: Iterable<string>,
 	concurrency = DEFAULT_CONCURRENCY,
 	onProgress?: (done: number, total: number) => void,
+	opts?: NpmLookupOpts,
 ): Promise<Map<string, NpmCell>> {
 	const list = [...new Set([...names].map((name) => name.trim()).filter(Boolean))];
-	const cells = await mapPool(list, concurrency, (name) => npmLatest(name), onProgress);
-	return new Map(list.map((name, i) => [name, cells[i] as NpmCell]));
+	const run = runner(opts);
+	const owner = opts?.owner?.trim();
+	if (owner && list.length) await seedMaintainerLatest(owner, run);
+	const missing = list.filter((name) => !cached(name));
+	const already = list.length - missing.length;
+	if (already && onProgress) onProgress(already, list.length);
+	if (missing.length) {
+		await mapPool(
+			missing,
+			concurrency,
+			(name) => viewLatest(name, run),
+			(done) => onProgress?.(already + done, list.length),
+		);
+	} else if (list.length && onProgress && !already) {
+		onProgress(list.length, list.length);
+	}
+	return new Map(
+		list.map((name) => [
+			name,
+			cached(name) ?? { name, status: 'error', error: `npm view missing result for ${name}` },
+		]),
+	);
 }
 
 export type WaitForNpmVersionOpts = {
@@ -98,7 +270,7 @@ export type WaitForNpmVersionOpts = {
 	probe?: (name: string, version: string) => Promise<NpmCell>;
 };
 
-/** Poll until this exact version is on the registry. `/latest` can lag a just-published tarball. */
+/** Poll until this exact version is on the registry. `npm view` latest can lag a just-published tarball. */
 export async function waitForNpmVersion(
 	name: string,
 	version: string,
@@ -122,22 +294,13 @@ export async function waitForNpmVersion(
 	return last;
 }
 
-export async function npmHasVersion(name: string, version: string): Promise<NpmCell> {
-	const url = `https://registry.npmjs.org/${encodeName(name)}/${encodeURIComponent(version)}`;
+export async function npmHasVersion(name: string, version: string, opts?: NpmLookupOpts): Promise<NpmCell> {
 	try {
-		const res = await fetch(url, {
-			headers: { accept: 'application/json' },
-			signal: AbortSignal.timeout(15_000),
-		});
-		if (res.status === 404) return { name, status: 'none' };
-		if (!res.ok) return { name, status: 'error', error: `npm HTTP ${res.status} for ${name}@${version}` };
-		const body: unknown = await res.json();
-		const found =
-			body && typeof body === 'object' && 'version' in body && typeof body.version === 'string'
-				? body.version
-				: undefined;
-		if (!found) return { name, status: 'error', error: `npm missing version for ${name}@${version}` };
-		return { name, latest: found, status: 'ok' };
+		const result = await runner(opts)(
+			['view', `${name}@${version}`, 'version', '--json', '--prefer-online'],
+			VIEW_TIMEOUT_MS,
+		);
+		return cellFromView(name, result);
 	} catch (err) {
 		return {
 			name,
@@ -151,7 +314,7 @@ export function clearNpmCache(): void {
 	cache.clear();
 }
 
-/** `/latest` can lag a just-published version. If local is already on the registry, treat it as latest. */
+/** Latest from search/view can lag a just-published version. If local is already on the registry, treat it as latest. */
 export function withPublishedLocal(latest: NpmCell, localVersion: string, localIsOnNpm: boolean): NpmCell {
 	if (!localIsOnNpm || latest.status !== 'ok' || !latest.latest) return latest;
 	const cmp = compareSemver(localVersion, latest.latest);

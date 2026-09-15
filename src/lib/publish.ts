@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { applyBump, planBump } from './bump.js';
 import { commitPaths, helmBumpMessage } from './commit.js';
 import { applyPush, readGit, type GitJobRow } from './git.js';
@@ -63,22 +63,7 @@ export function openInBrowser(url: string): void {
 	spawn('xdg-open', [url], { detached: true, stdio: 'ignore' }).unref();
 }
 
-export function npmWhoami(): string | null {
-	const win = process.platform === 'win32';
-	const result = spawnSync(win ? 'npm.cmd' : 'npm', ['whoami'], {
-		encoding: 'utf8',
-		windowsHide: true,
-		shell: win,
-		timeout: 15_000,
-	});
-	if (result.error || result.status !== 0) return null;
-	const user = (result.stdout ?? '')
-		.trim()
-		.split(/\r?\n/)
-		.map((line) => line.trim())
-		.find((line) => line.length > 0 && !line.startsWith('npm '));
-	return user || null;
-}
+export { npmWhoami } from './npm.js';
 
 export function requirePublishIds(ids: string[]): string[] {
 	const named = ids.map((id) => id.trim()).filter((id) => id.length > 0);

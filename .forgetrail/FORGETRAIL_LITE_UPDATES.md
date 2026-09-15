@@ -46,9 +46,9 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 
 ### 5. Dashboard boot must not serialize independent I/O or lock the chrome
 
-**What went wrong:** A fleet status route awaited `npm view`-style registry calls one package at a time (~33 sequential `registry.npmjs.org` hits → ~36s). Plugin `board()` hooks ran in a `for`/`await` loop (~13s). The client set `busy` for that read, which disabled the header and tabs until both finished. Roster JSON was already 4ms.
+**What went wrong:** A fleet status route awaited anonymous `GET registry.npmjs.org/<name>/latest` in a pool (easy 429; errors cached 5 minutes). `npm view` is one package per process — there is no `npm view --owner` or multi-name argv. Plugin `board()` hooks ran in a `for`/`await` loop (~13s). The client set `busy` for that read, which disabled the header and tabs until both finished. Roster JSON was already 4ms.
 
-**Suggested Lite change:** In dashboard / Phase 2 spine notes (§4.2): independent reads (registry, plugin boards, git) should fan out with a small pool; cache short-TTL process state across refresh. Do not disable navigation/chrome for a read — show an inline “reading…” line. Writes can still take the lock. Prefer a dedicated/network LLM host when the operator’s workstation is the busy box (ollanet-style discovery: remote first, localhost last).
+**Suggested Lite change:** In dashboard / Phase 2 spine notes (§4.2): independent reads (registry, plugin boards, git) should fan out with a small pool; cache short-TTL process state across refresh. Do not disable navigation/chrome for a read — show an inline “reading…” line. Writes can still take the lock. Prefer a dedicated/network LLM host when the operator’s workstation is the busy box (ollanet-style discovery: remote first, localhost last). For npm latest, prefer the CLI (`npm search maintainer:<whoami>` then leftover `npm view`) over anonymous `/latest` HTTP so npmrc/auth/cache apply.
 
 **Project pointer:** LocalHelm `src/lib/npm.ts` `npmLatestMany`, `src/lib/plugin.ts` `loadPluginDashboard`, `app/src/routes/+page.svelte` `readQuiet`.
 

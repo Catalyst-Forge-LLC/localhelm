@@ -1,6 +1,6 @@
 import { countCommitsSinceVersion, GIT_POOL, readGitAsync } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { clearNpmCache, liftLatestIfVersionExists, mapPool, npmLatestMany } from './npm.js';
+import { clearNpmCache, liftLatestIfVersionExists, mapPool, npmLatestMany, npmWhoami } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pinsFromPkg } from './pins.js';
 import { clearGlobalCache, readGlobalVersions } from './globalInstall.js';
@@ -53,6 +53,8 @@ export type StatusOptions = {
 	gitOnly?: boolean;
 	/** After a write: skip pickaxe commit-since-npm. npm cache still used unless refreshNpm. */
 	skipCommitCounts?: boolean;
+	/** `npm whoami` user. Seeds latest via `npm search maintainer:<user>`. */
+	npmUser?: string | null;
 	onProgress?: (progress: StatusProgress) => void;
 };
 
@@ -207,7 +209,10 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 	if (needsGlobalRead) report('globals');
 	const globals = needsGlobalRead ? readGlobalVersions(Boolean(options.refreshNpm || options.fetch)) : new Map<string, string>();
 	if (names.size) report('npm', 0, names.size);
-	const npmByName = await npmLatestMany(names, undefined, (done, total) => report('npm', done, total));
+	const owner = options.npmUser !== undefined ? options.npmUser : npmWhoami();
+	const npmByName = await npmLatestMany(names, undefined, (done, total) => report('npm', done, total), {
+		owner,
+	});
 	const latestByName = new Map<string, string>();
 	for (const [name, cell] of npmByName) {
 		if (cell.status === 'ok' && cell.latest) latestByName.set(name, cell.latest);
