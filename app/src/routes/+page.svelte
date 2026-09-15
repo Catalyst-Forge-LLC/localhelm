@@ -20,7 +20,7 @@
 	import { formatPluginPlanLines, pluginPlanLineKeys } from '$lib/pluginPlan';
 	import { formatBrief } from '$lib/briefFormat';
 	import { familyMemberNames } from '$lib/family';
-	import { portFamilies, portLooks, type PortFamily } from '$lib/looks';
+	import { groupPortLooks, portFamilies, portLooks, type PortFamily } from '$lib/looks';
 	import {
 		canCommit,
 		canPublish,
@@ -293,10 +293,12 @@
 		}),
 	);
 	const portLookCards = $derived(
-		portLooks({
-			fleetIds: visibleProjects.map((row) => row.id),
-			leaseRows: leaseBoard?.rows ?? [],
-		}),
+		groupPortLooks(
+			portLooks({
+				fleetIds: visibleProjects.map((row) => row.id),
+				leaseRows: leaseBoard?.rows ?? [],
+			}),
+		),
 	);
 	const cascadeOnlyRows = $derived(
 		cascadeTargets.filter(

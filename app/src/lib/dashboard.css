@@ -1310,6 +1310,13 @@
 		min-width: 0;
 	}
 
+	.look-facts {
+		display: flex;
+		flex-direction: column;
+		gap: 0.12rem;
+		margin-top: 0.12rem;
+	}
+
 	.need-refresh-slot {
 		display: inline-block;
 		width: 1.35rem;

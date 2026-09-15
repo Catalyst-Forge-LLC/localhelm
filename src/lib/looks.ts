@@ -36,6 +36,14 @@ export type PortLook = {
 	kind: PortLookKind;
 };
 
+export type PortLookGroup = {
+	id: string;
+	title: string;
+	details: string[];
+	kinds: PortLookKind[];
+	leaseIds: string[];
+};
+
 const SKIP_LEASE_WITHOUT_FLEET = new Set(['localslip', 'localberth']);
 
 function listeningOf(cells: Record<string, string>): boolean | null {
@@ -156,4 +164,27 @@ export function portLooks(opts: { fleetIds: string[]; leaseRows: LeaseRowInput[]
 	}
 
 	return looks;
+}
+
+export function groupPortLooks(looks: PortLook[]): PortLookGroup[] {
+	const groups = new Map<string, PortLookGroup>();
+	for (const look of looks) {
+		const existing = groups.get(look.title);
+		if (!existing) {
+			groups.set(look.title, {
+				id: look.title,
+				title: look.title,
+				details: [look.detail],
+				kinds: [look.kind],
+				leaseIds: [...look.leaseIds],
+			});
+			continue;
+		}
+		if (!existing.details.includes(look.detail)) existing.details.push(look.detail);
+		if (!existing.kinds.includes(look.kind)) existing.kinds.push(look.kind);
+		for (const id of look.leaseIds) {
+			if (!existing.leaseIds.includes(id)) existing.leaseIds.push(id);
+		}
+	}
+	return [...groups.values()].sort((a, b) => a.title.localeCompare(b.title));
 }

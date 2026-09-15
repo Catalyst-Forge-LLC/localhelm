@@ -1672,6 +1672,19 @@
         "Month-only rail (too coarse for a 200-entry log)"
       ],
       "status": "active"
+    },
+    {
+      "id": "d121",
+      "timestamp": "2026-09-15T18:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Looks pane groups port facts by lease title. One card lists every fact for that id; Open Ports still checks the merged lease set. Atomic portLooks() stays for tests.",
+      "rationale": "Operator 2026-09-15: Looks used multiple rows for the same site (recipe + enroll vs lease).",
+      "alternatives_considered": [
+        "Group by family stem (would merge UI/API/site ids)",
+        "Keep one card per fact"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

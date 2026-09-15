@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { portFamilies, portLooks } from './looks.js';
+import { groupPortLooks, portFamilies, portLooks } from './looks.js';
 
 describe('port looks and families', () => {
 	it('groups a stack and reports listen bits', () => {
@@ -31,6 +31,22 @@ describe('port looks and families', () => {
 		assert.ok(looks.some((look) => look.kind === 'family-split' && look.detail.includes('API down')));
 		assert.ok(looks.some((look) => look.kind === 'lease-without-fleet' && look.title === 'ghost'));
 		assert.ok(!looks.some((look) => look.kind === 'lease-without-fleet' && look.title === 'dictawhisper-api'));
+	});
+
+	it('groups multiple facts for the same lease onto one card', () => {
+		const looks = portLooks({
+			fleetIds: [],
+			leaseRows: [
+				{ id: 'acmegeek', cells: { listening: 'no', recipe: '—', cwdOk: 'yes' } },
+				{ id: 'ghost', cells: { listening: 'no', recipe: 'pnpm serve', cwdOk: 'yes' } },
+			],
+		});
+		const grouped = groupPortLooks(looks);
+		const acme = grouped.find((card) => card.title === 'acmegeek');
+		assert.ok(acme);
+		assert.ok(acme.details.includes('No start recipe'));
+		assert.ok(acme.details.includes('Lease has no matching fleet row'));
+		assert.equal(grouped.filter((card) => card.title === 'acmegeek').length, 1);
 	});
 
 	it('does not treat a -site lease as missing when the package is enrolled', () => {

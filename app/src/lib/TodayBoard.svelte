@@ -6,7 +6,7 @@
 	import Tooltip from '$lib/Tooltip.svelte';
 	import type { CrossChip } from '$lib/crosswalk';
 	import type { CascadeTarget, NeedFilter, PluginBoard, PluginRow, Project } from '$lib/dashboardTypes';
-	import type { PortFamily, PortLook } from '$lib/looks';
+	import type { PortFamily, PortLookGroup } from '$lib/looks';
 
 	export type TodayBadge = { text: string; tone: 'ship' | 'warn' | 'bad' | 'info'; title?: string };
 	export type TodayNeedAction = { id: string; label: string; title: string; run: () => void; disabled?: boolean };
@@ -70,7 +70,7 @@
 		needActions: (row: Project) => TodayNeedAction[];
 		cascadeFor: (id: string) => CascadeTarget | undefined;
 		gitSummary: (row: Project) => string;
-		portLookCards: PortLook[];
+		portLookCards: PortLookGroup[];
 		chipsFor: (id: string) => CrossChip[];
 		filepressBoard: PluginBoard | null;
 		sitesNeedingLand: PluginRow[];
@@ -94,6 +94,8 @@
 		onOpenPortsFamily: (ids: string[]) => void;
 		onOpenPortsStacks: () => void;
 	} = $props();
+
+	const lookFactCount = $derived(portLookCards.reduce((n, card) => n + card.details.length, 0));
 </script>
 
 <div class="today-board">
@@ -259,7 +261,11 @@
 				<h2>Looks</h2>
 				<p class="hint">
 					{#if portLookCards.length}
-						{portLookCards.length} Ports fact{portLookCards.length === 1 ? '' : 's'} — missing recipe, split stack, or enroll vs lease. No gold write here.
+						{lookFactCount} Ports fact{lookFactCount === 1 ? '' : 's'}
+						{#if lookFactCount !== portLookCards.length}
+							on {portLookCards.length} lease{portLookCards.length === 1 ? '' : 's'}
+						{/if}
+						— missing recipe, split stack, or enroll vs lease. No gold write here.
 					{:else}
 						Ports facts (recipe, stack, enroll), not fleet writes.
 					{/if}
@@ -280,8 +286,12 @@
 									<span class="id">{look.title}</span>
 									<CrossChips compact chips={chipsFor(look.title)} onOpen={(kind) => onOpenCross(look.title, kind)} />
 								</div>
-								<Tooltip wide title={look.detail}>
-									<div class="dim small">{look.detail}</div>
+								<Tooltip wide title={look.details.join(' · ')}>
+									<div class="look-facts">
+										{#each look.details as detail (detail)}
+											<div class="dim small">{detail}</div>
+										{/each}
+									</div>
 								</Tooltip>
 							</div>
 							<div class="need-tools">
