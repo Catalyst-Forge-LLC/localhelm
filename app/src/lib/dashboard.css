@@ -130,6 +130,10 @@
 		color: var(--dim);
 		font-family: inherit;
 		cursor: pointer;
+		transition:
+			background-color var(--hud-fade) ease,
+			border-color var(--hud-fade) ease,
+			box-shadow var(--hud-fade) ease;
 	}
 
 	.lamp:hover {
@@ -369,6 +373,11 @@
 		font-size: 0.8rem;
 		cursor: pointer;
 		text-decoration: none;
+		transition:
+			background-color var(--hud-fade) ease,
+			border-color var(--hud-fade) ease,
+			box-shadow var(--hud-fade) ease,
+			color var(--hud-fade) ease;
 	}
 
 	.btn:hover:not(:disabled) {
@@ -415,6 +424,10 @@
 		color: var(--dim);
 		font-family: inherit;
 		cursor: pointer;
+		transition:
+			background-color var(--hud-fade) ease,
+			border-color var(--hud-fade) ease,
+			color var(--hud-fade) ease;
 	}
 
 	.chip.hot {
@@ -559,6 +572,15 @@
 		.lamp.live .lamp-dot {
 			animation: none;
 		}
+
+		.btn,
+		.chip,
+		.lamp,
+		.tab,
+		.gauge,
+		tbody tr {
+			transition: none;
+		}
 	}
 
 	.gauge {
@@ -572,6 +594,7 @@
 		background: transparent;
 		color: var(--cyan);
 		cursor: pointer;
+		transition: color var(--hud-fade) ease;
 	}
 
 	.gauge:hover {
@@ -678,6 +701,11 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.4rem;
+		transition:
+			background-color var(--hud-fade) ease,
+			border-color var(--hud-fade) ease,
+			color var(--hud-fade) ease,
+			text-shadow var(--hud-fade) ease;
 	}
 
 	.tab:hover {
@@ -990,12 +1018,19 @@
 		vertical-align: top;
 	}
 
+	tbody tr {
+		transition:
+			background-color var(--hud-fade) ease,
+			box-shadow var(--hud-fade) ease;
+	}
+
 	tbody tr:nth-child(even) {
 		background: rgb(126 244 255 / 0.03);
 	}
 
 	tbody tr:hover {
-		background: rgb(201 162 39 / 0.08);
+		background: rgb(201 162 39 / 0.1);
+		box-shadow: inset 0 0 0 1px rgb(201 162 39 / 0.35), 0 0 14px rgb(201 162 39 / 0.12);
 	}
 
 	.tick {

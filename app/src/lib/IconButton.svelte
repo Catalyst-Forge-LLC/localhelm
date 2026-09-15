@@ -59,6 +59,11 @@
 		border-radius: var(--plate-radius-sm, 0 0 5px 5px);
 		font-size: 1.05rem;
 		cursor: pointer;
+		transition:
+			background-color var(--hud-fade, 0.125s) ease,
+			border-color var(--hud-fade, 0.125s) ease,
+			box-shadow var(--hud-fade, 0.125s) ease,
+			color var(--hud-fade, 0.125s) ease;
 	}
 
 	.icon-btn:hover:not(:disabled) {
@@ -108,5 +113,11 @@
 		border-color: var(--gold, #c9a227);
 		background: rgb(201 162 39 / 0.16);
 		color: var(--gold-soft, #fde68a);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.icon-btn {
+			transition: none;
+		}
 	}
 </style>

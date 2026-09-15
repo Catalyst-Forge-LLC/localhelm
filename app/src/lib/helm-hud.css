@@ -19,6 +19,7 @@
 	--keel-radius-sm: 5px;
 	--plate-radius: 0 0 var(--keel-radius) var(--keel-radius);
 	--plate-radius-sm: 0 0 var(--keel-radius-sm) var(--keel-radius-sm);
+	--hud-fade: 0.125s;
 }
 
 .helm-chart {
