@@ -1,0 +1,26 @@
+/* Shared HUD tokens. Imported by the operator board and Deck. */
+:root {
+	--hull: #03060c;
+	--hull-2: #1c1c21;
+	--hairline: #1f1f22;
+	--steel: #3a5a70;
+	--well: #060a13;
+	--gold: #c9a227;
+	--gold-soft: #fde68a;
+	--ice: #93c5fd;
+	--cyan: #7ef4ff;
+	--cyan-dim: rgb(126 244 255 / 0.62);
+	--cyan-glow: rgb(126 244 255 / 0.42);
+	--grid: rgb(126 244 255 / 0.11);
+	--chart-size: 1.25rem;
+	--alarm: #f87171;
+	--dim: #a8a8b0;
+}
+
+.helm-chart {
+	background:
+		linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 100% var(--chart-size),
+		linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / var(--chart-size) 100%,
+		var(--hull);
+	color: #ececef;
+}

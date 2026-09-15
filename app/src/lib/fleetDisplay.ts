@@ -1,4 +1,6 @@
 export {
+	BRIDGE_GAUGE_C,
+	bridgeGaugeFrac,
 	bridgeIdleLine,
 	bridgeServeHeading,
 	fleetProjectMeta,
@@ -6,4 +8,4 @@ export {
 	fleetVersionNote,
 	headerNeedChips,
 } from '../../../src/lib/fleetDisplay.js';
-export type { BridgeIdleInput, HeaderNeedChip } from '../../../src/lib/fleetDisplay.js';
+export type { BridgeGauge, BridgeIdleInput, HeaderNeedChip } from '../../../src/lib/fleetDisplay.js';

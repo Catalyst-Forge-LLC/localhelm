@@ -87,6 +87,22 @@ export type BridgeIdleInput = {
 	npmUser: string | null;
 };
 
+export type BridgeGauge = {
+	id: 'fleet' | 'sites' | 'slips';
+	label: string;
+	count: number;
+	need: number;
+};
+
+/** Need share of the count, 0..1. Empty sets stay 0 (quiet ring). */
+export function bridgeGaugeFrac(count: number, need: number): number {
+	if (count <= 0) return 0;
+	return Math.min(1, Math.max(0, need / count));
+}
+
+/** Circumference of the 14px-radius HUD dial. */
+export const BRIDGE_GAUGE_C = 2 * Math.PI * 14;
+
 /** Keel idle copy. Order: Fleet N · hidden · remotes · stale · npm */
 export function bridgeIdleLine(input: BridgeIdleInput): string {
 	const parts = [`Fleet ${input.fleetCount}`];

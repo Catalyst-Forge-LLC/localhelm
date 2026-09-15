@@ -328,5 +328,6 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - Bridge header locked (§10 answers) and peeled to `BridgeHeader.svelte`. First chrome pass still looked like the old toolbar. Second pass: visible `--steel` bay/keel dividers, lamp plates with count + word + on-halo, recessed mono keel. Deck unchanged.
 - HUD pass after operator reference boards: chart-grid hull, corner-bracket bays, stacked instrument lamps (mono count over tracked label), cyan Refresh / gold Pull-Push plates, glowing keel with busy/error marker. Spec §3.1 states the sea/space mix per element; G4 is now corner brackets.
-- Brighter HUD carried to stations and body: shell chart grid, cyan tab underline, steel/well panels with corner ticks, gold writes. IconButton / HelmMenu / chips follow tokens. Deck still has its own grey tiles.
+- Brighter HUD carried to stations and body: shell chart grid, cyan tab underline, steel/well panels with corner ticks, gold writes. IconButton / HelmMenu / chips follow tokens.
+- Bridge layout: keel lives in the situation bay; Fleet / Sites / Slips dials (need/count) sit between lamps and Refresh. Deck imports `helm-hud.css` — chart hull, cyan header, bracketed tiles.
 - Deck tile initials hide once the favicon loads (they showed through transparent logos).

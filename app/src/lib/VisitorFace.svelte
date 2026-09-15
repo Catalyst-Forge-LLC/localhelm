@@ -36,7 +36,7 @@
 	});
 </script>
 
-<div class="visit">
+<div class="visit helm-chart">
 	<header>
 		<img class="mark" src="/logo.png" alt="" width="72" height="48" />
 		<span class="word">Deck</span>
@@ -82,8 +82,6 @@
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
-		background: #1c1c21;
-		color: #ececef;
 	}
 	header {
 		display: flex;
@@ -91,7 +89,9 @@
 		align-items: center;
 		gap: 0.55rem 0.75rem;
 		padding: 0.65rem 1.1rem;
-		background: #111114;
+		background: var(--well, #111114);
+		border-bottom: 1px solid var(--cyan-dim, #2e2e36);
+		box-shadow: 0 1px 14px var(--cyan-glow, transparent);
 	}
 	.mark {
 		display: block;
@@ -100,15 +100,19 @@
 	}
 	.word {
 		font-weight: 600;
-		letter-spacing: -0.02em;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--cyan, #ececef);
+		text-shadow: 0 0 10px var(--cyan-glow, transparent);
 	}
 	.meta,
 	.dot {
 		border: 0;
 		background: none;
-		color: rgba(255, 255, 255, 0.72);
+		color: var(--dim, rgba(255, 255, 255, 0.72));
 		font: inherit;
-		font-size: 0.875rem;
+		font-size: 0.8rem;
+		letter-spacing: 0.04em;
 		padding: 0;
 	}
 	.meta {
@@ -116,7 +120,7 @@
 		text-decoration: none;
 	}
 	.meta:hover {
-		color: #fff;
+		color: var(--cyan, #fff);
 	}
 	main {
 		flex: 1;
@@ -134,12 +138,12 @@
 	}
 	.empty {
 		margin: 0;
-		color: #b4b4bc;
+		color: var(--dim, #b4b4bc);
 		font-size: 0.9rem;
 		line-height: 1.45;
 	}
 	.empty code {
-		color: #ececef;
+		color: var(--cyan, #ececef);
 	}
 	footer {
 		display: flex;
@@ -147,8 +151,8 @@
 		gap: 1rem;
 		padding: 0.7rem 1.1rem;
 		padding-bottom: max(0.7rem, env(safe-area-inset-bottom));
-		border-top: 1px solid #2e2e36;
-		color: #8b8b93;
+		border-top: 1px solid var(--steel, #2e2e36);
+		color: var(--dim, #8b8b93);
 		font-size: 0.8rem;
 	}
 	footer a {

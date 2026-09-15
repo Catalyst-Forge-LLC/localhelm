@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '$lib/helm-hud.css';
 	import VisitorFace from '$lib/VisitorFace.svelte';
 
 	let { data } = $props();

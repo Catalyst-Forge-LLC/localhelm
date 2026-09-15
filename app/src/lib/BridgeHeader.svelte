@@ -2,7 +2,7 @@
 	import Icon from './Icon.svelte';
 	import IconButton from './IconButton.svelte';
 	import Tooltip from './Tooltip.svelte';
-	import { bridgeIdleLine, type HeaderNeedChip } from './fleetDisplay';
+	import { BRIDGE_GAUGE_C, bridgeGaugeFrac, bridgeIdleLine, type BridgeGauge, type HeaderNeedChip } from './fleetDisplay';
 	import type { NeedFilter } from './dashboardTypes';
 
 	let {
@@ -18,6 +18,7 @@
 		needChips,
 		fleetCount,
 		hiddenCount = 0,
+		gauges,
 		activityOpen,
 		activityBadge = '',
 		onRefresh,
@@ -25,6 +26,7 @@
 		onPush,
 		onToggleActivity,
 		onLamp,
+		onGauge,
 		children,
 	}: {
 		busy: string;
@@ -39,6 +41,7 @@
 		needChips: HeaderNeedChip[];
 		fleetCount: number;
 		hiddenCount?: number;
+		gauges: BridgeGauge[];
 		activityOpen: boolean;
 		activityBadge?: string | number;
 		onRefresh: () => void;
@@ -46,6 +49,7 @@
 		onPush: () => void;
 		onToggleActivity: () => void;
 		onLamp: (filter: NeedFilter) => void;
+		onGauge: (id: BridgeGauge['id']) => void;
 		children: import('svelte').Snippet;
 	} = $props();
 
@@ -65,11 +69,6 @@
 		if (error) return 'err';
 		return 'idle';
 	});
-	const npmHeading = $derived.by(() => {
-		if (npmUser) return `npm ${npmUser}`;
-		if (statusReady) return 'npm not signed in';
-		return '';
-	});
 </script>
 
 <header class="bridge">
@@ -79,22 +78,14 @@
 				<img class="mark" src="/logo.png" alt="" width="96" height="64" />
 				<div class="brand-copy">
 					<h1>LocalHelm</h1>
-					{#if serveHostPort || npmHeading}
+					{#if serveHostPort}
 						<p class="heading-line">
-							{#if serveHostPort}
-								{#if serveNote}
-									<Tooltip title={serveNote}>
-										<code class="heading-host">{serveHostPort}</code>
-									</Tooltip>
-								{:else}
+							{#if serveNote}
+								<Tooltip title={serveNote}>
 									<code class="heading-host">{serveHostPort}</code>
-								{/if}
-							{/if}
-							{#if serveHostPort && npmHeading}
-								<span class="heading-sep" aria-hidden="true">·</span>
-							{/if}
-							{#if npmHeading}
-								<span class="heading-npm">{npmHeading}</span>
+								</Tooltip>
+							{:else}
+								<code class="heading-host">{serveHostPort}</code>
 							{/if}
 						</p>
 					{/if}
@@ -135,6 +126,37 @@
 			{:else}
 				<p class="reading">Reading…</p>
 			{/if}
+			<div class="bridge-keel status-rail" data-bridge="keel" aria-live="polite">
+				<p class="line {keelKind}" class:live={reading}>{keelText}</p>
+			</div>
+		</div>
+
+		<div class="bridge-scope" data-bridge="scope" role="group" aria-label="Fleet, sites, and slips">
+			{#each gauges as gauge (gauge.id)}
+				{@const frac = bridgeGaugeFrac(gauge.count, gauge.need)}
+				{@const filled = BRIDGE_GAUGE_C * frac}
+				<button
+					type="button"
+					class="gauge"
+					class:hot={gauge.need > 0}
+					title="{gauge.count} {gauge.label.toLowerCase()}{gauge.need ? ` · ${gauge.need} need you` : ''}"
+					aria-label="{gauge.count} {gauge.label}{gauge.need ? `, ${gauge.need} need you` : ''} — open {gauge.label}"
+					onclick={() => onGauge(gauge.id)}
+				>
+					<svg class="dial" viewBox="0 0 36 36" aria-hidden="true">
+						<circle class="dial-track" cx="18" cy="18" r="14" />
+						<circle
+							class="dial-arc"
+							cx="18"
+							cy="18"
+							r="14"
+							stroke-dasharray="{filled} {BRIDGE_GAUGE_C}"
+						/>
+					</svg>
+					<span class="gauge-count">{gauge.count}</span>
+					<span class="gauge-word">{gauge.label}</span>
+				</button>
+			{/each}
 		</div>
 
 		<div class="bridge-conn" data-bridge="conn">
@@ -178,8 +200,5 @@
 				{@render children()}
 			</div>
 		</div>
-	</div>
-	<div class="bridge-keel status-rail" data-bridge="keel" aria-live="polite">
-		<p class="line {keelKind}" class:live={reading}>{keelText}</p>
 	</div>
 </header>

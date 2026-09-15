@@ -47,7 +47,7 @@
 	} from '$lib/publishBatch';
 	import { clearLandBatch, loadLandBatch, persistLandSnap } from '$lib/landBatch';
 	import { emptyConfirmPhases, markConfirmKey, type ConfirmPhase } from '$lib/confirmProgress';
-	import { bridgeServeHeading, fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
+	import { bridgeServeHeading, fleetProjectMeta, fleetVersionLabel, headerNeedChips, type BridgeGauge } from '$lib/fleetDisplay';
 	import { formatActivityAt } from '$lib/formatTime';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
@@ -258,6 +258,21 @@
 		(observedBoard?.rows ?? []).filter((row) => rowMatchesPortFilters(row.cells, observedFilters, 'observed')),
 	);
 	const portsNeedingYou = $derived((leaseBoard?.rows ?? []).filter((row) => portNeedsYou(row.cells)));
+	const siteCount = $derived(filepressBoard?.rows.length ?? 0);
+	const slipCount = $derived(leaseBoardAll?.rows.length ?? 0);
+	const fleetNeed = $derived(
+		inventory
+			? inventory.digest.unpublishedAhead +
+				inventory.digest.dirty +
+				inventory.digest.cascadeBehind +
+				inventory.digest.missing
+			: 0,
+	);
+	const bridgeGauges = $derived.by((): BridgeGauge[] => [
+		{ id: 'fleet', label: 'Fleet', count: fleetCount, need: fleetNeed },
+		{ id: 'sites', label: 'Sites', count: siteCount, need: sitesNeedingYou.length },
+		{ id: 'slips', label: 'Slips', count: slipCount, need: portsNeedingYou.length },
+	]);
 	const portFamilyCards = $derived(
 		portFamilies({
 			fleetIds: visibleProjects.map((row) => row.id),
@@ -1792,7 +1807,7 @@
 	}}
 />
 
-<div class="shell">
+<div class="shell helm-chart">
 	<BridgeHeader
 		{busy}
 		{statusNote}
@@ -1806,6 +1821,7 @@
 		{needChips}
 		{fleetCount}
 		{hiddenCount}
+		gauges={bridgeGauges}
 		{activityOpen}
 		activityBadge={activityUnseen ? 'new' : entries.length || ''}
 		onRefresh={() => void refresh()}
@@ -1815,6 +1831,11 @@
 		onLamp={(filter) => {
 			setTab('today');
 			needFilter = filter;
+		}}
+		onGauge={(id) => {
+			if (id === 'fleet') setTab('fleet');
+			else if (id === 'sites') setTab('filepress');
+			else setTab('localslip');
 		}}
 	>
 		<HelmMenu

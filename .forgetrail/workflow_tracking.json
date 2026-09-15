@@ -1632,6 +1632,19 @@
         "Brighten the header only",
         "Restyle Deck to match"
       ],
+      "status": "superseded"
+    },
+    {
+      "id": "d118",
+      "timestamp": "2026-09-15T15:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 46,
+      "decision": "Keel status sits in the situation bay under the lamps, not a full-width strip under the logo. Three HUD dials (Fleet / Sites / Slips) show enrolled counts; the arc is need/count from digest and plugin boards. Click opens that station. Deck imports helm-hud.css and uses the same hull, brackets, and cyan band.",
+      "rationale": "Operator 2026-09-15: header space felt awkward; put loading status in the gap; add a dial/spark for fleet/slips/sites; update Deck too.",
+      "alternatives_considered": [
+        "Leave the keel as a full-width strip",
+        "Decorative radar not tied to counts"
+      ],
       "status": "active"
     }
   ],

@@ -136,13 +136,24 @@
 
 <style>
 	.tile {
+		--edge: var(--cyan-dim, #3a5a70);
+		--tick: 0.7rem;
 		display: flex;
 		min-height: 9.5rem;
 		flex-direction: column;
 		overflow: hidden;
-		border: 1px solid #3a3a42;
-		border-radius: 10px;
-		background: #2a2a32;
+		border: 1px solid var(--steel, #3a3a42);
+		border-radius: 2px;
+		background:
+			linear-gradient(var(--edge), var(--edge)) top left / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) top right / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) top right / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom left / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom left / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom right / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom right / 1px var(--tick) no-repeat,
+			var(--well, #2a2a32);
 		color: #ececef;
 		text-decoration: none;
 		text-align: center;
@@ -151,7 +162,16 @@
 		-webkit-touch-callout: none;
 	}
 	a.tile:hover {
-		background: #32323a;
+		background:
+			linear-gradient(var(--edge), var(--edge)) top left / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) top right / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) top right / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom left / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom left / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom right / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom right / 1px var(--tick) no-repeat,
+			rgb(126 244 255 / 0.06);
 	}
 	.face {
 		display: flex;
@@ -171,11 +191,11 @@
 		align-items: center;
 		justify-content: center;
 		overflow: hidden;
-		border-radius: 0.75rem;
-		background: rgba(255, 255, 255, 0.06);
+		border-radius: 2px;
+		background: rgb(126 244 255 / 0.06);
 		font-size: 1.1rem;
 		font-weight: 600;
-		color: #b4b4bc;
+		color: var(--dim, #b4b4bc);
 	}
 	.icon img {
 		position: absolute;
@@ -198,8 +218,9 @@
 		width: 100%;
 		align-items: center;
 		justify-content: center;
-		background: #111114;
-		color: #ececef;
+		background: var(--well, #111114);
+		border-top: 1px solid var(--cyan-dim, #2e2e36);
+		color: var(--cyan, #ececef);
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 		font-size: 0.875rem;
 	}

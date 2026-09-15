@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
+	bridgeGaugeFrac,
 	bridgeIdleLine,
 	bridgeServeHeading,
 	fleetProjectMeta,
@@ -114,6 +115,13 @@ describe('fleetDisplay', () => {
 			}),
 			'Fleet 43 · remotes fetched 9:41:07 PM · 3 could not be read · npm acme',
 		);
+	});
+
+	it('maps gauge need to a 0..1 arc share', () => {
+		assert.equal(bridgeGaugeFrac(0, 2), 0);
+		assert.equal(bridgeGaugeFrac(10, 0), 0);
+		assert.equal(bridgeGaugeFrac(10, 5), 0.5);
+		assert.equal(bridgeGaugeFrac(4, 9), 1);
 	});
 
 	it('puts host:port on the glass and demotes the lease note', () => {
