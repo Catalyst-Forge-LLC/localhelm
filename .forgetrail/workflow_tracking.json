@@ -1789,6 +1789,19 @@
         "Playfair / Cinzel (Victorian serif — spec no)"
       ],
       "status": "active"
+    },
+    {
+      "id": "d130",
+      "timestamp": "2026-09-15T21:56:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Wordmark splits typefaces: Oxanium on Local, Syne on Helm. One h1, no space between spans.",
+      "rationale": "Operator 2026-09-15: mix typefaces; Local should read more tech.",
+      "alternatives_considered": [
+        "Orbitron on Local (too costume for the whole line)",
+        "Keep both in Syne"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

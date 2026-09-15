@@ -142,13 +142,22 @@
 	}
 
 	.bridge h1 {
-		font-family: var(--font-mark);
 		font-size: 1.85rem;
-		letter-spacing: 0.01em;
-		font-weight: 700;
 		line-height: 0.95;
 		color: #f2f0e8;
 		text-shadow: 0 0 16px rgb(126 244 255 / 0.28);
+	}
+
+	.bridge h1 .name-local {
+		font-family: var(--font-tech);
+		font-weight: 600;
+		letter-spacing: 0.06em;
+	}
+
+	.bridge h1 .name-helm {
+		font-family: var(--font-mark);
+		font-weight: 700;
+		letter-spacing: 0.01em;
 	}
 
 	.heading-line {

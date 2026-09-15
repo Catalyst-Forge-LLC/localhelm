@@ -84,7 +84,7 @@
 			<div class="brand">
 				<img class="mark" src="/logo.png" alt="" width="96" height="64" />
 				<div class="brand-copy">
-					<h1>LocalHelm</h1>
+					<h1><span class="name-local">Local</span><span class="name-helm">Helm</span></h1>
 					{#if serveHostPort}
 						<p class="heading-line">
 							{#if serveNote}
