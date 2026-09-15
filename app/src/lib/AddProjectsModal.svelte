@@ -92,7 +92,7 @@
 		border-radius: var(--plate-radius);
 		background: var(--hull);
 		color: #ececef;
-		box-shadow: 0 24px 48px rgb(0 0 0 / 0.65), 0 0 24px rgb(126 244 255 / 0.08);
+		box-shadow: var(--overlay-glow);
 	}
 
 	.head {

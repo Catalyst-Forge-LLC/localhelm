@@ -20,6 +20,10 @@
 	--plate-radius: 0 0 var(--keel-radius) var(--keel-radius);
 	--plate-radius-sm: 0 0 var(--keel-radius-sm) var(--keel-radius-sm);
 	--hud-fade: 0.125s;
+	--overlay-glow:
+		0 16px 36px rgb(0 0 0 / 0.45),
+		0 0 22px rgb(126 244 255 / 0.28),
+		0 0 48px rgb(126 244 255 / 0.14);
 }
 
 .helm-chart {
