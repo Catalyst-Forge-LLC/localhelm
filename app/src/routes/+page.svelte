@@ -1833,7 +1833,7 @@
 	}}
 />
 
-<div class="shell helm-chart">
+<div class="shell">
 	<BridgeHeader
 		{busy}
 		{statusNote}

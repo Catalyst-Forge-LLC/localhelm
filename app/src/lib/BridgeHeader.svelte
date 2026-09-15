@@ -78,7 +78,7 @@
 	const sparkMax = $derived(Math.max(1, ...activitySpark));
 </script>
 
-<header class="bridge">
+<header class="bridge helm-chart">
 	<div class="bridge-bays">
 		<div class="bridge-ident hud-frame" data-bridge="ident">
 			<div class="brand">
