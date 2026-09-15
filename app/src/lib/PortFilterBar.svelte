@@ -120,7 +120,7 @@
 		font-weight: 600;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
-		color: #8b8b93;
+		color: var(--dim, #8b8b93);
 	}
 
 	.fc {
@@ -131,30 +131,30 @@
 
 	.chip {
 		margin: 0;
-		border: 1px solid #4c4c54;
+		border: 1px solid var(--steel, #4c4c54);
 		background: none;
-		border-radius: 999px;
+		border-radius: 2px;
 		padding: 0.15rem 0.65rem;
 		font: inherit;
 		font-size: 0.75rem;
-		color: #8b8b93;
+		color: var(--dim, #8b8b93);
 		cursor: pointer;
 	}
 
 	.chip:hover {
-		color: #f4f4f5;
+		color: var(--cyan, #f4f4f5);
 	}
 
 	.chip.on {
-		border-color: #c9a227;
-		background: #4a3a12;
-		color: #fde68a;
+		border-color: var(--gold, #c9a227);
+		background: rgb(201 162 39 / 0.14);
+		color: var(--gold-soft, #fde68a);
 	}
 
 	.shown {
 		font-size: 0.75rem;
 		font-variant-numeric: tabular-nums;
-		color: #8b8b93;
+		color: var(--dim, #8b8b93);
 		padding-bottom: 0.15rem;
 	}
 </style>

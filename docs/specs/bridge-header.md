@@ -3,9 +3,10 @@
 **Spec kind:** Visual / IA  
 **Status:** Locked (2026-09-14)  
 **Chrome pass (2026-09-14):** First build still read as the old toolbar — `--hairline` on `--hull` is invisible, lamps were the old chips. Operator asked for more sea-space. Hairlines use `--steel`, lamps are instrument plates (count + word + halo), keel is a recessed waterline strip. Still no bay labels, no steampunk, no fake gauges.  
-**HUD pass (2026-09-15):** Operator brought cinematic sci-fi dashboard references (corner brackets, chart grid, cyan edge light, big mono numbers over tracked labels). The mix is now explicit — see §3.1. Framing device switched from hairline dividers to **corner brackets** (supersedes §10 answer 5). Chart-paper grid on the hull, `--cyan` running lights, glow allowed on lamp dots, keel line, and Refresh. Labels still plain; no gauges that don't map to a digest field.
+**HUD pass (2026-09-15):** Operator brought cinematic sci-fi dashboard references (corner brackets, chart grid, cyan edge light, big mono numbers over tracked labels). The mix is now explicit — see §3.1. Framing device switched from hairline dividers to **corner brackets** (supersedes §10 answer 5). Chart-paper grid on the hull, `--cyan` running lights, glow allowed on lamp dots, keel line, and Refresh. Labels still plain; no gauges that don't map to a digest field.  
+**Stations + body (2026-09-15):** Operator asked to go brighter and carry the HUD to tabs / boards / tables. Chart grid is on the whole `.shell`. Stations are tracked uppercase with a cyan active underline. Panels get corner ticks; writes stay gold. `/deck` still does not inherit.
 **Related:** `docs/PHASE_1_BRIEF.md`, `docs/specs/cheap-surfaces.md`, `CONTEXT_PROMPT.md` sessions 43–46  
-**Surfaces:** Dashboard `header` + `.status-rail` in `app/src/routes/+page.svelte` / `app/src/lib/dashboard.css`. Tabs stay **stations** under the bridge in v1.
+**Surfaces:** Dashboard `header` + `.status-rail` + stations + body chrome in `app/src/routes/+page.svelte` / `app/src/lib/dashboard.css`. Deck (`/deck`) stays out.
 
 Pairing: **LocalSlip is the slip (local DNS for ports). LocalHelm is the wheel.** Deck stays `/deck`. This spec elevates the header into a **bridge** — command center chrome for the wheel. It does not change CLI verbs, product names, or plugin hosts.
 
@@ -62,7 +63,7 @@ The center of the band is empty. The facts that tell you “where the helm is po
 - Cyan / ice for live instruments (`.info` is already `#93c5fd`)
 - Tight mono for counts and `host:port` (chart table, not display type)
 - Lamp dots as the motif element that carries meaning; **one** framing device — corner brackets (chosen 2026-09-15 over hairline dividers)
-- Chart-paper grid on the hull at ≤ 5% cyan — texture, not scanlines
+- Chart-paper grid on the hull at about 11% cyan — brighter after the 2026-09-15 pass; still texture, not scanlines
 - Glow only where a light is on: lamp dots and counts, the keel rule and marker, Refresh, `host:port`. No hull glow, no page gradients.
 - Quiet motion only when something is actually happening (keel step ticks on Refresh); none at idle
 
@@ -217,7 +218,7 @@ Build this string in a pure helper `bridgeIdleLine(...)` in `src/lib/fleetDispla
 
 ### 5.5 Stations
 
-Today / Fleet / Sites / Ports / plugin tabs stay the row below the bridge. v1 does not fold them into the header or restyle them as “stations” chrome beyond optional later work.
+Today / Fleet / Sites / Ports / plugin tabs stay the row below the bridge. They are **stations** chrome now (tracked uppercase, cyan active underline, mono counts) but they are not folded into the header. Operator labels stay Today / Fleet / Sites / Ports.
 
 ### 5.6 Narrow viewport
 
@@ -239,7 +240,7 @@ These prevent the most likely wrong builds. Treat them as acceptance, not advice
 | G6 | **Semantics.** Lamps are `<button>`s with count + destination in `aria-label`. Keel keeps `aria-live="polite"` (already on `.status-rail`). | Screen readers get counts and live steps, not decorative dots. |
 | G7 | **Deck untouched.** Bridge tokens and rules live in the dashboard stylesheet path only; `/deck` (phone-on-LAN tile grid) inherits none of the hull / gold chrome. | Deck is a different surface with a different job. |
 | G8 | **Stable hooks.** `data-bridge` attribute on the four regions, valued `ident`, `situation`, `conn`, `keel`. | §8 acceptance and the browser pass can assert keel copy per state without guessing selectors. |
-| G9 | **Tokens, not literals.** Bridge CSS uses: `--hull` (`#03060c`, navy-black chart paper), `--hull-2` (`#1c1c21`), `--hairline` (`#1f1f22`, other dashboard chrome), `--steel` (`#2d4456`, blue-steel lamp borders), `--well` (`#060a13`, keel recess + lamp plates), `--gold` / `--gold-soft` (telegraph writes), `--ice` (`#93c5fd`, cool text), `--cyan` (`#67e8f9`, running lights), `--cyan-dim` / `--cyan-glow` (brackets, keel rule, halos), `--alarm`, `--dim`. | Keeps the build from scattering colors and keeps contrast checkable in one place. |
+| G9 | **Tokens, not literals.** Dashboard CSS uses: `--hull` (`#03060c`), `--well` (`#060a13`), `--steel` (`#3a5a70`), `--gold` / `--gold-soft`, `--ice`, `--cyan` (`#7ef4ff`), `--cyan-dim` / `--cyan-glow` / `--grid`, `--alarm`, `--dim`. Same tokens on header, stations, panels, tables. Deck does not import this file. | One palette; brighter after the 2026-09-15 pass. |
 
 ---
 

@@ -53,28 +53,28 @@
 		width: 2.15rem;
 		height: 2.15rem;
 		padding: 0;
-		border: 1px solid #5a5a64;
-		background: #3c3c44;
+		border: 1px solid var(--steel, #5a5a64);
+		background: var(--well, #3c3c44);
 		color: #ececef;
-		border-radius: 0.45rem;
+		border-radius: 2px;
 		font-size: 1.05rem;
 		cursor: pointer;
 	}
 
 	.icon-btn:hover:not(:disabled) {
-		border-color: #8b8b93;
-		background: #484850;
+		border-color: var(--cyan-dim, #8b8b93);
+		background: rgb(126 244 255 / 0.08);
 	}
 
 	.icon-btn.pressed {
-		border-color: #c9a227;
-		background: #4a3a12;
-		color: #fde68a;
+		border-color: var(--gold, #c9a227);
+		background: rgb(201 162 39 / 0.16);
+		color: var(--gold-soft, #fde68a);
 	}
 
 	.icon-btn.hot:not(.pressed) {
-		border-color: #c9a227;
-		color: #fde68a;
+		border-color: var(--gold, #c9a227);
+		color: var(--gold-soft, #fde68a);
 	}
 
 	.icon-btn:disabled {
@@ -94,10 +94,10 @@
 		right: -0.35rem;
 		min-width: 1rem;
 		padding: 0 0.28rem;
-		border: 1px solid #8b8b93;
-		background: #3a3a42;
-		border-radius: 999px;
-		color: #f4f4f5;
+		border: 1px solid var(--steel, #8b8b93);
+		background: var(--well, #3a3a42);
+		border-radius: 2px;
+		color: var(--cyan, #f4f4f5);
 		font-size: 0.62rem;
 		line-height: 1.15rem;
 		text-align: center;
@@ -105,8 +105,8 @@
 
 	.hot .badge,
 	.pressed .badge {
-		border-color: #c9a227;
-		background: #4a3a12;
-		color: #fde68a;
+		border-color: var(--gold, #c9a227);
+		background: rgb(201 162 39 / 0.16);
+		color: var(--gold-soft, #fde68a);
 	}
 </style>

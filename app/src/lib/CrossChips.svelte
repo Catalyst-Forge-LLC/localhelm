@@ -45,22 +45,22 @@
 		font-size: 0.62rem;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
-		color: #8b8b93;
+		color: var(--dim, #8b8b93);
 	}
 	.xchip {
 		margin: 0;
 		padding: 0.05rem 0.4rem;
-		border: 1px solid #5a5a64;
-		border-radius: 999px;
-		background: #32323a;
-		color: #d4d4d8;
+		border: 1px solid var(--steel, #5a5a64);
+		border-radius: 2px;
+		background: var(--well, #32323a);
+		color: var(--dim, #d4d4d8);
 		font: inherit;
 		font-size: 0.68rem;
 		cursor: pointer;
 	}
 	.xchip:hover {
-		border-color: #c9a227;
-		color: #fde68a;
+		border-color: var(--gold, #c9a227);
+		color: var(--gold-soft, #fde68a);
 	}
 
 	.chips.compact {

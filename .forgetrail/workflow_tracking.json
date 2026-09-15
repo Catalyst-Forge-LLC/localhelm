@@ -1620,6 +1620,19 @@
         "Decorative gauges not tied to digest fields"
       ],
       "status": "active"
+    },
+    {
+      "id": "d117",
+      "timestamp": "2026-09-15T15:15:00Z",
+      "phase": "2-scaffolding",
+      "session": 46,
+      "decision": "HUD chrome is brighter and covers the operator board: shell chart grid, stations as tracked uppercase with cyan active underline, panels with corner ticks, tables/chips/buttons on --well/--steel, writes gold. Deck /deck does not import dashboard.css and stays the phone tile grid.",
+      "rationale": "Operator 2026-09-15: go a bit brighter, and carry the vibe to the body/tabs.",
+      "alternatives_considered": [
+        "Brighten the header only",
+        "Restyle Deck to match"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
