@@ -34,13 +34,37 @@ export function needsCommitsSinceNpm(
 	return true;
 }
 
+export type StatusPhase = 'packages' | 'npm' | 'globals' | 'git';
+
+export type StatusProgress = {
+	phase: StatusPhase;
+	label: string;
+	done?: number;
+	total?: number;
+};
+
 export type StatusOptions = {
 	fetch?: boolean;
 	/** When set, only these project ids are read (npm + git). Faster for Land. */
 	onlyIds?: string[];
 	/** Drop the in-process npm latest cache (Refresh / fetch remotes). */
 	refreshNpm?: boolean;
+	onProgress?: (progress: StatusProgress) => void;
 };
+
+export function statusPhaseLabel(phase: StatusPhase, done?: number, total?: number): string {
+	if (phase === 'globals') return 'checking global installs';
+	const counted = total != null && total > 0 && done != null;
+	if (phase === 'packages') {
+		if (counted) return `reading packages (${done} of ${total})`;
+		if (total != null && total > 0) return `reading ${total} packages`;
+		return 'reading packages';
+	}
+	if (phase === 'npm') {
+		return counted ? `checking npm (${done} of ${total})` : 'checking npm';
+	}
+	return counted ? `reading git (${done} of ${total})` : 'reading git';
+}
 
 type Prepared = {
 	id: string;
@@ -64,9 +88,13 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 	const prepared: Prepared[] = [];
 	const names = new Set<string>();
 	const only = options.onlyIds?.length ? new Set(options.onlyIds) : null;
+	const listed = loaded.manifest.projects.filter((project) => !only || only.has(project.id));
+	const report = (phase: StatusPhase, done?: number, total?: number): void => {
+		options.onProgress?.({ phase, label: statusPhaseLabel(phase, done, total), done, total });
+	};
+	report('packages', 0, listed.length);
 
-	for (const project of loaded.manifest.projects) {
-		if (only && !only.has(project.id)) continue;
+	for (const [index, project] of listed.entries()) {
 		const absPath = joinRoot(loaded.workspaceRoot, project.path);
 		if (!(await pathExists(absPath))) {
 			prepared.push({
@@ -78,6 +106,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 				localVersion: null,
 				npmName: project.npm,
 			});
+			report('packages', index + 1, listed.length);
 			continue;
 		}
 		const rootFile = rootPkgPath(absPath);
@@ -105,6 +134,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			sitePkg,
 			ship: shipScriptTarget(rootPkg, sitePkg),
 		});
+		report('packages', index + 1, listed.length);
 	}
 
 	if (only) {
@@ -122,15 +152,21 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 	}
 
 	const needsGlobalRead = prepared.some((row) => pkgBinNames(row.rootPkg).length > 0);
+	if (needsGlobalRead) report('globals');
 	const globals = needsGlobalRead ? readGlobalVersions(Boolean(options.refreshNpm || options.fetch)) : new Map<string, string>();
-	const npmByName = await npmLatestMany(names);
+	if (names.size) report('npm', 0, names.size);
+	const npmByName = await npmLatestMany(names, undefined, (done, total) => report('npm', done, total));
 	const latestByName = new Map<string, string>();
 	for (const [name, cell] of npmByName) {
 		if (cell.status === 'ok' && cell.latest) latestByName.set(name, cell.latest);
 	}
 
-	const gitCells = await mapPool(prepared, GIT_POOL, async (row) =>
-		row.missing ? EMPTY_GIT : readGitAsync(row.absPath, options.fetch === true),
+	report('git', 0, prepared.length);
+	const gitCells = await mapPool(
+		prepared,
+		GIT_POOL,
+		async (row) => (row.missing ? EMPTY_GIT : readGitAsync(row.absPath, options.fetch === true)),
+		(done, total) => report('git', done, total),
 	);
 
 	const projects: ProjectStatus[] = [];

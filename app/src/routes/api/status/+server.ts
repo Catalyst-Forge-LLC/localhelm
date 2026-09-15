@@ -3,6 +3,8 @@ import type { RequestHandler } from './$types';
 import { fleetStatus, npmWhoami, readLandPendingReasons, readLandPendingSiteIds } from '../../../../../src/lib/index.js';
 import { errJson, loadOptional, operatorCwd } from '$lib/server/helm';
 
+type Loaded = NonNullable<Awaited<ReturnType<typeof loadOptional>>>;
+
 let lastNpmUser: { user: string; at: number } | null = null;
 
 function currentNpmUser(): string | null {
@@ -20,44 +22,103 @@ function listen(): { host: string | null; port: string | null; portSource: strin
 	};
 }
 
+type StatusBody = {
+	inventory: unknown;
+	workspaceRoot: string | null;
+	scanRoot: string;
+	cwd: string;
+	fetched?: boolean;
+	npmUser: string | null;
+	landPending?: string[];
+	landPendingReasons?: Record<string, string>;
+	host: string | null;
+	port: string | null;
+	portSource: string | null;
+};
+
+async function statusBody(
+	loaded: Loaded,
+	cwd: string,
+	opts: {
+		fetchRemotes: boolean;
+		refreshNpm: boolean;
+		onlyIds?: string[];
+		onProgress?: (progress: { phase: string; label: string; done?: number; total?: number }) => void;
+	},
+): Promise<StatusBody> {
+	const npmUserP = Promise.resolve().then(() => currentNpmUser());
+	const landP = readLandPendingSiteIds(loaded.workspaceRoot);
+	const reasonsP = readLandPendingReasons(loaded.workspaceRoot);
+	const inventory = await fleetStatus(loaded, {
+		fetch: opts.fetchRemotes,
+		refreshNpm: opts.refreshNpm,
+		onlyIds: opts.onlyIds,
+		onProgress: opts.onProgress,
+	});
+	const [npmUser, landPending, landPendingReasons] = await Promise.all([npmUserP, landP, reasonsP]);
+	return {
+		inventory,
+		workspaceRoot: loaded.workspaceRoot,
+		scanRoot: loaded.workspaceRoot,
+		cwd,
+		fetched: opts.fetchRemotes,
+		npmUser,
+		landPending,
+		landPendingReasons,
+		...listen(),
+	};
+}
+
 export const GET: RequestHandler = async ({ url }) => {
 	try {
 		const loaded = await loadOptional();
 		const cwd = operatorCwd();
-		const npmUserP = Promise.resolve().then(() => currentNpmUser());
 		if (!loaded) {
 			return json({
 				inventory: null,
 				workspaceRoot: null,
 				scanRoot: cwd,
 				cwd,
-				npmUser: await npmUserP,
+				npmUser: currentNpmUser(),
 				...listen(),
 			});
 		}
 		const fetchRemotes = url.searchParams.get('fetch') === '1';
 		const refreshNpm = url.searchParams.get('fresh') === '1' || fetchRemotes;
 		const onlyIds = url.searchParams.get('ids')?.split(',').map((id) => id.trim()).filter(Boolean);
-		const [inventory, npmUser, landPending, landPendingReasons] = await Promise.all([
-			fleetStatus(loaded, {
-				fetch: fetchRemotes,
-				refreshNpm,
-				onlyIds: onlyIds?.length ? onlyIds : undefined,
-			}),
-			npmUserP,
-			readLandPendingSiteIds(loaded.workspaceRoot),
-			readLandPendingReasons(loaded.workspaceRoot),
-		]);
-		return json({
-			inventory,
-			workspaceRoot: loaded.workspaceRoot,
-			scanRoot: loaded.workspaceRoot,
-			cwd,
-			fetched: fetchRemotes,
-			npmUser,
-			landPending,
-			landPendingReasons,
-			...listen(),
+		const opts = {
+			fetchRemotes,
+			refreshNpm,
+			onlyIds: onlyIds?.length ? onlyIds : undefined,
+		};
+		if (url.searchParams.get('progress') !== '1') {
+			return json(await statusBody(loaded, cwd, opts));
+		}
+
+		const stream = new ReadableStream({
+			async start(controller) {
+				const enc = new TextEncoder();
+				const send = (obj: unknown): void => {
+					controller.enqueue(enc.encode(`${JSON.stringify(obj)}\n`));
+				};
+				try {
+					const body = await statusBody(loaded, cwd, {
+						...opts,
+						onProgress: (progress) => send({ type: 'progress', ...progress }),
+					});
+					send({ type: 'result', ...body });
+				} catch (err) {
+					send({ type: 'error', error: err instanceof Error ? err.message : String(err) });
+				} finally {
+					controller.close();
+				}
+			},
+		});
+		return new Response(stream, {
+			headers: {
+				'content-type': 'application/x-ndjson; charset=utf-8',
+				'cache-control': 'no-store',
+			},
 		});
 	} catch (err) {
 		return errJson(err);

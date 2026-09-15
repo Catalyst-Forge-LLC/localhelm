@@ -13,6 +13,12 @@ describe('mapPool', () => {
 		assert.deepEqual(out, [30, 10, 20]);
 		assert.equal(seen.length, 3);
 	});
+
+	it('reports finished counts in order', async () => {
+		const ticks: number[] = [];
+		await mapPool([1, 2, 3], 2, async (n) => n, (done) => ticks.push(done));
+		assert.deepEqual(ticks, [1, 2, 3]);
+	});
 });
 
 describe('withPublishedLocal', () => {

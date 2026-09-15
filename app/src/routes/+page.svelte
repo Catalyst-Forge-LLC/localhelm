@@ -842,12 +842,16 @@
 		const ids = opts.ids?.filter(Boolean) ?? [];
 		const scoped = ids.length > 0;
 		const query = new URLSearchParams();
+		query.set('progress', '1');
 		if (opts.fetchRemotes) query.set('fetch', '1');
 		if (opts.freshNpm) query.set('fresh', '1');
 		const csv = scoped ? serializeListParam(ids) : null;
 		if (csv) query.set('ids', csv);
-		const suffix = query.toString() ? `?${query}` : '';
-		const data = (await call(`/api/status${suffix}`)) as {
+		const data = (await callNdjson(`/api/status?${query}`, { method: 'GET' }, (event) => {
+			if (event.type === 'progress' && typeof event.label === 'string' && event.label.trim()) {
+				statusNote = event.label;
+			}
+		})) as {
 			inventory: Inventory | null;
 			scanRoot: string;
 			cwd: string;
@@ -880,9 +884,8 @@
 		bumpKind = kinds;
 		statusReady = true;
 		if (opts.extras !== false && !scoped) {
-			void loadPluginBoards();
-			void loadActivity();
-			void loadArchive();
+			statusNote = 'reading Sites and Ports';
+			await Promise.all([loadPluginBoards(), loadActivity(), loadArchive()]);
 		}
 	}
 
@@ -899,13 +902,12 @@
 	}
 
 	async function refresh(fetchRemotes = false, extras = true): Promise<void> {
-		await readQuiet(fetchRemotes ? 'fetching remotes, then reading status' : 'reading status', async () => {
+		await readQuiet(fetchRemotes ? 'fetching remotes' : 'reading packages', async () => {
 			const fleet = inventory?.projects.map((row) => row.id) ?? [];
 			if (fetchRemotes && fleet.length) {
 				statusNote = 'fetching remotes';
 				await call('/api/fetch', { method: 'POST', body: JSON.stringify({ ids: fleet }) });
 				fetchedAt = new Date().toLocaleTimeString();
-				statusNote = 'reading status';
 				await loadStatus({ extras, freshNpm: true });
 				return;
 			}
@@ -1766,7 +1768,7 @@
 		void loadActivity();
 		void loadRoster();
 		void loadPluginBoards();
-		void readQuiet('reading status', () => loadStatus({ extras: false }));
+		void readQuiet('reading packages', () => loadStatus({ extras: false }));
 	});
 </script>
 

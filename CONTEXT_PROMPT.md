@@ -314,3 +314,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Fetch remotes is one HTTP call and a pool of 8 async `git fetch` (CLI + `/api/fetch`). Status reads git with the same pool. Publish `commitsSinceNpm` skips `git log` unless a bump is still in play. npm latest uses the existing `npmLatestMany` map (no second per-row fetch).
 - CLI `land --apply` continues after one site fails (exit 1 if any failed). Dashboard already did this one-id-at-a-time.
 - Archive dry-run: `planArchive`. CLI without `--apply` prints hide/restore/skip rows. `POST /api/archive` with `apply: false` plans; omit or `apply: true` writes. Hide/Restore confirm plans first. Park-on-hide stays dashboard-only.
+
+### Session 44 — 2026-09-14
+
+- Header Refresh streams `/api/status?progress=1` (NDJSON). The rail names the live step: packages, npm, git, optional globals, then Sites and Ports. Plain `GET /api/status` is still JSON.

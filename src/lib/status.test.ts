@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 import type { LoadedManifest } from './manifest.js';
-import { fleetStatus, needsCommitsSinceNpm } from './status.js';
+import { fleetStatus, needsCommitsSinceNpm, statusPhaseLabel } from './status.js';
 
 describe('fleetStatus onlyIds', () => {
 	it('reads only the named projects', async () => {
@@ -28,8 +28,11 @@ describe('fleetStatus onlyIds', () => {
 				],
 			},
 		};
-		const all = await fleetStatus(loaded);
+		const phases: string[] = [];
+		const all = await fleetStatus(loaded, { onProgress: (progress) => phases.push(progress.phase) });
 		assert.equal(all.projects.length, 2);
+		assert.ok(phases.includes('packages'));
+		assert.ok(phases.includes('git'));
 		const one = await fleetStatus(loaded, { onlyIds: ['beta'] });
 		assert.deepEqual(
 			one.projects.map((row) => row.id),
@@ -78,6 +81,15 @@ describe('fleetStatus onlyIds', () => {
 		assert.deepEqual(inventory.projects[0]?.bin, ['localhelm']);
 		assert.ok(inventory.projects[0]?.global);
 		assert.equal(inventory.projects[0]?.commitsSinceNpm ?? null, null);
+	});
+});
+
+describe('statusPhaseLabel', () => {
+	it('names the current fleet read step', () => {
+		assert.equal(statusPhaseLabel('packages', 2, 43), 'reading packages (2 of 43)');
+		assert.equal(statusPhaseLabel('npm', 8, 40), 'checking npm (8 of 40)');
+		assert.equal(statusPhaseLabel('git', 16, 43), 'reading git (16 of 43)');
+		assert.equal(statusPhaseLabel('globals'), 'checking global installs');
 	});
 });
 

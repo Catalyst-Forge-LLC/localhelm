@@ -17,16 +17,20 @@ export async function mapPool<T, R>(
 	items: readonly T[],
 	concurrency: number,
 	fn: (item: T, index: number) => Promise<R>,
+	onProgress?: (done: number, total: number) => void,
 ): Promise<R[]> {
 	const results = new Array<R>(items.length);
 	if (!items.length) return results;
 	let next = 0;
 	const workers = Math.min(Math.max(1, concurrency), items.length);
+	let finished = 0;
 	await Promise.all(
 		Array.from({ length: workers }, async () => {
 			while (next < items.length) {
 				const index = next++;
 				results[index] = await fn(items[index] as T, index);
+				finished += 1;
+				onProgress?.(finished, items.length);
 			}
 		}),
 	);
@@ -79,9 +83,10 @@ export async function npmLatest(name: string): Promise<NpmCell> {
 export async function npmLatestMany(
 	names: Iterable<string>,
 	concurrency = DEFAULT_CONCURRENCY,
+	onProgress?: (done: number, total: number) => void,
 ): Promise<Map<string, NpmCell>> {
 	const list = [...new Set([...names].map((name) => name.trim()).filter(Boolean))];
-	const cells = await mapPool(list, concurrency, (name) => npmLatest(name));
+	const cells = await mapPool(list, concurrency, (name) => npmLatest(name), onProgress);
 	return new Map(list.map((name, i) => [name, cells[i] as NpmCell]));
 }
 

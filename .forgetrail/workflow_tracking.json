@@ -1554,6 +1554,19 @@
         "Treat omitted apply as archive plan (would break existing POST writers)"
       ],
       "status": "active"
+    },
+    {
+      "id": "d112",
+      "timestamp": "2026-09-15T01:55:00Z",
+      "phase": "2-scaffolding",
+      "session": 44,
+      "decision": "Dashboard status reads use GET /api/status?progress=1 NDJSON. fleetStatus onProgress emits packages, npm, git, and globals labels with (done of total). Refresh then awaits Sites and Ports. Unprefixed GET /api/status stays a single JSON body.",
+      "rationale": "Operator asked for a more descriptive Refresh than reading status. The wait is real steps, not one blob.",
+      "alternatives_considered": [
+        "Rotate guessed labels on a timer while one JSON request runs",
+        "Split Refresh into several HTTP calls"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

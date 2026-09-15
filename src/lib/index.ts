@@ -248,7 +248,8 @@ export {
 	portBusyMessage,
 } from './servePort.js';
 export type { PortOccupant } from './servePort.js';
-export { fleetStatus } from './status.js';
+export { fleetStatus, statusPhaseLabel } from './status.js';
+export type { StatusPhase, StatusProgress } from './status.js';
 export { operatorCwd } from './workspace.js';
 export type { BumpKind } from './semver.js';
 export type {
