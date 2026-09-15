@@ -195,6 +195,14 @@ export {
 	siteTableColumns,
 } from './siteDisplay.js';
 export {
+	activityDayGroups,
+	activityDayKey,
+	activityMonthGroups,
+	activitySparkCaption,
+	activitySparkSeries,
+} from './activityDays.js';
+export type { ActivityDay, ActivityMonth } from './activityDays.js';
+export {
 	bridgeGaugeFrac,
 	bridgeIdleLine,
 	fleetProjectMeta,

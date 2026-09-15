@@ -11,7 +11,9 @@
 	import Icon from '$lib/Icon.svelte';
 	import IconButton from '$lib/IconButton.svelte';
 	import InfoHint from '$lib/InfoHint.svelte';
+	import ActivityDayNav from '$lib/ActivityDayNav.svelte';
 	import Tooltip from '$lib/Tooltip.svelte';
+	import { activityDayGroups, activityDayKey, activitySparkSeries } from '$lib/activityDays';
 	import { tip } from '$lib/helmTippy';
 	import { activityLinkedIds } from '$lib/activityLinks';
 	import { crosswalkChips } from '$lib/crosswalk';
@@ -154,6 +156,16 @@
 	let copiedKey = $state('');
 
 	let entries = $state<LogEntry[]>([]);
+	let activityDay = $state('');
+	let activityLogEl = $state<HTMLElement | null>(null);
+	const activityDays = $derived(activityDayGroups(entries));
+	const activitySpark = $derived(activitySparkSeries(entries));
+
+	$effect(() => {
+		if (!activityDays.some((day) => day.key === activityDay)) {
+			activityDay = activityDays[0]?.key ?? '';
+		}
+	});
 	let busy = $state('');
 	let statusNote = $state('');
 	let error = $state('');
@@ -397,7 +409,18 @@
 
 	function setActivityOpen(next: boolean): void {
 		activityOpen = next;
-		if (next) activityUnseen = false;
+		if (next) {
+			activityUnseen = false;
+			if (!activityDays.some((day) => day.key === activityDay)) {
+				activityDay = activityDays[0]?.key ?? '';
+			}
+		}
+	}
+
+	function jumpActivityDay(key: string): void {
+		activityDay = key;
+		const row = activityLogEl?.querySelector(`[data-activity-day="${CSS.escape(key)}"]`);
+		row?.scrollIntoView({ block: 'start' });
 	}
 
 	function restoreUrlState(params: URLSearchParams): void {
@@ -1825,10 +1848,12 @@
 		gauges={bridgeGauges}
 		{activityOpen}
 		activityBadge={activityUnseen ? 'new' : entries.length || ''}
+		{activitySpark}
 		onRefresh={() => void refresh()}
 		onPull={() => startPull()}
 		onPush={() => startPush()}
 		onToggleActivity={() => setActivityOpen(!activityOpen)}
+		onWake={() => setActivityOpen(true)}
 		onLamp={(filter) => {
 			setTab('today');
 			needFilter = filter;
@@ -2707,9 +2732,11 @@
 			{#if entries.length === 0}
 				<p class="dim small">Nothing yet.</p>
 			{:else}
-				<ul class="log">
+				<div class="drawer-body">
+					<ActivityDayNav days={activityDays} selected={activityDay} onpick={jumpActivityDay} />
+					<ul class="log" bind:this={activityLogEl}>
 					{#each entries as entry (entry.at + entry.title)}
-						<li>
+						<li data-activity-day={activityDayKey(entry.at) ?? undefined}>
 							<details>
 								<summary>
 									<span class="dim small">{entry.time}</span>
@@ -2731,6 +2758,7 @@
 						</li>
 					{/each}
 				</ul>
+				</div>
 			{/if}
 		</aside>
 	{/if}

@@ -337,3 +337,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Leftover zinc overlays now match the operator board: Confirm + Add dialogs (`hud-frame`, `--hull`/`--steel`/`--well`, gold write / alarm danger), locker ticks, helm tooltips, Today/Add list hover, CellWait / InfoHint dim ink. Tokens load from `layout.css` so dialogs and body-appended tips share `--hull`.
 - Deck tiles were disappearing into the hull (`--well` ≈ `--hull`). They now use frosted `--glass-fill` + blur, a cyan sheen, and a 125ms lift/glow hover. Still a phone tile grid.
 - Tooltips are Tippy throughout (`Tooltip` + `use:tip`). Native `title` help is gone. Helm theme is a HUD plate (ticks, `--hull-2`, overlay glow, 125ms fade).
+- Conn bay: 14-day write spark + caption under Refresh/Pull/Push (real activity counts). Activity drawer has a narrow day rail (Engram/Dictawhisper-style) that jumps the log.

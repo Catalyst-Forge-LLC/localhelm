@@ -1659,6 +1659,19 @@
         "New overlay motif separate from the board"
       ],
       "status": "active"
+    },
+    {
+      "id": "d120",
+      "timestamp": "2026-09-15T17:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Conn bay empty space is a 14-day spark of real activity writes plus a caption. Click opens Activity. Activity gets a narrow day rail (year/month headers when needed) that jumps the log, same idea as Engram/Dictawhisper.",
+      "rationale": "Operator 2026-09-15: spacing around Refresh/Pull/Push felt odd; asked for text or spark lines below; Activity needs a date navigator.",
+      "alternatives_considered": [
+        "Decorative waveform not tied to writes",
+        "Month-only rail (too coarse for a 200-entry log)"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

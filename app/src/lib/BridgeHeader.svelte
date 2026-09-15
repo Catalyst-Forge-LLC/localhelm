@@ -2,6 +2,7 @@
 	import Icon from './Icon.svelte';
 	import IconButton from './IconButton.svelte';
 	import Tooltip from './Tooltip.svelte';
+	import { activitySparkCaption } from './activityDays';
 	import { BRIDGE_GAUGE_C, bridgeGaugeFrac, bridgeIdleLine, type BridgeGauge, type HeaderNeedChip } from './fleetDisplay';
 	import type { NeedFilter } from './dashboardTypes';
 
@@ -21,10 +22,12 @@
 		gauges,
 		activityOpen,
 		activityBadge = '',
+		activitySpark = [],
 		onRefresh,
 		onPull,
 		onPush,
 		onToggleActivity,
+		onWake,
 		onLamp,
 		onGauge,
 		children,
@@ -44,10 +47,12 @@
 		gauges: BridgeGauge[];
 		activityOpen: boolean;
 		activityBadge?: string | number;
+		activitySpark?: number[];
 		onRefresh: () => void;
 		onPull: () => void;
 		onPush: () => void;
 		onToggleActivity: () => void;
+		onWake: () => void;
 		onLamp: (filter: NeedFilter) => void;
 		onGauge: (id: BridgeGauge['id']) => void;
 		children: import('svelte').Snippet;
@@ -69,6 +74,8 @@
 		if (error) return 'err';
 		return 'idle';
 	});
+	const sparkCaption = $derived(activitySparkCaption(activitySpark));
+	const sparkMax = $derived(Math.max(1, ...activitySpark));
 </script>
 
 <header class="bridge">
@@ -180,17 +187,37 @@
 						Push
 					</button>
 				</Tooltip>
-				<IconButton
-					icon="lucide:scroll-text"
-					label={activityOpen ? 'Close activity log' : 'Open activity log'}
-					title="Activity — every plan and write"
-					pressed={activityOpen}
-					hot={activityBadge === 'new'}
-					badge={activityBadge}
-					onclick={onToggleActivity}
-				/>
+				<span class="conn-log">
+					<IconButton
+						icon="lucide:scroll-text"
+						label={activityOpen ? 'Close activity log' : 'Open activity log'}
+						title="Activity — every plan and write"
+						pressed={activityOpen}
+						hot={activityBadge === 'new'}
+						badge={activityBadge}
+						onclick={onToggleActivity}
+					/>
+				</span>
 				{@render children()}
 			</div>
+			<Tooltip title="Opens Activity. Each bar is a day’s writes.">
+				<button type="button" class="conn-wake" onclick={onWake} aria-label={sparkCaption}>
+					<svg class="spark" viewBox="0 0 112 18" aria-hidden="true">
+						{#each activitySpark as n, i (`s${i}`)}
+							{@const h = Math.max(n ? 3 : 1.25, (n / sparkMax) * 16)}
+							<rect
+								x={i * 8}
+								y={18 - h}
+								width="5.2"
+								height={h}
+								class:lit={n > 0}
+								class:today={i === activitySpark.length - 1 && n > 0}
+							/>
+						{/each}
+					</svg>
+					<span class="conn-caption">{sparkCaption}</span>
+				</button>
+			</Tooltip>
 		</div>
 	</div>
 </header>

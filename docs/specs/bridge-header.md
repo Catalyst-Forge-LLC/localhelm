@@ -7,7 +7,8 @@
 **Stations + body (2026-09-15):** Operator asked to go brighter and carry the HUD to tabs / boards / tables. Chart grid is on the whole `.shell`. Stations are tracked uppercase with a cyan active underline. Panels get corner ticks; writes stay gold.  
 **Gauges + Deck (2026-09-15):** Keel copy moved into the situation bay (not a strip under the logo). Three dials — Fleet / Sites / Slips — show real counts; the arc is `need / count`. Shared tokens live in `app/src/lib/helm-hud.css` so Deck can wear the same hull.  
 **Overlays (2026-09-15):** Confirm, Add, locker, tooltips, and the activity drawer use the same hull / steel / well / gold chrome. Plan-then-confirm behavior is unchanged.  
-**Deck tiles (2026-09-15):** Phone grid stays. Tiles are frosted glass plates (`--glass-fill` + blur) with a short lift/glow hover — not operator tables.
+**Deck tiles (2026-09-15):** Phone grid stays. Tiles are frosted glass plates (`--glass-fill` + blur) with a short lift/glow hover — not operator tables.  
+**Conn wake (2026-09-15):** Spark under Refresh/Pull/Push is 14 local days of activity writes, not a decorative waveform. Click opens Activity. Activity uses a narrow day rail.
 **Related:** `docs/PHASE_1_BRIEF.md`, `docs/specs/cheap-surfaces.md`, `CONTEXT_PROMPT.md` sessions 43–46  
 **Surfaces:** Dashboard `header` + `.status-rail` + stations + body chrome in `app/src/routes/+page.svelte` / `app/src/lib/dashboard.css`. Deck (`/deck`) stays out.
 
