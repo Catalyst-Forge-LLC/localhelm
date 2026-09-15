@@ -288,7 +288,7 @@
 					{#if portLookCards.length}
 						{lookFactCount} Ports fact{lookFactCount === 1 ? '' : 's'}
 						{#if lookFactCount !== portLookCards.length}
-							on {portLookCards.length} lease{portLookCards.length === 1 ? '' : 's'}
+							on {portLookCards.length} row{portLookCards.length === 1 ? '' : 's'}
 						{/if}
 						— missing recipe, split stack, or enroll vs lease. Add enrolls; Ports does not.
 					{:else}

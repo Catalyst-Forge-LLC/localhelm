@@ -31,6 +31,8 @@ describe('port looks and families', () => {
 		assert.ok(looks.some((look) => look.kind === 'family-split' && look.detail.includes('API down')));
 		assert.ok(looks.some((look) => look.kind === 'lease-without-fleet' && look.title === 'ghost'));
 		assert.ok(!looks.some((look) => look.kind === 'lease-without-fleet' && look.title === 'dictawhisper-api'));
+		assert.ok(looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'temper-pass'));
+		assert.ok(!looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'dictawhisper'));
 	});
 
 	it('groups multiple facts for the same lease onto one card', () => {
@@ -66,5 +68,19 @@ describe('port looks and families', () => {
 			leaseRows: [{ id: 'finetuna-site', cells: { listening: 'no', recipe: 'pnpm site:dev', cwdOk: 'yes' } }],
 		});
 		assert.ok(!looks.some((look) => look.kind === 'lease-without-fleet'));
+		assert.ok(looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'finetuna'));
+	});
+
+	it('lists enrolled fleet and site ids that have no exact lease name', () => {
+		const looks = portLooks({
+			fleetIds: ['detangler', 'acmegeek'],
+			siteIds: ['detangler', 'orphan-site'],
+			leaseRows: [{ id: 'acmegeek', cells: { listening: 'yes', recipe: '—', cwdOk: 'yes' } }],
+			claimedIds: ['acmegeek', 'parked-only'],
+		});
+		assert.ok(looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'detangler' && look.detail === 'Enrolled, no port lease'));
+		assert.ok(looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'orphan-site' && look.detail === 'Site has no port lease'));
+		assert.ok(!looks.some((look) => look.title === 'acmegeek' && look.kind === 'fleet-without-lease'));
+		assert.ok(!looks.some((look) => look.title === 'parked-only'));
 	});
 });

@@ -295,14 +295,6 @@
 			leaseRows: leaseBoard?.rows ?? [],
 		}),
 	);
-	const portLookCards = $derived(
-		groupPortLooks(
-			portLooks({
-				fleetIds: visibleProjects.map((row) => row.id),
-				leaseRows: leaseBoard?.rows ?? [],
-			}),
-		),
-	);
 	const cascadeOnlyRows = $derived(
 		cascadeTargets.filter(
 			(target) =>
@@ -360,6 +352,16 @@
 	const fleetIds = $derived(visibleProjects.map((row) => row.id));
 	const siteIds = $derived((filepressBoard?.rows ?? []).map((row) => row.id));
 	const leaseIds = $derived((leaseBoardAll?.rows ?? []).map((row) => row.id));
+	const portLookCards = $derived(
+		groupPortLooks(
+			portLooks({
+				fleetIds,
+				siteIds,
+				leaseRows: leaseBoard?.rows ?? [],
+				claimedIds: leaseIds,
+			}),
+		),
+	);
 	const knownIds = $derived([...new Set([...fleetIds, ...siteIds, ...leaseIds])]);
 	const quietSiteIds = $derived(
 		(leaseBoard?.rows ?? [])

@@ -1724,6 +1724,19 @@
         "Change LOCALHELM_CWD to the workspace parent"
       ],
       "status": "active"
+    },
+    {
+      "id": "d125",
+      "timestamp": "2026-09-15T19:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Looks lists every Fleet and Sites id with no exact LocalSlip lease name. Sibling -site/-api leases do not count as claimed. Parked leases still count. Jump stays Open Ports; claim stays on LocalSlip.",
+      "rationale": "Operator 2026-09-15: Detangler was on Fleet/Sites with no Ports chip, and the old fleet-without-lease look only fired for stacks that already had another family lease.",
+      "alternatives_considered": [
+        "Keep the stack-only UI-lease look",
+        "Treat a family sibling lease as claimed (would hide detangler when only detangler-site exists)"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

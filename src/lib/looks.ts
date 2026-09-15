@@ -67,7 +67,7 @@ export function lookJump(kind: PortLookKind, opts?: { enrolled?: boolean }): Loo
 		return {
 			id: 'ports',
 			label: 'Open Ports',
-			title: 'Helm does not claim ports. Ports shows the stack; claim the UI lease with localslip claim.',
+			title: 'Helm does not claim ports. Open Ports to see slips; claim this name with localslip claim.',
 		};
 	}
 	if (kind === 'cwd-missing' && opts?.enrolled) {
@@ -145,9 +145,16 @@ export function portFamilies(opts: { fleetIds: string[]; leaseRows: LeaseRowInpu
 	return families.sort((a, b) => a.label.localeCompare(b.label));
 }
 
-export function portLooks(opts: { fleetIds: string[]; leaseRows: LeaseRowInput[] }): PortLook[] {
-	const { fleetIds, leaseRows } = opts;
+export function portLooks(opts: {
+	fleetIds: string[];
+	leaseRows: LeaseRowInput[];
+	siteIds?: string[];
+	/** Lease names that count as claimed, including parked. Defaults to leaseRows. */
+	claimedIds?: Iterable<string>;
+}): PortLook[] {
+	const { fleetIds, leaseRows, siteIds = [] } = opts;
 	const fleetStems = new Set(fleetIds.map((id) => familyStem(id)));
+	const claimed = new Set(opts.claimedIds ? [...opts.claimedIds] : leaseRows.map((row) => row.id));
 	const looks: PortLook[] = [];
 
 	for (const row of leaseRows) {
@@ -197,18 +204,19 @@ export function portLooks(opts: { fleetIds: string[]; leaseRows: LeaseRowInput[]
 				kind: 'family-split',
 			});
 		}
-		const hasFleet = family.members.some((member) => member.hasFleet);
-		const uiFleet = family.members.find((member) => member.role === 'ui' && member.hasFleet);
-		const uiLease = family.members.find((member) => member.role === 'ui' && member.hasLease);
-		if (hasFleet && family.leaseIds.length > 0 && uiFleet && !uiLease) {
-			looks.push({
-				id: `fleet-without-lease:${family.stem}`,
-				title: uiFleet.id,
-				detail: 'Fleet row has no UI lease',
-				leaseIds: family.leaseIds,
-				kind: 'fleet-without-lease',
-			});
-		}
+	}
+
+	const enrolledIds = [...new Set([...fleetIds, ...siteIds])].sort((a, b) => a.localeCompare(b));
+	for (const id of enrolledIds) {
+		if (claimed.has(id)) continue;
+		const onFleet = fleetIds.includes(id);
+		looks.push({
+			id: `fleet-without-lease:${id}`,
+			title: id,
+			detail: onFleet ? 'Enrolled, no port lease' : 'Site has no port lease',
+			leaseIds: [],
+			kind: 'fleet-without-lease',
+		});
 	}
 
 	return looks;
