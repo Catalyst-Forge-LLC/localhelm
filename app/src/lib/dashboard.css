@@ -13,8 +13,6 @@
 		display: flex;
 		flex-direction: column;
 		overflow: hidden;
-		background: var(--hull);
-		color: #ececef;
 		font-family:
 			ui-sans-serif,
 			system-ui,
@@ -26,6 +24,7 @@
 	.bridge {
 		flex-shrink: 0;
 		position: relative;
+		background: transparent;
 		border-bottom: 0;
 		padding: 0.4rem 1.25rem;
 	}
@@ -36,9 +35,10 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		height: 1.6rem;
+		height: 1px;
 		pointer-events: none;
-		background: linear-gradient(to bottom, transparent, var(--hull));
+		background: var(--cyan-dim);
+		box-shadow: 0 0 12px var(--cyan-glow);
 	}
 
 	.bridge-bays {
@@ -762,7 +762,7 @@
 		flex-shrink: 0;
 		gap: 0.15rem;
 		padding: 0.45rem 1.5rem 0;
-		background: var(--hull);
+		background: linear-gradient(to bottom, rgb(3 6 12 / 0.92), rgb(3 6 12 / 0.55) 70%, transparent);
 		border-bottom: 1px solid var(--cyan-dim);
 		box-shadow: 0 1px 14px var(--cyan-glow);
 	}

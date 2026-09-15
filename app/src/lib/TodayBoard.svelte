@@ -29,7 +29,7 @@
 		needActions,
 		cascadeFor,
 		gitSummary,
-		portLookCards,
+		portLookCards = [],
 		chipsFor,
 		filepressBoard,
 		sitesNeedingLand,
@@ -95,7 +95,9 @@
 		onOpenPortsStacks: () => void;
 	} = $props();
 
-	const lookFactCount = $derived(portLookCards.reduce((n, card) => n + card.details.length, 0));
+	const lookFactCount = $derived(
+		(portLookCards ?? []).reduce((n, card) => n + (card?.details?.length ?? 0), 0),
+	);
 </script>
 
 <div class="today-board">
