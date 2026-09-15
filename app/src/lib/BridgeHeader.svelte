@@ -135,11 +135,11 @@
 			{#each gauges as gauge (gauge.id)}
 				{@const frac = bridgeGaugeFrac(gauge.count, gauge.need)}
 				{@const filled = BRIDGE_GAUGE_C * frac}
+				<Tooltip title="{gauge.count} {gauge.label.toLowerCase()}{gauge.need ? ` · ${gauge.need} need you` : ''}">
 				<button
 					type="button"
 					class="gauge"
 					class:hot={gauge.need > 0}
-					title="{gauge.count} {gauge.label.toLowerCase()}{gauge.need ? ` · ${gauge.need} need you` : ''}"
 					aria-label="{gauge.count} {gauge.label}{gauge.need ? `, ${gauge.need} need you` : ''} — open {gauge.label}"
 					onclick={() => onGauge(gauge.id)}
 				>
@@ -156,38 +156,30 @@
 					<span class="gauge-count">{gauge.count}</span>
 					<span class="gauge-word">{gauge.label}</span>
 				</button>
+				</Tooltip>
 			{/each}
 		</div>
 
 		<div class="bridge-conn hud-frame" data-bridge="conn">
 			<div class="actions">
-				<button
-					class="btn btn-sounding"
-					disabled={Boolean(busy)}
-					onclick={onRefresh}
-					title="Re-read every enrolled project, plus Sites and Ports. For one row, use the refresh icon on that row."
-				>
-					<Icon icon="lucide:refresh-cw" />
-					Refresh
-				</button>
-				<button
-					class="btn btn-write"
-					disabled={Boolean(busy)}
-					onclick={onPull}
-					title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull."
-				>
-					<Icon icon="lucide:git-pull-request" />
-					Pull
-				</button>
-				<button
-					class="btn btn-write"
-					disabled={Boolean(busy)}
-					onclick={onPush}
-					title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local."
-				>
-					<Icon icon="lucide:upload" />
-					Push
-				</button>
+				<Tooltip title="Re-read every enrolled project, plus Sites and Ports. For one row, use the refresh icon on that row.">
+					<button class="btn btn-sounding" disabled={Boolean(busy)} onclick={onRefresh}>
+						<Icon icon="lucide:refresh-cw" />
+						Refresh
+					</button>
+				</Tooltip>
+				<Tooltip title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull.">
+					<button class="btn btn-write" disabled={Boolean(busy)} onclick={onPull}>
+						<Icon icon="lucide:git-pull-request" />
+						Pull
+					</button>
+				</Tooltip>
+				<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.">
+					<button class="btn btn-write" disabled={Boolean(busy)} onclick={onPush}>
+						<Icon icon="lucide:upload" />
+						Push
+					</button>
+				</Tooltip>
 				<IconButton
 					icon="lucide:scroll-text"
 					label={activityOpen ? 'Close activity log' : 'Open activity log'}

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Icon from './Icon.svelte';
 	import IconButton from './IconButton.svelte';
+	import Tooltip from './Tooltip.svelte';
 
 	type PluginItem = { id: string; label: string; source?: string; enabled: boolean };
 
@@ -85,10 +86,12 @@
 			<p class="heading">This board</p>
 			{#if fleetPath}
 				<p class="meta">
-					<button type="button" class="path" title="Copy fleet path" onclick={() => void copyFleetPath()}>
+					<Tooltip title="Copy fleet path">
+					<button type="button" class="path" onclick={() => void copyFleetPath()}>
 						<code>{fleetPath}</code>
 						<span class="copy-hint">{copiedPath ? 'copied' : 'copy'}</span>
 					</button>
+					</Tooltip>
 				</p>
 			{:else if statusReady}
 				<p class="hint">No fleet yet — open the Fleet tab, scan a folder, then enroll.</p>

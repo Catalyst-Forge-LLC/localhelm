@@ -13,18 +13,20 @@ body {
 	color: #ececef;
 }
 
-/* After Tailwind preflight: restore the arrow triangle and Helm colors. */
+/* Tippy helm theme — HUD plate. Ticks come from .hud-frame on the box. */
 .tippy-box[data-theme~='helm'] {
-	background: var(--well);
+	--hud-fill: var(--hull-2);
+	--tick: 0.55rem;
+	background-color: var(--hud-fill);
 	color: #ececef;
 	border: 1px solid var(--steel);
 	border-radius: var(--plate-radius);
 	font-size: 0.78rem;
 	line-height: 1.45;
-	box-shadow: 0 6px 18px rgb(0 0 0 / 0.55), 0 0 12px rgb(126 244 255 / 0.08);
+	box-shadow: var(--overlay-glow);
 }
 .tippy-box[data-theme~='helm'] .tippy-arrow {
-	color: var(--well);
+	color: var(--hull-2);
 }
 .tippy-box[data-theme~='helm'] .tippy-arrow::before {
 	border-style: solid;

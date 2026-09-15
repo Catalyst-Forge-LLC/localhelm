@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { Instance, Placement } from 'tippy.js';
-
-	function appendToBody(): HTMLElement {
-		return document.body;
-	}
-
-	const TOOLTIP_Z_INDEX = 80;
+	import { helmTippyProps } from './helmTippy';
 
 	let {
 		title,
@@ -24,20 +19,19 @@
 		children: import('svelte').Snippet;
 	} = $props();
 
-	const theme = $derived(wide ? 'helm helm-wide' : 'helm');
 	let el: HTMLSpanElement | undefined;
 	let instance = $state<Instance | null>(null);
 
 	function applyProps(): void {
-		instance?.setProps({
-			content: title,
-			placement,
-			delay,
-			theme,
-			interactive,
-			appendTo: appendToBody,
-			zIndex: TOOLTIP_Z_INDEX,
-		});
+		instance?.setProps(
+			helmTippyProps({
+				content: title,
+				placement,
+				delay,
+				interactive,
+				wide,
+			}),
+		);
 	}
 
 	onMount(() => {
@@ -45,16 +39,7 @@
 		let tip: Instance | null = null;
 		void import('tippy.js').then(({ default: tippy }) => {
 			if (cancelled || !el || !title.trim()) return;
-			tip = tippy(el, {
-				content: title,
-				placement,
-				delay,
-				arrow: true,
-				theme,
-				interactive,
-				appendTo: appendToBody,
-				zIndex: TOOLTIP_Z_INDEX,
-			});
+			tip = tippy(el, helmTippyProps({ content: title, placement, delay, interactive, wide }));
 			instance = tip;
 			applyProps();
 		});
@@ -69,8 +54,8 @@
 		void title;
 		void placement;
 		void delay;
-		void theme;
 		void interactive;
+		void wide;
 		void instance;
 		if (!title.trim()) {
 			instance?.disable();
@@ -94,7 +79,9 @@
 		align-items: center;
 	}
 
-	.tip-ref :global(button:disabled) {
+	/* Let hover hit the wrapper so a disabled control still shows the tip. */
+	.tip-ref :global(button:disabled),
+	.tip-ref :global(a[aria-disabled='true']) {
 		pointer-events: none;
 	}
 </style>

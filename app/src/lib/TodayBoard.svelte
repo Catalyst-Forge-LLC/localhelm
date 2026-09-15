@@ -131,37 +131,28 @@
 			{#if needBulkWrites}
 				<div class="group-buttons">
 					{#if needCommitIds.length}
-						<button
-							class="btn btn-write"
-							disabled={busy}
-							onclick={() => onCommit(needCommitIds)}
-							title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push."
-						>
-							<Icon icon="lucide:git-commit-horizontal" />
-							Commit dirty
-						</button>
+						<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
+							<button class="btn btn-write" disabled={busy} onclick={() => onCommit(needCommitIds)}>
+								<Icon icon="lucide:git-commit-horizontal" />
+								Commit dirty
+							</button>
+						</Tooltip>
 					{/if}
 					{#if needPublishIds.length}
-						<button
-							class="btn btn-write"
-							disabled={busy}
-							onclick={() => onPublish(needPublishIds)}
-							title="Shows bump (when needed), push, and npm publish. Confirm in the modal."
-						>
-							<Icon icon="lucide:package-up" />
-							Publish
-						</button>
+						<Tooltip title="Shows bump (when needed), push, and npm publish. Confirm in the modal.">
+							<button class="btn btn-write" disabled={busy} onclick={() => onPublish(needPublishIds)}>
+								<Icon icon="lucide:package-up" />
+								Publish
+							</button>
+						</Tooltip>
 					{/if}
 					{#if needPushIds.length}
-						<button
-							class="btn btn-write"
-							disabled={busy}
-							onclick={() => onPush(needPushIds)}
-							title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local."
-						>
-							<Icon icon="lucide:upload" />
-							Push ahead
-						</button>
+						<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.">
+							<button class="btn btn-write" disabled={busy} onclick={() => onPush(needPushIds)}>
+								<Icon icon="lucide:upload" />
+								Push ahead
+							</button>
+						</Tooltip>
 					{/if}
 				</div>
 			{/if}
@@ -209,20 +200,23 @@
 							<div class="need-tools">
 								<div class="badges">
 									{#each todayBadges(row) as badge (badge.text)}
-										<span class={`badge ${badge.tone}`} title={badge.title ?? ''}>{badge.text}</span>
+										<Tooltip title={badge.title ?? badge.text}>
+											<span class={`badge ${badge.tone}`}>{badge.text}</span>
+										</Tooltip>
 									{/each}
 								</div>
 								<div class="need-actions">
 									{#each acts as act, i (act.id)}
-										<button
-											class="btn btn-sm"
-											class:btn-write={i === 0 && !act.disabled}
-											disabled={busy || Boolean(act.disabled)}
-											onclick={act.run}
-											title={act.title}
-										>
-											{act.label}
-										</button>
+										<Tooltip title={act.title}>
+											<button
+												class="btn btn-sm"
+												class:btn-write={i === 0 && !act.disabled}
+												disabled={busy || Boolean(act.disabled)}
+												onclick={act.run}
+											>
+												{act.label}
+											</button>
+										</Tooltip>
 									{/each}
 								</div>
 							</div>
@@ -245,14 +239,11 @@
 									{#if target.linked}<span class="badge info">{target.linked} local link</span>{/if}
 								</div>
 								<div class="need-actions">
-									<button
-										class="btn btn-sm btn-write"
-										disabled={busy}
-										onclick={() => onCascade(target.id)}
-										title="Shows which dependents would get the new pin. Confirm in the modal to write."
-									>
-										{target.writable === 1 ? 'Write 1 pin' : `Write ${target.writable} pins`}
-									</button>
+									<Tooltip title="Shows which dependents would get the new pin. Confirm in the modal to write.">
+										<button class="btn btn-sm btn-write" disabled={busy} onclick={() => onCascade(target.id)}>
+											{target.writable === 1 ? 'Write 1 pin' : `Write ${target.writable} pins`}
+										</button>
+									</Tooltip>
 								</div>
 							</div>
 						</li>
@@ -295,14 +286,11 @@
 							</div>
 							<div class="need-tools">
 								<div class="need-actions">
-									<button
-										type="button"
-										class="btn btn-sm"
-										onclick={() => onOpenPortsFamily(look.leaseIds)}
-										title="Opens Ports with these leases checked."
-									>
-										Open Ports
-									</button>
+									<Tooltip title="Opens Ports with these leases checked.">
+										<button type="button" class="btn btn-sm" onclick={() => onOpenPortsFamily(look.leaseIds)}>
+											Open Ports
+										</button>
+									</Tooltip>
 								</div>
 							</div>
 						</li>
@@ -336,26 +324,24 @@
 				</div>
 				<div class="group-buttons">
 					{#if filepressLandIds.length}
-						<button
-							class="btn btn-write btn-sm"
-							disabled={busy}
-							onclick={() => onLand(filepressLandIds)}
-							title="Plans Land for every site that needs an engine write or a finished ship. Confirm in the modal."
-						>
-							<Icon icon="lucide:plane-landing" />
-							Land{filepressLandIds.length > 1 ? ` ${filepressLandIds.length}` : ''}
-						</button>
+						<Tooltip title="Plans Land for every site that needs an engine write or a finished ship. Confirm in the modal.">
+							<button class="btn btn-write btn-sm" disabled={busy} onclick={() => onLand(filepressLandIds)}>
+								<Icon icon="lucide:plane-landing" />
+								Land{filepressLandIds.length > 1 ? ` ${filepressLandIds.length}` : ''}
+							</button>
+						</Tooltip>
 					{/if}
 					{#if filepressBoard && filepressSyncIds.length}
-						<button
-							class="btn btn-write btn-sm"
-							disabled={busy}
-							onclick={() => onSyncEngine(filepressBoard.plugin, filepressSyncIds)}
-							title="Shows which FilePress sites need an engine sync. Confirm in the modal to write."
-						>
-							<Icon icon="lucide:refresh-cw" />
-							Sync engine
-						</button>
+						<Tooltip title="Shows which FilePress sites need an engine sync. Confirm in the modal to write.">
+							<button
+								class="btn btn-write btn-sm"
+								disabled={busy}
+								onclick={() => onSyncEngine(filepressBoard.plugin, filepressSyncIds)}
+							>
+								<Icon icon="lucide:refresh-cw" />
+								Sync engine
+							</button>
+						</Tooltip>
 					{/if}
 					<button type="button" class="btn btn-sm" onclick={() => onSetTab('filepress')}><Icon icon="lucide:arrow-right" /> FilePress Sites</button>
 				</div>
@@ -371,15 +357,12 @@
 								</div>
 								<div class="need-tools">
 									<div class="need-actions">
-										<button
-											class="btn btn-sm btn-write"
-											disabled={busy}
-											onclick={() => onLand([site.id])}
-											title="Plans Sync → Push → Ship for this site. Confirm in the modal."
-										>
-											<Icon icon="lucide:plane-landing" />
-											Land
-										</button>
+										<Tooltip title="Plans Sync → Push → Ship for this site. Confirm in the modal.">
+											<button class="btn btn-sm btn-write" disabled={busy} onclick={() => onLand([site.id])}>
+												<Icon icon="lucide:plane-landing" />
+												Land
+											</button>
+										</Tooltip>
 									</div>
 								</div>
 							</li>
@@ -433,14 +416,11 @@
 											</div>
 											<div class="need-tools">
 												<div class="need-actions">
-													<button
-														type="button"
-														class="btn btn-sm"
-														onclick={() => onOpenPortsStacks()}
-														title="Opens the Stacks table. Start and Stop live on each row."
-													>
-														Open
-													</button>
+													<Tooltip title="Opens the Stacks table. Start and Stop live on each row.">
+														<button type="button" class="btn btn-sm" onclick={() => onOpenPortsStacks()}>
+															Open
+														</button>
+													</Tooltip>
 												</div>
 											</div>
 										</li>

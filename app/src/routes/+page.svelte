@@ -12,6 +12,7 @@
 	import IconButton from '$lib/IconButton.svelte';
 	import InfoHint from '$lib/InfoHint.svelte';
 	import Tooltip from '$lib/Tooltip.svelte';
+	import { tip } from '$lib/helmTippy';
 	import { activityLinkedIds } from '$lib/activityLinks';
 	import { crosswalkChips } from '$lib/crosswalk';
 	import { formatPluginPlanLines, pluginPlanLineKeys } from '$lib/pluginPlan';
@@ -1936,105 +1937,72 @@
 							<p class="hint">Needs you is the write for that row. The refresh icon re-reads that row only. Check rows for bulk refresh, bump, push, publish, or remove. Removing never deletes a folder. Bump writes package.json and commits that file.</p>
 						</div>
 						<div class="group-buttons">
-							<button
-								class="btn"
-								disabled={Boolean(busy) || !checkedIds.length}
-								onclick={() => void refreshRows(checkedIds)}
-								title="Re-read package.json, git, and npm for the checked rows only. Does not fetch remotes or reload Sites/Ports."
-							>
-								<Icon icon="lucide:refresh-cw" />
-								Refresh{checkedIds.length ? ` (${checkedIds.length})` : ''}
-							</button>
-							<button
-								class="btn"
-								disabled={Boolean(busy)}
-								onclick={() => (addOpen = true)}
-								title="Scan a folder and pick which projects to enroll."
-							>
-								<Icon icon="lucide:folder-plus" />
-								Add projects
-							</button>
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy) || !checkedCommitIds.length}
-								onclick={() => void startCommit(checkedIds)}
-								title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push."
-							>
-								<Icon icon="lucide:git-commit-horizontal" />
-								Commit{checkedCommitIds.length ? ` (${checkedCommitIds.length})` : ''}
-							</button>
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy) || !checkedIds.length}
-								onclick={() => startBump(checkedIds)}
-								title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish."
-							>
-								<Icon icon="lucide:chevrons-up" />
-								Bump{checkedIds.length ? ` (${checkedIds.length})` : ''}
-							</button>
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy) || !checkedPushIds.length}
-								onclick={() => startPush(checkedIds)}
-								title="Shows which checked repos would push to origin. The count is how many are ahead, not how many are checked. Confirm in the modal. Never --force."
-							>
-								<Icon icon="lucide:upload" />
-								Push{checkedPushIds.length ? ` (${checkedPushIds.length})` : ''}
-							</button>
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy) || !checkedPublishIds.length}
-								onclick={() => startPublish(checkedPublishIds)}
-								title="Shows bump, push, and npm publish for the checked public packages. Confirm in the modal."
-							>
-								<Icon icon="lucide:package-up" />
-								Publish{checkedPublishIds.length ? ` (${checkedPublishIds.length})` : ''}
-							</button>
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy) || !checkedShipIds.length}
-								onclick={() => void startShip(checkedShipIds)}
-								title="Runs pnpm ship for checked repos that have the script (wrangler / Pages). Confirm in the modal. Not FilePress Land."
-							>
-								<Icon icon="lucide:ship" />
-								Ship{checkedShipIds.length ? ` (${checkedShipIds.length})` : ''}
-							</button>
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy) || !checkedGlobalIds.length}
-								onclick={() => void startGlobal(checkedGlobalIds)}
-								title="Installs or updates the checked CLIs on this machine (pnpm add -g). Confirm in the modal. Never --force."
-							>
-								<Icon icon="lucide:hard-drive-download" />
-								Install global{checkedGlobalIds.length ? ` (${checkedGlobalIds.length})` : ''}
-							</button>
-							<button
-								class="btn btn-write"
-								disabled={Boolean(busy) || !checkedIds.length}
-								onclick={() => startUnenroll()}
-								title="Shows which fleet rows would be removed. Confirm in the modal. Never deletes a folder."
-							>
-								<Icon icon="lucide:folder-minus" />
-								Remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
-							</button>
-							<button
-								class="btn"
-								disabled={Boolean(busy) || !checkedIds.length}
-								onclick={() => void startArchive(checkedIds, showArchived)}
-								title={showArchived ? 'Puts checked rows back on Today. Folder was never moved.' : 'Hides checked rows on Today. Folder and port stay.'}
-							>
-								<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
-								{showArchived ? 'Restore' : 'Archive'}{checkedIds.length ? ` (${checkedIds.length})` : ''}
-							</button>
-							{#if archivedIds.length}
-								<button
-									type="button"
-									class="btn"
-									onclick={() => (showArchived = !showArchived)}
-									title="Archived rows stay enrolled. This only changes what Today and Fleet show."
-								>
-									{showArchived ? 'Hide archived' : `Archived (${archivedIds.length})`}
+							<Tooltip title="Re-read package.json, git, and npm for the checked rows only. Does not fetch remotes or reload Sites/Ports.">
+								<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => void refreshRows(checkedIds)}>
+									<Icon icon="lucide:refresh-cw" />
+									Refresh{checkedIds.length ? ` (${checkedIds.length})` : ''}
 								</button>
+							</Tooltip>
+							<Tooltip title="Scan a folder and pick which projects to enroll.">
+								<button class="btn" disabled={Boolean(busy)} onclick={() => (addOpen = true)}>
+									<Icon icon="lucide:folder-plus" />
+									Add projects
+								</button>
+							</Tooltip>
+							<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
+								<button class="btn btn-write" disabled={Boolean(busy) || !checkedCommitIds.length} onclick={() => void startCommit(checkedIds)}>
+									<Icon icon="lucide:git-commit-horizontal" />
+									Commit{checkedCommitIds.length ? ` (${checkedCommitIds.length})` : ''}
+								</button>
+							</Tooltip>
+							<Tooltip title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish.">
+								<button class="btn btn-write" disabled={Boolean(busy) || !checkedIds.length} onclick={() => startBump(checkedIds)}>
+									<Icon icon="lucide:chevrons-up" />
+									Bump{checkedIds.length ? ` (${checkedIds.length})` : ''}
+								</button>
+							</Tooltip>
+							<Tooltip title="Shows which checked repos would push to origin. The count is how many are ahead, not how many are checked. Confirm in the modal. Never --force.">
+								<button class="btn btn-write" disabled={Boolean(busy) || !checkedPushIds.length} onclick={() => startPush(checkedIds)}>
+									<Icon icon="lucide:upload" />
+									Push{checkedPushIds.length ? ` (${checkedPushIds.length})` : ''}
+								</button>
+							</Tooltip>
+							<Tooltip title="Shows bump, push, and npm publish for the checked public packages. Confirm in the modal.">
+								<button class="btn btn-write" disabled={Boolean(busy) || !checkedPublishIds.length} onclick={() => startPublish(checkedPublishIds)}>
+									<Icon icon="lucide:package-up" />
+									Publish{checkedPublishIds.length ? ` (${checkedPublishIds.length})` : ''}
+								</button>
+							</Tooltip>
+							<Tooltip title="Runs pnpm ship for checked repos that have the script (wrangler / Pages). Confirm in the modal. Not FilePress Land.">
+								<button class="btn btn-write" disabled={Boolean(busy) || !checkedShipIds.length} onclick={() => void startShip(checkedShipIds)}>
+									<Icon icon="lucide:ship" />
+									Ship{checkedShipIds.length ? ` (${checkedShipIds.length})` : ''}
+								</button>
+							</Tooltip>
+							<Tooltip title="Installs or updates the checked CLIs on this machine (pnpm add -g). Confirm in the modal. Never --force.">
+								<button class="btn btn-write" disabled={Boolean(busy) || !checkedGlobalIds.length} onclick={() => void startGlobal(checkedGlobalIds)}>
+									<Icon icon="lucide:hard-drive-download" />
+									Install global{checkedGlobalIds.length ? ` (${checkedGlobalIds.length})` : ''}
+								</button>
+							</Tooltip>
+							<Tooltip title="Shows which fleet rows would be removed. Confirm in the modal. Never deletes a folder.">
+								<button class="btn btn-write" disabled={Boolean(busy) || !checkedIds.length} onclick={() => startUnenroll()}>
+									<Icon icon="lucide:folder-minus" />
+									Remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
+								</button>
+							</Tooltip>
+							<Tooltip title={showArchived ? 'Puts checked rows back on Today. Folder was never moved.' : 'Hides checked rows on Today. Folder and port stay.'}>
+								<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => void startArchive(checkedIds, showArchived)}>
+									<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
+									{showArchived ? 'Restore' : 'Archive'}{checkedIds.length ? ` (${checkedIds.length})` : ''}
+								</button>
+							</Tooltip>
+							{#if archivedIds.length}
+								<Tooltip title="Archived rows stay enrolled. This only changes what Today and Fleet show.">
+									<button type="button" class="btn" onclick={() => (showArchived = !showArchived)}>
+										{showArchived ? 'Hide archived' : `Archived (${archivedIds.length})`}
+									</button>
+								</Tooltip>
 							{/if}
 						</div>
 					</div>
@@ -2102,7 +2070,7 @@
 											{:else if row.pins.length}
 												<div class="pins">
 													{#each row.pins as pin (pin.fromFile + pin.name)}
-														<span class={`pin ${pinTone(pin)}`} title={`${pin.fromFile} package.json · ${pin.spec}${pin.note ? ` · ${pin.note}` : ''}`}>
+														<span class={`pin ${pinTone(pin)}`} use:tip={`${pin.fromFile} package.json · ${pin.spec}${pin.note ? ` · ${pin.note}` : ''}`}>
 															{pinLabel(pin)}
 														</span>
 													{/each}
@@ -2143,14 +2111,15 @@
 													<option value="minor">minor</option>
 													<option value="major">major</option>
 												</select>
-												<button
-													class="btn btn-sm btn-write"
-													disabled={Boolean(busy) || Boolean(row.pending)}
-													onclick={() => startBump([row.id])}
-													title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish."
-												>
-													{bumpTo ? `Bump ${bumpTo}` : 'Bump'}
-												</button>
+												<Tooltip title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish.">
+													<button
+														class="btn btn-sm btn-write"
+														disabled={Boolean(busy) || Boolean(row.pending)}
+														onclick={() => startBump([row.id])}
+													>
+														{bumpTo ? `Bump ${bumpTo}` : 'Bump'}
+													</button>
+												</Tooltip>
 											</div>
 										</td>
 									</tr>
@@ -2190,39 +2159,40 @@
 								{@const syncIds = board.rows
 									.filter((row) => selectedSites[row.id] && siteNeedsEngineSync(row.cells))
 									.map((row) => row.id)}
-								<button
-									class="btn btn-write"
-									disabled={Boolean(busy) || landIds.length === 0}
-									onclick={() => startLand(landIds)}
-									title="Plans Sync → Push → Ship for the checked sites. Confirm in the modal."
-								>
-									<Icon icon="lucide:plane-landing" />
-									Land{landIds.length ? ` (${landIds.length})` : ''}
-								</button>
-								<button
-									class="btn btn-write"
-									disabled={Boolean(busy) || syncIds.length === 0}
-									onclick={() => startPluginJob(board.plugin, 'sync', syncIds, 'Sync engine')}
-									title="Retargets getfilepress and merges headers for the checked sites that are behind. Confirm in the modal."
-								>
-									<Icon icon="lucide:refresh-cw" />
-									Sync engine{syncIds.length ? ` (${syncIds.length})` : ''}
-								</button>
+								<Tooltip title="Plans Sync → Push → Ship for the checked sites. Confirm in the modal.">
+									<button class="btn btn-write" disabled={Boolean(busy) || landIds.length === 0} onclick={() => startLand(landIds)}>
+										<Icon icon="lucide:plane-landing" />
+										Land{landIds.length ? ` (${landIds.length})` : ''}
+									</button>
+								</Tooltip>
+								<Tooltip title="Retargets getfilepress and merges headers for the checked sites that are behind. Confirm in the modal.">
+									<button
+										class="btn btn-write"
+										disabled={Boolean(busy) || syncIds.length === 0}
+										onclick={() => startPluginJob(board.plugin, 'sync', syncIds, 'Sync engine')}
+									>
+										<Icon icon="lucide:refresh-cw" />
+										Sync engine{syncIds.length ? ` (${syncIds.length})` : ''}
+									</button>
+								</Tooltip>
 							{/if}
 							{#each boardActions(board) as act (act.id)}
 								{@const icon = actionIcon(act)}
 								{@const bulkLabel = board.plugin === 'xfacts' && act.id === 'refresh' ? 'Add / refresh labels' : act.label}
-								<button
-									class="btn btn-write"
-									disabled={Boolean(busy) || checkedSiteIds(board, act.id).length === 0}
-									onclick={() => startPluginJob(board.plugin, act.id, checkedSiteIds(board, act.id), bulkLabel)}
+								<Tooltip
 									title={board.plugin === 'xfacts' && act.id === 'refresh'
 										? 'Creates APP_FACTS.md when missing, or refreshes an existing label. Confirm in the modal.'
 										: `Shows what ${act.label.toLowerCase()} would do for the checked sites. Confirm in the modal.`}
 								>
+								<button
+									class="btn btn-write"
+									disabled={Boolean(busy) || checkedSiteIds(board, act.id).length === 0}
+									onclick={() => startPluginJob(board.plugin, act.id, checkedSiteIds(board, act.id), bulkLabel)}
+								>
 									{#if icon}<Icon {icon} />{/if}
 									{bulkLabel}{checkedSiteIds(board, act.id).length ? ` (${checkedSiteIds(board, act.id).length})` : ''}
 								</button>
+								</Tooltip>
 							{/each}
 						</div>
 					</div>
@@ -2263,7 +2233,7 @@
 														href={liveHref}
 														target="_blank"
 														rel="noopener noreferrer"
-														title={`Open ${liveHref} in a new tab`}
+														use:tip={`Open ${liveHref} in a new tab`}
 													>{row.label ?? row.id}</a>
 												{:else}
 													<span class="id">{row.label ?? row.id}</span>
@@ -2280,7 +2250,7 @@
 													{#each cellLinks as item, i (`${col.id}:${item.label}:${i}`)}
 														{#if i > 0}<span class="dim"> · </span>{/if}
 														{#if item.href}
-															<a class="live-link" href={item.href} target="_blank" rel="noopener noreferrer" title={`Open ${item.href}`}>{item.label}</a>
+															<a class="live-link" href={item.href} target="_blank" rel="noopener noreferrer" use:tip={`Open ${item.href}`}>{item.label}</a>
 														{:else}
 															<span>{item.label}</span>
 														{/if}
@@ -2306,38 +2276,37 @@
 													</Tooltip>
 												{/if}
 												{#if board.plugin === 'filepress'}
-													<button
-														class="btn btn-sm btn-write"
-														disabled={Boolean(busy)}
-														onclick={() => startLand([row.id])}
-														title="Plans Sync → Push → Ship for this site. Confirm in the modal."
-													>
-														<Icon icon="lucide:plane-landing" />
-														Land
-													</button>
+													<Tooltip title="Plans Sync → Push → Ship for this site. Confirm in the modal.">
+														<button class="btn btn-sm btn-write" disabled={Boolean(busy)} onclick={() => startLand([row.id])}>
+															<Icon icon="lucide:plane-landing" />
+															Land
+														</button>
+													</Tooltip>
 												{/if}
 												{#if board.plugin === 'filepress' && siteNeedsEngineSync(row.cells)}
-													<button
-														class="btn btn-sm btn-write"
-														disabled={Boolean(busy)}
-														onclick={() => startPluginJob(board.plugin, 'sync', [row.id], siteSyncLabel(row.cells))}
-														title="Retargets getfilepress and merges headers if needed. Confirm in the modal."
-													>
-														<Icon icon="lucide:refresh-cw" />
-														{siteSyncLabel(row.cells)}
-													</button>
+													<Tooltip title="Retargets getfilepress and merges headers if needed. Confirm in the modal.">
+														<button
+															class="btn btn-sm btn-write"
+															disabled={Boolean(busy)}
+															onclick={() => startPluginJob(board.plugin, 'sync', [row.id], siteSyncLabel(row.cells))}
+														>
+															<Icon icon="lucide:refresh-cw" />
+															{siteSyncLabel(row.cells)}
+														</button>
+													</Tooltip>
 												{/if}
 												{#each row.actions.filter((act) => sitePluginJobVisible(board.plugin, act.id)) as act (act.id)}
 													{@const icon = actionIcon(act)}
-													<button
-														class="btn btn-sm"
-														disabled={Boolean(busy)}
-														onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
-														title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}
-													>
-														{#if icon}<Icon {icon} />{/if}
-														{act.label}
-													</button>
+													<Tooltip title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}>
+														<button
+															class="btn btn-sm"
+															disabled={Boolean(busy)}
+															onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
+														>
+															{#if icon}<Icon {icon} />{/if}
+															{act.label}
+														</button>
+													</Tooltip>
 												{/each}
 											</div>
 										</td>
@@ -2579,26 +2548,24 @@
 										</button>
 									</Tooltip>
 									{#if parkedLeaseCount}
-										<button
-											type="button"
-											class="btn"
-											onclick={() => (showParked = !showParked)}
-											title="Parked leases keep their port. Unpark does not start them."
-										>
-											{showParked ? 'Hide parked' : `Parked (${parkedLeaseCount})`}
-										</button>
+										<Tooltip title="Parked leases keep their port. Unpark does not start them.">
+											<button type="button" class="btn" onclick={() => (showParked = !showParked)}>
+												{showParked ? 'Hide parked' : `Parked (${parkedLeaseCount})`}
+											</button>
+										</Tooltip>
 									{/if}
 									{#each boardActions(board) as act (act.id)}
 										{@const icon = actionIcon(act)}
-										<button
-											class="btn btn-write"
-											disabled={Boolean(busy) || checkedPortIds(board, act.id).length === 0}
-											onclick={() => startPluginJob(board.plugin, act.id, checkedPortIds(board, act.id), act.label)}
-											title={`Shows what ${act.label.toLowerCase()} would do for the checked leases. Confirm in the modal.`}
-										>
-											{#if icon}<Icon {icon} />{/if}
-											{act.label}{checkedPortIds(board, act.id).length ? ` (${checkedPortIds(board, act.id).length})` : ''}
-										</button>
+										<Tooltip title={`Shows what ${act.label.toLowerCase()} would do for the checked leases. Confirm in the modal.`}>
+											<button
+												class="btn btn-write"
+												disabled={Boolean(busy) || checkedPortIds(board, act.id).length === 0}
+												onclick={() => startPluginJob(board.plugin, act.id, checkedPortIds(board, act.id), act.label)}
+											>
+												{#if icon}<Icon {icon} />{/if}
+												{act.label}{checkedPortIds(board, act.id).length ? ` (${checkedPortIds(board, act.id).length})` : ''}
+											</button>
+										</Tooltip>
 									{/each}
 								</div>
 							{/if}
@@ -2794,7 +2761,7 @@
 					<div>
 						<div class="id">{row.id}</div>
 						{#if candidateFolderLabel(row) !== row.id}
-							<div class="path" title={row.absPath}>{candidateFolderLabel(row)}</div>
+							<div class="path" use:tip={row.absPath}>{candidateFolderLabel(row)}</div>
 						{/if}
 						<div class="dim small">
 							{row.npmName ?? 'no package name'}{row.version ? ` ${row.version}` : ''}{row.git ? ' · git' : ' · no git'}{already
@@ -2806,15 +2773,12 @@
 			{/each}
 		</ul>
 		<div class="group-buttons">
-			<button
-				class="btn btn-write"
-				disabled={Boolean(busy) || !checkedScan.length}
-				onclick={() => startEnroll()}
-				title="Shows which folders would join the fleet. Confirm in the modal to write localhelm.fleet.json."
-			>
-				<Icon icon="lucide:folder-plus" />
-				Add to fleet{checkedScan.length ? ` (${checkedScan.length})` : ''}
-			</button>
+			<Tooltip title="Shows which folders would join the fleet. Confirm in the modal to write localhelm.fleet.json.">
+				<button class="btn btn-write" disabled={Boolean(busy) || !checkedScan.length} onclick={() => startEnroll()}>
+					<Icon icon="lucide:folder-plus" />
+					Add to fleet{checkedScan.length ? ` (${checkedScan.length})` : ''}
+				</button>
+			</Tooltip>
 		</div>
 	{:else}
 		<p class="dim small">Scan a folder to see candidates. Already enrolled rows stay in the list as disabled.</p>
