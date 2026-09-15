@@ -21,7 +21,7 @@
 	import { formatBrief } from '$lib/briefFormat';
 	import { familyMemberNames } from '$lib/family';
 	import { groupPortLooks, portFamilies, portLooks, type PortFamily } from '$lib/looks';
-	import { isNestedSitePath } from '$lib/scan';
+	import { isNestedSitePath } from '$lib/scanPaths';
 	import {
 		canCommit,
 		canPublish,

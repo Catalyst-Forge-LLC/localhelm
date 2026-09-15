@@ -1702,6 +1702,14 @@
   ],
   "gotchas": [
     {
+      "timestamp": "2026-09-15T18:27:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "issue": "app/src/lib/scan.ts re-export collided with src/lib/scan.ts. Vite loaded the Node walker (paths.ts → node:os.homedir) into the dashboard client and HMR failed.",
+      "resolution": "Browser helper is $lib/scanPaths → src/lib/scanPaths.ts only. Do not name a Svelte $lib shim the same as a Node module in src/lib.",
+      "category": "ux"
+    },
+    {
       "timestamp": "2026-09-15T00:10:00Z",
       "phase": "2-scaffolding",
       "session": 38,

@@ -16,7 +16,9 @@ Copy into **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** on a bootstrapped project
 
 **Suggested Lite change:** In the SvelteKit pitfalls / dashboard section (near §4.2 or the anti-patterns around shared `$lib`), add: modules imported by `.svelte` (even one named export) are in the browser graph. Keep `node:os`, `node:fs`, `node:child_process` in a `*Machine.ts` / `$lib/server` file. Client code uses `import type` plus browser-safe helpers (`visitorHttpUrl`, not a wrapper that lives next to `os.hostname`).
 
-**Project pointer:** LocalHelm `src/lib/visitorTiles.ts` vs `src/lib/visitorMachine.ts`.
+**Also:** Do not name a Svelte `$lib` shim the same as a Node module in the sibling `src/lib` (e.g. `$lib/scan` vs `src/lib/scan.ts`). Vite can load the Node walker (`node:os` / `node:fs`) into the client. Use a distinct name (`$lib/scanPaths`) and re-export only the browser-safe file.
+
+**Project pointer:** LocalHelm `src/lib/visitorTiles.ts` vs `src/lib/visitorMachine.ts`; `$lib/scanPaths` vs `src/lib/scan.ts`.
 
 ### 2. Vite `allowedHosts` blocks Tailscale MagicDNS
 
