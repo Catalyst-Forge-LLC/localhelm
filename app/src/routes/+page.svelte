@@ -2772,7 +2772,7 @@
 	</div>
 </div>
 
-<AddProjectsModal bind:open={addOpen} busy={Boolean(busy)}>
+<AddProjectsModal bind:open={addOpen} busy={Boolean(busy)} busyLabel={busy}>
 	<label for="scan-root">Folder to scan</label>
 	<div class="row">
 		<input id="scan-root" bind:value={scanRoot} spellcheck="false" />
@@ -2810,7 +2810,7 @@
 		</div>
 	{:else if candidates.length}
 		<p class="dim small">Everything in this scan is already enrolled.</p>
-	{:else}
+	{:else if !busy}
 		<p class="dim small">Scan a folder to see candidates that are not enrolled yet.</p>
 	{/if}
 </AddProjectsModal>

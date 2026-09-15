@@ -4,10 +4,11 @@
 	type Props = {
 		open: boolean;
 		busy?: boolean;
+		busyLabel?: string;
 		children?: Snippet;
 	};
 
-	let { open = $bindable(), busy = false, children }: Props = $props();
+	let { open = $bindable(), busy = false, busyLabel = '', children }: Props = $props();
 
 	let dialogEl = $state<HTMLDialogElement | null>(null);
 
@@ -48,6 +49,12 @@
 			<button type="button" class="btn" disabled={busy} onclick={cancel}>Close</button>
 		</div>
 		<div class="body">
+			{#if busy}
+				<div class="working" role="status" aria-live="polite">
+					<span class="working-copy">{busyLabel || 'Scanning…'}</span>
+					<span class="hud-scan" aria-hidden="true"><span class="hud-scan-blob"></span></span>
+				</div>
+			{/if}
 			{#if children}{@render children()}{/if}
 		</div>
 	</div>
@@ -122,6 +129,17 @@
 		padding: 0 1.25rem 1.15rem;
 		overflow: auto;
 		min-height: 0;
+	}
+
+	.working {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.4rem;
+		margin: 0 0 0.75rem;
+		color: #ececef;
+		font-size: 0.88rem;
+		line-height: 1.4;
 	}
 
 	.btn {

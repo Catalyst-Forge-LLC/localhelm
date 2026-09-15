@@ -228,7 +228,7 @@
 		{#if busy && busyLabel}
 			<div class="working" class:solo={!items.length} role="status" aria-live="polite">
 				<span class="working-copy">{busyLabel}</span>
-				<span class="scan" aria-hidden="true"><span class="scan-blob"></span></span>
+				<span class="hud-scan" aria-hidden="true"><span class="hud-scan-blob"></span></span>
 			</div>
 		{/if}
 		{#if groups && selected}
@@ -472,35 +472,6 @@
 	.working.solo {
 		min-height: 3.25rem;
 		padding: 0.35rem 0 0.15rem;
-	}
-
-	.scan {
-		position: relative;
-		height: 3px;
-		overflow: hidden;
-		border-radius: 999px;
-		background: rgb(126 244 255 / 0.12);
-	}
-
-	.scan-blob {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 0;
-		width: 32%;
-		border-radius: inherit;
-		background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-		box-shadow: 0 0 10px var(--cyan-glow);
-		animation: knight 1.15s ease-in-out infinite alternate;
-	}
-
-	@keyframes knight {
-		from {
-			transform: translateX(-15%);
-		}
-		to {
-			transform: translateX(230%);
-		}
 	}
 
 	.split {
@@ -828,12 +799,6 @@
 		.roster-row,
 		.btn {
 			transition: none;
-		}
-
-		.scan-blob {
-			animation: none;
-			left: 34%;
-			opacity: 0.7;
 		}
 	}
 
