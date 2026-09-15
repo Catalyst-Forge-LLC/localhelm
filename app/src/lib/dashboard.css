@@ -46,8 +46,6 @@
 		align-items: center;
 		min-width: 0;
 		padding: 0.3rem 0.75rem;
-		border: 1px solid transparent;
-		border-bottom-color: var(--cyan-dim);
 	}
 
 	.bridge-situation {

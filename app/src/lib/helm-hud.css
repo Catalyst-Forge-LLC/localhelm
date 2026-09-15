@@ -34,7 +34,7 @@
 .hud-frame {
 	--edge: var(--cyan-dim);
 	--tick: 0.85rem;
-	--inset: var(--keel-radius);
+	--inset: calc(var(--keel-radius) + 2px);
 	border-radius: var(--plate-radius);
 	background-color: var(--hud-fill, transparent);
 	background-image:
@@ -61,8 +61,8 @@
 		top left,
 		top right,
 		top right,
-		left var(--inset) bottom,
-		left bottom var(--inset),
-		right var(--inset) bottom,
-		right bottom var(--inset);
+		left var(--inset) bottom 0,
+		left 0 bottom var(--inset),
+		right var(--inset) bottom 0,
+		right 0 bottom var(--inset);
 }
