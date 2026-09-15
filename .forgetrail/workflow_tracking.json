@@ -1698,6 +1698,19 @@
         "Hide the button when Ports cannot act"
       ],
       "status": "active"
+    },
+    {
+      "id": "d123",
+      "timestamp": "2026-09-15T18:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Dashboard Add ticks plus Add to fleet writes the manifest. No second Confirm modal for enroll. CLI enroll stays plan then --apply. Unenroll still confirms.",
+      "rationale": "Operator 2026-09-15: after selecting folders, a second confirm stacked two Enrolling scanners and was not needed.",
+      "alternatives_considered": [
+        "Keep Confirm and hide the Add scanner",
+        "Keep Confirm and close Add first"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

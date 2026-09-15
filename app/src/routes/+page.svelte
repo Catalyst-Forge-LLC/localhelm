@@ -1341,46 +1341,6 @@
 		});
 	}
 
-	async function startEnroll(): Promise<void> {
-		if (!checkedScan.length) {
-			error = 'Check at least one scanned folder first.';
-			return;
-		}
-		const paths = [...checkedScan];
-		await run(
-			'planning enroll',
-			async () => {
-				const plan = await call('/api/enroll', {
-					method: 'POST',
-					body: JSON.stringify({ paths, apply: false }),
-				});
-				const rows = Array.isArray((plan as { rows?: { action?: string; id?: string; path?: string }[] }).rows)
-					? (plan as { rows: { action?: string; id?: string; path?: string }[] }).rows
-					: [];
-				const adds = rows.filter((row) => row.action === 'add' && row.id && row.path);
-				const lined = rowLines(plan);
-				const lineKeys = pluginPlanLineKeys(plan);
-				note(`enroll plan — ${paths.length} project(s), nothing written`, plan);
-				offerConfirm({
-					title: adds.length ? `Add ${adds.length} project${adds.length === 1 ? '' : 's'} to the fleet?` : 'Nothing to enroll',
-					hint: adds.length
-						? 'Writes these rows into localhelm.fleet.json. Does not copy or delete folders.'
-						: 'Every ticked folder is already enrolled or cannot be added.',
-					items: lined.length ? lined : ['Nothing to enroll.'],
-					itemKeys: lined.length && lineKeys?.length === lined.length ? lineKeys : rows.map((row) => row.id ?? ''),
-					applyIds: adds.map((row) => row.id as string),
-					confirmLabel: adds.length === 1 ? 'Add to fleet' : `Add ${adds.length} to fleet`,
-					canApply: adds.length > 0,
-					run: (included) => {
-						const next = adds.filter((row) => included.includes(row.id as string)).map((row) => row.path as string);
-						if (next.length) void applyEnroll(next);
-					},
-				});
-			},
-			planOpts('Add to fleet', paths),
-		);
-	}
-
 	async function applyEnroll(paths: string[]): Promise<void> {
 		await run(paths.length === 1 ? 'enrolling' : `enrolling ${paths.length} projects`, async () => {
 			const plan = await call('/api/enroll', {
@@ -2802,8 +2762,8 @@
 			{/each}
 		</ul>
 		<div class="group-buttons">
-			<Tooltip title="Shows which folders would join the fleet. Confirm in the modal to write localhelm.fleet.json.">
-				<button class="btn btn-write" disabled={Boolean(busy) || !checkedScan.length} onclick={() => startEnroll()}>
+			<Tooltip title="Writes the ticked folders into localhelm.fleet.json. Does not copy or delete folders.">
+				<button class="btn btn-write" disabled={Boolean(busy) || !checkedScan.length} onclick={() => void applyEnroll(checkedScan)}>
 					<Icon icon="lucide:folder-plus" />
 					Add to fleet{checkedScan.length ? ` (${checkedScan.length})` : ''}
 				</button>

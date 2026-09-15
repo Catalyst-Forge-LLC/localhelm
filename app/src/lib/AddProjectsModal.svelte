@@ -44,7 +44,7 @@
 		<div class="head">
 			<div>
 				<h2 id="add-projects-title">Add projects</h2>
-				<p class="hint">Scanning proposes folders. Nothing joins the fleet until you tick it and write.</p>
+				<p class="hint">Tick folders, then Add to fleet. That write is the confirm.</p>
 			</div>
 			<button type="button" class="btn" disabled={busy} onclick={cancel}>Close</button>
 		</div>
