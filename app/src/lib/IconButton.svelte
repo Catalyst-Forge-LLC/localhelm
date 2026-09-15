@@ -99,10 +99,10 @@
 		right: -0.35rem;
 		min-width: 1rem;
 		padding: 0 0.28rem;
-		border: 1px solid var(--steel, #8b8b93);
-		background: var(--well, #3a3a42);
-		border-radius: var(--plate-radius-sm, 0 0 5px 5px);
-		color: var(--cyan, #f4f4f5);
+		border: 1px solid var(--steel);
+		background: var(--hull-2);
+		border-radius: var(--plate-radius-sm);
+		color: var(--cyan);
 		font-size: 0.62rem;
 		line-height: 1.15rem;
 		text-align: center;
@@ -110,9 +110,10 @@
 
 	.hot .badge,
 	.pressed .badge {
-		border-color: var(--gold, #c9a227);
-		background: rgb(201 162 39 / 0.16);
-		color: var(--gold-soft, #fde68a);
+		border-color: var(--gold);
+		background: var(--gold-soft);
+		color: var(--hull);
+		font-weight: 600;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
