@@ -180,9 +180,11 @@
 			.toSorted((a, b) => a.id.localeCompare(b.id, undefined, { sensitivity: 'base' })),
 	);
 	const scanCandidates = $derived(
-		candidates.toSorted((a, b) =>
-			a.path.localeCompare(b.path, undefined, { sensitivity: 'base', numeric: true }),
-		),
+		candidates
+			.filter((row) => !enrolledIds.has(row.id))
+			.toSorted((a, b) =>
+				a.path.localeCompare(b.path, undefined, { sensitivity: 'base', numeric: true }),
+			),
 	);
 	const checkedScan = $derived(
 		Object.entries(selectedScan)
@@ -2776,19 +2778,14 @@
 		<input id="scan-root" bind:value={scanRoot} spellcheck="false" />
 		<button class="btn" disabled={Boolean(busy)} onclick={() => scan()}><Icon icon="lucide:search" /> Scan</button>
 	</div>
-	{#if candidates.length}
-		<p class="hint">
-			{scanCandidates.filter((c) => !enrolledIds.has(c.id)).length} new ·
-			{scanCandidates.filter((c) => enrolledIds.has(c.id)).length} already enrolled
-		</p>
+	{#if scanCandidates.length}
+		<p class="hint">{scanCandidates.length} not enrolled yet. Enrolled folders stay off this list.</p>
 		<ul class="candidates">
 			{#each scanCandidates as row (row.absPath)}
-				{@const already = enrolledIds.has(row.id)}
-				<li class:already>
+				<li>
 					<input
 						type="checkbox"
 						aria-label={`enroll ${row.id}`}
-						disabled={already}
 						bind:checked={selectedScan[row.absPath]}
 					/>
 					<div>
@@ -2797,9 +2794,7 @@
 							<div class="path" use:tip={row.absPath}>{candidateFolderLabel(row)}</div>
 						{/if}
 						<div class="dim small">
-							{row.npmName ?? 'no package name'}{row.version ? ` ${row.version}` : ''}{row.git ? ' · git' : ' · no git'}{already
-								? ' · enrolled'
-								: ''}
+							{row.npmName ?? 'no package name'}{row.version ? ` ${row.version}` : ''}{row.git ? ' · git' : ' · no git'}
 						</div>
 					</div>
 				</li>
@@ -2813,8 +2808,10 @@
 				</button>
 			</Tooltip>
 		</div>
+	{:else if candidates.length}
+		<p class="dim small">Everything in this scan is already enrolled.</p>
 	{:else}
-		<p class="dim small">Scan a folder to see candidates. Already enrolled rows stay in the list as disabled.</p>
+		<p class="dim small">Scan a folder to see candidates that are not enrolled yet.</p>
 	{/if}
 </AddProjectsModal>
 
