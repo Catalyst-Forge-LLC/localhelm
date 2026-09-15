@@ -237,6 +237,7 @@ export { joinBatchFailures, runNamedBatch } from './batchApply.js';
 export type { NamedBatchFailure, NamedBatchHooks } from './batchApply.js';
 export { acquireJobLock, clearStaleJobLock, isPidAlive } from './lock.js';
 export { compareScanPath, scanFolders } from './scan.js';
+export { isNestedSitePath } from './scanPaths.js';
 export {
 	isOperatorFace,
 	isLoopbackClient,

@@ -21,6 +21,7 @@
 	import { formatBrief } from '$lib/briefFormat';
 	import { familyMemberNames } from '$lib/family';
 	import { groupPortLooks, portFamilies, portLooks, type PortFamily } from '$lib/looks';
+	import { isNestedSitePath } from '$lib/scan';
 	import {
 		canCommit,
 		canPublish,
@@ -181,7 +182,7 @@
 	);
 	const scanCandidates = $derived(
 		candidates
-			.filter((row) => !enrolledIds.has(row.id))
+			.filter((row) => !enrolledIds.has(row.id) && !isNestedSitePath(row.path))
 			.toSorted((a, b) =>
 				a.path.localeCompare(b.path, undefined, { sensitivity: 'base', numeric: true }),
 			),

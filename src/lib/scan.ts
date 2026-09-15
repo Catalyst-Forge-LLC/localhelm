@@ -4,7 +4,10 @@ import type { Ignore } from 'ignore';
 import { isIgnoredRel, loadScanIgnore } from './ignorefile.js';
 import { isDir, pathExists, readPkg, rootPkgPath, sitePkgPath } from './pkg.js';
 import { resolveUserPath, skipDirName, slugId, toPosix } from './paths.js';
+import { isNestedSitePath } from './scanPaths.js';
 import type { ScanCandidate } from './types.js';
+
+export { isNestedSitePath } from './scanPaths.js';
 
 export type ScanOptions = {
 	roots: string[];
@@ -67,7 +70,7 @@ async function walk(
 	}
 	for (const entry of entries) {
 		if (!entry.isDirectory()) continue;
-		if (skipDirName(entry.name)) continue;
+		if (skipDirName(entry.name) || entry.name === 'site') continue;
 		const child = toPosix(path.join(dir, entry.name));
 		const rel = toPosix(path.relative(root, child));
 		if (isIgnoredRel(ig, rel)) continue;
@@ -101,7 +104,7 @@ export async function scanFolders(options: ScanOptions): Promise<ScanCandidate[]
 	const seen = new Set<string>();
 	for (const dir of [...dirs].sort(compareScanPath)) {
 		const row = await candidateFor(dir, workspaceHint);
-		if (!row) continue;
+		if (!row || isNestedSitePath(row.path)) continue;
 		const key = toPosix(path.resolve(workspaceHint ?? cwd, row.path));
 		if (seen.has(key)) continue;
 		seen.add(key);
