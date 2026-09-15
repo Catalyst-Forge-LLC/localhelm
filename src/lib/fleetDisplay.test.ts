@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { fleetProjectMeta, fleetVersionLabel, fleetVersionNote, headerNeedChips } from './fleetDisplay.js';
+import {
+	bridgeIdleLine,
+	bridgeServeHeading,
+	fleetProjectMeta,
+	fleetVersionLabel,
+	fleetVersionNote,
+	headerNeedChips,
+} from './fleetDisplay.js';
 
 describe('fleetDisplay', () => {
 	it('hides the npm name when it matches the fleet id', () => {
@@ -55,8 +62,16 @@ describe('fleetDisplay', () => {
 				npmErrors: 0,
 			}),
 			[
-				{ id: 'unpublished', label: '2 unpublished', tone: 'hot', tab: 'today' },
-				{ id: 'dirty', label: '1 dirty', tone: 'warm', tab: 'today' },
+				{
+					id: 'unpublished',
+					label: '2 unpublished',
+					count: 2,
+					word: 'unpublished',
+					tone: 'hot',
+					tab: 'today',
+					need: 'publish',
+				},
+				{ id: 'dirty', label: '1 dirty', count: 1, word: 'dirty', tone: 'warm', tab: 'today', need: 'push' },
 			],
 		);
 		assert.deepEqual(
@@ -67,7 +82,52 @@ describe('fleetDisplay', () => {
 				missing: 0,
 				npmErrors: 0,
 			}),
-			[{ id: 'pins', label: '3 pins behind', tone: 'warm', tab: 'today' }],
+			[
+				{
+					id: 'pins',
+					label: '3 pins behind',
+					count: 3,
+					word: 'pins behind',
+					tone: 'warm',
+					tab: 'today',
+					need: 'pins',
+				},
+			],
 		);
+	});
+
+	it('builds the keel idle line in contract order', () => {
+		assert.equal(
+			bridgeIdleLine({ fleetCount: 43, fetchedAt: '9:41:07 PM', npmUser: 'acme' }),
+			'Fleet 43 · remotes fetched 9:41:07 PM · npm acme',
+		);
+		assert.equal(
+			bridgeIdleLine({ fleetCount: 41, hiddenCount: 2, fetchedAt: null, npmUser: null }),
+			'Fleet 41 · 2 hidden · remotes not fetched this session · npm not signed in',
+		);
+		assert.equal(
+			bridgeIdleLine({
+				fleetCount: 43,
+				fetchedAt: '9:41:07 PM',
+				staleCount: 3,
+				npmUser: 'acme',
+			}),
+			'Fleet 43 · remotes fetched 9:41:07 PM · 3 could not be read · npm acme',
+		);
+	});
+
+	it('puts host:port on the glass and demotes the lease note', () => {
+		assert.deepEqual(
+			bridgeServeHeading({ host: '127.0.0.1', port: '4321', portSource: 'localslip' }),
+			{ hostPort: '127.0.0.1:4321', note: 'port leased from LocalSlip' },
+		);
+		assert.deepEqual(bridgeServeHeading({ host: '0.0.0.0', port: '4321', portSource: null }), {
+			hostPort: ':4321',
+			note: 'on all interfaces',
+		});
+		assert.deepEqual(bridgeServeHeading({ host: null, port: null, portSource: null }), {
+			hostPort: '',
+			note: '',
+		});
 	});
 });

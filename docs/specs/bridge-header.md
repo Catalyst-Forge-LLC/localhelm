@@ -1,8 +1,9 @@
 # Bridge header — LocalHelm
 
 **Spec kind:** Visual / IA  
-**Status:** Draft (2026-09-14) — not locked; no build until operator says so  
-**Related:** `docs/PHASE_1_BRIEF.md`, `docs/specs/cheap-surfaces.md`, `CONTEXT_PROMPT.md` sessions 43–44  
+**Status:** Locked (2026-09-14)  
+**Chrome pass (2026-09-14):** First build still read as the old toolbar — `--hairline` on `--hull` is invisible, lamps were the old chips. Operator asked for more sea-space. Hairlines use `--steel`, lamps are instrument plates (count + word + halo), keel is a recessed waterline strip. Still no bay labels, no steampunk, no fake gauges.
+**Related:** `docs/PHASE_1_BRIEF.md`, `docs/specs/cheap-surfaces.md`, `CONTEXT_PROMPT.md` sessions 43–46  
 **Surfaces:** Dashboard `header` + `.status-rail` in `app/src/routes/+page.svelte` / `app/src/lib/dashboard.css`. Tabs stay **stations** under the bridge in v1.
 
 Pairing: **LocalSlip is the slip (local DNS for ports). LocalHelm is the wheel.** Deck stays `/deck`. This spec elevates the header into a **bridge** — command center chrome for the wheel. It does not change CLI verbs, product names, or plugin hosts.
@@ -60,6 +61,7 @@ The center of the band is empty. The facts that tell you “where the helm is po
 - Cyan / ice for live instruments (`.info` is already `#93c5fd`)
 - Tight mono for counts and `host:port` (chart table, not display type)
 - Lamp dots as the motif element that carries meaning; **one** framing device (hairline dividers *or* corner ticks, not both)
+- Lamp-dot halo when a lamp is on (the light is the instrument). No hull glow, no page gradients.
 - Quiet motion only when something is actually happening (keel step ticks on Refresh); none at idle
 
 ### No
@@ -68,7 +70,7 @@ The center of the band is empty. The facts that tell you “where the helm is po
 - “Engage warp” / cosplay button labels
 - Fake instruments
 - Renaming UI tabs or CLI commands to match motif words
-- Glow, gradients, or borders that do not separate anything
+- Hull glow, page gradients, or borders that do not separate anything. Lamp-dot halo is allowed.
 - **New words on the glass.** No “BRIDGE” / “SITUATION” microcaps or bay labels shown to the operator. Motif is carried by geometry and lamps, not by naming bays.
 - A new color (e.g. green for “quiet”). Reuse hot / warm / bad / info tones only.
 
@@ -201,7 +203,7 @@ Today / Fleet / Sites / Ports / plugin tabs stay the row below the bridge. v1 do
 ### 5.6 Narrow viewport
 
 - **Breakpoint:** bays stack at **≤ 48rem** (768px). The drawer already breaks at 1100px; the bridge does not need to follow it — the bays fit side by side well below that.
-- **Stack order (default):** row 1 Ident + Conn, row 2 Situation lamps, row 3 Keel. Refresh stays in thumb reach; lamps do not bury the primary control. (Alternative Ident → Situation → Conn → Keel is a fork in §7.)
+- **Stack order (locked):** Ident → Situation → Conn → Keel. Operator chose this over Ident + Conn first.
 - No horizontal scroll of the bridge. Conn actions wrap; lamps wrap.
 
 ### 5.7 Guardrails
@@ -213,12 +215,12 @@ These prevent the most likely wrong builds. Treat them as acceptance, not advice
 | G1 | **Height budget.** Bridge (bays + keel) is no taller than today's `header` + `.status-rail` on desktop (≈ 5.5rem). Measure before and after. | The shell is `100vh` / `overflow: hidden`; every pixel the bridge grows comes out of the Fleet table. “Use the full width” must not become “use more height.” |
 | G2 | **Keel precedence and error lifetime** as in §5.4. | Avoids re-deriving the rail chain and avoids errors that vanish on a timer. |
 | G3 | **Lamps hold during refresh** (§5.2). | `statusReady` is `true` mid-read; naive builds flash All quiet. |
-| G4 | **One framing device.** Lamp dots carry meaning; pick hairline dividers *or* corner ticks for the bays. No glow, no gradients. | Four motif elements at once is the costume §3 rejects. |
+| G4 | **One framing device.** Lamp dots carry meaning; pick hairline dividers *or* corner ticks for the bays. Hairlines must be **visible** (`--steel`, not black-on-black). Lamp-dot halo is allowed (the lamp is on). No hull glow, no gradients. | Four motif elements at once is the costume §3 rejects. Invisible hairlines make the bridge read as the old toolbar. |
 | G5 | **Motion gated.** Keel tick / lamp pulse only while `busy || statusNote`, never at idle, and disabled under `@media (prefers-reduced-motion: reduce)`. Nothing in `app/src` honors that query yet; the bridge is the first to introduce motion, so it is the first to gate it. | Accessibility; also keeps idle chrome still. |
 | G6 | **Semantics.** Lamps are `<button>`s with count + destination in `aria-label`. Keel keeps `aria-live="polite"` (already on `.status-rail`). | Screen readers get counts and live steps, not decorative dots. |
 | G7 | **Deck untouched.** Bridge tokens and rules live in the dashboard stylesheet path only; `/deck` (phone-on-LAN tile grid) inherits none of the hull / gold chrome. | Deck is a different surface with a different job. |
 | G8 | **Stable hooks.** `data-bridge` attribute on the four regions, valued `ident`, `situation`, `conn`, `keel`. | §8 acceptance and the browser pass can assert keel copy per state without guessing selectors. |
-| G9 | **Tokens, not literals.** Add a small block in `app/src/lib/dashboard.css` mapped to hex already in use: `--hull` (`#000`), `--hull-2` (`#1c1c21`), `--hairline` (`#1f1f22`), `--gold` (`#c9a227`), `--gold-soft` (`#fde68a`), `--ice` (`#93c5fd`), `--alarm` (existing `bad` red), `--dim` (existing muted grey, ≥ 4.5:1 on hull). Bridge CSS uses the tokens. | Keeps the build from scattering colors and keeps contrast checkable in one place. |
+| G9 | **Tokens, not literals.** Bridge CSS uses: `--hull` (`#000`), `--hull-2` (`#1c1c21`), `--hairline` (`#1f1f22`, other dashboard chrome), `--steel` (`#4a5360`, visible bay/keel dividers), `--well` (`#08090d`, keel recess + lamp plates), `--gold` (`#c9a227`), `--gold-soft` (`#fde68a`), `--ice` (`#93c5fd`), `--alarm` (existing `bad` red), `--dim` (existing muted grey, ≥ 4.5:1 on hull). | Keeps the build from scattering colors and keeps contrast checkable in one place. `--hairline` on `--hull` is invisible; `--steel` is the bridge divider. |
 
 ---
 
@@ -256,14 +258,14 @@ These prevent the most likely wrong builds. Treat them as acceptance, not advice
 
 | Fork | Default | Alternative |
 | ---- | ------- | ----------- |
-| Pull / Push placement | Stay in **conn** | Fleet-tab toolbar only |
+| Pull / Push placement | Stay in **conn** (also remain on Fleet) | Fleet-tab toolbar only |
 | Empty digest | **All quiet** lamp after `statusReady` | Leave binnacle blank |
 | Fetch remotes | Stay in **locker** | Second conn control |
-| Narrow stack order | **Ident + Conn, then lamps, then keel** | Ident → Situation → Conn → Keel |
+| Narrow stack order | Ident → Situation → Conn → Keel | Ident + Conn, then lamps, then keel |
 | Bay framing | **Hairline dividers** between bays | Corner ticks on each bay |
 | Stale remotes on keel | **Merged into idle line** | Replaces idle line (today's rail behavior) |
 
-Defaults stand unless the operator overrides when locking or building.
+Locked 2026-09-14 from operator answers. Narrow stack is the override; the other five match the prior defaults.
 
 ---
 
@@ -282,9 +284,9 @@ Defaults stand unless the operator overrides when locking or building.
 
 ---
 
-## 9. Implementation later (out of this draft)
+## 9. Implementation
 
-Do **not** build until the operator locks this spec and asks to implement.
+Locked. Build in this pass.
 
 1. Lock this file (`Status: Locked` + date).
 2. Peel header markup to `app/src/lib/BridgeHeader.svelte` (same peel rule as `TodayBoard.svelte` — ConfirmModal / `loadStatus` / URL state stay on `+page.svelte`). `HelmMenu` stays a child and keeps receiving what it receives today.
@@ -312,13 +314,11 @@ Cost: **Free/Cheap** — rearrange and restyle existing facts. No new daemon.
 
 ---
 
-## 10. Questions for lock
+## 10. Lock answers (2026-09-14)
 
-1. Keep Pull/Push in conn, or Fleet-only?
-2. Show **All quiet** when digest is empty, or leave the binnacle empty?
-3. Keep Fetch remotes in the locker?
-4. Narrow stack: Ident + Conn first (default), or Ident → Situation → Conn?
-5. Bay framing: hairline dividers (default) or corner ticks?
-6. Stale remotes: merge into the idle line (default) or keep today's replace behavior?
-
-Until answered, §7 defaults apply.
+1. Pull/Push stay in **conn** (and still on Fleet).
+2. **All quiet** when the digest is empty after `statusReady`.
+3. Fetch remotes stays in the **locker**.
+4. Narrow stack: **Ident → Situation → Conn → Keel**.
+5. Bay framing: **hairline dividers**.
+6. Stale remotes: **merge into the idle line**.

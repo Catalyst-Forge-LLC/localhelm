@@ -1593,6 +1593,19 @@
         "Only skip site/build by hard-coded name"
       ],
       "status": "active"
+    },
+    {
+      "id": "d115",
+      "timestamp": "2026-09-15T03:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 46,
+      "decision": "Bridge chrome uses visible --steel hairlines, instrument lamp plates (count + word + on-halo), and a recessed mono keel. --hairline on --hull is too dark to read as a bridge. Still no bay labels, no steampunk, no fake gauges. Deck does not inherit these tokens.",
+      "rationale": "Operator 2026-09-14: first BridgeHeader pass did not look different from the old toolbar; they expected more sea-space-punk. Lock answers in docs/specs/bridge-header.md §10 already stood.",
+      "alternatives_considered": [
+        "Leave the conservative chip-and-toolbar chrome",
+        "Add bay labels or decorative radar"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

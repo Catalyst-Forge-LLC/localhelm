@@ -3,6 +3,7 @@
 	import { replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import TodayBoard from '$lib/TodayBoard.svelte';
+	import BridgeHeader from '$lib/BridgeHeader.svelte';
 	import '$lib/dashboard.css';
 	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
 	import CellWait from '$lib/CellWait.svelte';
@@ -46,7 +47,8 @@
 	} from '$lib/publishBatch';
 	import { clearLandBatch, loadLandBatch, persistLandSnap } from '$lib/landBatch';
 	import { emptyConfirmPhases, markConfirmKey, type ConfirmPhase } from '$lib/confirmProgress';
-	import { fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
+	import { bridgeServeHeading, fleetProjectMeta, fleetVersionLabel, headerNeedChips } from '$lib/fleetDisplay';
+	import { formatActivityAt } from '$lib/formatTime';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
 	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
@@ -179,9 +181,18 @@
 			.filter(([, on]) => on)
 			.map(([id]) => id),
 	);
-	const staleRemotes = $derived(
-		(inventory?.projects ?? []).some((p) => p.git.repo && Boolean(p.git.fetchError)),
+	const staleRemoteCount = $derived(
+		(inventory?.projects ?? []).filter((p) => p.git.repo && Boolean(p.git.fetchError)).length,
 	);
+	const hiddenCount = $derived(
+		inventory
+			? archivedIds.filter((id) => inventory.projects.some((row) => row.id === id)).length
+			: archivedIds.length,
+	);
+	const fleetCount = $derived(
+		inventory ? Math.max(0, inventory.digest.projects - hiddenCount) : 0,
+	);
+	const serveHeading = $derived(bridgeServeHeading({ host, port, portSource }));
 	const serveLine = $derived.by(() => {
 		if (!port) return '';
 		const where =
@@ -574,8 +585,7 @@
 	}
 
 	function formatEntryTime(at: string): string {
-		const when = new Date(at);
-		return Number.isNaN(when.getTime()) ? at : when.toLocaleTimeString();
+		return formatActivityAt(at);
 	}
 
 	function toLog(row: { at: string; title: string; body: string }): LogEntry {
@@ -1783,102 +1793,45 @@
 />
 
 <div class="shell">
-	<header>
-		<div class="head-row">
-			<div class="brand">
-				<img class="mark" src="/logo.png" alt="" width="96" height="64" />
-				<div class="brand-copy">
-					<h1>LocalHelm</h1>
-					{#if needChips.length}
-						<div class="chips">
-							{#each needChips as chip (chip.id)}
-								<button
-									type="button"
-									class="chip"
-									class:hot={chip.tone === 'hot'}
-									class:warm={chip.tone === 'warm'}
-									class:bad={chip.tone === 'bad'}
-									title="Open Today"
-									onclick={() => {
-										setTab(chip.tab);
-										if (chip.id === 'pins') needFilter = 'pins';
-									}}
-								>
-									{chip.label}
-								</button>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			</div>
-
-			<div class="actions">
-				<button
-					class="btn"
-					disabled={Boolean(busy)}
-					onclick={() => refresh()}
-					title="Re-read every enrolled project, plus Sites and Ports. For one row, use the refresh icon on that row."
-				>
-					<Icon icon="lucide:refresh-cw" />
-					Refresh
-				</button>
-				<button
-					class="btn btn-write"
-					disabled={Boolean(busy)}
-					onclick={() => startPull()}
-					title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull."
-				>
-					<Icon icon="lucide:git-pull-request" />
-					Pull
-				</button>
-				<button
-					class="btn btn-write"
-					disabled={Boolean(busy)}
-					onclick={() => startPush()}
-					title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local."
-				>
-					<Icon icon="lucide:upload" />
-					Push
-				</button>
-				<IconButton
-					icon="lucide:scroll-text"
-					label={activityOpen ? 'Close activity log' : 'Open activity log'}
-					title="Activity — every plan and write"
-					pressed={activityOpen}
-					hot={activityUnseen}
-					badge={activityUnseen ? 'new' : entries.length || ''}
-					onclick={() => setActivityOpen(!activityOpen)}
-				/>
-				<HelmMenu
-					plugins={pluginMetas}
-					busy={Boolean(busy)}
-					fleetPath={inventory?.manifestPath ?? manifestPath}
-					{serveLine}
-					{npmUser}
-					{fetchedAt}
-					{statusReady}
-					{briefCopied}
-					onToggle={(id, enabled) => void setPluginOn(id, enabled)}
-					onCopyBrief={() => void copyBrief()}
-					onFetchRemotes={() => refresh(true)}
-					onExport={() => void startExport()}
-				/>
-			</div>
-		</div>
-		<div class="status-rail" aria-live="polite">
-			{#if busy}
-				<p class="line busy">Working: {busy}…</p>
-			{:else if statusNote}
-				<p class="line info">{statusNote}…</p>
-			{:else if error}
-				<p class="line err">{error}</p>
-			{:else if staleRemotes}
-				<p class="line info">Some remotes could not be read, so ahead and behind counts may be stale. Local state below is accurate.</p>
-			{:else}
-				<p class="line idle" aria-hidden="true">&nbsp;</p>
-			{/if}
-		</div>
-	</header>
+	<BridgeHeader
+		{busy}
+		{statusNote}
+		{error}
+		staleCount={staleRemoteCount}
+		{statusReady}
+		serveHostPort={serveHeading.hostPort}
+		serveNote={serveHeading.note}
+		{npmUser}
+		{fetchedAt}
+		{needChips}
+		{fleetCount}
+		{hiddenCount}
+		{activityOpen}
+		activityBadge={activityUnseen ? 'new' : entries.length || ''}
+		onRefresh={() => void refresh()}
+		onPull={() => startPull()}
+		onPush={() => startPush()}
+		onToggleActivity={() => setActivityOpen(!activityOpen)}
+		onLamp={(filter) => {
+			setTab('today');
+			needFilter = filter;
+		}}
+	>
+		<HelmMenu
+			plugins={pluginMetas}
+			busy={Boolean(busy)}
+			fleetPath={inventory?.manifestPath ?? manifestPath}
+			{serveLine}
+			{npmUser}
+			{fetchedAt}
+			{statusReady}
+			{briefCopied}
+			onToggle={(id, enabled) => void setPluginOn(id, enabled)}
+			onCopyBrief={() => void copyBrief()}
+			onFetchRemotes={() => refresh(true)}
+			onExport={() => void startExport()}
+		/>
+	</BridgeHeader>
 
 	<nav class="tabs" aria-label="Dashboard views">
 		<button type="button" class="tab" class:active={tab === 'today'} class:hot={todayCount > 0} onclick={() => setTab('today')}>
