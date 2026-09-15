@@ -116,7 +116,7 @@
 
 {#if href}
 	<a
-		class="tile"
+		class="tile hud-frame"
 		{href}
 		target={OPEN_TARGET}
 		rel="noopener"
@@ -131,29 +131,18 @@
 		{@render face()}
 	</a>
 {:else}
-	<div class="tile">{@render face()}</div>
+	<div class="tile hud-frame">{@render face()}</div>
 {/if}
 
 <style>
 	.tile {
-		--edge: var(--cyan-dim, #3a5a70);
 		--tick: 0.7rem;
+		--hud-fill: var(--well, #2a2a32);
 		display: flex;
 		min-height: 9.5rem;
 		flex-direction: column;
 		overflow: hidden;
 		border: 1px solid var(--steel, #3a3a42);
-		border-radius: var(--plate-radius, 0 0 8px 8px);
-		background:
-			linear-gradient(var(--edge), var(--edge)) top left / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top right / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top right / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) left var(--keel-radius, 8px) bottom / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) left bottom var(--keel-radius, 8px) / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) right var(--keel-radius, 8px) bottom / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) right bottom var(--keel-radius, 8px) / 1px var(--tick) no-repeat,
-			var(--well, #2a2a32);
 		color: #ececef;
 		text-decoration: none;
 		text-align: center;
@@ -162,16 +151,7 @@
 		-webkit-touch-callout: none;
 	}
 	a.tile:hover {
-		background:
-			linear-gradient(var(--edge), var(--edge)) top left / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top right / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top right / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) left var(--keel-radius, 8px) bottom / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) left bottom var(--keel-radius, 8px) / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) right var(--keel-radius, 8px) bottom / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) right bottom var(--keel-radius, 8px) / 1px var(--tick) no-repeat,
-			rgb(126 244 255 / 0.06);
+		--hud-fill: rgb(126 244 255 / 0.06);
 	}
 	.face {
 		display: flex;

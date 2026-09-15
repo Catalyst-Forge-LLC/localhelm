@@ -1929,7 +1929,7 @@
 			/>
 		{:else if tab === 'fleet'}
 			<div class="fleet-layout">
-				<section class="panel">
+				<section class="panel hud-frame">
 					<div class="section-head">
 						<div>
 							<h2>Fleet</h2>
@@ -2173,7 +2173,7 @@
 		{:else if !isPortsPluginTab(tab) && tab !== 'today' && tab !== 'fleet'}
 			{#each siteBoards as board (board.plugin + board.title)}
 				{@const siteCols = siteTableColumns(board.plugin, board.columns)}
-				<section class="panel plugin-board">
+				<section class="panel hud-frame plugin-board">
 					<div class="section-head">
 						<div>
 							<h2>{board.title}</h2>
@@ -2352,7 +2352,7 @@
 				</section>
 			{:else}
 				{@const plugMeta = pluginTabs.find((plug) => plug.id === canonicalizeTab(tab))}
-				<section class="panel plugin-board">
+				<section class="panel hud-frame plugin-board">
 					<div class="section-head">
 						<div>
 							<h2>{plugMeta?.label ?? canonicalizeTab(tab)}</h2>
@@ -2386,7 +2386,7 @@
 			{/each}
 		{:else if isPortsPluginTab(tab)}
 			{#if !pluginsReady && !portBoards.length}
-				<section class="panel plugin-board">
+				<section class="panel hud-frame plugin-board">
 					<div class="section-head">
 						<div>
 							<h2>LocalSlip Ports</h2>
@@ -2412,7 +2412,7 @@
 					</div>
 				</section>
 			{:else if !portBoards.length}
-				<section class="panel">
+				<section class="panel hud-frame">
 					<h2>LocalSlip Ports</h2>
 					<p class="hint">No LocalSlip plugin loaded. Enroll the localslip checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 				</section>
@@ -2456,7 +2456,7 @@
 					</button>
 				</div>
 				{#if portPane === 'stacks'}
-					<section class="panel plugin-board" id="pane-ports" aria-labelledby="tab-stacks">
+					<section class="panel hud-frame plugin-board" id="pane-ports" aria-labelledby="tab-stacks">
 						<div class="section-head">
 							<div>
 								<h2>Stacks</h2>
@@ -2525,7 +2525,7 @@
 					{@const leaseActions = portPane === 'leases'}
 					{@const portCols = portTableColumns(board.plugin, portPane, board.columns)}
 					{@const viewRows = portPane === 'observed' ? observedViewRows : leaseViewRows}
-					<section class="panel plugin-board" id="pane-ports" aria-labelledby={portPane === 'observed' ? 'tab-observed' : 'tab-leases'}>
+					<section class="panel hud-frame plugin-board" id="pane-ports" aria-labelledby={portPane === 'observed' ? 'tab-observed' : 'tab-leases'}>
 						<div class="section-head">
 							<div>
 								<h2>{board.title}</h2>

@@ -28,3 +28,40 @@
 		var(--hull);
 	color: #ececef;
 }
+
+/* Eight ticks. Bottom pair is inset so it sits on the hull curve, not in the clipped corner. */
+.hud-frame {
+	--edge: var(--cyan-dim);
+	--tick: 0.85rem;
+	--inset: var(--keel-radius);
+	border-radius: var(--plate-radius);
+	background-color: var(--hud-fill, transparent);
+	background-image:
+		linear-gradient(var(--edge), var(--edge)),
+		linear-gradient(var(--edge), var(--edge)),
+		linear-gradient(var(--edge), var(--edge)),
+		linear-gradient(var(--edge), var(--edge)),
+		linear-gradient(var(--edge), var(--edge)),
+		linear-gradient(var(--edge), var(--edge)),
+		linear-gradient(var(--edge), var(--edge)),
+		linear-gradient(var(--edge), var(--edge));
+	background-repeat: no-repeat;
+	background-size:
+		var(--tick) 1px,
+		1px var(--tick),
+		var(--tick) 1px,
+		1px var(--tick),
+		var(--tick) 1px,
+		1px var(--tick),
+		var(--tick) 1px,
+		1px var(--tick);
+	background-position:
+		top left,
+		top left,
+		top right,
+		top right,
+		left var(--inset) bottom,
+		left bottom var(--inset),
+		right var(--inset) bottom,
+		right bottom var(--inset);
+}

@@ -73,7 +73,7 @@
 
 <header class="bridge">
 	<div class="bridge-bays">
-		<div class="bridge-ident" data-bridge="ident">
+		<div class="bridge-ident hud-frame" data-bridge="ident">
 			<div class="brand">
 				<img class="mark" src="/logo.png" alt="" width="96" height="64" />
 				<div class="brand-copy">
@@ -93,7 +93,7 @@
 			</div>
 		</div>
 
-		<div class="bridge-situation" data-bridge="situation" class:held={reading && statusReady}>
+		<div class="bridge-situation hud-frame" data-bridge="situation" class:held={reading && statusReady}>
 			{#if needChips.length}
 				<div class="lamps" role="group" aria-label="Fleet needs">
 					{#each needChips as chip (chip.id)}
@@ -131,7 +131,7 @@
 			</div>
 		</div>
 
-		<div class="bridge-scope" data-bridge="scope" role="group" aria-label="Fleet, sites, and slips">
+		<div class="bridge-scope hud-frame" data-bridge="scope" role="group" aria-label="Fleet, sites, and slips">
 			{#each gauges as gauge (gauge.id)}
 				{@const frac = bridgeGaugeFrac(gauge.count, gauge.need)}
 				{@const filled = BRIDGE_GAUGE_C * frac}
@@ -159,7 +159,7 @@
 			{/each}
 		</div>
 
-		<div class="bridge-conn" data-bridge="conn">
+		<div class="bridge-conn hud-frame" data-bridge="conn">
 			<div class="actions">
 				<button
 					class="btn btn-sounding"

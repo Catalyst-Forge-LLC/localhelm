@@ -37,28 +37,17 @@
 		min-height: 3.2rem;
 	}
 
-	/* Corner ticks: eight 1px rules, one element, no pseudo. */
 	.bridge-ident,
 	.bridge-situation,
 	.bridge-scope,
 	.bridge-conn {
-		--edge: var(--cyan-dim);
-		--tick: 0.85rem;
 		position: relative;
 		display: flex;
 		align-items: center;
 		min-width: 0;
 		padding: 0.3rem 0.75rem;
-		border-radius: var(--plate-radius);
-		background:
-			linear-gradient(var(--edge), var(--edge)) top left / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top right / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top right / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) left var(--keel-radius) bottom / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) left bottom var(--keel-radius) / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) right var(--keel-radius) bottom / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) right bottom var(--keel-radius) / 1px var(--tick) no-repeat;
+		border: 1px solid transparent;
+		border-bottom-color: var(--cyan-dim);
 	}
 
 	.bridge-situation {
@@ -1111,20 +1100,9 @@
 	}
 
 	.panel {
-		--edge: var(--cyan-dim);
 		--tick: 0.65rem;
+		--hud-fill: var(--well);
 		border: 1px solid var(--steel);
-		background:
-			linear-gradient(var(--edge), var(--edge)) top left / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top right / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) top right / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) left var(--keel-radius) bottom / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) left bottom var(--keel-radius) / 1px var(--tick) no-repeat,
-			linear-gradient(var(--edge), var(--edge)) right var(--keel-radius) bottom / var(--tick) 1px no-repeat,
-			linear-gradient(var(--edge), var(--edge)) right bottom var(--keel-radius) / 1px var(--tick) no-repeat,
-			var(--well);
-		border-radius: var(--plate-radius);
 		padding: 0.95rem 1rem;
 	}
 

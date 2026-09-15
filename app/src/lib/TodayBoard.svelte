@@ -97,7 +97,7 @@
 </script>
 
 <div class="today-board">
-	<section class="panel fill today-needs">
+	<section class="panel hud-frame fill today-needs">
 		<div class="section-head">
 			<div>
 				<h2>Needs you</h2>
@@ -262,7 +262,7 @@
 		</div>
 	</section>
 
-	<section class="panel fill today-looks">
+	<section class="panel hud-frame fill today-looks">
 		<div class="section-head">
 			<div>
 				<h2>Looks</h2>
@@ -313,7 +313,7 @@
 	</section>
 
 	<div class="today-side">
-		<section class="panel fill today-sites">
+		<section class="panel hud-frame fill today-sites">
 			<div class="section-head">
 				<div>
 					<h2>FilePress Sites</h2>
@@ -394,7 +394,7 @@
 				{/if}
 			</div>
 		</section>
-		<section class="panel fill today-ports">
+		<section class="panel hud-frame fill today-ports">
 			<div class="section-head">
 				<div>
 					<h2>Ports</h2>
