@@ -143,7 +143,7 @@
 		flex-direction: column;
 		overflow: hidden;
 		border: 1px solid var(--steel, #3a3a42);
-		border-radius: 2px;
+		border-radius: var(--plate-radius, 0 0 5px 5px);
 		background:
 			linear-gradient(var(--edge), var(--edge)) top left / var(--tick) 1px no-repeat,
 			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
@@ -191,7 +191,7 @@
 		align-items: center;
 		justify-content: center;
 		overflow: hidden;
-		border-radius: 2px;
+		border-radius: var(--plate-radius, 0 0 5px 5px);
 		background: rgb(126 244 255 / 0.06);
 		font-size: 1.1rem;
 		font-weight: 600;

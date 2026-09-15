@@ -49,6 +49,7 @@
 		align-items: center;
 		min-width: 0;
 		padding: 0.3rem 0.75rem;
+		border-radius: var(--plate-radius);
 		background:
 			linear-gradient(var(--edge), var(--edge)) top left / var(--tick) 1px no-repeat,
 			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
@@ -134,7 +135,7 @@
 		border: 1px solid var(--steel);
 		border-left-width: 3px;
 		background: var(--well);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0.2rem 1.15rem 0.22rem 0.55rem;
 		line-height: 1;
 		color: var(--dim);
@@ -238,7 +239,7 @@
 
 	/* Conn controls: HUD plates. Refresh is cyan sounding, Pull/Push brass telegraph. */
 	.bridge .actions .btn {
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		background: transparent;
 		font-size: 0.68rem;
 		letter-spacing: 0.1em;
@@ -271,7 +272,7 @@
 	}
 
 	.bridge .actions .icon-btn {
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		border-color: var(--steel);
 		background: transparent;
 		color: var(--ice);
@@ -374,7 +375,7 @@
 		border: 1px solid var(--steel);
 		background: var(--well);
 		color: #ececef;
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0.28rem 0.62rem;
 		font-size: 0.8rem;
 		cursor: pointer;
@@ -417,7 +418,7 @@
 	.chip {
 		border: 1px solid var(--steel);
 		background: var(--well);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0.12rem 0.6rem;
 		font-size: 0.72rem;
 		line-height: 1.35;
@@ -458,7 +459,7 @@
 		font-size: 0.65rem;
 		border: 1px solid var(--steel);
 		background: var(--well);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0 0.35rem;
 		color: var(--cyan);
 	}
@@ -715,7 +716,7 @@
 		text-transform: none;
 		border: 1px solid var(--steel);
 		background: var(--well);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0 0.35rem;
 		color: var(--cyan);
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -830,7 +831,7 @@
 		border: 1px solid var(--gold);
 		background: rgb(201 162 39 / 0.14);
 		color: var(--gold-soft);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		font-size: 1.05rem;
 		text-decoration: none;
 	}
@@ -894,7 +895,7 @@
 		text-transform: none;
 		border: 1px solid var(--steel);
 		background: var(--well);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0 0.4rem;
 		color: var(--cyan);
 	}
@@ -970,7 +971,7 @@
 		overflow-x: auto;
 		border: 1px solid var(--steel);
 		background: var(--well);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 	}
 
 	table {
@@ -1058,7 +1059,7 @@
 	.badge,
 	.pin {
 		border: 1px solid var(--steel);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0.05rem 0.35rem;
 		font-size: 0.7rem;
 		white-space: nowrap;
@@ -1122,7 +1123,7 @@
 			linear-gradient(var(--edge), var(--edge)) bottom right / var(--tick) 1px no-repeat,
 			linear-gradient(var(--edge), var(--edge)) bottom right / 1px var(--tick) no-repeat,
 			var(--well);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0.95rem 1rem;
 	}
 
@@ -1149,7 +1150,7 @@
 		border: 1px solid var(--cyan-dim);
 		color: var(--cyan);
 		padding: 0.45rem 0.7rem;
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		margin: 0.35rem 0 0;
 		font-size: 0.8rem;
 	}
@@ -1186,7 +1187,7 @@
 		gap: 0.5rem 0.65rem;
 		background: rgb(126 244 255 / 0.03);
 		border: 1px solid var(--steel);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0.4rem 0.55rem;
 	}
 
@@ -1240,7 +1241,7 @@
 		border: 1px solid var(--steel);
 		background: var(--well);
 		color: #ececef;
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0.25rem 0.5rem;
 		font-size: 0.8rem;
 	}
@@ -1249,7 +1250,7 @@
 		border: 1px solid var(--steel);
 		background: var(--well);
 		color: #ececef;
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		font-size: 0.72rem;
 		padding: 0.15rem 0.2rem;
 	}
@@ -1275,7 +1276,7 @@
 		margin-left: 0.35rem;
 		padding: 0.05rem 0.4rem;
 		border: 1px solid var(--steel);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		background: var(--well);
 		color: var(--dim);
 		font: inherit;
@@ -1316,7 +1317,7 @@
 		align-items: flex-start;
 		border: 1px solid var(--steel);
 		background: var(--well);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0.3rem 0.45rem;
 	}
 
@@ -1339,7 +1340,7 @@
 	.log li {
 		border: 1px solid var(--steel);
 		background: rgb(126 244 255 / 0.03);
-		border-radius: 2px;
+		border-radius: var(--plate-radius);
 		padding: 0.3rem 0.45rem;
 		font-size: 0.76rem;
 	}
