@@ -26,3 +26,8 @@
 	outline: 2px solid #e0b87a;
 	outline-offset: 3px;
 }
+
+/* Dark board shot on parchment: a hull edge, not a floating bitmap. */
+.prose figure img {
+	border: 1px solid #1c1c1c;
+}

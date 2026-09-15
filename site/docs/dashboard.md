@@ -9,6 +9,8 @@ localhelm serve --host 127.0.0.1 --port 4321
 
 Default bind is **all interfaces** on **4321**. `--host` / `--hosts` (Vite-style, with or without an address) also means all interfaces. `--host 127.0.0.1` stays loopback-only. The checkout dashboard (`app/`) calls the same library as the CLI.
 
+![LocalHelm dashboard showing Today needs and FilePress sites](/dashboard.jpg "Today: fleet writes you can confirm, and FilePress sites waiting on Land")
+
 A phone on LAN or Tailscale opens the **Deck** (`/deck`): tiles for listening leases the phone can reach. Tap a tile to open it on that host. From the operator board, menu **Deck** is the same page. `/visitor` still redirects there. Write APIs stay on loopback.
 
 ## Tabs

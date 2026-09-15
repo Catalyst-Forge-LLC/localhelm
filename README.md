@@ -8,6 +8,10 @@
 
 See which local projects need attention: uncommitted work, package versions, dependents, and supported site or port status. Scan proposes. You enroll. `status` is a read. Writes need `--apply`. [LocalSlip](https://localslip.dev) is the slip. LocalHelm is the wheel. Ports and FilePress jobs are optional.
 
+<p align="center">
+  <img src="https://localhelm.dev/dashboard.jpg" alt="LocalHelm dashboard: Today needs and FilePress sites" />
+</p>
+
 ```bash
 pnpm add -g localhelm
 # or from a checkout:

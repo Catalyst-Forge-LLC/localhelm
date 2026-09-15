@@ -9,6 +9,8 @@ description: See which local projects need attention in one place.
 
 See which local projects need attention in one place: uncommitted work, package versions, dependents, and supported site or port status. Choose the repositories you track, then inspect their current state.
 
+![LocalHelm dashboard showing Today needs and FilePress sites](/dashboard.jpg "Today: fleet writes you can confirm, and FilePress sites waiting on Land")
+
 Scan a folder, enroll the ones you keep, then read git, npm, and dependents. LocalSlip and FilePress are optional add-ons, not a suite install.
 
 ```text

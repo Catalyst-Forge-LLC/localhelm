@@ -1737,6 +1737,19 @@
         "Treat a family sibling lease as claimed (would hide detangler when only detangler-site exists)"
       ],
       "status": "active"
+    },
+    {
+      "id": "d126",
+      "timestamp": "2026-09-15T20:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Operator board screenshot lives at site/static/dashboard.jpg. Home and docs/dashboard show it as a FilePress figure. README uses https://localhelm.dev/dashboard.jpg so npmjs does not need the private GitHub tree or a heavier tarball.",
+      "rationale": "Operator 2026-09-15: add the Today + FilePress Sites shot to the site and README. Named rows are public products.",
+      "alternatives_considered": [
+        "Put the jpg in package.json files and unpkg (works only after npm publish; bloats the CLI tarball)",
+        "Relative README path (GitHub private; npmjs 404)"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
