@@ -51,6 +51,7 @@
 	} from '$lib/publishBatch';
 	import { clearLandBatch, loadLandBatch, persistLandSnap } from '$lib/landBatch';
 	import { emptyConfirmPhases, markConfirmKey, type ConfirmPhase } from '$lib/confirmProgress';
+	import { applyWritePatches, digestFromProjects, writeReloadBusy, type WritePatch, type WriteReloadMode } from '$lib/inventoryPatch';
 	import { bridgeServeHeading, fleetProjectMeta, fleetVersionLabel, headerNeedChips, type BridgeGauge } from '$lib/fleetDisplay';
 	import { formatActivityAt } from '$lib/formatTime';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
@@ -907,6 +908,7 @@
 		extras?: boolean;
 		freshNpm?: boolean;
 		gitOnly?: boolean;
+		skipCommitCounts?: boolean;
 	} = {}): Promise<void> {
 		const ids = opts.ids?.filter(Boolean) ?? [];
 		const scoped = ids.length > 0;
@@ -915,6 +917,7 @@
 		if (opts.fetchRemotes) query.set('fetch', '1');
 		if (opts.freshNpm) query.set('fresh', '1');
 		if (opts.gitOnly) query.set('git', '1');
+		if (opts.skipCommitCounts) query.set('light', '1');
 		const csv = scoped ? serializeListParam(ids) : null;
 		if (csv) query.set('ids', csv);
 		const data = (await callNdjson(`/api/status?${query}`, { method: 'GET' }, (event) => {
@@ -956,8 +959,27 @@
 		statusReady = true;
 		if (opts.extras !== false && !scoped) {
 			statusNote = 'reading Sites and Ports';
+			if (busy) busy = 'reading Sites and Ports';
 			await Promise.all([loadPluginBoards(), loadActivity(), loadArchive()]);
 		}
+	}
+
+	function patchWrite(patch: WritePatch): void {
+		if (!inventory) return;
+		const projects = applyWritePatches(inventory.projects, [patch]);
+		inventory = { ...inventory, projects, digest: digestFromProjects(projects) };
+	}
+
+	async function reloadAfterWrite(ids: string[], mode: WriteReloadMode = 'git'): Promise<void> {
+		const named = ids.filter(Boolean);
+		if (!named.length) return;
+		busy = writeReloadBusy(mode, named);
+		await loadStatus({
+			ids: named,
+			extras: false,
+			gitOnly: mode === 'git',
+			skipCommitCounts: true,
+		});
 	}
 
 	async function readQuiet(label: string, fn: () => Promise<void>): Promise<void> {
@@ -1080,6 +1102,8 @@
 		eachNamed,
 		offerConfirm,
 		loadStatus,
+		reloadAfterWrite,
+		patchWrite,
 		loadPluginBoards,
 		readyNamed,
 		persistNpmUser,

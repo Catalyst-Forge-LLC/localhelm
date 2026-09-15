@@ -47,11 +47,13 @@ async function statusBody(
 		fetchRemotes: boolean;
 		refreshNpm: boolean;
 		gitOnly?: boolean;
+		skipCommitCounts?: boolean;
 		onlyIds?: string[];
 		onProgress?: (progress: { phase: string; label: string; done?: number; total?: number }) => void;
 	},
 ): Promise<StatusBody> {
-	const npmUserP = opts.gitOnly ? Promise.resolve(peekNpmUser()) : Promise.resolve().then(() => currentNpmUser());
+	const npmUserP =
+		opts.gitOnly || opts.skipCommitCounts ? Promise.resolve(peekNpmUser()) : Promise.resolve().then(() => currentNpmUser());
 	const landP = readLandPendingSiteIds(loaded.workspaceRoot);
 	const reasonsP = readLandPendingReasons(loaded.workspaceRoot);
 	const inventory = await fleetStatus(loaded, {
@@ -59,6 +61,7 @@ async function statusBody(
 		refreshNpm: opts.refreshNpm,
 		onlyIds: opts.onlyIds,
 		gitOnly: opts.gitOnly,
+		skipCommitCounts: opts.skipCommitCounts,
 		onProgress: opts.onProgress,
 	});
 	const [npmUser, landPending, landPendingReasons] = await Promise.all([npmUserP, landP, reasonsP]);
@@ -92,11 +95,13 @@ export const GET: RequestHandler = async ({ url }) => {
 		const fetchRemotes = url.searchParams.get('fetch') === '1';
 		const refreshNpm = url.searchParams.get('fresh') === '1' || fetchRemotes;
 		const gitOnly = url.searchParams.get('git') === '1';
+		const skipCommitCounts = url.searchParams.get('light') === '1';
 		const onlyIds = url.searchParams.get('ids')?.split(',').map((id) => id.trim()).filter(Boolean);
 		const opts = {
 			fetchRemotes,
 			refreshNpm,
 			gitOnly,
+			skipCommitCounts,
 			onlyIds: onlyIds?.length ? onlyIds : undefined,
 		};
 		if (url.searchParams.get('progress') !== '1') {

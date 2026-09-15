@@ -51,6 +51,8 @@ export type StatusOptions = {
 	refreshNpm?: boolean;
 	/** After a git write: re-read ahead/behind only. Skip npm, globals, and commit-since-npm. */
 	gitOnly?: boolean;
+	/** After a write: skip pickaxe commit-since-npm. npm cache still used unless refreshNpm. */
+	skipCommitCounts?: boolean;
 	onProgress?: (progress: StatusProgress) => void;
 };
 
@@ -100,23 +102,29 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			id: project.id,
 			path: project.path,
 			absPath: joinRoot(loaded.workspaceRoot, project.path),
+			npm: project.npm,
 		}));
-		const exists = await mapPool(gitOnlyRows, GIT_POOL, async (row) => pathExists(row.absPath));
-		const gitCells = await mapPool(
+		const gitPack = await mapPool(
 			gitOnlyRows,
 			GIT_POOL,
-			async (row, index) => (exists[index] ? readGitAsync(row.absPath, options.fetch === true) : EMPTY_GIT),
+			async (row) => {
+				const exists = await pathExists(row.absPath);
+				return {
+					exists,
+					git: exists ? await readGitAsync(row.absPath, options.fetch === true) : EMPTY_GIT,
+				};
+			},
 			(done, total) => report('git', done, total),
 		);
 		const projects: ProjectStatus[] = gitOnlyRows.map((row, index) => ({
 			id: row.id,
 			path: row.path,
 			absPath: row.absPath,
-			missing: !exists[index],
+			missing: !gitPack[index]?.exists,
 			localVersion: null,
 			private: false,
-			npm: { name: loaded.manifest.projects.find((project) => project.id === row.id)?.npm, status: 'none' },
-			git: gitCells[index] ?? EMPTY_GIT,
+			npm: { name: row.npm, status: 'none' },
+			git: gitPack[index]?.git ?? EMPTY_GIT,
 			pins: [],
 			cascadeBehind: 0,
 			unpublishedAhead: false,
@@ -273,9 +281,11 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			cascadeBehind: pins.filter((pin) => pin.kind === 'registry' && pin.onLatest === false).length,
 			unpublishedAhead,
 			commitsSinceNpm:
-				needsCommitsSinceNpm(row, npm, unpublishedAhead, git) && publishedVersion
-					? countCommitsSinceVersion(row.absPath, publishedVersion, git.branch)
-					: null,
+				options.skipCommitCounts || options.gitOnly
+					? null
+					: needsCommitsSinceNpm(row, npm, unpublishedAhead, git) && publishedVersion
+						? countCommitsSinceVersion(row.absPath, publishedVersion, git.branch)
+						: null,
 			ship: row.ship,
 			bin: pkgBinNames(row.rootPkg),
 			global: row.npmName ? { version: globals.get(row.npmName) ?? null } : undefined,

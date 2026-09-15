@@ -66,6 +66,22 @@ describe('fleetStatus onlyIds', () => {
 		assert.equal(inventory.projects[0]?.commitsSinceNpm ?? null, null);
 	});
 
+	it('skipCommitCounts leaves commitsSinceNpm unset', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-status-light-'));
+		await mkdir(path.join(root, 'solo'));
+		await writeFile(
+			path.join(root, 'solo', 'package.json'),
+			'{\n  "name": "solo",\n  "version": "1.0.0",\n  "private": true\n}\n',
+		);
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: { workspaceRoot: '.', projects: [{ id: 'solo', path: 'solo', npm: 'solo' }] },
+		};
+		const inventory = await fleetStatus(loaded, { skipCommitCounts: true });
+		assert.equal(inventory.projects[0]?.commitsSinceNpm ?? null, null);
+	});
+
 	it('marks scripts.ship on root or site package.json', async () => {
 		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-status-ship-'));
 		await mkdir(path.join(root, 'forge'));

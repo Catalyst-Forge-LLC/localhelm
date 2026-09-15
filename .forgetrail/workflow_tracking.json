@@ -1763,6 +1763,19 @@
         "Keep full status but only change the busy label (still minutes of npm + pickaxe)"
       ],
       "status": "active"
+    },
+    {
+      "id": "d128",
+      "timestamp": "2026-09-15T21:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Every batch write patches the board as each row finishes, then reloads git (or a light pin reread for cascade). Post-write status never counts commits-since-npm or calls npm whoami. Busy says reading git/fleet, not the last N of N.",
+      "rationale": "Operator 2026-09-15: speed up and smooth out all multi actions, not only Push.",
+      "alternatives_considered": [
+        "Close the modal with no reread (ahead/pins would lie until Refresh)",
+        "Keep a full npm status after Publish/Bump (registry did not change except the version we already know)"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

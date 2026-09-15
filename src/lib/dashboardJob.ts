@@ -2,6 +2,7 @@
 
 import type { ConfirmPhase } from './confirmProgress.js';
 import type { BumpKind, Inventory, PublishRow } from './dashboardTypes.js';
+import type { WritePatch, WriteReloadMode } from './inventoryPatch.js';
 import type { ConfirmOffer, JobRunOpts, PublishBatchRow } from './writeConfirm.js';
 import type { LandBatchRow } from './landDisplay.js';
 
@@ -31,7 +32,10 @@ export type DashboardJobHost = {
 		extras?: boolean;
 		freshNpm?: boolean;
 		gitOnly?: boolean;
+		skipCommitCounts?: boolean;
 	}): Promise<void>;
+	reloadAfterWrite(ids: string[], mode?: WriteReloadMode): Promise<void>;
+	patchWrite(patch: WritePatch): void;
 	loadPluginBoards(): Promise<void>;
 	readyNamed(ids: string[]): string[];
 	persistNpmUser(value: string): void;

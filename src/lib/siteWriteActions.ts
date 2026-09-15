@@ -96,6 +96,7 @@ export function createSiteWrites(host: DashboardJobHost) {
 			try {
 				await applyPluginItems(plugin, action, ids);
 			} finally {
+				host.setBusy('reading Sites and Ports');
 				await host.loadPluginBoards();
 			}
 		});
@@ -269,8 +270,9 @@ export function createSiteWrites(host: DashboardJobHost) {
 					host.note(landApplyTitle(rows), { rows });
 				} finally {
 					host.setPublishOtp('');
+					host.setBusy('reading Sites and Ports');
 					await host.loadPluginBoards();
-					await host.loadStatus({ ids });
+					await host.reloadAfterWrite(ids, 'git');
 				}
 			},
 			{ closeConfirm: false },

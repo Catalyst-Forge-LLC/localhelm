@@ -247,9 +247,9 @@ export function createFleetWrites(host: DashboardJobHost) {
 				}
 				host.note(`commit --apply ${id}`, row);
 				host.setConfirmPhases(markCommitKeys(id, 'done'));
+				host.patchWrite({ id, gitDirty: false });
 			});
-			host.setBusy(named.length === 1 ? 'reading git' : `reading git (${named.length} projects)`);
-			await host.loadStatus({ ids: named, extras: false, gitOnly: true });
+			await host.reloadAfterWrite(named, 'git');
 		});
 	}
 
@@ -270,9 +270,16 @@ export function createFleetWrites(host: DashboardJobHost) {
 							: `bumped ${id} to ${plan.to}${plan.commitReason ? ` (no commit — ${plan.commitReason})` : ''}`,
 						plan,
 					);
+					if (plan.action === 'bump' && plan.to) {
+						host.patchWrite({
+							id,
+							localVersion: plan.to,
+							gitDirty: plan.commit !== 'commit',
+						});
+					}
 				},
 			);
-			await host.loadStatus({ ids: jobs.map((job) => job.id) });
+			await host.reloadAfterWrite(jobs.map((job) => job.id), 'git');
 		});
 	}
 
@@ -311,11 +318,13 @@ export function createFleetWrites(host: DashboardJobHost) {
 					body: JSON.stringify({ apply: true, ids: [id] }),
 				})) as { rows: GitRow[] };
 				rows.push(...data.rows);
+				if (data.rows.some((row) => row.reason === 'pulled ff-only')) {
+					host.patchWrite({ id, gitBehind: 0 });
+				}
 			});
 			const eligible = rows.filter((r) => r.action === 'pull');
 			host.note(`pull --apply — ${eligible.length} repo(s) fast-forwarded`, { rows });
-			host.setBusy(ids.length === 1 ? 'reading git' : `reading git (${ids.length} projects)`);
-			await host.loadStatus({ ids, extras: false, gitOnly: true });
+			await host.reloadAfterWrite(ids, 'git');
 		});
 	}
 
@@ -370,6 +379,9 @@ export function createFleetWrites(host: DashboardJobHost) {
 					body: JSON.stringify({ apply: true, ids: [id] }),
 				})) as { rows: GitRow[] };
 				rows.push(...data.rows);
+				if (data.rows.some((row) => row.action === 'push' && row.reason === 'pushed')) {
+					host.patchWrite({ id, gitAhead: 0 });
+				}
 			});
 			const eligible = rows.filter((r) => r.action === 'push');
 			const failed = eligible.filter((r) => r.reason !== 'pushed');
@@ -380,8 +392,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 					: `push --apply — ${ok} pushed`,
 				{ rows },
 			);
-			host.setBusy(ids.length === 1 ? 'reading git' : `reading git (${ids.length} projects)`);
-			await host.loadStatus({ ids, extras: false, gitOnly: true });
+			await host.reloadAfterWrite(ids, 'git');
 			if (failed.length) {
 				host.setError(failed.map((r) => `${r.id}: ${r.reason ?? 'push failed'}`).join(' · '));
 			}
@@ -449,7 +460,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 					: `ship --apply — ${ok} shipped`,
 				{ rows },
 			);
-			await host.loadStatus({ ids });
+			await host.reloadAfterWrite(ids, 'git');
 			if (failed.length) {
 				host.setError(failed.map((r) => `${r.id}: ${r.reason ?? 'ship failed'}`).join(' · '));
 			}
@@ -543,6 +554,11 @@ export function createFleetWrites(host: DashboardJobHost) {
 						body: JSON.stringify({ apply: true, ids: [id], versions, wait }),
 					})) as { rows: GlobalInstallRow[] };
 					rows.push(...data.rows);
+					for (const row of data.rows) {
+						if (row.reason?.startsWith('installed global ') && row.version) {
+							host.patchWrite({ id: row.id, globalVersion: row.version });
+						}
+					}
 				});
 				const eligible = rows.filter((r) => r.action === 'global');
 				const waiting = eligible.filter((r) => isNpmNotReadyReason(r.reason));
@@ -558,7 +574,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 							: `global --apply — ${ok} installed`,
 					{ rows },
 				);
-				await host.loadStatus({ ids });
+				await host.reloadAfterWrite(ids, 'git');
 				if (waiting.length) {
 					offerNpmWait(waiting, versions);
 					return;
@@ -788,6 +804,16 @@ export function createFleetWrites(host: DashboardJobHost) {
 							},
 						)) as { rows?: PublishRow[] };
 						rows.push(...(data.rows ?? []));
+						for (const row of data.rows ?? []) {
+							if (!isPublishedReason(row.reason) || !row.version) continue;
+							host.patchWrite({
+								id: row.id,
+								localVersion: row.version,
+								npmLatest: row.version,
+								commitsSinceNpm: 0,
+								gitAhead: 0,
+							});
+						}
 					} catch (err) {
 						const reason = err instanceof Error ? err.message : String(err);
 						rows.push({ id, path: '', action: 'publish', version: null, steps: [], reason });
@@ -800,7 +826,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 				});
 				host.note(publishApplyTitle(rows), { rows: slimPublishRows(rows) });
 				host.setPublishOtp('');
-				await host.loadStatus({ ids: rows.map((row) => row.id) });
+				await host.reloadAfterWrite(rows.map((row) => row.id), 'git');
 			},
 			{ closeConfirm: false },
 		);
@@ -845,7 +871,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 			})) as { to: string; npm: string; rows: { action: string; writes?: boolean; fromId: string }[]; note: string };
 			host.note(`cascade ${data.npm}@${data.to} — wrote ${data.rows.filter((r) => r.writes).length} pin(s)`, data);
 			const wrote = data.rows.filter((row) => row.writes).map((row) => row.fromId);
-			await host.loadStatus({ ids: [...new Set([id, ...wrote])] });
+			await host.reloadAfterWrite([...new Set([id, ...wrote])], 'light');
 		});
 	}
 
