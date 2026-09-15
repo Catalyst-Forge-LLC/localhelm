@@ -199,7 +199,6 @@ export function createSiteWrites(host: DashboardJobHost) {
 					items: lined.items.length ? lined.items : ['Already current.'],
 					itemKeys: lined.keys,
 					confirmLabel: work.length === 1 ? `Land ${work[0]?.siteId}` : work.length ? `Land ${work.length}` : 'Land',
-					variant: needsPublish ? 'danger' : 'write',
 					canApply: work.length > 0,
 					showOtp: needsOtp,
 					applyIds: work.map((plan) => plan.siteId),

@@ -743,7 +743,6 @@ export function createFleetWrites(host: DashboardJobHost) {
 						: githubOnly
 							? `Open GitHub ${eligible.length}`
 							: `Publish ${eligible.length}`,
-					variant: 'danger',
 					canApply: eligible.length > 0,
 					showOtp: needsNpm,
 					applyIds: eligible.map((row) => row.id),
