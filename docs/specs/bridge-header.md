@@ -59,8 +59,8 @@ The center of the band is empty. The facts that tell you “where the helm is po
 - Instrument gold already on writes (`#c9a227` / `#fde68a`)
 - Cyan / ice for live instruments (`.info` is already `#93c5fd`)
 - Tight mono for counts and `host:port` (chart table, not display type)
-- Hairline frames, corner ticks, lamp dots — HUD of a working bridge
-- Quiet motion only when something is actually happening (keel step ticks on Refresh)
+- Lamp dots as the motif element that carries meaning; **one** framing device (hairline dividers *or* corner ticks, not both)
+- Quiet motion only when something is actually happening (keel step ticks on Refresh); none at idle
 
 ### No
 
@@ -68,8 +68,11 @@ The center of the band is empty. The facts that tell you “where the helm is po
 - “Engage warp” / cosplay button labels
 - Fake instruments
 - Renaming UI tabs or CLI commands to match motif words
+- Glow, gradients, or borders that do not separate anything
+- **New words on the glass.** No “BRIDGE” / “SITUATION” microcaps or bay labels shown to the operator. Motif is carried by geometry and lamps, not by naming bays.
+- A new color (e.g. green for “quiet”). Reuse hot / warm / bad / info tones only.
 
-Internal / spec terms (binnacle, keel, conn) may appear in docs and class names. Operator-facing labels stay plain English.
+Internal / spec terms (binnacle, keel, conn) may appear in docs and class names. Operator-facing labels stay plain English. Avoid compass-side words (port / starboard) in class names — they collide with `host:port` and the Ports tab.
 
 ---
 
@@ -78,9 +81,9 @@ Internal / spec terms (binnacle, keel, conn) may appear in docs and class names.
 | Term | Meaning |
 | ---- | ------- |
 | **Bridge** | The full header band: three bays + keel. |
-| **Ident** | Port / wheel: mark, product name, heading (serve + npm). |
-| **Situation / binnacle** | Center: instrument lamps from fleet digest (needs work). |
-| **Conn** | Starboard: primary sounding (Refresh) + telegraph writes (Pull / Push) + logbook + locker. |
+| **Ident** | Left bay: mark, product name, heading (serve + npm). |
+| **Situation / binnacle** | Center bay: instrument lamps from fleet digest (needs work). |
+| **Conn** | Right bay: primary sounding (Refresh) + telegraph writes (Pull / Push) + logbook + locker. |
 | **Keel** | Full-width strip under the bays. Always on after status is ready. Idle heading or live step. |
 | **Stations** | Tab row under the bridge (Today, Fleet, Sites, Ports, plugins). Out of scope for v1 restyle. |
 | **Sounding** | Refresh — re-read packages, npm, git, then Sites/Ports. |
@@ -103,24 +106,46 @@ Internal / spec terms (binnacle, keel, conn) may appear in docs and class names.
   Stations (tabs) — unchanged in v1
 ```
 
-### 5.1 Ident (port / wheel)
+### 5.1 Ident (left)
 
 - Keep the mark + **LocalHelm**.
 - Add a one-line **heading** from facts we already have:
   - `serveLine` (host:port + LocalSlip lease / `--port` note)
   - npm user, or “npm not signed in” after `statusReady`
+- **Composition:** `host:port` in mono on the glass. The lease / `--port` note is demoted to a tooltip or a trailing dim whisper; it must not push the heading to two lines. `serveLine` today can be as long as “serving :4321 on all interfaces (port leased from LocalSlip)” — do not print that verbatim.
+- **Empty case:** when the serve port is unknown (dev server without env), the heading shows only the npm part; never an empty line or a placeholder like `—:—`.
 - Fleet path stays a **copyable whisper** in the locker (optional whisper under heading is allowed if it does not fight the title). Not a second `h1`.
 
 ### 5.2 Situation (center / binnacle)
 
 - Need chips become **instrument lamps** with counts: unpublished, dirty, pins behind, missing, npm errors.
 - Same data as `headerNeedChips` in `src/lib/fleetDisplay.ts` — still hide zeros.
-- Click still jumps Today (pins still set `?need=pins`).
+- Each lamp is a `<button>` (not a div with a dot) with an `aria-label` that includes the count and destination, e.g. `3 unpublished — open Today`.
+- **Click → Today with the matching filter** (`NeedFilter` in `src/lib/dashboardTypes.ts`):
+
+  | Lamp | Today filter |
+  | ---- | ------------ |
+  | unpublished | `publish` |
+  | dirty | `push` |
+  | pins behind | `pins` (sets `?need=pins`, unchanged) |
+  | missing | `all` |
+  | npm errors | `all` |
+
+- **Tone map** (reuse existing dashboard tones; no new colors):
+
+  | Tone | Existing class | Lamps |
+  | ---- | -------------- | ----- |
+  | gold | `hot` / `warm` | unpublished, dirty, pins behind — a write is waiting |
+  | red | `bad` | missing, npm errors — something is broken |
+  | cyan | `info` | live / reading |
+  | dim | — | All quiet: dim ice, steady dot |
+
 - This bay owns the empty center.
 - When the fleet digest has no lamps and `statusReady` is true: one lamp **All quiet** (same rule as Today — never claim quiet before status finishes).
 - Before status is ready: binnacle may show a quiet “Reading…” or stay empty; do not invent counts.
+- **During a re-read, lamps hold.** `statusReady` stays `true` while Refresh runs, so a naive build flickers to All quiet or to zero lamps mid-read. Lamps keep their last values (dimmed) and update only when the new inventory lands. Never claim quiet *during* status either.
 
-### 5.3 Conn (starboard / helm)
+### 5.3 Conn (right)
 
 | Control | Role | Note |
 | ------- | ---- | ---- |
@@ -137,8 +162,37 @@ Internal / spec terms (binnacle, keel, conn) may appear in docs and class names.
 | Refresh / status note | Live step from progress stream: `reading packages (12 of 43)`, `checking npm…`, `reading git…`, `reading Sites and Ports` |
 | Error | Existing error line |
 | Stale remotes | Existing stale warning |
-| Idle after `statusReady` | Never blank. Example: `Fleet N · remotes fetched {time} · npm {user}` or `Fleet N · remotes not fetched this session · npm not signed in` |
+| Idle after `statusReady` | Never blank. Contract below. |
 | Idle before status | May show `reading packages…` / boot note; not a permanent empty spacer |
+
+**Precedence** (one keel, one message; same if/else chain the rail uses today):
+
+1. `busy` → `Working: {busy}…`
+2. `statusNote` → live step
+3. `error` → error line
+4. idle line, with **stale remotes merged in** (not replacing it)
+
+`error` clears when the next read or write starts — not on a timer, not on click. Stale remotes do **not** evict the idle heading; they fold into it (see contract).
+
+**Idle line contract** (exact, so it can be tested):
+
+- Separator: ` · `
+- Order: `Fleet {N}` · remotes · npm
+- `N` = enrolled projects in the digest, **excluding** archived/hidden rows. If any are hidden, append `· {H} hidden` after `Fleet {N}`.
+- remotes: `remotes fetched {fetchedAt}` (existing `toLocaleTimeString` form) or `remotes not fetched this session`. If `staleRemotes` is non-empty, append `· {S} could not be read`.
+- npm: `npm {user}` or `npm not signed in`.
+
+Examples:
+
+```
+Fleet 43 · remotes fetched 9:41:07 PM · npm acme
+Fleet 41 · 2 hidden · remotes not fetched this session · npm not signed in
+Fleet 43 · remotes fetched 9:41:07 PM · 3 could not be read · npm acme
+```
+
+Build this string in a pure helper `bridgeIdleLine(...)` in `src/lib/fleetDisplay.ts` next to `headerNeedChips` (no `node:*` imports) and unit-test it. This is the one piece of logic in the spec worth a test; it is **not** optional.
+
+**Height:** the keel is one line. Only the error state may grow, keeping the existing `.err` `max-height: 4.5em` scroll. Idle and live copy truncate with an ellipsis rather than wrap.
 
 ### 5.5 Stations
 
@@ -146,7 +200,25 @@ Today / Fleet / Sites / Ports / plugin tabs stay the row below the bridge. v1 do
 
 ### 5.6 Narrow viewport
 
-Bays stack: Ident → Situation → Conn → Keel. No horizontal scroll of the bridge. Conn actions wrap; lamps wrap.
+- **Breakpoint:** bays stack at **≤ 48rem** (768px). The drawer already breaks at 1100px; the bridge does not need to follow it — the bays fit side by side well below that.
+- **Stack order (default):** row 1 Ident + Conn, row 2 Situation lamps, row 3 Keel. Refresh stays in thumb reach; lamps do not bury the primary control. (Alternative Ident → Situation → Conn → Keel is a fork in §7.)
+- No horizontal scroll of the bridge. Conn actions wrap; lamps wrap.
+
+### 5.7 Guardrails
+
+These prevent the most likely wrong builds. Treat them as acceptance, not advice.
+
+| # | Guardrail | Why |
+| - | --------- | --- |
+| G1 | **Height budget.** Bridge (bays + keel) is no taller than today's `header` + `.status-rail` on desktop (≈ 5.5rem). Measure before and after. | The shell is `100vh` / `overflow: hidden`; every pixel the bridge grows comes out of the Fleet table. “Use the full width” must not become “use more height.” |
+| G2 | **Keel precedence and error lifetime** as in §5.4. | Avoids re-deriving the rail chain and avoids errors that vanish on a timer. |
+| G3 | **Lamps hold during refresh** (§5.2). | `statusReady` is `true` mid-read; naive builds flash All quiet. |
+| G4 | **One framing device.** Lamp dots carry meaning; pick hairline dividers *or* corner ticks for the bays. No glow, no gradients. | Four motif elements at once is the costume §3 rejects. |
+| G5 | **Motion gated.** Keel tick / lamp pulse only while `busy || statusNote`, never at idle, and disabled under `@media (prefers-reduced-motion: reduce)`. Nothing in `app/src` honors that query yet; the bridge is the first to introduce motion, so it is the first to gate it. | Accessibility; also keeps idle chrome still. |
+| G6 | **Semantics.** Lamps are `<button>`s with count + destination in `aria-label`. Keel keeps `aria-live="polite"` (already on `.status-rail`). | Screen readers get counts and live steps, not decorative dots. |
+| G7 | **Deck untouched.** Bridge tokens and rules live in the dashboard stylesheet path only; `/deck` (phone-on-LAN tile grid) inherits none of the hull / gold chrome. | Deck is a different surface with a different job. |
+| G8 | **Stable hooks.** `data-bridge` attribute on the four regions, valued `ident`, `situation`, `conn`, `keel`. | §8 acceptance and the browser pass can assert keel copy per state without guessing selectors. |
+| G9 | **Tokens, not literals.** Add a small block in `app/src/lib/dashboard.css` mapped to hex already in use: `--hull` (`#000`), `--hull-2` (`#1c1c21`), `--hairline` (`#1f1f22`), `--gold` (`#c9a227`), `--gold-soft` (`#fde68a`), `--ice` (`#93c5fd`), `--alarm` (existing `bad` red), `--dim` (existing muted grey, ≥ 4.5:1 on hull). Bridge CSS uses the tokens. | Keeps the build from scattering colors and keeps contrast checkable in one place. |
 
 ---
 
@@ -187,6 +259,9 @@ Bays stack: Ident → Situation → Conn → Keel. No horizontal scroll of the b
 | Pull / Push placement | Stay in **conn** | Fleet-tab toolbar only |
 | Empty digest | **All quiet** lamp after `statusReady` | Leave binnacle blank |
 | Fetch remotes | Stay in **locker** | Second conn control |
+| Narrow stack order | **Ident + Conn, then lamps, then keel** | Ident → Situation → Conn → Keel |
+| Bay framing | **Hairline dividers** between bays | Corner ticks on each bay |
+| Stale remotes on keel | **Merged into idle line** | Replaces idle line (today's rail behavior) |
 
 Defaults stand unless the operator overrides when locking or building.
 
@@ -194,12 +269,16 @@ Defaults stand unless the operator overrides when locking or building.
 
 ## 8. Acceptance (when built)
 
-1. With a loaded fleet and quiet digest, the header shows Ident heading + All quiet + idle keel with Fleet N / remotes / npm — no blank keel spacer.
-2. With unpublished / dirty / pins behind, situation shows those lamps; click opens Today (pins still filters pins).
-3. Refresh updates the keel through packages → npm → git → Sites and Ports, then returns to idle keel copy.
-4. Locker still exposes plugins, Deck, brief, fetch remotes, export, fleet path.
-5. Desktop and a narrow viewport: no clipped primary controls; bays stack sanely.
-6. No steampunk chrome; no renamed CLI or product strings.
+1. With a loaded fleet and quiet digest, `[data-bridge="keel"]` shows the §5.4 idle line (Fleet N / remotes / npm) and `[data-bridge="situation"]` shows one All quiet lamp — no blank keel spacer.
+2. With unpublished / dirty / pins behind, situation shows those lamps; each click opens Today with the §5.2 filter (`publish` / `push` / `pins`).
+3. Refresh updates the keel through packages → npm → git → Sites and Ports, then returns to idle keel copy. Lamps do **not** disappear or flash All quiet while it runs.
+4. An error set during a read stays on the keel until the next read or write starts.
+5. Locker still exposes plugins, Deck, brief, fetch remotes, export, fleet path.
+6. Desktop: bridge height ≤ today's header + rail (G1). ≤ 48rem: bays stack per §5.6; Refresh visible without scrolling; no horizontal scroll.
+7. `prefers-reduced-motion: reduce` disables keel tick and lamp pulse; at idle nothing animates in either mode.
+8. `bridgeIdleLine` unit tests cover: signed in / not, fetched / not fetched, hidden > 0, stale > 0.
+9. `/deck` renders unchanged.
+10. No steampunk chrome; no renamed CLI or product strings; no new operator-facing bay labels.
 
 ---
 
@@ -208,11 +287,26 @@ Defaults stand unless the operator overrides when locking or building.
 Do **not** build until the operator locks this spec and asks to implement.
 
 1. Lock this file (`Status: Locked` + date).
-2. Peel header markup to something like `BridgeHeader.svelte` (same peel rule as `TodayBoard.svelte` — ConfirmModal / `loadStatus` / URL state stay on `+page.svelte`).
-3. Tokens + keel idle copy in `app/src/lib/dashboard.css` only (or a small bridge section there). Prefer existing gold / cyan / hull colors.
-4. Optional: `bridgeIdleLine(...)` helper next to `headerNeedChips` for keel idle string tests.
-5. Browser-check desktop and narrow viewport.
-6. Log decision in `.forgetrail/workflow_tracking.json`; session note in `CONTEXT_PROMPT.md`.
+2. Peel header markup to `app/src/lib/BridgeHeader.svelte` (same peel rule as `TodayBoard.svelte` — ConfirmModal / `loadStatus` / URL state stay on `+page.svelte`). `HelmMenu` stays a child and keeps receiving what it receives today.
+
+   **Props contract** (all already exist as `+page.svelte` state or derived values; the peel is a copy job, not a rewrite):
+
+   | Prop | Source on page |
+   | ---- | -------------- |
+   | `busy`, `statusNote`, `error`, `staleRemotes`, `statusReady` | keel state |
+   | `serveLine`, `npmUser`, `fetchedAt` | ident heading + keel idle |
+   | `needChips` | `headerNeedChips(...)` |
+   | `fleetCount`, `hiddenCount` | digest / archive |
+   | `activityOpen`, `activityBadge` | logbook |
+   | `onRefresh`, `onPull`, `onPush`, `onToggleActivity` | conn callbacks |
+   | `onLamp(filter: NeedFilter)` | situation click → `setTab('today')` + filter |
+
+   No `node:*` imports in the component. Nothing about plan-then-confirm moves.
+3. Tokens (G9) + bridge rules in `app/src/lib/dashboard.css` in one bridge section. Reduced-motion gate (G5) lives there too.
+4. `bridgeIdleLine(...)` in `src/lib/fleetDisplay.ts` with unit tests (§5.4 contract). Required, not optional.
+5. Measure header + rail height before the peel; assert the bridge is not taller after (G1).
+6. Browser-check desktop and ≤ 48rem; check `/deck` unchanged (G7).
+7. Log decision in `.forgetrail/workflow_tracking.json`; session note in `CONTEXT_PROMPT.md`.
 
 Cost: **Free/Cheap** — rearrange and restyle existing facts. No new daemon.
 
@@ -223,5 +317,8 @@ Cost: **Free/Cheap** — rearrange and restyle existing facts. No new daemon.
 1. Keep Pull/Push in conn, or Fleet-only?
 2. Show **All quiet** when digest is empty, or leave the binnacle empty?
 3. Keep Fetch remotes in the locker?
+4. Narrow stack: Ident + Conn first (default), or Ident → Situation → Conn?
+5. Bay framing: hairline dividers (default) or corner ticks?
+6. Stale remotes: merge into the idle line (default) or keep today's replace behavior?
 
 Until answered, §7 defaults apply.
