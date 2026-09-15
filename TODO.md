@@ -7,7 +7,7 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 - [x] Manifest `workspaceRoot: "."` + scan folder(s)
 - [x] Enroll / unenroll plan then `--apply`
 - [x] `status` and `deps` (local / npm / git) + JSON export
-- [x] Seed a real workspace fleet by hand (operator) _(localhelm, localberth, ollanet, filepress)_
+- [x] Seed a real workspace fleet by hand (operator) _(localhelm, localslip, ollanet, filepress)_
 
 ## M2 — Safe writes + dashboard
 
@@ -26,14 +26,14 @@ Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 ## M4 — Compose + agents
 
 - [x] Plugin host: enrolled `localhelm.plugin.mjs` (FilePress sites board)
-- [ ] Optional LocalBerth lease / IngotVault column
+- [ ] Optional LocalSlip lease / IngotVault column
 - [ ] MCP for status / deps / plans
 
 ## Later
 
 - [x] Selected `origin` push with harsh confirm _(named ids + confirm copy; never `--force`)_
 - [x] Optional publish action _(plan then named-id apply: bump+commit+push only if needed, then npm publish; never `--force`)_
-- [x] FilePress `site/` + `/docs` on localhelm.dev _(modeled on LocalBerth, 2026-08-27)_
+- [x] FilePress `site/` + `/docs` on localhelm.dev _(modeled on LocalSlip, 2026-08-27)_
 - [ ] Tag on bump
 
 ## Cheap surfaces (draft spec)

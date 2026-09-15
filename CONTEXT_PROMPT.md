@@ -140,7 +140,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 11 — 2026-08-23
 
-- Ports tab hosts the LocalBerth plugin (leases + observed + Open + Start/Stop). Same board as `localberth serve`, not under Sites. Claim/release stay on the LocalBerth CLI.
+- Ports tab hosts the LocalSlip plugin (leases + observed + Open + Start/Stop). Same board as `localslip serve`, not under Sites. Claim/release stay on the LocalSlip CLI.
 
 ### Session 12 — 2026-08-23
 
@@ -161,7 +161,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 15 — 2026-08-24
 
-- Ports Start/Stop: LocalBerth starts/stops a stored recipe (`pnpm serve` by default) detached. LocalHelm only hosts the plan/confirm buttons. Observed stays read-only. Claim/release stay on `localberth`. Checked leases persist as `?leases=`. Confirm lines show the recipe command, not `start start …`. A `-api` lease with no folder of that name guesses the package folder and `pnpm start` (dictawhisper-api → dictawhisper). Hyphenless lease names match hyphenated folders (`temperpass-site` → `temper-pass`). `start` sets `PORT` to that lease — dictawhisper `serve` must not let the UI port (7777) become the API (8008).
+- Ports Start/Stop: LocalSlip starts/stops a stored recipe (`pnpm serve` by default) detached. LocalHelm only hosts the plan/confirm buttons. Observed stays read-only. Claim/release stay on `localslip`. Checked leases persist as `?leases=`. Confirm lines show the recipe command, not `start start …`. A `-api` lease with no folder of that name guesses the package folder and `pnpm start` (dictawhisper-api → dictawhisper). Hyphenless lease names match hyphenated folders (`temperpass-site` → `temper-pass`). `start` sets `PORT` to that lease — dictawhisper `serve` must not let the UI port (7777) become the API (8008).
 - Cheap surfaces (draft): `docs/specs/cheap-surfaces.md`. H1–H5 landed: family stacks, look cards, `PORT`/`HOST` on confirm, `localhelm brief` + Copy brief, soft archive (`.localhelm/archive.json`, hide not delete), family start/stop, Save guess. Today Ports is one column with titled Stacks and Down or conflicted lists.
 - Confirm (d71): a sequenced list (publish steps, pull/push ids) stays up after yes and ticks the current line. Start/stop still dismisses; the header rail still shows Working…. The dialog must not pin itself open just because a family start/stop is in flight.
 
@@ -188,13 +188,13 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Cut version only when origin has commits after the last npm version (tag or package.json bump). Publish plan skips `nothing to cut`.
 - Today is a four-pane board (Needs you, Looks, Sites, Ports). Each pane scrolls. Refresh sits next to the project id. Needs you is fleet writes; Looks is Ports facts. Needs you filters: All / Publish / Cut / Push (`?need=`). The pane head offers bulk **Commit dirty**, **Publish unpublished**, **Push ahead**, and **Cut versions** when those writes exist. Each still opens a plan you confirm. Write pins stay per publisher.
 - Sites tab: a FilePress `live` http(s) URL makes the site name and live cell open in a new tab. `—` and non-http values stay plain text. When the matching `*-site` lease is listening, the same Ports open icon appears on the Sites row (never the dashboard lease).
-- Ports: Leases / Stacks / Observed. Lease filters copy LocalBerth (Listening/Quiet, LAN/Loopback, Conflict/Ephemeral, firewall). Stacks is one row per family with its own Start/Stop. Observed only gets Bind. `?ports=stacks` or `observed`.
+- Ports: Leases / Stacks / Observed. Lease filters copy LocalSlip (Listening/Quiet, LAN/Loopback, Conflict/Ephemeral, firewall). Stacks is one row per family with its own Start/Stop. Observed only gets Bind. `?ports=stacks` or `observed`.
 - Plugin confirm lines use the job only. Ship shows `pnpm ship in …`, not leftover `pnpm update getfilepress`. Push uses its git reason. Sync still shows the engine update.
 - Today and Fleet share `fleetWriteIds`. Cut version appears in Fleet **needs you** (not “nothing to do”) whenever Today would offer it.
 - Unpublished-ahead always shows **Publish** on the row. Dirty/diverged/no-origin disable it with the skip reason; they do not replace it with an unpublished pill.
 - Cut is labeled `Cut 0.1.17 · 4 commits` (next version + origin commits since the last npm version). Never `Cut version 4` — that read as a semver.
 - Write numbers: semver is `0.1.17`; commit counts say `commits` (`Push 4 commits`, `4 commits to push`); selected-row counts stay in parentheses (`Push (4)`). Blocked Push stays on the row, disabled, like Publish. Fleet Bump is `Bump 0.1.17`. Write pins says how many. Header Push does not require a clean tree.
-- FilePress site at `site/` (modeled on LocalBerth): pages + `/docs` mount, FilePress id `localhelm`, lease `localhelm-site` on **5201**, `pnpm ship` → Cloudflare Pages project `localhelm`. Need `site/static/favicon.png` as well as `logo.png` / `favicon.svg` — getfilepress 0.1.18 prerender 404s a missing PNG.
+- FilePress site at `site/` (modeled on LocalSlip): pages + `/docs` mount, FilePress id `localhelm`, lease `localhelm-site` on **5206**, `pnpm ship` → Cloudflare Pages project `localhelm`. Need `site/static/favicon.png` as well as `logo.png` / `favicon.svg` — getfilepress 0.1.18 prerender 404s a missing PNG.
 
 ### Session 21 — 2026-08-28
 
@@ -289,7 +289,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 38 — 2026-09-14
 
-- Land **localslip** sync failed `ERR_PNPM_UNEXPECTED_VIRTUAL_STORE` because `site/node_modules` still recorded `Z:\\workspace\\localberth` after the rename. Reinstalled from `localslip/site`. FilePress `applyUpdate` now reinstalls when the virtual store path is stale, then retries `pnpm update getfilepress`. Do not bake shop folder names into Helm.
+- Land **localslip** sync failed `ERR_PNPM_UNEXPECTED_VIRTUAL_STORE` because `site/node_modules` still recorded `Z:\\workspace\\localslip` after the rename. Reinstalled from `localslip/site`. FilePress `applyUpdate` now reinstalls when the virtual store path is stale, then retries `pnpm update getfilepress`. Do not bake shop folder names into Helm.
 - Registry **pin behind** is Cascade from the **published** package (`localhelm cascade <id> --apply`, Today → Pins / Write pins). FilePress Land / Sync engine is only getfilepress on sites (then push + ship). A consumer row can offer Write {publisher} pin when that cascade is writable. Dirty consumers are skipped.
 - Dashboard named applies continue after one id fails (`runNamedBatch`). Stop still aborts the rest. CLI `publish --apply` uses `isPublishedReason` (GitHub OIDC counts), continues the batch, and exits 1 if a publish row failed. CLI `land --apply` continues the rest of the named sites and exits 1 if any failed.
 
