@@ -1,13 +1,16 @@
 /* Dashboard route styles. Imported only from +page.svelte. */
 	:root {
-		--hull: #000;
+		--hull: #03060c;
 		--hull-2: #1c1c21;
 		--hairline: #1f1f22;
-		--steel: #4a5360;
-		--well: #08090d;
+		--steel: #2d4456;
+		--well: #060a13;
 		--gold: #c9a227;
 		--gold-soft: #fde68a;
 		--ice: #93c5fd;
+		--cyan: #67e8f9;
+		--cyan-dim: rgb(103 232 249 / 0.38);
+		--cyan-glow: rgb(103 232 249 / 0.22);
 		--alarm: #f87171;
 		--dim: #a8a8b0;
 	}
@@ -32,60 +35,87 @@
 			sans-serif;
 	}
 
+	/* Bridge: chart-paper hull, bracket-framed bays, running lights. */
 	header,
 	.bridge {
 		flex-shrink: 0;
-		background: var(--hull);
+		position: relative;
+		background:
+			linear-gradient(rgb(103 232 249 / 0.05) 1px, transparent 1px) 0 0 / 100% 1.375rem,
+			linear-gradient(90deg, rgb(103 232 249 / 0.05) 1px, transparent 1px) 0 0 / 1.375rem 100%,
+			var(--hull);
 		border-bottom: 0;
-		padding: 0.35rem 1.25rem 0;
+		padding: 0.4rem 1.25rem 0;
 	}
 
 	.bridge-bays {
 		display: grid;
 		grid-template-columns: minmax(12rem, 1.1fr) minmax(11rem, 1.4fr) auto;
-		align-items: center;
-		gap: 0;
+		align-items: stretch;
+		gap: 0.6rem;
 		min-height: 3.2rem;
 	}
 
+	/* Corner ticks: eight 1px rules, one element, no pseudo. */
 	.bridge-ident,
-	.bridge-situation {
-		padding-right: 1rem;
-		margin-right: 1rem;
-		border-right: 1px solid var(--steel);
+	.bridge-situation,
+	.bridge-conn {
+		--edge: var(--cyan-dim);
+		--tick: 0.7rem;
+		position: relative;
+		display: flex;
+		align-items: center;
 		min-width: 0;
+		padding: 0.3rem 0.8rem;
+		background:
+			linear-gradient(var(--edge), var(--edge)) top left / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) top left / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) top right / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) top right / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom left / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom left / 1px var(--tick) no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom right / var(--tick) 1px no-repeat,
+			linear-gradient(var(--edge), var(--edge)) bottom right / 1px var(--tick) no-repeat;
+	}
+
+	.bridge-situation {
+		justify-content: center;
 	}
 
 	.bridge-conn {
-		min-width: 0;
 		justify-self: end;
 	}
 
 	.bridge h1 {
-		font-size: 1.28rem;
-		letter-spacing: 0.06em;
-		font-weight: 650;
+		font-size: 1.22rem;
+		letter-spacing: 0.14em;
+		font-weight: 600;
 		color: #f2f0e8;
+		text-shadow: 0 0 12px rgb(242 240 232 / 0.18);
 	}
 
 	.heading-line {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.4rem;
-		margin: 0.2rem 0 0;
-		font-size: 0.72rem;
+		gap: 0.45rem;
+		margin: 0.22rem 0 0;
+		font-size: 0.66rem;
 		line-height: 1.2;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 		color: var(--dim);
 	}
 
 	.heading-host {
-		color: var(--ice);
-		font-size: 0.72rem;
-		letter-spacing: 0.03em;
-		padding: 0.08rem 0.38rem;
-		border: 1px solid var(--steel);
+		color: var(--cyan);
+		font-size: 0.68rem;
+		letter-spacing: 0.06em;
+		text-transform: none;
+		padding: 0.08rem 0.4rem;
+		border: 1px solid var(--cyan-dim);
 		background: var(--well);
+		text-shadow: 0 0 8px var(--cyan-glow);
 	}
 
 	.heading-sep {
@@ -101,42 +131,59 @@
 	.lamps {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
+		gap: 0.45rem;
 	}
 
+	/* Instrument lamp: big mono count over a tracked label, side stripe, on-halo dot. */
 	.lamp {
+		position: relative;
 		display: inline-flex;
-		align-items: center;
-		gap: 0.4rem;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.08rem;
+		min-width: 5.4rem;
 		border: 1px solid var(--steel);
+		border-left-width: 3px;
 		background: var(--well);
-		border-radius: 0.15rem;
-		padding: 0.2rem 0.5rem 0.2rem 0.4rem;
-		font-size: 0.72rem;
-		line-height: 1.2;
+		border-radius: 2px;
+		padding: 0.2rem 1.15rem 0.22rem 0.55rem;
+		line-height: 1;
 		color: var(--dim);
 		font-family: inherit;
 		cursor: pointer;
 	}
 
+	.lamp:hover {
+		background: #0a1020;
+	}
+
 	.lamp-dot {
-		width: 0.55rem;
-		height: 0.55rem;
+		position: absolute;
+		top: 0.35rem;
+		right: 0.38rem;
+		width: 0.42rem;
+		height: 0.42rem;
 		border-radius: 50%;
 		background: currentColor;
 		box-shadow: 0 0 0 1px currentColor;
-		flex-shrink: 0;
 	}
 
 	.lamp-count {
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		font-variant-numeric: tabular-nums;
+		font-size: 1.08rem;
+		font-weight: 600;
 		letter-spacing: 0.02em;
 		color: inherit;
+		text-shadow: 0 0 10px currentColor;
 	}
 
 	.lamp-word {
-		color: inherit;
+		font-size: 0.56rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--dim);
+		white-space: nowrap;
 	}
 
 	.lamp.hot {
@@ -145,16 +192,16 @@
 	}
 
 	.lamp.hot .lamp-dot {
-		box-shadow: 0 0 0 1px var(--gold), 0 0 7px rgb(201 162 39 / 0.5);
+		box-shadow: 0 0 0 1px var(--gold), 0 0 8px rgb(201 162 39 / 0.6);
 	}
 
 	.lamp.warm {
-		border-color: #8a8a2a;
+		border-color: #a08a2a;
 		color: #e4e48a;
 	}
 
 	.lamp.warm .lamp-dot {
-		box-shadow: 0 0 0 1px #8a8a2a, 0 0 6px rgb(228 228 138 / 0.35);
+		box-shadow: 0 0 0 1px #a08a2a, 0 0 7px rgb(228 228 138 / 0.4);
 	}
 
 	.lamp.bad {
@@ -163,13 +210,25 @@
 	}
 
 	.lamp.bad .lamp-dot {
-		box-shadow: 0 0 0 1px var(--alarm), 0 0 7px rgb(248 113 113 / 0.45);
+		box-shadow: 0 0 0 1px var(--alarm), 0 0 8px rgb(248 113 113 / 0.5);
 	}
 
 	.lamp.quiet {
-		border-color: var(--steel);
-		color: var(--ice);
-		opacity: 0.78;
+		justify-content: center;
+		border-color: var(--cyan-dim);
+		color: var(--cyan);
+		padding-top: 0.42rem;
+		padding-bottom: 0.42rem;
+	}
+
+	.lamp.quiet .lamp-word {
+		font-size: 0.66rem;
+		color: var(--cyan);
+		text-shadow: 0 0 8px var(--cyan-glow);
+	}
+
+	.lamp.quiet .lamp-dot {
+		box-shadow: 0 0 0 1px var(--cyan), 0 0 8px var(--cyan-glow);
 	}
 
 	.lamp.live .lamp-dot {
@@ -182,20 +241,63 @@
 
 	.reading {
 		margin: 0;
-		color: var(--dim);
-		font-size: 0.75rem;
-		letter-spacing: 0.04em;
+		color: var(--cyan);
+		font-size: 0.66rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
 	}
 
-	.btn-sounding {
-		border-color: #5a7a9a;
-		background: #1a2836;
-		color: #dbeafe;
+	/* Conn controls: HUD plates. Refresh is cyan sounding, Pull/Push brass telegraph. */
+	.bridge .actions .btn {
+		border-radius: 2px;
+		background: transparent;
+		font-size: 0.68rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		padding: 0.34rem 0.72rem;
 	}
 
-	.btn-sounding:hover:not(:disabled) {
-		border-color: var(--ice);
-		background: #243447;
+	.bridge .actions .btn-sounding {
+		border-color: var(--cyan-dim);
+		background: rgb(103 232 249 / 0.07);
+		color: var(--cyan);
+		text-shadow: 0 0 8px var(--cyan-glow);
+	}
+
+	.bridge .actions .btn-sounding:hover:not(:disabled) {
+		border-color: var(--cyan);
+		background: rgb(103 232 249 / 0.14);
+		box-shadow: 0 0 12px var(--cyan-glow);
+	}
+
+	.bridge .actions .btn-write {
+		border-color: var(--gold);
+		background: rgb(201 162 39 / 0.08);
+		color: var(--gold-soft);
+	}
+
+	.bridge .actions .btn-write:hover:not(:disabled) {
+		background: rgb(201 162 39 / 0.18);
+		box-shadow: 0 0 12px rgb(201 162 39 / 0.28);
+	}
+
+	.bridge .actions .icon-btn {
+		border-radius: 2px;
+		border-color: var(--steel);
+		background: transparent;
+		color: var(--ice);
+	}
+
+	.bridge .actions .icon-btn:hover:not(:disabled) {
+		border-color: var(--cyan-dim);
+		background: rgb(103 232 249 / 0.07);
+	}
+
+	.bridge .actions .icon-btn.pressed,
+	.bridge .actions .icon-btn.hot:not(.pressed) {
+		border-color: var(--gold);
+		color: var(--gold-soft);
+		background: rgb(201 162 39 / 0.12);
 	}
 
 	.head-row {
@@ -377,22 +479,45 @@
 		cursor: default;
 	}
 
+	/* Keel: waterline strip with a running-light marker. */
 	.status-rail,
 	.bridge-keel {
 		display: flex;
 		align-items: center;
+		gap: 0.6rem;
 		min-height: 1.2rem;
-		margin: 0.3rem -1.25rem 0;
-		padding: 0.18rem 1.25rem;
+		margin: 0.4rem -1.25rem 0;
+		padding: 0.2rem 1.25rem;
 		background: var(--well);
-		border-top: 1px solid var(--steel);
+		border-top: 1px solid var(--cyan-dim);
+		box-shadow: 0 -1px 12px var(--cyan-glow);
+	}
+
+	.bridge-keel::before {
+		content: '';
+		flex-shrink: 0;
+		width: 0.38rem;
+		height: 0.38rem;
+		background: var(--cyan);
+		box-shadow: 0 0 6px var(--cyan);
+		transform: rotate(45deg);
+	}
+
+	.bridge-keel:has(.line.busy)::before {
+		background: var(--gold-soft);
+		box-shadow: 0 0 6px var(--gold);
+	}
+
+	.bridge-keel:has(.line.err)::before {
+		background: var(--alarm);
+		box-shadow: 0 0 6px var(--alarm);
 	}
 
 	.line {
 		margin: 0;
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-		font-size: 0.7rem;
-		letter-spacing: 0.03em;
+		font-size: 0.68rem;
+		letter-spacing: 0.06em;
 		line-height: 1.3;
 		white-space: nowrap;
 		overflow: hidden;
@@ -401,7 +526,12 @@
 	}
 
 	.line.idle {
-		color: #8b93a0;
+		color: #7f95a8;
+		text-transform: uppercase;
+	}
+
+	.line.info {
+		text-shadow: 0 0 8px var(--cyan-glow);
 	}
 
 	.line.live {
@@ -452,15 +582,9 @@
 		.bridge-ident,
 		.bridge-situation,
 		.bridge-conn {
-			padding: 0.35rem 0;
+			padding: 0.4rem 0.6rem;
 			margin: 0;
-			border-right: 0;
 			justify-self: stretch;
-		}
-
-		.bridge-ident,
-		.bridge-situation {
-			border-bottom: 1px solid var(--steel);
 		}
 
 		.bridge-conn .actions {
@@ -474,7 +598,7 @@
 		flex-shrink: 0;
 		gap: 0.35rem;
 		padding: 0.85rem 1.5rem 0;
-		background: #000;
+		background: var(--hull);
 		border-bottom: 1px solid #1f1f22;
 	}
 

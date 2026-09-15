@@ -327,3 +327,5 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 46 — 2026-09-14
 
 - Bridge header locked (§10 answers) and peeled to `BridgeHeader.svelte`. First chrome pass still looked like the old toolbar. Second pass: visible `--steel` bay/keel dividers, lamp plates with count + word + on-halo, recessed mono keel. Deck unchanged.
+- HUD pass after operator reference boards: chart-grid hull, corner-bracket bays, stacked instrument lamps (mono count over tracked label), cyan Refresh / gold Pull-Push plates, glowing keel with busy/error marker. Spec §3.1 states the sea/space mix per element; G4 is now corner brackets.
+- Deck tile initials hide once the favicon loads (they showed through transparent logos).

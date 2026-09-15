@@ -184,11 +184,11 @@
 	const staleRemoteCount = $derived(
 		(inventory?.projects ?? []).filter((p) => p.git.repo && Boolean(p.git.fetchError)).length,
 	);
-	const hiddenCount = $derived(
-		inventory
-			? archivedIds.filter((id) => inventory.projects.some((row) => row.id === id)).length
-			: archivedIds.length,
-	);
+	const hiddenCount = $derived.by(() => {
+		const rows = inventory?.projects;
+		if (!rows) return archivedIds.length;
+		return archivedIds.filter((id) => rows.some((row) => row.id === id)).length;
+	});
 	const fleetCount = $derived(
 		inventory ? Math.max(0, inventory.digest.projects - hiddenCount) : 0,
 	);

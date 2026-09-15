@@ -2,7 +2,8 @@
 
 **Spec kind:** Visual / IA  
 **Status:** Locked (2026-09-14)  
-**Chrome pass (2026-09-14):** First build still read as the old toolbar — `--hairline` on `--hull` is invisible, lamps were the old chips. Operator asked for more sea-space. Hairlines use `--steel`, lamps are instrument plates (count + word + halo), keel is a recessed waterline strip. Still no bay labels, no steampunk, no fake gauges.
+**Chrome pass (2026-09-14):** First build still read as the old toolbar — `--hairline` on `--hull` is invisible, lamps were the old chips. Operator asked for more sea-space. Hairlines use `--steel`, lamps are instrument plates (count + word + halo), keel is a recessed waterline strip. Still no bay labels, no steampunk, no fake gauges.  
+**HUD pass (2026-09-15):** Operator brought cinematic sci-fi dashboard references (corner brackets, chart grid, cyan edge light, big mono numbers over tracked labels). The mix is now explicit — see §3.1. Framing device switched from hairline dividers to **corner brackets** (supersedes §10 answer 5). Chart-paper grid on the hull, `--cyan` running lights, glow allowed on lamp dots, keel line, and Refresh. Labels still plain; no gauges that don't map to a digest field.
 **Related:** `docs/PHASE_1_BRIEF.md`, `docs/specs/cheap-surfaces.md`, `CONTEXT_PROMPT.md` sessions 43–46  
 **Surfaces:** Dashboard `header` + `.status-rail` in `app/src/routes/+page.svelte` / `app/src/lib/dashboard.css`. Tabs stay **stations** under the bridge in v1.
 
@@ -60,8 +61,9 @@ The center of the band is empty. The facts that tell you “where the helm is po
 - Instrument gold already on writes (`#c9a227` / `#fde68a`)
 - Cyan / ice for live instruments (`.info` is already `#93c5fd`)
 - Tight mono for counts and `host:port` (chart table, not display type)
-- Lamp dots as the motif element that carries meaning; **one** framing device (hairline dividers *or* corner ticks, not both)
-- Lamp-dot halo when a lamp is on (the light is the instrument). No hull glow, no page gradients.
+- Lamp dots as the motif element that carries meaning; **one** framing device — corner brackets (chosen 2026-09-15 over hairline dividers)
+- Chart-paper grid on the hull at ≤ 5% cyan — texture, not scanlines
+- Glow only where a light is on: lamp dots and counts, the keel rule and marker, Refresh, `host:port`. No hull glow, no page gradients.
 - Quiet motion only when something is actually happening (keel step ticks on Refresh); none at idle
 
 ### No
@@ -70,11 +72,28 @@ The center of the band is empty. The facts that tell you “where the helm is po
 - “Engage warp” / cosplay button labels
 - Fake instruments
 - Renaming UI tabs or CLI commands to match motif words
-- Hull glow, page gradients, or borders that do not separate anything. Lamp-dot halo is allowed.
+- Hull glow, page gradients, or borders that do not separate anything. Instrument glow (see Yes) is allowed.
+- Radar sweeps, waveforms, globes, progress rings with no digest field behind them.
 - **New words on the glass.** No “BRIDGE” / “SITUATION” microcaps or bay labels shown to the operator. Motif is carried by geometry and lamps, not by naming bays.
 - A new color (e.g. green for “quiet”). Reuse hot / warm / bad / info tones only.
 
 Internal / spec terms (binnacle, keel, conn) may appear in docs and class names. Operator-facing labels stay plain English. Avoid compass-side words (port / starboard) in class names — they collide with `host:port` and the Ports tab.
+
+### 3.1 The mix, stated plainly
+
+“Sea-space-punk” is a **ship's bridge drawn as a HUD.** Each element has one foot in each world:
+
+| Element | Sea | Space |
+| ------- | --- | ----- |
+| Hull background | dark navy, chart paper | faint cyan grid (the reference boards' grid) |
+| Bay frames | brass corner fittings | HUD corner brackets — thin cyan ticks, not full boxes |
+| Lamps | engine-room indicator lamps | big tabular-mono count over a tracked uppercase label, side stripe, glowing dot |
+| Refresh | taking a sounding | cyan running light; the one cool-toned control |
+| Pull / Push | brass engine telegraph | outlined gold plates, glow on hover |
+| Keel | waterline | glowing cyan rule with a diamond marker that turns gold when busy, red on error |
+| Words | helm, fleet, deck, land, ship | none — no “SYSTEMS NOMINAL”, no station names on glass |
+
+**Cyan is for live / reading / heading. Gold is for a write that is waiting. Red is for broken.** Nothing else glows. If a reference-board element cannot be tied to a real fact (radar sweep, waveform, globe), it stays off the bridge.
 
 ---
 
@@ -215,12 +234,12 @@ These prevent the most likely wrong builds. Treat them as acceptance, not advice
 | G1 | **Height budget.** Bridge (bays + keel) is no taller than today's `header` + `.status-rail` on desktop (≈ 5.5rem). Measure before and after. | The shell is `100vh` / `overflow: hidden`; every pixel the bridge grows comes out of the Fleet table. “Use the full width” must not become “use more height.” |
 | G2 | **Keel precedence and error lifetime** as in §5.4. | Avoids re-deriving the rail chain and avoids errors that vanish on a timer. |
 | G3 | **Lamps hold during refresh** (§5.2). | `statusReady` is `true` mid-read; naive builds flash All quiet. |
-| G4 | **One framing device.** Lamp dots carry meaning; pick hairline dividers *or* corner ticks for the bays. Hairlines must be **visible** (`--steel`, not black-on-black). Lamp-dot halo is allowed (the lamp is on). No hull glow, no gradients. | Four motif elements at once is the costume §3 rejects. Invisible hairlines make the bridge read as the old toolbar. |
+| G4 | **One framing device: corner brackets** on each bay (`--cyan-dim`, 1px, ~0.7rem ticks, drawn with background gradients — no pseudo-elements, no full box). Glow only on instruments that are on (§3). No hull glow, no page gradients. | Four motif elements at once is the costume §3 rejects. Invisible hairlines made the first build read as the old toolbar. |
 | G5 | **Motion gated.** Keel tick / lamp pulse only while `busy || statusNote`, never at idle, and disabled under `@media (prefers-reduced-motion: reduce)`. Nothing in `app/src` honors that query yet; the bridge is the first to introduce motion, so it is the first to gate it. | Accessibility; also keeps idle chrome still. |
 | G6 | **Semantics.** Lamps are `<button>`s with count + destination in `aria-label`. Keel keeps `aria-live="polite"` (already on `.status-rail`). | Screen readers get counts and live steps, not decorative dots. |
 | G7 | **Deck untouched.** Bridge tokens and rules live in the dashboard stylesheet path only; `/deck` (phone-on-LAN tile grid) inherits none of the hull / gold chrome. | Deck is a different surface with a different job. |
 | G8 | **Stable hooks.** `data-bridge` attribute on the four regions, valued `ident`, `situation`, `conn`, `keel`. | §8 acceptance and the browser pass can assert keel copy per state without guessing selectors. |
-| G9 | **Tokens, not literals.** Bridge CSS uses: `--hull` (`#000`), `--hull-2` (`#1c1c21`), `--hairline` (`#1f1f22`, other dashboard chrome), `--steel` (`#4a5360`, visible bay/keel dividers), `--well` (`#08090d`, keel recess + lamp plates), `--gold` (`#c9a227`), `--gold-soft` (`#fde68a`), `--ice` (`#93c5fd`), `--alarm` (existing `bad` red), `--dim` (existing muted grey, ≥ 4.5:1 on hull). | Keeps the build from scattering colors and keeps contrast checkable in one place. `--hairline` on `--hull` is invisible; `--steel` is the bridge divider. |
+| G9 | **Tokens, not literals.** Bridge CSS uses: `--hull` (`#03060c`, navy-black chart paper), `--hull-2` (`#1c1c21`), `--hairline` (`#1f1f22`, other dashboard chrome), `--steel` (`#2d4456`, blue-steel lamp borders), `--well` (`#060a13`, keel recess + lamp plates), `--gold` / `--gold-soft` (telegraph writes), `--ice` (`#93c5fd`, cool text), `--cyan` (`#67e8f9`, running lights), `--cyan-dim` / `--cyan-glow` (brackets, keel rule, halos), `--alarm`, `--dim`. | Keeps the build from scattering colors and keeps contrast checkable in one place. |
 
 ---
 
@@ -320,5 +339,5 @@ Cost: **Free/Cheap** — rearrange and restyle existing facts. No new daemon.
 2. **All quiet** when the digest is empty after `statusReady`.
 3. Fetch remotes stays in the **locker**.
 4. Narrow stack: **Ident → Situation → Conn → Keel**.
-5. Bay framing: **hairline dividers**.
+5. Bay framing: ~~hairline dividers~~ → **corner brackets** (operator reference boards, 2026-09-15).
 6. Stale remotes: **merge into the idle line**.

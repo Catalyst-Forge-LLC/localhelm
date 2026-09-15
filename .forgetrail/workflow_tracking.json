@@ -1606,6 +1606,20 @@
         "Add bay labels or decorative radar"
       ],
       "status": "active"
+    },
+    {
+      "id": "d116",
+      "timestamp": "2026-09-15T14:55:00Z",
+      "phase": "2-scaffolding",
+      "session": 46,
+      "decision": "Bridge goes HUD: chart-grid hull, corner-bracket bays (supersedes hairline dividers), stacked instrument lamps with mono count over tracked uppercase label, cyan Refresh and gold Pull/Push plates, glowing keel rule with a marker that turns gold when busy and red on error. Glow only where a light is on. No radar/waveform/globe; no words on glass beyond existing labels. Spec §3.1 pins the sea/space mix per element.",
+      "rationale": "Operator 2026-09-15 shared cinematic sci-fi dashboard references and said the second pass still lacked the space vibe. The frame-and-light language is what those boards share; the facts on our bridge were already right.",
+      "alternatives_considered": [
+        "Keep hairline dividers and only recolor",
+        "Full neon cyberpunk skin with scanlines",
+        "Decorative gauges not tied to digest fields"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
