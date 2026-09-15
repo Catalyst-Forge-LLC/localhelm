@@ -33,12 +33,19 @@
 		padding: 0.05rem;
 		border: 0;
 		background: none;
-		color: #8b8b93;
+		color: var(--dim);
 		font-size: 0.95rem;
 		cursor: help;
+		transition: color var(--hud-fade) ease;
 	}
 
 	.info-btn:hover {
-		color: #fde68a;
+		color: var(--gold-soft);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.info-btn {
+			transition: none;
+		}
 	}
 </style>

@@ -39,7 +39,7 @@
 		if (event.key === 'Escape' && busy) event.preventDefault();
 	}}
 >
-	<div class="panel">
+	<div class="panel hud-frame">
 		<div class="head">
 			<div>
 				<h2 id="add-projects-title">Add projects</h2>
@@ -79,19 +79,20 @@
 	}
 
 	.add::backdrop {
-		background: rgb(0 0 0 / 0.62);
+		background: rgb(3 6 12 / 0.78);
 	}
 
 	.panel {
+		--hud-fill: var(--hull);
 		width: min(40rem, 100%);
 		max-height: calc(100dvh - 2rem);
 		display: flex;
 		flex-direction: column;
-		border: 1px solid #3f3f46;
-		border-radius: 0.75rem;
-		background: #18181b;
-		color: #e4e4e7;
-		box-shadow: 0 24px 48px rgb(0 0 0 / 0.55);
+		border: 1px solid var(--steel);
+		border-radius: var(--plate-radius);
+		background: var(--hull);
+		color: #ececef;
+		box-shadow: 0 24px 48px rgb(0 0 0 / 0.65), 0 0 24px rgb(126 244 255 / 0.08);
 	}
 
 	.head {
@@ -112,7 +113,7 @@
 
 	.hint {
 		margin: 0.35rem 0 0;
-		color: #c4c4cc;
+		color: var(--dim);
 		font-size: 0.82rem;
 		line-height: 1.4;
 	}
@@ -124,17 +125,32 @@
 	}
 
 	.btn {
-		border: 1px solid #3f3f46;
-		background: #27272a;
-		color: #e4e4e7;
-		border-radius: 0.4rem;
+		border: 1px solid var(--steel);
+		background: var(--well);
+		color: #ececef;
+		border-radius: var(--plate-radius);
 		padding: 0.35rem 0.7rem;
 		font-size: 0.82rem;
 		cursor: pointer;
+		transition:
+			background-color var(--hud-fade) ease,
+			border-color var(--hud-fade) ease,
+			box-shadow var(--hud-fade) ease;
+	}
+
+	.btn:hover:not(:disabled) {
+		border-color: var(--cyan-dim);
+		background: rgb(126 244 255 / 0.08);
 	}
 
 	.btn:disabled {
-		opacity: 0.5;
+		opacity: 0.42;
 		cursor: not-allowed;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.btn {
+			transition: none;
+		}
 	}
 </style>

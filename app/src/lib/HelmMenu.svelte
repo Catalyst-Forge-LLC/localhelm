@@ -81,7 +81,7 @@
 		onclick={() => (open = !open)}
 	/>
 	{#if open}
-		<div class="panel" role="menu" aria-label="LocalHelm menu">
+		<div class="panel hud-frame" role="menu" aria-label="LocalHelm menu">
 			<p class="heading">This board</p>
 			{#if fleetPath}
 				<p class="meta">
@@ -161,16 +161,17 @@
 	}
 
 	.panel {
+		--hud-fill: var(--well);
 		position: absolute;
 		top: calc(100% + 0.4rem);
 		right: 0;
 		z-index: 40;
 		width: min(24rem, calc(100vw - 2rem));
 		padding: 0.75rem 0.85rem 0.85rem;
-		border: 1px solid var(--cyan-dim, #5a5a64);
-		background: var(--well, #2c2c32);
-		border-radius: var(--plate-radius, 0 0 8px 8px);
-		box-shadow: 0 0.6rem 1.4rem rgb(0 0 0 / 0.45), 0 0 18px var(--cyan-glow, transparent);
+		border: 1px solid var(--cyan-dim);
+		background: var(--well);
+		border-radius: var(--plate-radius);
+		box-shadow: 0 0.6rem 1.4rem rgb(0 0 0 / 0.45), 0 0 18px var(--cyan-glow);
 	}
 
 	.heading {
@@ -217,7 +218,7 @@
 
 	.copy-hint {
 		flex-shrink: 0;
-		color: #9a9aa3;
+		color: var(--dim);
 		font-size: 0.72rem;
 	}
 
@@ -289,7 +290,7 @@
 	}
 
 	.id {
-		color: #9a9aa3;
+		color: var(--dim);
 		font-size: 0.75rem;
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 	}

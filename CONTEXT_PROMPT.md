@@ -331,3 +331,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Brighter HUD carried to stations and body: shell chart grid, cyan tab underline, steel/well panels with corner ticks, gold writes. IconButton / HelmMenu / chips follow tokens.
 - Bridge layout: keel lives in the situation bay; Fleet / Sites / Slips dials (need/count) sit between lamps and Refresh. Deck imports `helm-hud.css` — chart hull, cyan header, bracketed tiles.
 - Deck tile initials hide once the favicon loads (they showed through transparent logos).
+
+### Session 47 — 2026-09-15
+
+- Leftover zinc overlays now match the operator board: Confirm + Add dialogs (`hud-frame`, `--hull`/`--steel`/`--well`, gold write / alarm danger), locker ticks, helm tooltips, Today/Add list hover, CellWait / InfoHint dim ink. Tokens load from `layout.css` so dialogs and body-appended tips share `--hull`.

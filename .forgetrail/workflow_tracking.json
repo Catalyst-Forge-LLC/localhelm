@@ -1646,6 +1646,19 @@
         "Decorative radar not tied to counts"
       ],
       "status": "active"
+    },
+    {
+      "id": "d119",
+      "timestamp": "2026-09-15T16:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Confirm, Add, locker, tooltips, and leftover zinc chips use the same helm-hud tokens and hud-frame as the operator board. Plan-then-confirm and write gates stay as they are.",
+      "rationale": "Operator 2026-09-15: make everything else like the operator board now.",
+      "alternatives_considered": [
+        "Leave Confirm/Add on zinc until a later peel",
+        "New overlay motif separate from the board"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

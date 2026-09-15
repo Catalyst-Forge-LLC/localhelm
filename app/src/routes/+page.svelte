@@ -2721,7 +2721,7 @@
 
 	{#if activityOpen}
 		<button type="button" class="drawer-backdrop" aria-label="Close activity" onclick={() => setActivityOpen(false)}></button>
-		<aside class="drawer" aria-label="Activity">
+		<aside class="drawer hud-frame" aria-label="Activity">
 			<div class="section-head">
 				<div>
 					<h2><Icon icon="lucide:scroll-text" /> Activity</h2>

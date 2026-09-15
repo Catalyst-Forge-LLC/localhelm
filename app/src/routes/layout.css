@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import '../lib/helm-hud.css';
 
 /* Tailwind preflight zeros margins; native dialog centering needs margin: auto. */
 dialog {
@@ -8,22 +9,22 @@ dialog {
 /* Tooltips append to body, which is outside .shell — set ink here. */
 html,
 body {
-	background: #1c1c21;
+	background: var(--hull);
 	color: #ececef;
 }
 
 /* After Tailwind preflight: restore the arrow triangle and Helm colors. */
 .tippy-box[data-theme~='helm'] {
-	background: #2a2a32;
+	background: var(--well);
 	color: #ececef;
-	border: 1px solid #5a5a64;
-	border-radius: 0.4rem;
+	border: 1px solid var(--steel);
+	border-radius: var(--plate-radius);
 	font-size: 0.78rem;
 	line-height: 1.45;
-	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+	box-shadow: 0 6px 18px rgb(0 0 0 / 0.55), 0 0 12px rgb(126 244 255 / 0.08);
 }
 .tippy-box[data-theme~='helm'] .tippy-arrow {
-	color: #2a2a32;
+	color: var(--well);
 }
 .tippy-box[data-theme~='helm'] .tippy-arrow::before {
 	border-style: solid;

@@ -219,7 +219,7 @@
 		}
 	}}
 >
-	<div class="panel">
+	<div class="panel hud-frame">
 	<div class="body">
 		<h2 id="confirm-title">{displayTitle}</h2>
 		{#if displayHint}
@@ -412,17 +412,18 @@
 	}
 
 	.panel {
+		--hud-fill: var(--hull);
 		display: flex;
 		flex-direction: column;
 		width: min(36rem, calc(100vw - 2rem));
 		max-width: 100%;
 		max-height: calc(100dvh - 2rem);
 		overflow: hidden;
-		border: 1px solid #3f3f46;
-		border-radius: 0.75rem;
-		background: #18181b;
-		color: #e4e4e7;
-		box-shadow: 0 24px 48px rgb(0 0 0 / 0.55);
+		border: 1px solid var(--steel);
+		border-radius: var(--plate-radius);
+		background: var(--hull);
+		color: #ececef;
+		box-shadow: 0 24px 48px rgb(0 0 0 / 0.65), 0 0 24px rgb(126 244 255 / 0.08);
 	}
 
 	.wide .panel {
@@ -430,7 +431,7 @@
 	}
 
 	.confirm::backdrop {
-		background: rgb(0 0 0 / 0.62);
+		background: rgb(3 6 12 / 0.78);
 	}
 
 	.body {
@@ -451,7 +452,7 @@
 	.hint {
 		flex-shrink: 0;
 		margin: 0.4rem 0 0;
-		color: #a1a1aa;
+		color: var(--dim);
 		font-size: 0.82rem;
 		line-height: 1.4;
 	}
@@ -462,7 +463,7 @@
 		gap: 0.45rem;
 		flex-shrink: 0;
 		margin: 0.75rem 0 0;
-		color: #e4e4e7;
+		color: #ececef;
 		font-size: 0.88rem;
 		line-height: 1.4;
 	}
@@ -492,9 +493,9 @@
 		overflow-x: hidden;
 		overflow-y: auto;
 		list-style: none;
-		border: 1px solid #27272a;
-		border-radius: 0.45rem;
-		background: #09090b;
+		border: 1px solid var(--steel);
+		border-radius: var(--plate-radius);
+		background: var(--well);
 	}
 
 	ul {
@@ -520,8 +521,11 @@
 		width: 100%;
 		margin: 0;
 		padding: 0.1rem 0.15rem 0.1rem 0.25rem;
-		border-radius: 0.35rem;
-		color: #d4d4d8;
+		border-radius: var(--plate-radius-sm);
+		color: #ececef;
+		transition:
+			background-color var(--hud-fade) ease,
+			box-shadow var(--hud-fade) ease;
 	}
 
 	.roster-row + .roster-row {
@@ -529,8 +533,8 @@
 	}
 
 	.roster-row.on {
-		background: #27272a;
-		color: #fafafa;
+		background: rgb(126 244 255 / 0.08);
+		color: var(--cyan);
 	}
 
 	.roster-row.out {
@@ -552,7 +556,7 @@
 
 	.include input {
 		margin: 0;
-		accent-color: #ca8a04;
+		accent-color: var(--gold);
 	}
 
 	.pick {
@@ -564,7 +568,7 @@
 		margin: 0;
 		padding: 0.25rem 0.25rem 0.25rem 0.1rem;
 		border: 0;
-		border-radius: 0.3rem;
+		border-radius: var(--plate-radius-sm);
 		background: transparent;
 		color: inherit;
 		font: inherit;
@@ -574,7 +578,7 @@
 	}
 
 	.pick:hover {
-		background: #18181b;
+		background: rgb(201 162 39 / 0.12);
 	}
 
 	.roster-row.on .pick:hover {
@@ -582,7 +586,7 @@
 	}
 
 	.roster-row.current {
-		color: #fde68a;
+		color: var(--gold-soft);
 	}
 
 	.roster-row.done {
@@ -605,11 +609,11 @@
 	.count {
 		flex-shrink: 0;
 		font-size: 0.68rem;
-		color: #a1a1aa;
+		color: var(--dim);
 	}
 
 	.roster-row.current .now {
-		color: #fde68a;
+		color: var(--gold-soft);
 	}
 
 	li {
@@ -622,13 +626,13 @@
 	}
 
 	li a {
-		color: #fbbf24;
+		color: var(--gold);
 		text-decoration: underline;
 		text-underline-offset: 0.12em;
 	}
 
 	.tracked li.current {
-		color: #fde68a;
+		color: var(--gold-soft);
 	}
 
 	.tracked li.done {
@@ -664,7 +668,7 @@
 		height: 0.38rem;
 		margin: 0.26rem auto 0;
 		border-radius: 999px;
-		background: #52525b;
+		background: var(--steel);
 	}
 
 	:global(.spin) {
@@ -680,7 +684,7 @@
 	li + li {
 		margin-top: 0.55rem;
 		padding-top: 0.45rem;
-		border-top: 1px solid #27272a;
+		border-top: 1px solid var(--hairline);
 	}
 
 	.extra {
@@ -696,18 +700,18 @@
 		gap: 0.6rem;
 		margin: 0.85rem 0 0.3rem;
 		font-size: 0.78rem;
-		color: #a1a1aa;
+		color: var(--dim);
 	}
 
 	.draft-id {
-		color: #e4e4e7;
+		color: #ececef;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 	}
 
 	.draft-hint {
 		margin: 0 0 0.35rem;
 		font-size: 0.75rem;
-		color: #a1a1aa;
+		color: var(--dim);
 	}
 
 	textarea {
@@ -716,10 +720,10 @@
 		min-height: 5.2rem;
 		box-sizing: border-box;
 		resize: vertical;
-		border: 1px solid #3f3f46;
-		border-radius: 0.4rem;
-		background: #09090b;
-		color: #e4e4e7;
+		border: 1px solid var(--steel);
+		border-radius: var(--plate-radius);
+		background: var(--well);
+		color: #ececef;
 		padding: 0.45rem 0.55rem;
 		font: inherit;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -728,7 +732,7 @@
 	}
 
 	textarea:focus {
-		outline: 1px solid #854d0e;
+		outline: 1px solid var(--gold);
 	}
 
 	.actions {
@@ -741,33 +745,60 @@
 	}
 
 	.btn {
-		border: 1px solid #3f3f46;
-		background: #27272a;
-		color: #e4e4e7;
-		border-radius: 0.4rem;
+		border: 1px solid var(--steel);
+		background: var(--well);
+		color: #ececef;
+		border-radius: var(--plate-radius);
 		padding: 0.35rem 0.7rem;
 		font-size: 0.82rem;
 		cursor: pointer;
 		max-width: 100%;
 		white-space: normal;
 		text-align: right;
+		transition:
+			background-color var(--hud-fade) ease,
+			border-color var(--hud-fade) ease,
+			box-shadow var(--hud-fade) ease,
+			color var(--hud-fade) ease;
+	}
+
+	.btn:hover:not(:disabled) {
+		border-color: var(--cyan-dim);
+		background: rgb(126 244 255 / 0.08);
 	}
 
 	.btn:disabled {
-		opacity: 0.5;
+		opacity: 0.42;
 		cursor: not-allowed;
 	}
 
 	.btn.write {
-		border-color: #854d0e;
-		background: #422006;
-		color: #fde68a;
+		border-color: var(--gold);
+		background: rgb(201 162 39 / 0.12);
+		color: var(--gold-soft);
+	}
+
+	.btn.write:hover:not(:disabled) {
+		background: rgb(201 162 39 / 0.22);
+		box-shadow: 0 0 10px rgb(201 162 39 / 0.28);
 	}
 
 	.btn.danger {
-		border-color: #991b1b;
-		background: #7f1d1d;
+		border-color: var(--alarm);
+		background: rgb(248 113 113 / 0.16);
 		color: #fecaca;
+	}
+
+	.btn.danger:hover:not(:disabled) {
+		background: rgb(248 113 113 / 0.28);
+		box-shadow: 0 0 10px rgb(248 113 113 / 0.28);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.roster-row,
+		.btn {
+			transition: none;
+		}
 	}
 
 	@media (max-width: 36rem) {

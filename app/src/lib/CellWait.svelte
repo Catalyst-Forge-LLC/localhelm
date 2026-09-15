@@ -18,7 +18,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.4rem;
-		color: #a1a1aa;
+		color: var(--dim);
 	}
 
 	:global(.spin) {
