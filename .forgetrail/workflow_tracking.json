@@ -1817,6 +1817,20 @@
         "Treat fleet/site id acmegeek as the npm owner without whoami"
       ],
       "status": "active"
+    },
+    {
+      "id": "d132",
+      "timestamp": "2026-09-15T22:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Git reads are one --no-optional-locks status per repo; origin/backup from .git/config. commitsSinceNpm and plan fetch/pull/push use the same pool.",
+      "rationale": "Operator 2026-09-15: can we read git any faster? Status was two git processes per checkout, then sequential spawnSync pickaxe. Remotes rarely change and live in config.",
+      "alternatives_considered": [
+        "Raise GIT_POOL only",
+        "Keep git remote -v as a second spawn",
+        "libgit2 / isomorphic-git"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

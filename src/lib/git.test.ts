@@ -7,6 +7,7 @@ import {
 	applyFetches,
 	applyPush,
 	countCommitsSinceVersion,
+	parseRemoteFetchUrls,
 	planFetch,
 	planPull,
 	planPush,
@@ -26,6 +27,23 @@ async function gitRepo(dir: string): Promise<void> {
 	assert.equal(runGit(dir, ['add', 'README.md']).ok, true);
 	assert.equal(runGit(dir, ['commit', '-m', 'init']).ok, true);
 }
+
+describe('git remotes from config', () => {
+	it('reads origin and backup fetch urls', () => {
+		const remotes = parseRemoteFetchUrls(`
+[core]
+	bare = false
+[remote "origin"]
+	url = https://github.com/acme/widget.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[remote "backup"]
+	url = https://example.com/widget.git
+	fetch = +refs/heads/*:refs/remotes/backup/*
+`);
+		assert.equal(remotes.origin, 'https://github.com/acme/widget.git');
+		assert.equal(remotes.backup, 'https://example.com/widget.git');
+	});
+});
 
 describe('git jobs', () => {
 	it('plans fetch for named ids only', async () => {
@@ -159,13 +177,13 @@ describe('git jobs', () => {
 		assert.equal(runGit(pkgDir, ['remote', 'add', 'origin', bare]).ok, true);
 		assert.equal(runGit(pkgDir, ['push', '-u', 'origin', 'HEAD']).ok, true);
 		const branch = runGit(pkgDir, ['branch', '--show-current']).stdout.trim();
-		assert.equal(countCommitsSinceVersion(pkgDir, '1.0.0', branch), 0);
+		assert.equal(await countCommitsSinceVersion(pkgDir, '1.0.0', branch), 0);
 
 		await writeFile(path.join(pkgDir, 'note.txt'), 'work\n');
 		assert.equal(runGit(pkgDir, ['add', 'note.txt']).ok, true);
 		assert.equal(runGit(pkgDir, ['commit', '-m', 'work']).ok, true);
-		assert.equal(countCommitsSinceVersion(pkgDir, '1.0.0', branch), 0);
+		assert.equal(await countCommitsSinceVersion(pkgDir, '1.0.0', branch), 0);
 		assert.equal(runGit(pkgDir, ['push']).ok, true);
-		assert.equal(countCommitsSinceVersion(pkgDir, '1.0.0', branch), 1);
+		assert.equal(await countCommitsSinceVersion(pkgDir, '1.0.0', branch), 1);
 	});
 });

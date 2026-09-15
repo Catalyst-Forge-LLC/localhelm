@@ -227,6 +227,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 	);
 
 	const projects: ProjectStatus[] = [];
+	const sinceJobs: { absPath: string; version: string; branch?: string; status: ProjectStatus }[] = [];
 	for (const [index, row] of prepared.entries()) {
 		const git = gitCells[index] ?? EMPTY_GIT;
 		if (row.missing) {
@@ -286,18 +287,27 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			pins,
 			cascadeBehind: pins.filter((pin) => pin.kind === 'registry' && pin.onLatest === false).length,
 			unpublishedAhead,
-			commitsSinceNpm:
-				options.skipCommitCounts || options.gitOnly
-					? null
-					: needsCommitsSinceNpm(row, npm, unpublishedAhead, git) && publishedVersion
-						? countCommitsSinceVersion(row.absPath, publishedVersion, git.branch)
-						: null,
+			commitsSinceNpm: null,
 			ship: row.ship,
 			bin: pkgBinNames(row.rootPkg),
 			global: row.npmName ? { version: globals.get(row.npmName) ?? null } : undefined,
 		};
 		if (row.rootError) status.error = row.rootError;
 		projects.push(status);
+		if (
+			!options.skipCommitCounts &&
+			!options.gitOnly &&
+			needsCommitsSinceNpm(row, npm, unpublishedAhead, git) &&
+			publishedVersion
+		) {
+			sinceJobs.push({ absPath: row.absPath, version: publishedVersion, branch: git.branch, status });
+		}
+	}
+
+	if (sinceJobs.length) {
+		await mapPool(sinceJobs, GIT_POOL, async (job) => {
+			job.status.commitsSinceNpm = await countCommitsSinceVersion(job.absPath, job.version, job.branch);
+		});
 	}
 
 	const digest: FleetDigest = {
