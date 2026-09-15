@@ -56,7 +56,7 @@
 		border: 1px solid var(--steel, #5a5a64);
 		background: var(--well, #3c3c44);
 		color: #ececef;
-		border-radius: var(--plate-radius, 0 0 5px 5px);
+		border-radius: var(--plate-radius, 0 0 8px 8px);
 		font-size: 1.05rem;
 		cursor: pointer;
 	}
@@ -96,7 +96,7 @@
 		padding: 0 0.28rem;
 		border: 1px solid var(--steel, #8b8b93);
 		background: var(--well, #3a3a42);
-		border-radius: var(--plate-radius, 0 0 5px 5px);
+		border-radius: var(--plate-radius, 0 0 8px 8px);
 		color: var(--cyan, #f4f4f5);
 		font-size: 0.62rem;
 		line-height: 1.15rem;

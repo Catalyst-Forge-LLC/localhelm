@@ -15,7 +15,7 @@
 	--chart-size: 1.25rem;
 	--alarm: #f87171;
 	--dim: #a8a8b0;
-	--keel-radius: 5px;
+	--keel-radius: 8px;
 	--plate-radius: 0 0 var(--keel-radius) var(--keel-radius);
 }
 
