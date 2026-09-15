@@ -27,6 +27,7 @@
 	const candidates = $derived(iconBase ? visitorFaviconCandidates(iconBase) : [...VISITOR_FAVICON_FILES].map((file) => `/${file}`));
 	let iconIndex = $state(0);
 	let broken = $state(false);
+	let iconReady = $state(false);
 	let copied = $state(false);
 	let copiedTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 	let pressTimer = $state<ReturnType<typeof setTimeout> | null>(null);
@@ -36,6 +37,7 @@
 		void candidates;
 		iconIndex = 0;
 		broken = false;
+		iconReady = false;
 	});
 
 	const favicon = $derived(!broken && iconIndex < candidates.length ? (candidates[iconIndex] ?? null) : null);
@@ -76,6 +78,10 @@
 		held = false;
 	}
 
+	function markIfCached(node: HTMLImageElement) {
+		if (node.complete && node.naturalWidth > 0) iconReady = true;
+	}
+
 	function onContextMenu(event: MouseEvent) {
 		if (!href) return;
 		event.preventDefault();
@@ -86,12 +92,17 @@
 {#snippet face()}
 	<span class="face">
 		<span class="icon" aria-hidden="true">
-			{letter}
+			{#if !iconReady}{letter}{/if}
 			{#if favicon && !broken}
 				<img
 					src={favicon}
 					alt=""
+					onload={() => {
+						iconReady = true;
+					}}
+					{@attach markIfCached}
 					onerror={() => {
+						iconReady = false;
 						if (iconIndex + 1 < candidates.length) iconIndex += 1;
 						else broken = true;
 					}}
