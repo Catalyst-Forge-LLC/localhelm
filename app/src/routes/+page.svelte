@@ -1017,7 +1017,7 @@
 		const label =
 			named.length === 1 ? `reading ${named[0]}` : `reading ${named.length} projects`;
 		await readQuiet(fetchRemotes ? `fetching remotes, then ${label}` : label, async () => {
-			await loadStatus({ fetchRemotes, ids: named, extras: false, freshNpm: fetchRemotes });
+			await loadStatus({ fetchRemotes, ids: named, extras: false, freshNpm: true });
 		});
 	}
 

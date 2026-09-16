@@ -255,7 +255,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 33 — 2026-09-10
 
 - Commit drafts prefer a live **network** Ollama host (dedicated box) over this machine; localhost is fallback. Confirm still opens on fallbacks, then drafts fill in.
-- `GET /api/status` reads enrolled latest from `registry.npmjs.org/<name>/latest` (Bearer token from `~/.npmrc` when present) in a pool of 8, in parallel with git. Private package names are skipped. Eight `npm.cmd view` processes on Windows were the 24-error source (timeouts / warn-polluted stdout). 5‑minute success cache; 10s error cache. Plugin boards load in parallel. Status reads do not lock the header.
+- `GET /api/status` reads enrolled latest from `registry.npmjs.org/<name>/latest` (Bearer token from `~/.npmrc` when present) in a pool of 8, in parallel with git. Private package names are skipped. Header Refresh and Fleet row/check Refresh drop the npm cache (`fresh=1`). 5‑minute success cache; 10s error cache. Plugin boards load in parallel. Status reads do not lock the header.
 
 ### Session 34 — 2026-09-10
 
