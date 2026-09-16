@@ -120,7 +120,7 @@ export {
 	pluginTabMetas,
 } from './dashboardTabs.js';
 export type { PluginTabMeta } from './dashboardTabs.js';
-export { archiveIds, archivePath, isArchived, planArchive, readArchive, restoreIds } from './archive.js';
+export { archiveHidesId, archiveIds, archivePath, isArchived, planArchive, readArchive, restoreIds } from './archive.js';
 export type { ArchiveFile, ArchivePlanRow } from './archive.js';
 export { fleetRoster } from './roster.js';
 export type { FleetRosterRow } from './roster.js';

@@ -15,6 +15,7 @@
 	import Tooltip from '$lib/Tooltip.svelte';
 	import { activityDayGroups, activityDayKey, activitySparkSeries } from '$lib/activityDays';
 	import { tip } from '$lib/helmTippy';
+	import { archiveHidesId } from '$lib/archiveVis';
 	import { activityLinkedIds } from '$lib/activityLinks';
 	import { crosswalkChips } from '$lib/crosswalk';
 	import { formatPluginPlanLines, pluginPlanLineKeys } from '$lib/pluginPlan';
@@ -249,11 +250,12 @@
 	const portBoards = $derived(pluginBoards.filter((board) => board.plugin === 'localslip' || board.tab === 'ports'));
 	const filepressBoard = $derived(pluginBoards.find((board) => board.plugin === 'filepress') ?? null);
 	const landPendingSet = $derived(new Set(landPendingIds));
-	const sitesNeedingSync = $derived((filepressBoard?.rows ?? []).filter((row) => siteNeedsEngineSync(row.cells)));
+	const visibleSiteRows = $derived(
+		(filepressBoard?.rows ?? []).filter((row) => showArchived || !archiveHidesId(row.id, archivedSet)),
+	);
+	const sitesNeedingSync = $derived(visibleSiteRows.filter((row) => siteNeedsEngineSync(row.cells)));
 	const sitesNeedingLand = $derived(
-		(filepressBoard?.rows ?? []).filter(
-			(row) => siteNeedsEngineSync(row.cells) || landPendingSet.has(row.id),
-		),
+		visibleSiteRows.filter((row) => siteNeedsEngineSync(row.cells) || landPendingSet.has(row.id)),
 	);
 	const sitesNeedingYou = $derived(sitesNeedingLand);
 	const leaseBoardAll = $derived(portBoards.find((board) => board.title === 'Leases') ?? portBoards[0] ?? null);
@@ -275,7 +277,7 @@
 		(observedBoard?.rows ?? []).filter((row) => rowMatchesPortFilters(row.cells, observedFilters, 'observed')),
 	);
 	const portsNeedingYou = $derived((leaseBoard?.rows ?? []).filter((row) => portNeedsYou(row.cells)));
-	const siteCount = $derived(filepressBoard?.rows.length ?? 0);
+	const siteCount = $derived(visibleSiteRows.length);
 	const slipCount = $derived(leaseBoardAll?.rows.length ?? 0);
 	const fleetNeed = $derived(
 		inventory
@@ -351,7 +353,7 @@
 		needCommitIds.length + needPublishIds.length + needPushIds.length > 0,
 	);
 	const fleetIds = $derived(visibleProjects.map((row) => row.id));
-	const siteIds = $derived((filepressBoard?.rows ?? []).map((row) => row.id));
+	const siteIds = $derived(visibleSiteRows.map((row) => row.id));
 	const leaseIds = $derived((leaseBoardAll?.rows ?? []).map((row) => row.id));
 	const portLookCards = $derived(
 		groupPortLooks(
@@ -1498,8 +1500,14 @@
 		return null;
 	}
 
+	function visibleBoardRows(board: PluginBoard) {
+		return showArchived ? board.rows : board.rows.filter((row) => !archiveHidesId(row.id, archivedSet));
+	}
+
 	function boardActionIds(board: PluginBoard, action: string): string[] {
-		return board.rows.filter((row) => row.actions.some((act) => act.id === action)).map((row) => row.id);
+		return visibleBoardRows(board)
+			.filter((row) => row.actions.some((act) => act.id === action))
+			.map((row) => row.id);
 	}
 
 	function checkedSiteIds(board: PluginBoard, action: string): string[] {
@@ -1507,13 +1515,18 @@
 	}
 
 	function siteAllChecked(board: PluginBoard): boolean {
-		return board.rows.length > 0 && board.rows.every((row) => selectedSites[row.id]);
+		const rows = visibleBoardRows(board);
+		return rows.length > 0 && rows.every((row) => selectedSites[row.id]);
 	}
 
 	function toggleSiteAll(board: PluginBoard, on: boolean): void {
 		const next = { ...selectedSites };
-		for (const row of board.rows) next[row.id] = on;
+		for (const row of visibleBoardRows(board)) next[row.id] = on;
 		selectedSites = next;
+	}
+
+	function checkedBoardSiteIds(board: PluginBoard): string[] {
+		return visibleBoardRows(board).filter((row) => selectedSites[row.id]).map((row) => row.id);
 	}
 
 	function checkedPortIds(board: PluginBoard, action: string): string[] {
@@ -1955,7 +1968,7 @@
 				{gitSummary}
 				{portLookCards}
 				{chipsFor}
-				{filepressBoard}
+				filepressBoard={filepressBoard ? { ...filepressBoard, rows: visibleSiteRows } : null}
 				{sitesNeedingLand}
 				{landPendingIds}
 				{filepressLandIds}
@@ -2043,7 +2056,7 @@
 									Remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
 								</button>
 							</Tooltip>
-							<Tooltip title={showArchived ? 'Puts checked rows back on Today. Folder was never moved.' : 'Hides checked rows on Today. Folder and port stay.'}>
+							<Tooltip title={showArchived ? 'Puts checked rows back on Today (fleet writes and site Land). Folder was never moved.' : 'Hides checked rows on Today, including matching -site Land. Folder and port stay.'}>
 								<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => void startArchive(checkedIds, showArchived)}>
 									<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
 									{showArchived ? 'Restore' : 'Archive'}{checkedIds.length ? ` (${checkedIds.length})` : ''}
@@ -2194,21 +2207,23 @@
 		{:else if !isPortsPluginTab(tab) && tab !== 'today' && tab !== 'fleet'}
 			{#each siteBoards as board (board.plugin + board.title)}
 				{@const siteCols = siteTableColumns(board.plugin, board.columns)}
+				{@const viewRows = visibleBoardRows(board)}
+				{@const checkedOnBoard = checkedBoardSiteIds(board)}
 				<section class="panel hud-frame plugin-board">
 					<div class="section-head">
 						<div>
 							<h2>{board.title}</h2>
 							<InfoHint
 								summary={board.plugin === 'filepress'
-									? 'Content sites. Check rows, then Land, Sync, or Ship. Land still pushes. Git push is on Fleet.'
+									? 'Content sites. Check rows, then Land, Sync, or Ship. Archive hides a site from Today Land until you Restore. Git push is on Fleet.'
 									: 'Check rows, then run a job on the selection.'}
 								detail={siteBoardHelp(board)}
 							/>
 						</div>
 						<div class="group-buttons">
 							{#if board.plugin === 'filepress'}
-								{@const landIds = board.rows.filter((row) => selectedSites[row.id]).map((row) => row.id)}
-								{@const syncIds = board.rows
+								{@const landIds = viewRows.filter((row) => selectedSites[row.id]).map((row) => row.id)}
+								{@const syncIds = viewRows
 									.filter((row) => selectedSites[row.id] && siteNeedsEngineSync(row.cells))
 									.map((row) => row.id)}
 								<Tooltip title="Plans Sync → Push → Ship for the checked sites. Confirm in the modal.">
@@ -2246,6 +2261,19 @@
 								</button>
 								</Tooltip>
 							{/each}
+							<Tooltip title={showArchived ? 'Puts checked sites back on Today Land. Folder was never moved.' : 'Hides checked sites from Today Land and this list. Folder and port stay.'}>
+								<button class="btn" disabled={Boolean(busy) || !checkedOnBoard.length} onclick={() => void startArchive(checkedOnBoard, showArchived)}>
+									<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
+									{showArchived ? 'Restore' : 'Archive'}{checkedOnBoard.length ? ` (${checkedOnBoard.length})` : ''}
+								</button>
+							</Tooltip>
+							{#if archivedIds.length}
+								<Tooltip title={showArchived ? 'Hide archived sites and fleet rows again.' : 'Show archived sites so you can Restore them to Today Land.'}>
+									<button type="button" class="btn" onclick={() => (showArchived = !showArchived)}>
+										{showArchived ? 'Hide archived' : `Archived (${archivedIds.length})`}
+									</button>
+								</Tooltip>
+							{/if}
 						</div>
 					</div>
 					<div class="table-wrap">
@@ -2257,7 +2285,7 @@
 											type="checkbox"
 											aria-label={`Select all ${board.title} rows`}
 											checked={siteAllChecked(board)}
-											indeterminate={board.rows.some((row) => selectedSites[row.id]) && !siteAllChecked(board)}
+											indeterminate={viewRows.some((row) => selectedSites[row.id]) && !siteAllChecked(board)}
 											onchange={(event) => toggleSiteAll(board, event.currentTarget.checked)}
 										/>
 									</th>
@@ -2269,7 +2297,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each board.rows as row (row.id)}
+								{#each viewRows as row (row.id)}
 									{@const liveHref = pluginRowOpenHref(row)}
 									{@const localHref = siteLocalHref(row.id, leaseBoardAll?.rows ?? [])}
 									{@const rowNote = pluginRowNote(board.plugin, row.cells)}
@@ -2364,8 +2392,8 @@
 										</td>
 									</tr>
 								{/each}
-								{#if !board.rows.length}
-									<tr><td class="empty" colspan={siteCols.length + 3}>No rows from this plugin.</td></tr>
+								{#if !viewRows.length}
+									<tr><td class="empty" colspan={siteCols.length + 3}>{archivedIds.length && !showArchived ? 'No visible rows. Open Archived to Restore hidden sites.' : 'No rows from this plugin.'}</td></tr>
 								{/if}
 							</tbody>
 						</table>

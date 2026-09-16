@@ -82,6 +82,8 @@ export function isArchived(id: string, archived: Iterable<string>): boolean {
 	return new Set(archived).has(id);
 }
 
+export { archiveHidesId } from './archiveVis.js';
+
 export type ArchivePlanRow = {
 	id: string;
 	action: 'hide' | 'restore' | 'skip';

@@ -1859,6 +1859,20 @@
         "Anonymous registry /latest"
       ],
       "status": "active"
+    },
+    {
+      "id": "d135",
+      "timestamp": "2026-09-16T17:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Reuse Archive as the later/never flag for publish-ship-land. Sites honor archive.json; a fleet id also hides id-site. Archived (N) shows them so Restore puts them back on Today.",
+      "rationale": "Operator 2026-09-16: some sites will not publish/ship/land for a while or ever; want a flag plus a filter to include as ready again. Archive already hid Fleet/Today; FilePress Land still listed those sites.",
+      "alternatives_considered": [
+        "New quiet flag on fleet.json",
+        "Separate later.json sidecar",
+        "Per-action no-publish / no-ship / no-land bits"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

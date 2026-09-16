@@ -99,7 +99,7 @@ Cost: **Free** = format or filter existing JSON. **Cheap** = one extra local com
 
 - **Not** `unenroll` (that drops the row). **Not** delete. **Not** `release` (that frees the port).
 - Persist `.localhelm/archive.json` (gitignored, next to activity): `{ ids: string[], archivedAt }`.
-- Today and default Fleet omit archived ids. A small “Archived (N)” toggle or Fleet filter shows them. Restore confirms and removes the id.
+- Today and default Fleet omit archived ids. FilePress Sites honor the same list (a fleet hide also hides `id-site` on Today Land). A small “Archived (N)” toggle on Fleet or Sites shows them. Restore confirms and removes the id.
 - Optional confirm extra: “Also park LocalSlip leases in this family” — **plan only**; apply calls the LocalSlip plugin `park` (sibling spec). LocalHelm does not stop processes itself.
 - **Not in this slice:** moving the folder to workspace `__ARCHIVE/`. The machine already has that folder as a human habit. A later plan can propose `git` + move with a harsh confirm. v1 archive is visibility.
 
