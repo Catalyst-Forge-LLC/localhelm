@@ -343,3 +343,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Chart grid stays on the whole shell. A cyan waterline plus a hull fade on the tab rail darkens stations without wiping the paper.
 - Ident wordmark mixes Oxanium 600 on *Local* (`--font-tech`) and Syne 700 on *Helm* (`--font-mark`). Deck “Deck” stays Syne. Host:port stays mono.
 - After a batch write the confirm does not re-check npm (except Cascade, which needs pins and uses `?light=1` to skip commit-counts and whoami). Push / Pull / Commit / Bump / Publish / Ship / Global / Land end with **git-only**. The board patches as each row finishes (ahead 0, new version, published latest). Busy switches to “reading git” / “reading fleet”, not the last “N of N”.
+
+### Session 48 — 2026-09-16
+
+- Keep local is not Archive. Archive hides a row from Today/Fleet (folder stays). Keep local is for work you still run and update, but will not publish, ship, or Land for a while or ever (`launch-campaign`). Persist `.localhelm/local-only.json` (`ids`, `markedAt`). A fleet id also covers `id-site`. Fleet/Sites stay; Publish, Ship, and Today Land drop until Include. `Local only (N)` lists the flagged rows. `POST /api/local-only` writes immediately (no plan/confirm).

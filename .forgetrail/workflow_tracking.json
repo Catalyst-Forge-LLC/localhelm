@@ -1872,6 +1872,20 @@
         "Separate later.json sidecar",
         "Per-action no-publish / no-ship / no-land bits"
       ],
+      "status": "superseded"
+    },
+    {
+      "id": "d136",
+      "timestamp": "2026-09-16T18:40:00Z",
+      "phase": "2-scaffolding",
+      "session": 48,
+      "decision": "Keep local is a separate persist from Archive. .localhelm/local-only.json (ids, markedAt). Rows stay on Fleet/Sites/Ports for start, commit, bump, and Sync. They drop off Publish, Ship, and Today Land until Include. A fleet id also covers id-site. Archive remains hide-from-Today.",
+      "rationale": "Operator 2026-09-16: archive is the wrong word. launch-campaign is actively used and updated, only locally — not publishing or shipping. The flag is local for now or forever.",
+      "alternatives_considered": [
+        "Reuse Archive (d135)",
+        "Per-action no-publish / no-ship / no-land bits",
+        "Quiet flag on fleet.json"
+      ],
       "status": "active"
     }
   ],

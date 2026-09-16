@@ -115,6 +115,8 @@ Cost: **Free** = format or filter existing JSON. **Cheap** = one extra local com
 
 **C7. Quiet sites.** Stop every `*-site` lease that is listening, minus `always` kinds if LocalSlip exposes `kind`. Confirm lists names. Night / meeting button.
 
+**C8. Keep local (operator-asked).** Archive is hide-from-Today. Keep local is a different flag: the row stays on Fleet / Sites / Ports for start, commit, bump, and Sync, but drops off Publish, Ship, and Today Land until Include. Persist `.localhelm/local-only.json` (gitignored): `{ version: 1, ids, markedAt }`. A fleet id also covers `id-site`. Example: `launch-campaign` is in daily use locally, not shipping.
+
 ### 5.3 Later / dear (parked here so we do not pretend they are cheap)
 
 - MCP (M4) — do brief first.
@@ -132,6 +134,7 @@ Cost: **Free** = format or filter existing JSON. **Cheap** = one extra local com
 | ----- | ---- |
 | `localhelm.fleet.json` | Enrollment. Unchanged by archive. |
 | `.localhelm/archive.json` | Hidden ids. Gitignored. |
+| `.localhelm/local-only.json` | Local-for-now (or forever) ids. Still on Fleet/Sites; off Publish/Ship/Land. Gitignored. |
 | `.localhelm/activity.json` | Brief + F9. Already shipped. |
 | Plugin boards | Recipes, listen, family. Source of truth on LocalSlip / FilePress. |
 
@@ -157,6 +160,7 @@ No new cloud. No schema in a sibling database from this package.
 | Risk | Mitigation |
 | ---- | ---------- |
 | Archive mistaken for delete | Copy: “Hides on Today. Folder and port stay.” |
+| Archive mistaken for local-only | Archive hides the row. Keep local keeps it usable and only drops Publish, Ship, and Land. |
 | Park + archive double-hide | Archive is Helm visibility; park is Berth. Restoring archive does not unpark unless the confirm said so. |
 | Family stem collision (`file` vs `filepress`) | Stem = id minus `-site`/`-api`, hyphen-folded, longest prefix among enrolled/leased names — not a substring of an unrelated id. |
 | Brief goes stale | Brief is a point-in-time read, like status. No cache across days. |
@@ -212,3 +216,4 @@ No new cloud. No schema in a sibling database from this package.
 - `2026-08-25:` C7 quiet, F2/F7/F9 cross-walk + copy + activity links, C3 guess-all. Tippy for labels and recipe/family facts.
 - `2026-08-25:` Attention UX — Ports actions on one line; stack chips labeled; Sites/Ports notes in ? tip; Fleet needs you is the row write.
 - `2026-08-27:` Stacks subtab is a table with per-row Start/Stop. Chip-then-toolbar select is gone.
+- `2026-09-16:` C8 Keep local — `.localhelm/local-only.json`. Archive stays hide. Local-only stays on Fleet/Sites; off Publish/Ship/Land until Include.

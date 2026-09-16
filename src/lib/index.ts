@@ -122,6 +122,8 @@ export {
 export type { PluginTabMeta } from './dashboardTabs.js';
 export { archiveHidesId, archiveIds, archivePath, isArchived, planArchive, readArchive, restoreIds } from './archive.js';
 export type { ArchiveFile, ArchivePlanRow } from './archive.js';
+export { clearLocalOnly, localOnlyCoversId, localOnlyPath, markLocalOnly, readLocalOnly } from './localOnly.js';
+export type { LocalOnlyFile } from './localOnly.js';
 export { fleetRoster } from './roster.js';
 export type { FleetRosterRow } from './roster.js';
 export { buildBrief, formatBrief } from './brief.js';

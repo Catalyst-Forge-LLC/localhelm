@@ -16,6 +16,7 @@
 	import { activityDayGroups, activityDayKey, activitySparkSeries } from '$lib/activityDays';
 	import { tip } from '$lib/helmTippy';
 	import { archiveHidesId } from '$lib/archiveVis';
+	import { localOnlyCoversId } from '$lib/localOnlyVis';
 	import { activityLinkedIds } from '$lib/activityLinks';
 	import { crosswalkChips } from '$lib/crosswalk';
 	import { formatPluginPlanLines, pluginPlanLineKeys } from '$lib/pluginPlan';
@@ -154,6 +155,8 @@
 	let manifestPath = $state('');
 	let archivedIds = $state<string[]>([]);
 	let showArchived = $state(false);
+	let localOnlyIds = $state<string[]>([]);
+	let showLocalOnly = $state(false);
 	let showParked = $state(false);
 	let briefCopied = $state(false);
 	let copiedKey = $state('');
@@ -177,9 +180,11 @@
 
 	const enrolledIds = $derived(new Set((inventory ? inventory.projects : roster).map((p) => p.id)));
 	const archivedSet = $derived(new Set(archivedIds));
+	const localOnlySet = $derived(new Set(localOnlyIds));
 	const visibleProjects = $derived(
 		(inventory ? inventory.projects : roster.map(shellProject))
 			.filter((row) => showArchived || !archivedSet.has(row.id))
+			.filter((row) => !showLocalOnly || localOnlyCoversId(row.id, localOnlySet))
 			.toSorted((a, b) => a.id.localeCompare(b.id, undefined, { sensitivity: 'base' })),
 	);
 	const scanCandidates = $derived(
@@ -255,7 +260,11 @@
 	);
 	const sitesNeedingSync = $derived(visibleSiteRows.filter((row) => siteNeedsEngineSync(row.cells)));
 	const sitesNeedingLand = $derived(
-		visibleSiteRows.filter((row) => siteNeedsEngineSync(row.cells) || landPendingSet.has(row.id)),
+		visibleSiteRows.filter(
+			(row) =>
+				inShipQueue(row.id) &&
+				(siteNeedsEngineSync(row.cells) || landPendingSet.has(row.id)),
+		),
 	);
 	const sitesNeedingYou = $derived(sitesNeedingLand);
 	const leaseBoardAll = $derived(portBoards.find((board) => board.title === 'Leases') ?? portBoards[0] ?? null);
@@ -328,7 +337,7 @@
 	const filepressLandIds = $derived(sitesNeedingLand.map((row) => row.id));
 	const checkedPublishIds = $derived(checkedIds.filter((id) => {
 		const row = inventory?.projects.find((p) => p.id === id);
-		return row ? !whyNotPublish(row) : false;
+		return row ? !whyNotPublish(row) && inShipQueue(id) : false;
 	}));
 	const checkedPushIds = $derived(checkedIds.filter((id) => {
 		const row = inventory?.projects.find((p) => p.id === id);
@@ -340,13 +349,15 @@
 	}));
 	const checkedShipIds = $derived(checkedIds.filter((id) => {
 		const row = inventory?.projects.find((p) => p.id === id);
-		return row ? canShip(row) : false;
+		return row ? canShip(row) && inShipQueue(id) : false;
 	}));
 	const checkedGlobalIds = $derived(checkedIds.filter((id) => {
 		const row = inventory?.projects.find((p) => p.id === id);
 		return row ? needsGlobal(row) : false;
 	}));
-	const needPublishIds = $derived(visibleProjects.filter((row) => canPublish(row)).map((row) => row.id));
+	const needPublishIds = $derived(
+		visibleProjects.filter((row) => canPublish(row) && inShipQueue(row.id)).map((row) => row.id),
+	);
 	const needCommitIds = $derived(visibleProjects.filter((row) => canCommit(row)).map((row) => row.id));
 	const needPushIds = $derived(visibleProjects.filter((row) => canPush(row)).map((row) => row.id));
 	const needBulkWrites = $derived(
@@ -404,7 +415,7 @@
 
 	function rowHasNeed(row: Project, filter: NeedFilter): boolean {
 		if (filter === 'all') return true;
-		if (filter === 'publish') return canPublish(row);
+		if (filter === 'publish') return canPublish(row) && inShipQueue(row.id);
 		if (filter === 'pins') return row.cascadeBehind > 0;
 		return canPush(row);
 	}
@@ -513,9 +524,20 @@
 		}
 	});
 
+	function inShipQueue(id: string): boolean {
+		return !localOnlyCoversId(id, localOnlySet);
+	}
+
 	function rowNeedsYou(row: Project): boolean {
 		if (row.pending) return false;
-		return badges(row).some((badge) => badge.text !== 'nothing to do') || writesFor(row).length > 0;
+		const skipShip = !inShipQueue(row.id);
+		const writeList = writesFor(row);
+		const badgeList = badges(row).filter((badge) => {
+			if (badge.text === 'nothing to do') return false;
+			if (skipShip && (badge.text.includes('unpublished') || badge.text.includes('never published'))) return false;
+			return true;
+		});
+		return badgeList.length > 0 || writeList.length > 0;
 	}
 
 	function siteNeedReason(siteId: string, cells: Record<string, string>): string {
@@ -547,7 +569,9 @@
 
 	function writesFor(row: Project): FleetWriteId[] {
 		if (row.pending) return [];
-		return fleetWriteIds(row, cascadeFor(row.id)?.writable ?? 0);
+		const ids = fleetWriteIds(row, cascadeFor(row.id)?.writable ?? 0);
+		if (!inShipQueue(row.id)) return ids.filter((id) => id !== 'publish');
+		return ids;
 	}
 
 	function readyNamed(ids: string[]): string[] {
@@ -865,17 +889,28 @@
 		}
 	}
 
+	async function loadLocalOnly(): Promise<void> {
+		try {
+			const data = (await call('/api/local-only')) as { ids?: string[] };
+			localOnlyIds = Array.isArray(data.ids) ? data.ids : [];
+		} catch {
+			/* keep the last local-only list */
+		}
+	}
+
 	async function loadRoster(): Promise<void> {
 		try {
 			const data = (await call('/api/roster')) as {
 				projects?: RosterRow[];
 				archivedIds?: string[];
+				localOnlyIds?: string[];
 				scanRoot?: string;
 				cwd?: string;
 				manifestPath?: string | null;
 			};
 			roster = data.projects ?? [];
 			if (Array.isArray(data.archivedIds)) archivedIds = data.archivedIds;
+			if (Array.isArray(data.localOnlyIds)) localOnlyIds = data.localOnlyIds;
 			if (!candidates.length && data.scanRoot) scanRoot = data.scanRoot;
 			if (data.cwd) cwd = data.cwd;
 			if (data.manifestPath) manifestPath = data.manifestPath;
@@ -962,7 +997,7 @@
 		if (opts.extras !== false && !scoped) {
 			statusNote = 'reading Sites and Ports';
 			if (busy) busy = 'reading Sites and Ports';
-			await Promise.all([loadPluginBoards(), loadActivity(), loadArchive()]);
+			await Promise.all([loadPluginBoards(), loadActivity(), loadArchive(), loadLocalOnly()]);
 		}
 	}
 
@@ -1362,6 +1397,19 @@
 		);
 	}
 
+	async function applyLocalOnly(ids: string[], restore: boolean): Promise<void> {
+		if (!ids.length) return;
+		await run(restore ? 'including' : 'keeping local', async () => {
+			const data = (await call('/api/local-only', {
+				method: 'POST',
+				body: JSON.stringify({ ids, restore }),
+			})) as { ids?: string[] };
+			localOnlyIds = Array.isArray(data.ids) ? data.ids : [];
+			if (!localOnlyIds.length) showLocalOnly = false;
+			note(restore ? `include ${ids.join(', ')}` : `keep local ${ids.join(', ')}`, data);
+		});
+	}
+
 	async function applyArchive(ids: string[], restore: boolean, parkIds: string[]): Promise<void> {
 		const verb = restore ? 'restoring' : 'hiding';
 		const label = ids.length
@@ -1501,12 +1549,15 @@
 	}
 
 	function visibleBoardRows(board: PluginBoard) {
-		return showArchived ? board.rows : board.rows.filter((row) => !archiveHidesId(row.id, archivedSet));
+		let rows = showArchived ? board.rows : board.rows.filter((row) => !archiveHidesId(row.id, archivedSet));
+		if (showLocalOnly) rows = rows.filter((row) => localOnlyCoversId(row.id, localOnlySet));
+		return rows;
 	}
 
 	function boardActionIds(board: PluginBoard, action: string): string[] {
 		return visibleBoardRows(board)
 			.filter((row) => row.actions.some((act) => act.id === action))
+			.filter((row) => action !== 'ship' || inShipQueue(row.id))
 			.map((row) => row.id);
 	}
 
@@ -1732,7 +1783,7 @@
 				else startCascade(row.id);
 			},
 		}));
-		if (row.unpublishedAhead && !acts.some((act) => act.id === 'publish')) {
+		if (row.unpublishedAhead && inShipQueue(row.id) && !acts.some((act) => act.id === 'publish')) {
 			acts.unshift({
 				id: 'publish',
 				label: fleetWriteLabel('publish', row),
@@ -1753,7 +1804,7 @@
 			if (afterPub >= 0) acts.splice(afterPub + 1, 0, pushAct);
 			else acts.unshift(pushAct);
 		}
-		if (canShip(row) && !acts.some((act) => act.id === 'ship')) {
+		if (canShip(row) && inShipQueue(row.id) && !acts.some((act) => act.id === 'ship')) {
 			acts.push({
 				id: 'ship',
 				label: 'Ship',
@@ -1791,6 +1842,11 @@
 		const acts = needActions(row);
 		return badges(row).filter((badge) => {
 			if (badge.text === 'nothing to do') return acts.length === 0;
+			if (
+				!inShipQueue(row.id) &&
+				(badge.text.includes('unpublished') || badge.text.includes('never published'))
+			)
+				return false;
 			if (acts.some((act) => act.id === 'publish') && badge.text.includes('unpublished')) return false;
 			if (acts.some((act) => act.id === 'push') && badge.text.includes('to push')) return false;
 			if (
@@ -1810,6 +1866,7 @@
 				'Site names can match a fleet package and still be a different checkout.',
 				'Engine is the locked getfilepress version. Sync engine <version> appears only when that site is behind or headers need a merge. Headers and ship stay on the job buttons, not extra columns.',
 				'Land syncs getfilepress on the site, then Push → Ship. It does not publish filepress or a matching fleet package.',
+				'Keep local leaves the site here to run and Sync. It drops Today Land until you Include. Archive hides the row from Today.',
 				'Git push stays on Fleet — that board already shows branch, ahead, and origin.',
 			);
 		}
@@ -2062,6 +2119,27 @@
 									{showArchived ? 'Restore' : 'Archive'}{checkedIds.length ? ` (${checkedIds.length})` : ''}
 								</button>
 							</Tooltip>
+							<Tooltip
+								title={showLocalOnly
+									? 'Puts checked rows back on Publish, Ship, and Today Land. Start, commit, and bump stay as they are.'
+									: 'Stays on Fleet and Sites for start, commit, and updates. Drops off Publish, Ship, and Today Land until you Include.'}
+							>
+								<button
+									class="btn"
+									disabled={Boolean(busy) || !checkedIds.length}
+									onclick={() => void applyLocalOnly(checkedIds, showLocalOnly)}
+								>
+									<Icon icon={showLocalOnly ? 'lucide:globe' : 'lucide:house'} />
+									{showLocalOnly ? 'Include' : 'Keep local'}{checkedIds.length ? ` (${checkedIds.length})` : ''}
+								</button>
+							</Tooltip>
+							{#if localOnlyIds.length}
+								<Tooltip title="Local-only rows stay enrolled and usable. This only hides them from Publish, Ship, and Land until you Include.">
+									<button type="button" class="btn" onclick={() => (showLocalOnly = !showLocalOnly)}>
+										{showLocalOnly ? 'Show all' : `Local only (${localOnlyIds.length})`}
+									</button>
+								</Tooltip>
+							{/if}
 							{#if archivedIds.length}
 								<Tooltip title="Archived rows stay enrolled. This only changes what Today and Fleet show.">
 									<button type="button" class="btn" onclick={() => (showArchived = !showArchived)}>
@@ -2102,6 +2180,9 @@
 										<td>
 											<div class="project-cell">
 												<span class="id">{row.id}</span>
+												{#if localOnlyCoversId(row.id, localOnlySet)}
+													<span class="chip quiet">local only</span>
+												{/if}
 												{#if projectMeta}
 													<span class="dim small">{projectMeta}</span>
 												{/if}
@@ -2192,14 +2273,24 @@
 								{#if !rosterReady && !inventory}
 									<tr><td class="empty" colspan="7"><CellWait label="Reading fleet…" showLabel /></td></tr>
 								{:else if !visibleProjects.length}
-									<tr><td class="empty" colspan="7">Nothing enrolled yet. Open Add projects, scan a folder, tick the ones you ship, then write.</td></tr>
+									<tr>
+										<td class="empty" colspan="7">
+											{#if showLocalOnly}
+												No local-only projects. Check a row and Keep local, or choose Show all.
+											{:else if archivedIds.length && !showArchived}
+												No visible rows. Open Archived to Restore hidden projects.
+											{:else}
+												Nothing enrolled yet. Open Add projects, scan a folder, tick the ones you ship, then write.
+											{/if}
+										</td>
+									</tr>
 								{/if}
 							</tbody>
 						</table>
 					</div>
 
 					<p class="legend">
-						Check rows for bulk bump, push, publish, ship, install global, or remove. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
+						Check rows for bulk bump, push, publish, ship, install global, or remove. Keep local leaves a row on Fleet for everyday work but drops Publish, Ship, and Land. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
 						Publish bumps if local is already on npm, pushes if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
 					</p>
 				</section>
@@ -2215,14 +2306,16 @@
 							<h2>{board.title}</h2>
 							<InfoHint
 								summary={board.plugin === 'filepress'
-									? 'Content sites. Check rows, then Land, Sync, or Ship. Archive hides a site from Today Land until you Restore. Git push is on Fleet.'
+									? 'Content sites. Check rows, then Land, Sync, or Ship. Keep local drops Land until you Include; the site stays here to run and update. Archive hides a site from Today until you Restore. Git push is on Fleet.'
 									: 'Check rows, then run a job on the selection.'}
 								detail={siteBoardHelp(board)}
 							/>
 						</div>
 						<div class="group-buttons">
 							{#if board.plugin === 'filepress'}
-								{@const landIds = viewRows.filter((row) => selectedSites[row.id]).map((row) => row.id)}
+								{@const landIds = viewRows
+									.filter((row) => selectedSites[row.id] && inShipQueue(row.id))
+									.map((row) => row.id)}
 								{@const syncIds = viewRows
 									.filter((row) => selectedSites[row.id] && siteNeedsEngineSync(row.cells))
 									.map((row) => row.id)}
@@ -2267,6 +2360,27 @@
 									{showArchived ? 'Restore' : 'Archive'}{checkedOnBoard.length ? ` (${checkedOnBoard.length})` : ''}
 								</button>
 							</Tooltip>
+							<Tooltip
+								title={showLocalOnly
+									? 'Puts checked sites back on Today Land. The folder stays; you can still Sync and run locally either way.'
+									: 'Stays on Sites to run and update. Drops off Today Land until you Include.'}
+							>
+								<button
+									class="btn"
+									disabled={Boolean(busy) || !checkedOnBoard.length}
+									onclick={() => void applyLocalOnly(checkedOnBoard, showLocalOnly)}
+								>
+									<Icon icon={showLocalOnly ? 'lucide:globe' : 'lucide:house'} />
+									{showLocalOnly ? 'Include' : 'Keep local'}{checkedOnBoard.length ? ` (${checkedOnBoard.length})` : ''}
+								</button>
+							</Tooltip>
+							{#if localOnlyIds.length}
+								<Tooltip title="Local-only sites stay on this list. This only hides them from Today Land until you Include.">
+									<button type="button" class="btn" onclick={() => (showLocalOnly = !showLocalOnly)}>
+										{showLocalOnly ? 'Show all' : `Local only (${localOnlyIds.length})`}
+									</button>
+								</Tooltip>
+							{/if}
 							{#if archivedIds.length}
 								<Tooltip title={showArchived ? 'Hide archived sites and fleet rows again.' : 'Show archived sites so you can Restore them to Today Land.'}>
 									<button type="button" class="btn" onclick={() => (showArchived = !showArchived)}>
@@ -2319,6 +2433,9 @@
 													<span class="id">{row.label ?? row.id}</span>
 												{/if}
 												<CrossChips compact chips={chipsFor(row.id, 'sites')} onOpen={(kind) => openCross(row.id, kind)} />
+												{#if localOnlyCoversId(row.id, localOnlySet)}
+													<span class="chip quiet">local only</span>
+												{/if}
 												{#if rowNote}<span class="chip quiet">{rowNote}</span>{/if}
 											</div>
 										</td>
@@ -2355,7 +2472,7 @@
 														</a>
 													</Tooltip>
 												{/if}
-												{#if board.plugin === 'filepress'}
+												{#if board.plugin === 'filepress' && inShipQueue(row.id)}
 													<Tooltip title="Plans Sync → Push → Ship for this site. Confirm in the modal.">
 														<button class="btn btn-sm btn-write" disabled={Boolean(busy)} onclick={() => startLand([row.id])}>
 															<Icon icon="lucide:plane-landing" />
@@ -2375,7 +2492,7 @@
 														</button>
 													</Tooltip>
 												{/if}
-												{#each row.actions.filter((act) => sitePluginJobVisible(board.plugin, act.id)) as act (act.id)}
+												{#each row.actions.filter((act) => sitePluginJobVisible(board.plugin, act.id) && (act.id !== 'ship' || inShipQueue(row.id))) as act (act.id)}
 													{@const icon = actionIcon(act)}
 													<Tooltip title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}>
 														<button
@@ -2393,7 +2510,17 @@
 									</tr>
 								{/each}
 								{#if !viewRows.length}
-									<tr><td class="empty" colspan={siteCols.length + 3}>{archivedIds.length && !showArchived ? 'No visible rows. Open Archived to Restore hidden sites.' : 'No rows from this plugin.'}</td></tr>
+									<tr>
+										<td class="empty" colspan={siteCols.length + 3}>
+											{#if showLocalOnly}
+												No local-only sites. Check a row and Keep local, or choose Show all.
+											{:else if archivedIds.length && !showArchived}
+												No visible rows. Open Archived to Restore hidden sites.
+											{:else}
+												No rows from this plugin.
+											{/if}
+										</td>
+									</tr>
 								{/if}
 							</tbody>
 						</table>
