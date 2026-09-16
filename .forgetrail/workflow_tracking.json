@@ -1845,6 +1845,20 @@
         "pacote.manifest pool"
       ],
       "status": "active"
+    },
+    {
+      "id": "d134",
+      "timestamp": "2026-09-16T04:42:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Status latest is authenticated registry GET /<name>/latest (token from ~/.npmrc). Do not spawn npm view per enrolled name. Skip private names.",
+      "rationale": "Operator 2026-09-16: still 24 npm errors after CLI views. Windows 8-wide npm.cmd (shell, unknown-config warns on stdout, 20s kills) is unreliable; anonymous /latest 429s. npm view's value was npmrc auth — send that on fetch instead.",
+      "alternatives_considered": [
+        "Keep npm view and only strip warn lines",
+        "Lower CLI concurrency to 2",
+        "Anonymous registry /latest"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

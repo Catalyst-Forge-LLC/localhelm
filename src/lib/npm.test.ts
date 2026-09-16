@@ -7,6 +7,7 @@ import {
 	npmHasVersion,
 	npmLatestMany,
 	parseMaintainerSearchJson,
+	parseNpmrcAuthToken,
 	parseNpmViewVersion,
 	waitForNpmVersion,
 	withPublishedLocal,
@@ -99,16 +100,46 @@ describe('npm maintainer search + view', () => {
 		);
 		assert.equal(parseNpmViewVersion('"1.2.3"\n'), '1.2.3');
 		assert.equal(parseNpmViewVersion(JSON.stringify({ version: '4.5.6' })), '4.5.6');
+		assert.equal(
+			parseNpmViewVersion(
+				'npm warn Unknown user config "msvs_version".\nnpm notice run tsc\n"0.1.20"\n',
+			),
+			'0.1.20',
+		);
+		assert.equal(parseNpmrcAuthToken('//registry.npmjs.org/:_authToken=npm_test_token\n'), 'npm_test_token');
 		assert.equal(npmCliNotFound('npm ERR! code E404', 1), true);
 		assert.equal(npmCliNotFound('npm ERR! code E429', 1), false);
 	});
 
-	it('seeds latest from maintainer search and views only leftovers', async () => {
+	it('reads latest from the registry and treats 404 as unpublished', async () => {
+		clearNpmCache();
+		const urls: string[] = [];
+		const byName = await npmLatestMany(['localhelm', 'missing-pkg'], 2, undefined, {
+			token: null,
+			fetch: (async (url) => {
+				urls.push(String(url));
+				if (String(url).includes('missing-pkg')) {
+					return { status: 404, ok: false, json: async () => ({}) } as Response;
+				}
+				return {
+					status: 200,
+					ok: true,
+					json: async () => ({ version: '0.1.20' }),
+				} as Response;
+			}) as typeof fetch,
+		});
+		assert.equal(byName.get('localhelm')?.latest, '0.1.20');
+		assert.equal(byName.get('missing-pkg')?.status, 'none');
+		assert.ok(urls.some((url) => url.includes('localhelm/latest')));
+	});
+
+	it('seeds latest from maintainer search and fetches leftovers', async () => {
 		clearNpmCache();
 		const calls: string[][] = [];
 		const byName = await npmLatestMany(['localhelm', 'solo-pkg'], 2, undefined, {
 			owner: 'acmegeek',
 			ownerSearch: true,
+			token: null,
 			run: async (args) => {
 				calls.push([...args]);
 				if (args[0] === 'search') {
@@ -118,61 +149,25 @@ describe('npm maintainer search + view', () => {
 						stderr: '',
 					};
 				}
-				if (args[0] === 'view' && args[1] === 'solo-pkg') {
-					return { status: 0, stdout: '"0.3.0"\n', stderr: '' };
-				}
 				return { status: 1, stdout: '', stderr: `unexpected ${args.join(' ')}` };
 			},
+			fetch: (async (url) => {
+				if (String(url).includes('solo-pkg')) {
+					return { status: 200, ok: true, json: async () => ({ version: '0.3.0' }) } as Response;
+				}
+				return { status: 500, ok: false, json: async () => ({}) } as Response;
+			}) as typeof fetch,
 		});
 		assert.equal(byName.get('localhelm')?.latest, '0.1.20');
 		assert.equal(byName.get('solo-pkg')?.latest, '0.3.0');
 		assert.equal(calls.filter((args) => args[0] === 'search').length, 1);
-		assert.equal(calls.filter((args) => args[0] === 'view').length, 1);
-		assert.deepEqual(calls.find((args) => args[0] === 'search')?.slice(0, 2), [
-			'search',
-			'maintainer:acmegeek',
-		]);
 	});
 
-	it('views enrolled names without waiting on maintainer search', async () => {
-		clearNpmCache();
-		const calls: string[][] = [];
-		const byName = await npmLatestMany(['localhelm'], 1, undefined, {
-			owner: 'acmegeek',
-			run: async (args) => {
-				calls.push([...args]);
-				if (args[0] === 'view' && args[1] === 'localhelm') {
-					return { status: 0, stdout: '"0.1.20"\n', stderr: '' };
-				}
-				return { status: 1, stdout: '', stderr: `unexpected ${args.join(' ')}` };
-			},
-		});
-		assert.equal(byName.get('localhelm')?.latest, '0.1.20');
-		assert.equal(byName.get('localhelm')?.status, 'ok');
-		assert.equal(calls.filter((args) => args[0] === 'search').length, 0);
-		assert.deepEqual(calls[0]?.slice(0, 3), ['view', 'localhelm', 'version']);
-	});
-
-	it('keeps the view cell when the cache is cleared mid-lookup', async () => {
-		clearNpmCache();
-		const byName = await npmLatestMany(['localhelm'], 1, undefined, {
-			run: async () => {
-				clearNpmCache();
-				return { status: 0, stdout: '"0.1.20"\n', stderr: '' };
-			},
-		});
-		assert.equal(byName.get('localhelm')?.latest, '0.1.20');
-		assert.notEqual(byName.get('localhelm')?.error, 'npm view missing result for localhelm');
-	});
-
-	it('treats npm view 404 as unpublished', async () => {
+	it('treats a missing version document as unpublished', async () => {
 		clearNpmCache();
 		const cell = await npmHasVersion('missing-pkg', '1.0.0', {
-			run: async () => ({
-				status: 1,
-				stdout: '',
-				stderr: 'npm ERR! code E404\nnpm ERR! 404 Not Found',
-			}),
+			token: null,
+			fetch: (async () => ({ status: 404, ok: false, json: async () => ({}) })) as typeof fetch,
 		});
 		assert.equal(cell.status, 'none');
 	});

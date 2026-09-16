@@ -189,7 +189,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 		(done, total) => report('packages', done, total),
 	);
 	for (const row of prepared) {
-		if (row.npmName) names.add(row.npmName);
+		if (row.npmName && !row.privatePkg) names.add(row.npmName);
 	}
 
 	if (only) {

@@ -112,7 +112,7 @@ Pin kinds a builder must classify, not squash into one string:
 
 ### 2.2 npm registry
 
-Enrolled names use `npm view <name> version --json` (Refresh / fetch remotes add `--prefer-online`). There is no `npm view --owner`; `npm search maintainer:<user>` is opt-in because it can block for tens of seconds and still miss a name. `404` / `E404` means unpublished, not an error. Other failures are errors and must be shown, not treated as "no package."
+Enrolled public names use `GET https://registry.npmjs.org/<name>/latest` with the user npmrc token when present (same auth as `npm view`). `404` means unpublished, not an error. Other failures are errors and must be shown, not treated as "no package." Do not spawn a fleet of `npm view` CLIs for status.
 
 Compare **semver**, not strings. `0.1.10` is greater than `0.1.9`. Local `>` published is "ready to publish" only if git is otherwise eligible. Local `===` published and a dirty tree is "unpublished work." Local `<` published is "local behind registry" (someone published from another clone, or this tree was reset).
 
