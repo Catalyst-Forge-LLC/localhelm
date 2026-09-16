@@ -1,6 +1,6 @@
 import { countCommitsSinceVersion, GIT_POOL, readGitAsync } from './git.js';
 import type { LoadedManifest } from './manifest.js';
-import { clearNpmCache, liftLatestIfVersionExists, mapPool, npmLatestMany, npmWhoami } from './npm.js';
+import { clearNpmCache, liftLatestIfVersionExists, mapPool, npmLatestMany } from './npm.js';
 import { joinRoot } from './paths.js';
 import { pinsFromPkg } from './pins.js';
 import { clearGlobalCache, readGlobalVersions } from './globalInstall.js';
@@ -92,7 +92,6 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 		clearNpmCache();
 		clearGlobalCache();
 	}
-	const prepared: Prepared[] = [];
 	const names = new Set<string>();
 	const only = options.onlyIds?.length ? new Set(options.onlyIds) : null;
 	const listed = loaded.manifest.projects.filter((project) => !only || only.has(project.id));
@@ -147,48 +146,50 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 		};
 	}
 	report('packages', 0, listed.length);
-
-	for (const [index, project] of listed.entries()) {
-		const absPath = joinRoot(loaded.workspaceRoot, project.path);
-		if (!(await pathExists(absPath))) {
-			prepared.push({
+	const prepared = await mapPool(
+		listed,
+		GIT_POOL,
+		async (project): Promise<Prepared> => {
+			const absPath = joinRoot(loaded.workspaceRoot, project.path);
+			if (!(await pathExists(absPath))) {
+				return {
+					id: project.id,
+					path: project.path,
+					absPath,
+					missing: true,
+					privatePkg: false,
+					localVersion: null,
+					npmName: project.npm,
+				};
+			}
+			const rootFile = rootPkgPath(absPath);
+			const rootRead = (await pathExists(rootFile)) ? await readPkg(rootFile) : null;
+			const rootError = rootRead && 'error' in rootRead ? rootRead.error : undefined;
+			const rootPkg = rootRead && !('error' in rootRead) ? rootRead : undefined;
+			let sitePkg: PkgJson | undefined;
+			const siteFile = sitePkgPath(absPath);
+			if (await pathExists(siteFile)) {
+				const siteRead = await readPkg(siteFile);
+				if (!('error' in siteRead)) sitePkg = siteRead;
+			}
+			return {
 				id: project.id,
 				path: project.path,
 				absPath,
-				missing: true,
-				privatePkg: false,
-				localVersion: null,
-				npmName: project.npm,
-			});
-			report('packages', index + 1, listed.length);
-			continue;
-		}
-		const rootFile = rootPkgPath(absPath);
-		const rootRead = (await pathExists(rootFile)) ? await readPkg(rootFile) : null;
-		const rootError = rootRead && 'error' in rootRead ? rootRead.error : undefined;
-		const rootPkg = rootRead && !('error' in rootRead) ? rootRead : undefined;
-		const npmName = project.npm ?? rootPkg?.name;
-		if (npmName) names.add(npmName);
-		let sitePkg: PkgJson | undefined;
-		const siteFile = sitePkgPath(absPath);
-		if (await pathExists(siteFile)) {
-			const siteRead = await readPkg(siteFile);
-			if (!('error' in siteRead)) sitePkg = siteRead;
-		}
-		prepared.push({
-			id: project.id,
-			path: project.path,
-			absPath,
-			missing: false,
-			privatePkg: !!rootPkg?.private,
-			localVersion: rootPkg?.version ?? null,
-			npmName,
-			rootPkg,
-			rootError,
-			sitePkg,
-			ship: shipScriptTarget(rootPkg, sitePkg),
-		});
-		report('packages', index + 1, listed.length);
+				missing: false,
+				privatePkg: !!rootPkg?.private,
+				localVersion: rootPkg?.version ?? null,
+				npmName: project.npm ?? rootPkg?.name,
+				rootPkg,
+				rootError,
+				sitePkg,
+				ship: shipScriptTarget(rootPkg, sitePkg),
+			};
+		},
+		(done, total) => report('packages', done, total),
+	);
+	for (const row of prepared) {
+		if (row.npmName) names.add(row.npmName);
 	}
 
 	if (only) {
@@ -205,26 +206,37 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 		}
 	}
 
+	const preferOnline = Boolean(options.refreshNpm || options.fetch);
 	const needsGlobalRead = prepared.some((row) => pkgBinNames(row.rootPkg).length > 0);
-	if (needsGlobalRead) report('globals');
-	const globals = needsGlobalRead ? readGlobalVersions(Boolean(options.refreshNpm || options.fetch)) : new Map<string, string>();
 	if (names.size) report('npm', 0, names.size);
-	const owner = options.npmUser !== undefined ? options.npmUser : npmWhoami();
-	const npmByName = await npmLatestMany(names, undefined, (done, total) => report('npm', done, total), {
-		owner,
+	else report('git', 0, prepared.length);
+	if (needsGlobalRead) report('globals');
+	const [npmByName, gitCells, globals] = await Promise.all([
+		names.size
+			? npmLatestMany(names, undefined, (done, total) => report('npm', done, total), { preferOnline })
+			: Promise.resolve(new Map<string, NpmCell>()),
+		mapPool(
+			prepared,
+			GIT_POOL,
+			async (row) => (row.missing ? EMPTY_GIT : readGitAsync(row.absPath, options.fetch === true)),
+			(done, total) => report('git', done, total),
+		),
+		needsGlobalRead
+			? Promise.resolve().then(() => readGlobalVersions(preferOnline))
+			: Promise.resolve(new Map<string, string>()),
+	]);
+	const lifted = await mapPool(prepared, GIT_POOL, async (row) => {
+		if (row.missing) return { name: row.npmName, status: 'none' } satisfies NpmCell;
+		if (row.privatePkg) return { name: row.npmName, status: 'private' } satisfies NpmCell;
+		if (!row.npmName) return { status: 'none' } satisfies NpmCell;
+		const npm = npmByName.get(row.npmName) ?? { name: row.npmName, status: 'none' };
+		if (!row.localVersion || npm.status !== 'ok') return npm;
+		return liftLatestIfVersionExists(row.npmName, row.localVersion, npm, { preferOnline });
 	});
 	const latestByName = new Map<string, string>();
-	for (const [name, cell] of npmByName) {
-		if (cell.status === 'ok' && cell.latest) latestByName.set(name, cell.latest);
+	for (const cell of [...npmByName.values(), ...lifted]) {
+		if (cell.status === 'ok' && cell.latest && cell.name) latestByName.set(cell.name, cell.latest);
 	}
-
-	report('git', 0, prepared.length);
-	const gitCells = await mapPool(
-		prepared,
-		GIT_POOL,
-		async (row) => (row.missing ? EMPTY_GIT : readGitAsync(row.absPath, options.fetch === true)),
-		(done, total) => report('git', done, total),
-	);
 
 	const projects: ProjectStatus[] = [];
 	const sinceJobs: { absPath: string; version: string; branch?: string; status: ProjectStatus }[] = [];
@@ -247,15 +259,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			continue;
 		}
 
-		let npm: NpmCell = row.privatePkg
-			? { name: row.npmName, status: 'private' }
-			: row.npmName
-				? (npmByName.get(row.npmName) ?? { name: row.npmName, status: 'none' })
-				: { status: 'none' };
-		if (!row.privatePkg && row.npmName && row.localVersion && npm.status === 'ok') {
-			npm = await liftLatestIfVersionExists(row.npmName, row.localVersion, npm);
-			if (npm.latest) latestByName.set(row.npmName, npm.latest);
-		}
+		const npm = lifted[index] ?? { status: 'none' };
 
 		const pins: PinEdge[] = [];
 		if (row.rootPkg) {

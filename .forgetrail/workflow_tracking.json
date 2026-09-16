@@ -1831,6 +1831,20 @@
         "libgit2 / isomorphic-git"
       ],
       "status": "active"
+    },
+    {
+      "id": "d133",
+      "timestamp": "2026-09-16T04:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 47,
+      "decision": "Status latest is enrolled-name `npm view` in a pool of 8, in parallel with git. Maintainer search is opt-in. Do not re-read the npm cache to build the result map.",
+      "rationale": "Operator 2026-09-16: board still took over a minute; Publish skipped localhelm with `npm view missing result`. Search can sit ~45s and still miss a name; leftover views plus sequential lifts stacked after that. A cache hole after search looked like a publish failure.",
+      "alternatives_considered": [
+        "Keep blocking maintainer search then leftover view",
+        "Anonymous registry /latest again",
+        "pacote.manifest pool"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

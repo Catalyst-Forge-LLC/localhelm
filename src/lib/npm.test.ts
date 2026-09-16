@@ -108,6 +108,7 @@ describe('npm maintainer search + view', () => {
 		const calls: string[][] = [];
 		const byName = await npmLatestMany(['localhelm', 'solo-pkg'], 2, undefined, {
 			owner: 'acmegeek',
+			ownerSearch: true,
 			run: async (args) => {
 				calls.push([...args]);
 				if (args[0] === 'search') {
@@ -131,6 +132,37 @@ describe('npm maintainer search + view', () => {
 			'search',
 			'maintainer:acmegeek',
 		]);
+	});
+
+	it('views enrolled names without waiting on maintainer search', async () => {
+		clearNpmCache();
+		const calls: string[][] = [];
+		const byName = await npmLatestMany(['localhelm'], 1, undefined, {
+			owner: 'acmegeek',
+			run: async (args) => {
+				calls.push([...args]);
+				if (args[0] === 'view' && args[1] === 'localhelm') {
+					return { status: 0, stdout: '"0.1.20"\n', stderr: '' };
+				}
+				return { status: 1, stdout: '', stderr: `unexpected ${args.join(' ')}` };
+			},
+		});
+		assert.equal(byName.get('localhelm')?.latest, '0.1.20');
+		assert.equal(byName.get('localhelm')?.status, 'ok');
+		assert.equal(calls.filter((args) => args[0] === 'search').length, 0);
+		assert.deepEqual(calls[0]?.slice(0, 3), ['view', 'localhelm', 'version']);
+	});
+
+	it('keeps the view cell when the cache is cleared mid-lookup', async () => {
+		clearNpmCache();
+		const byName = await npmLatestMany(['localhelm'], 1, undefined, {
+			run: async () => {
+				clearNpmCache();
+				return { status: 0, stdout: '"0.1.20"\n', stderr: '' };
+			},
+		});
+		assert.equal(byName.get('localhelm')?.latest, '0.1.20');
+		assert.notEqual(byName.get('localhelm')?.error, 'npm view missing result for localhelm');
 	});
 
 	it('treats npm view 404 as unpublished', async () => {

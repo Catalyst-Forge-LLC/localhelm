@@ -255,7 +255,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 33 — 2026-09-10
 
 - Commit drafts prefer a live **network** Ollama host (dedicated box) over this machine; localhost is fallback. Confirm still opens on fallbacks, then drafts fill in.
-- `GET /api/status` seeds npm latest from `npm search maintainer:<whoami>` (no `npm view --owner`), then leftover `npm view` in a pool of 4. 5‑minute success cache; 30s error cache (Refresh / fetch remotes clears it). Plugin boards load in parallel. Status reads do not lock the header.
+- `GET /api/status` views enrolled names (`npm view <name> version`) in a pool of 8, in parallel with git. Maintainer search is opt-in — it blocked boot (~45s) and could still miss a name (`npm view missing result`). Refresh / fetch remotes pass `--prefer-online`. 5‑minute success cache; 30s error cache. Plugin boards load in parallel. Status reads do not lock the header.
 
 ### Session 34 — 2026-09-10
 
@@ -311,7 +311,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 ### Session 43 — 2026-09-14
 
-- Fetch remotes is one HTTP call and a pool of 8 async `git fetch` (CLI + `/api/fetch`). Status reads git with the same pool: one `--no-optional-locks status` per repo; origin/backup come from `.git/config`. `commitsSinceNpm` is pooled (skips pickaxe unless a bump is still in play). npm latest uses the existing `npmLatestMany` map (maintainer search + leftover view; no second per-row fetch).
+- Fetch remotes is one HTTP call and a pool of 8 async `git fetch` (CLI + `/api/fetch`). Status reads git with the same pool: one `--no-optional-locks status` per repo; origin/backup come from `.git/config`. `commitsSinceNpm` is pooled (skips pickaxe unless a bump is still in play). npm latest views enrolled names in parallel with git (no second per-row fetch).
 - CLI `land --apply` continues after one site fails (exit 1 if any failed). Dashboard already did this one-id-at-a-time.
 - Archive dry-run: `planArchive`. CLI without `--apply` prints hide/restore/skip rows. `POST /api/archive` with `apply: false` plans; omit or `apply: true` writes. Hide/Restore confirm plans first. Park-on-hide stays dashboard-only.
 

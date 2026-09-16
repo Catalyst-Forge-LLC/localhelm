@@ -4,7 +4,7 @@ import type { NpmCell } from './types.js';
 
 const TTL_MS = 5 * 60_000;
 const ERROR_TTL_MS = 30_000;
-const DEFAULT_CONCURRENCY = 4;
+const DEFAULT_CONCURRENCY = 8;
 const SEARCH_LIMIT = '250';
 const VIEW_TIMEOUT_MS = 20_000;
 const SEARCH_TIMEOUT_MS = 45_000;
@@ -12,13 +12,18 @@ const SEARCH_TIMEOUT_MS = 45_000;
 type CacheEntry = { cell: NpmCell; at: number };
 
 const cache = new Map<string, CacheEntry>();
+const inflight = new Map<string, Promise<NpmCell>>();
 
 export type NpmCliResult = { status: number; stdout: string; stderr: string };
 export type NpmCliRun = (args: readonly string[], timeoutMs: number) => Promise<NpmCliResult>;
 
 export type NpmLookupOpts = {
-	/** `npm whoami` user. Seeds latest via `npm search maintainer:<owner>` (there is no `npm view --owner`). */
+	/** `npm whoami` user. Only used when `ownerSearch` is on (there is no `npm view --owner`). */
 	owner?: string | null;
+	/** Block on `npm search maintainer:<owner>`. Off by default — search can take ~45s and still miss names. */
+	ownerSearch?: boolean;
+	/** Pass `--prefer-online` (Refresh / fetch remotes). Default uses the local npm cache. */
+	preferOnline?: boolean;
 	run?: NpmCliRun;
 };
 
@@ -194,19 +199,33 @@ function cellFromView(name: string, result: NpmCliResult): NpmCell {
 	return { name, status: 'error', error: cliMessage(result.stderr, `npm view failed for ${name}`) };
 }
 
-async function viewLatest(name: string, run: NpmCliRun): Promise<NpmCell> {
+function viewArgs(name: string, preferOnline: boolean): string[] {
+	const args = ['view', name, 'version', '--json'];
+	if (preferOnline) args.push('--prefer-online');
+	return args;
+}
+
+async function viewLatest(name: string, run: NpmCliRun, preferOnline = false): Promise<NpmCell> {
 	const hit = cached(name);
 	if (hit) return hit;
-	try {
-		const result = await run(['view', name, 'version', '--json', '--prefer-online'], VIEW_TIMEOUT_MS);
-		return remember(name, cellFromView(name, result));
-	} catch (err) {
-		return remember(name, {
-			name,
-			status: 'error',
-			error: err instanceof Error ? err.message : String(err),
-		});
-	}
+	const pending = inflight.get(name);
+	if (pending) return pending;
+	const work = (async (): Promise<NpmCell> => {
+		try {
+			const result = await run(viewArgs(name, preferOnline), VIEW_TIMEOUT_MS);
+			return remember(name, cellFromView(name, result));
+		} catch (err) {
+			return remember(name, {
+				name,
+				status: 'error',
+				error: err instanceof Error ? err.message : String(err),
+			});
+		} finally {
+			inflight.delete(name);
+		}
+	})();
+	inflight.set(name, work);
+	return work;
 }
 
 async function seedMaintainerLatest(owner: string, run: NpmCliRun): Promise<void> {
@@ -228,7 +247,7 @@ async function seedMaintainerLatest(owner: string, run: NpmCliRun): Promise<void
 }
 
 export async function npmLatest(name: string, opts?: NpmLookupOpts): Promise<NpmCell> {
-	return viewLatest(name, runner(opts));
+	return viewLatest(name, runner(opts), Boolean(opts?.preferOnline));
 }
 
 export async function npmLatestMany(
@@ -239,27 +258,16 @@ export async function npmLatestMany(
 ): Promise<Map<string, NpmCell>> {
 	const list = [...new Set([...names].map((name) => name.trim()).filter(Boolean))];
 	const run = runner(opts);
-	const owner = opts?.owner?.trim();
+	const preferOnline = Boolean(opts?.preferOnline);
+	const owner = opts?.ownerSearch ? opts.owner?.trim() : undefined;
 	if (owner && list.length) await seedMaintainerLatest(owner, run);
-	const missing = list.filter((name) => !cached(name));
-	const already = list.length - missing.length;
-	if (already && onProgress) onProgress(already, list.length);
-	if (missing.length) {
-		await mapPool(
-			missing,
-			concurrency,
-			(name) => viewLatest(name, run),
-			(done) => onProgress?.(already + done, list.length),
-		);
-	} else if (list.length && onProgress && !already) {
-		onProgress(list.length, list.length);
-	}
-	return new Map(
-		list.map((name) => [
-			name,
-			cached(name) ?? { name, status: 'error', error: `npm view missing result for ${name}` },
-		]),
+	const cells = await mapPool(
+		list,
+		concurrency,
+		(name) => viewLatest(name, run, preferOnline),
+		onProgress,
 	);
+	return new Map(list.map((name, i) => [name, cells[i] ?? { name, status: 'error', error: `npm view failed for ${name}` }]));
 }
 
 export type WaitForNpmVersionOpts = {
@@ -296,10 +304,9 @@ export async function waitForNpmVersion(
 
 export async function npmHasVersion(name: string, version: string, opts?: NpmLookupOpts): Promise<NpmCell> {
 	try {
-		const result = await runner(opts)(
-			['view', `${name}@${version}`, 'version', '--json', '--prefer-online'],
-			VIEW_TIMEOUT_MS,
-		);
+		const args = ['view', `${name}@${version}`, 'version', '--json'];
+		if (opts?.preferOnline) args.push('--prefer-online');
+		const result = await runner(opts)(args, VIEW_TIMEOUT_MS);
 		return cellFromView(name, result);
 	} catch (err) {
 		return {
@@ -322,10 +329,15 @@ export function withPublishedLocal(latest: NpmCell, localVersion: string, localI
 	return { ...latest, latest: localVersion };
 }
 
-export async function liftLatestIfVersionExists(name: string, localVersion: string, latest: NpmCell): Promise<NpmCell> {
+export async function liftLatestIfVersionExists(
+	name: string,
+	localVersion: string,
+	latest: NpmCell,
+	opts?: NpmLookupOpts,
+): Promise<NpmCell> {
 	if (latest.status !== 'ok' || !latest.latest) return latest;
 	const cmp = compareSemver(localVersion, latest.latest);
 	if (cmp === null || cmp <= 0) return latest;
-	const has = await npmHasVersion(name, localVersion);
+	const has = await npmHasVersion(name, localVersion, opts);
 	return withPublishedLocal(latest, localVersion, has.status === 'ok');
 }
