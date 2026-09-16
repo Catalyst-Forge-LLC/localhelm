@@ -28,9 +28,33 @@ export function resolveDashboard(root: string): DashboardStart {
 	);
 }
 
-function quoteWinArg(value: string): string {
-	if (!/[ \t"]/.test(value)) return value;
-	return `"${value.replace(/"/g, '\\"')}"`;
+/**
+ * Quote one argv token for `cmd.exe` / CreateProcess (CommandLineToArgvW).
+ * Doubles backslashes that sit before a quote so `\` cannot cancel the closer.
+ */
+export function quoteWinArg(value: string): string {
+	if (value.length === 0) return '""';
+	if (!/[\t\n\v "]/.test(value)) return value;
+	let out = '"';
+	let slashes = 0;
+	for (const ch of value) {
+		if (ch === '\\') {
+			slashes += 1;
+			continue;
+		}
+		if (ch === '"') {
+			out += '\\'.repeat(slashes * 2 + 1);
+			out += '"';
+			slashes = 0;
+			continue;
+		}
+		out += '\\'.repeat(slashes);
+		slashes = 0;
+		out += ch;
+	}
+	out += '\\'.repeat(slashes * 2);
+	out += '"';
+	return out;
 }
 
 /** Windows: one shell string. `shell: true` plus an args array trips Node DEP0190. */
