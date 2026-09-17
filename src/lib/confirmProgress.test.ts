@@ -70,5 +70,20 @@ describe('confirmProgress', () => {
 			}),
 			'Ollama (gemma4:12b on localhost) drafted this. Edit if you want.',
 		);
+		assert.equal(
+			commitDraftProgressHint({
+				ids: ['coldeye'],
+				pending: ['engram', 'x-facts', 'filepress'],
+			}),
+			'Asking Ollama… 2 of 4 (engram).',
+		);
+		assert.equal(
+			commitDraftProgressHint({
+				ids: ['coldeye', 'engram', 'x-facts', 'filepress', 'smellcheck', 'temper-pass', 'haulout', 'localslip'],
+				pending: [],
+				notes: { coldeye: 'Ollama (gemma4:12b on localhost) drafted this. Edit if you want.' },
+			}),
+			'Ollama drafted 1 of 8. Edit if you want.',
+		);
 	});
 });

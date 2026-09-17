@@ -1108,7 +1108,11 @@
 		confirmDraftHint = spec.draftHint ?? '';
 		confirmDrafting = [];
 		confirmDraftNotes = {};
-		confirmDraftIds = [];
+		confirmDraftIds = spec.messages
+			? spec.applyIds?.length
+				? spec.applyIds.slice()
+				: Object.keys(spec.messages)
+			: [];
 		confirmMessageTouched = {};
 		confirmRun = spec.canApply && spec.run ? spec.run : null;
 		confirmAltLabel = spec.altLabel ?? '';
@@ -2322,10 +2326,10 @@
 								{@const syncIds = viewRows
 									.filter((row) => selectedSites[row.id] && siteNeedsEngineSync(row.cells))
 									.map((row) => row.id)}
-								<Tooltip title="Plans Sync → Push → Ship for the checked sites. Confirm in the modal.">
+								<Tooltip title="Plans Sync → Push → Ship for the checked sites. This count is the checkboxes, not Today’s waiting list. Confirm in the modal.">
 									<button class="btn btn-write" disabled={Boolean(busy) || landIds.length === 0} onclick={() => startLand(landIds)}>
 										<Icon icon="lucide:plane-landing" />
-										Land{landIds.length ? ` (${landIds.length})` : ''}
+										{landIds.length ? `Land checked (${landIds.length})` : 'Land'}
 									</button>
 								</Tooltip>
 								<Tooltip title="Retargets getfilepress and merges headers for the checked sites that are behind. Confirm in the modal.">
@@ -3021,10 +3025,14 @@
 	itemKeys={confirmItemKeys}
 	itemPhases={confirmPhases}
 	failNote={error}
-	bind:messageById={confirmMessages}
+	messageById={confirmMessages}
 	draftHint={confirmDraftHint}
 	draftingIds={confirmDrafting}
 	draftNoteById={confirmDraftNotes}
+	plannedDraftIds={confirmDraftIds}
+	onmessagechange={(id, text) => {
+		confirmMessages = { ...confirmMessages, [id]: text };
+	}}
 	ondraft={(id) => {
 		confirmMessageTouched = { ...confirmMessageTouched, [id]: true };
 	}}

@@ -141,8 +141,9 @@ export function createFleetWrites(host: DashboardJobHost) {
 				})) as { rows: CommitPlanRow[] };
 				const row = data.rows[0];
 				if (!row || !host.confirmOpen()) continue;
-				if (!host.confirmMessageTouched()[id] && row.message) {
-					host.setConfirmMessages({ ...host.confirmMessages(), [id]: row.message });
+				const text = row.message?.trim();
+				if (!host.confirmMessageTouched()[id] && text) {
+					host.setConfirmMessages({ ...host.confirmMessages(), [id]: text });
 				}
 				const draftNote =
 					row.suggestSource === 'ollama' && row.suggestModel

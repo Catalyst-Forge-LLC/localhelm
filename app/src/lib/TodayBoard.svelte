@@ -351,7 +351,7 @@
 								Land does Sync, then Push and Ship.
 							{/if}
 						{:else if filepressBoard}
-							{filepressBoard.rows.length} sites · none waiting on Land.
+							{filepressBoard.rows.length} sites · none waiting on Land. Sites Land is the rows you check, not this list.
 						{:else if !pluginsReady}
 							Reading sites…
 						{:else}

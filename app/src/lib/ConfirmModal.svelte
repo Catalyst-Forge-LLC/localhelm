@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { commitDraftProgressHint } from './confirmProgress';
+	import { commitDraftProgressHint, commitDraftSubjectIds } from './confirmProgress';
 	import { buildConfirmRoster, confirmCountText, confirmRosterSelected } from './confirmRoster';
 	import Icon from './Icon.svelte';
 
@@ -27,12 +27,14 @@
 		draftHint?: string;
 		draftingIds?: string[];
 		draftNoteById?: Record<string, string>;
+		plannedDraftIds?: string[];
 		children?: Snippet;
 		onconfirm: (includedIds: string[]) => void;
 		onalt?: (includedIds: string[]) => void;
 		oncancel?: () => void;
 		onstop?: () => void;
 		ondraft?: (id: string) => void;
+		onmessagechange?: (id: string, text: string) => void;
 		altLabel?: string;
 		/** Multi-id apply is running; Stop finishes the current item and skips the rest. */
 		canStop?: boolean;
@@ -55,16 +57,18 @@
 		applyIds = [],
 		excludedIds = $bindable<string[]>([]),
 		failNote = '',
-		messageById = $bindable<Record<string, string>>({}),
+		messageById = {},
 		draftHint = '',
 		draftingIds = [],
 		draftNoteById = {},
+		plannedDraftIds = [],
 		children,
 		onconfirm,
 		onalt,
 		oncancel,
 		onstop,
 		ondraft,
+		onmessagechange,
 		altLabel = '',
 		canStop = false,
 		stopping = false,
@@ -91,7 +95,14 @@
 
 	const selectedId = $derived(groups ? confirmRosterSelected(groups, pinned) : null);
 	const selected = $derived(groups?.find((group) => group.id === selectedId) ?? null);
-	const draftIds = $derived(Object.keys(messageById));
+	const draftIds = $derived(
+		commitDraftSubjectIds({
+			planned: plannedDraftIds,
+			pending: draftingIds,
+			messages: messageById,
+			notes: draftNoteById,
+		}),
+	);
 	const draftId = $derived(selectedId ?? draftIds[0] ?? '');
 	const applyPool = $derived(applyIds.length ? applyIds : (groups?.map((group) => group.id) ?? []));
 	const includedApply = $derived(applyPool.filter((id) => !excludedIds.includes(id)));
@@ -113,7 +124,7 @@
 	const liveDraftHint = $derived(
 		draftingIds.length || Object.keys(draftNoteById).length
 			? commitDraftProgressHint({
-					ids: draftIds.length ? draftIds : draftingIds,
+					ids: draftIds,
 					pending: draftingIds,
 					selected: draftId || undefined,
 					notes: draftNoteById,
@@ -352,7 +363,7 @@
 				disabled={busy}
 				value={messageById[draftId] ?? ''}
 				oninput={(event) => {
-					messageById = { ...messageById, [draftId]: event.currentTarget.value };
+					onmessagechange?.(draftId, event.currentTarget.value);
 					ondraft?.(draftId);
 				}}
 			></textarea>
