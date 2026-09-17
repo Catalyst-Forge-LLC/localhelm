@@ -243,6 +243,10 @@ describe('whyNotPush', () => {
 		assert.equal(whyNotPush(git({ ahead: 0 })), 'not ahead');
 		assert.equal(whyNotPush(git({ ahead: 1, behind: 1 })), 'diverged');
 		assert.equal(whyNotPush(git({ ahead: 1, origin: undefined })), 'no origin');
+		assert.equal(
+			whyNotPush(git({ ahead: 1, origin: undefined, backup: 'D:/git-mirrors/x.git' })),
+			'backup only',
+		);
 	});
 });
 
@@ -259,6 +263,15 @@ describe('whyNotPublish', () => {
 		assert.equal(
 			whyNotPublish(row({ unpublishedAhead: true, git: git({ ahead: 1, origin: undefined }) })),
 			'no origin',
+		);
+		assert.equal(
+			whyNotPublish(
+				row({
+					unpublishedAhead: true,
+					git: git({ ahead: 1, origin: undefined, backup: 'D:/git-mirrors/x.git' }),
+				}),
+			),
+			'backup only',
 		);
 	});
 

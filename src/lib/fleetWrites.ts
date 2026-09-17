@@ -7,6 +7,8 @@ export type GateGit = {
 	busy?: string;
 	detached?: boolean;
 	origin?: string;
+	/** IngotVault / local mirror. Never treated as origin. */
+	backup?: string;
 	branch?: string;
 	ahead: number | null;
 	behind: number | null;
@@ -29,7 +31,7 @@ export function whyNotPush(git: GateGit): string | undefined {
 	if (!git.repo) return 'no git';
 	if (git.detached) return 'detached';
 	if (git.busy) return git.busy;
-	if (!git.origin) return 'no origin';
+	if (!git.origin) return git.backup ? 'backup only' : 'no origin';
 	if (!git.branch) return 'no branch';
 	if (git.ahead == null || git.behind == null) return 'no upstream';
 	if (git.behind > 0) return 'diverged';
@@ -69,7 +71,7 @@ export function whyNotPublish(row: PublishGateRow, kind: BumpKind = 'patch'): st
 
 	const needsPush = needsBump || (row.git.ahead ?? 0) > 0;
 	if (needsPush) {
-		if (!row.git.origin) return 'no origin';
+		if (!row.git.origin) return row.git.backup ? 'backup only' : 'no origin';
 		if (!row.git.branch) return 'no branch';
 		if (row.git.ahead == null || row.git.behind == null) return 'no upstream';
 		if (row.git.behind > 0) return 'diverged';

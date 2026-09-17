@@ -1629,7 +1629,7 @@
 		if (!row.git.repo) return 'not a git repo';
 		if (row.git.error) return plainGitError(row.git.error);
 		const parts = [row.git.branch ?? 'detached', row.git.dirty ? 'dirty' : 'clean'];
-		if (!row.git.origin) parts.push('no origin');
+		if (!row.git.origin) parts.push(row.git.backup ? 'backup only' : 'no origin');
 		else if (!row.git.ahead && !row.git.behind) parts.push('in sync');
 		return parts.join(' · ');
 	}
@@ -1680,7 +1680,7 @@
 					: 'Local version is ahead of npm. Publish will push if needed, then npm publish.',
 			});
 		}
-		if ((row.git.ahead ?? 0) > 0) {
+		if ((row.git.ahead ?? 0) > 0 && row.git.origin) {
 			const blocked = whyNotPush(row.git);
 			out.push({
 				text: `${commitCountLabel(row.git.ahead) || row.git.ahead} to push`,
@@ -1765,6 +1765,9 @@
 
 	function blockedPushTitle(row: Project): string {
 		const blocked = whyNotPush(row.git);
+		if (blocked === 'backup only') {
+			return 'This checkout tracks backup (IngotVault), not origin. Helm never pushes the mirror. Add an origin remote if you want Push.';
+		}
 		if (blocked) return `Push is blocked (${blocked}). Fix that, then this button turns on.`;
 		return needActionTitle('push', row);
 	}
@@ -1792,7 +1795,7 @@
 				disabled: true,
 			});
 		}
-		if ((row.git.ahead ?? 0) > 0 && !acts.some((act) => act.id === 'push')) {
+		if ((row.git.ahead ?? 0) > 0 && row.git.origin && !acts.some((act) => act.id === 'push')) {
 			const pushAct: NeedAction = {
 				id: 'push',
 				label: fleetWriteLabel('push', row),
