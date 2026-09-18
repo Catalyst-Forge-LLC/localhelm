@@ -21,6 +21,7 @@
 		needCommitIds,
 		needPublishIds,
 		needPushIds,
+		noFleet = false,
 		attentionEmpty,
 		filteredEmpty,
 		filteredAttentionRows,
@@ -61,6 +62,7 @@
 		needFilter: NeedFilter;
 		needFilterCounts: { all: number; publish: number; push: number; pins: number };
 		needBulkWrites: boolean;
+		noFleet?: boolean;
 		needCommitIds: string[];
 		needPublishIds: string[];
 		needPushIds: string[];
@@ -137,10 +139,13 @@
 				<p class="hint">
 					{#if !statusReady}
 						Reading fleet…
+					{:else if noFleet}
+						Nothing enrolled yet. Scan the folder that holds your repos, tick the ones you keep, then write.
 					{:else}
 						Fleet writes you can confirm. Looks, below, is Ports facts. Lease claims a missing site slip.
 					{/if}
 				</p>
+				{#if !noFleet}
 				<div class="need-filters" role="group" aria-label="Needs you filter">
 					{#each [
 						{ id: 'all' as const, label: 'All' },
@@ -160,8 +165,18 @@
 						</button>
 					{/each}
 				</div>
+				{/if}
 			</div>
-			{#if needBulkWrites}
+			{#if noFleet && statusReady}
+				<div class="group-buttons">
+					<Tooltip title="Scan a folder and pick which projects to enroll. That write is the confirm.">
+						<button class="btn btn-write" disabled={busy} onclick={() => onOpenAdd()}>
+							<Icon icon="lucide:folder-plus" />
+							Add projects
+						</button>
+					</Tooltip>
+				</div>
+			{:else if needBulkWrites}
 				<div class="group-buttons">
 					{#if needCommitIds.length}
 						<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
@@ -193,6 +208,10 @@
 		<div class="panel-body">
 			{#if !statusReady}
 				<p class="dim small"><CellWait label="Reading fleet…" showLabel /></p>
+			{:else if noFleet}
+				<p class="quiet-banner">
+					No fleet yet. Serve from the folder that contains your repos, then Add projects. LocalSlip and FilePress are optional later.
+				</p>
 			{:else if attentionEmpty}
 				<p class="quiet-banner">All quiet on the fleet. Looks, FilePress, and LocalSlip stay in the other panes.</p>
 			{:else if filteredEmpty}
@@ -291,7 +310,9 @@
 			<div>
 				<h2>Looks</h2>
 				<p class="hint">
-					{#if portLookCards.length}
+					{#if noFleet}
+						Ports facts after you enroll. LocalSlip is optional.
+					{:else if portLookCards.length}
 						{lookFactCount} Ports fact{lookFactCount === 1 ? '' : 's'}
 						{#if lookFactCount !== portLookCards.length}
 							on {portLookCards.length} row{portLookCards.length === 1 ? '' : 's'}
@@ -306,8 +327,9 @@
 		<div class="panel-body">
 			{#if !pluginsReady}
 				<p class="dim small"><CellWait label="Reading looks…" showLabel /></p>
+			{:else if noFleet}
+				<p class="dim small">Looks stays empty until a project is on the fleet.</p>
 			{:else if !portLookCards.length}
-				<p class="dim small">Nothing to look at. Stacks and down leases stay on Ports.</p>
 			{:else}
 				<ul class="need-list">
 					{#each portLookCards as look (look.id)}
@@ -365,6 +387,8 @@
 							{filepressBoard.rows.length} sites · none waiting on Land. Sites Land is the rows you check, not this list.
 						{:else if !pluginsReady}
 							Reading sites…
+						{:else if noFleet}
+							Optional. FilePress sites show up after you enroll a site project.
 						{:else}
 							No FilePress plugin loaded.
 						{/if}
@@ -391,7 +415,9 @@
 							</button>
 						</Tooltip>
 					{/if}
+					{#if !noFleet}
 					<button type="button" class="btn btn-sm" onclick={() => onSetTab('filepress')}><Icon icon="lucide:arrow-right" /> FilePress Sites</button>
+					{/if}
 				</div>
 			</div>
 			<div class="panel-body">
@@ -420,6 +446,8 @@
 					<p class="dim small">Open FilePress Sites for the full board.</p>
 				{:else if !pluginsReady}
 					<p class="dim small"><CellWait label="Reading sites…" showLabel /></p>
+				{:else if noFleet}
+					<p class="dim small">Add a site project when you have one. Not required to start.</p>
 				{:else}
 					<p class="dim small">Enroll the filepress checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 				{/if}
@@ -442,12 +470,16 @@
 							{/if}
 						{:else if !pluginsReady}
 							Reading ports…
+						{:else if noFleet}
+							Optional. Ports show up after you enroll LocalSlip.
 						{:else}
 							No Ports plugin loaded.
 						{/if}
 					</p>
 				</div>
+				{#if !noFleet}
 				<button type="button" class="btn btn-sm" onclick={() => onSetTab('localslip')}><Icon icon="lucide:arrow-right" /> LocalSlip Ports</button>
+				{/if}
 			</div>
 			<div class="panel-body">
 				{#if leaseBoard}
@@ -497,6 +529,8 @@
 					</div>
 				{:else if !pluginsReady}
 					<p class="dim small"><CellWait label="Reading ports…" showLabel /></p>
+				{:else if noFleet}
+					<p class="dim small">Add LocalSlip when you want named ports. Not required to start.</p>
 				{:else}
 					<p class="dim small">Enroll the localslip checkout to expose <code>localhelm.plugin.mjs</code>.</p>
 				{/if}

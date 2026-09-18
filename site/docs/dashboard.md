@@ -7,7 +7,9 @@ localhelm serve
 localhelm serve --host 127.0.0.1 --port 4321
 ```
 
-Default bind is **all interfaces** on **4321**. `--host` / `--hosts` (Vite-style, with or without an address) also means all interfaces. `--host 127.0.0.1` stays loopback-only. The checkout dashboard (`app/`) calls the same library as the CLI.
+Run serve from the folder that contains your repos (or a child of the fleet file). Default bind is **all interfaces** on **4321**. `--host` / `--hosts` (Vite-style, with or without an address) also means all interfaces. `--host 127.0.0.1` stays loopback-only. The checkout dashboard (`app/`) calls the same library as the CLI.
+
+An empty board is not “all quiet.” Today and the header say **No fleet** and offer **Add projects**. Sites and Ports stay optional until you enroll those checkouts.
 
 ![LocalHelm dashboard showing Today needs and FilePress sites](/dashboard.jpg "Today: fleet writes you can confirm, and FilePress sites waiting on Land")
 

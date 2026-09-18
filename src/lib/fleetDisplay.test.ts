@@ -119,6 +119,15 @@ describe('fleetDisplay', () => {
 			}),
 			'Fleet 43 · remotes fetched 9:41:07 PM · 3 could not be read · npm acme',
 		);
+		assert.equal(
+			bridgeIdleLine({
+				fleetCount: 0,
+				fetchedAt: null,
+				npmUser: null,
+				noFleet: true,
+			}),
+			'No fleet yet · Add projects on Today',
+		);
 	});
 
 	it('maps gauge need to a 0..1 arc share', () => {

@@ -207,6 +207,7 @@ Internal / spec terms (binnacle, keel, conn) may appear in docs and class names.
 - Separator: ` · `
 - Order: `Fleet {N}` · remotes · npm
 - `N` = enrolled projects in the digest, **excluding** archived/hidden rows. If any are hidden, append `· {H} hidden` after `Fleet {N}`.
+- **No fleet** (no manifest, or `projects: []`): `No fleet yet · Add projects on Today`. Do not print `Fleet 0` plus remotes/npm. Situation lamp is **No fleet** (opens Add), not All quiet.
 - remotes: `remotes fetched {fetchedAt}` (existing `toLocaleTimeString` form) or `remotes not fetched this session`. If `staleRemotes` is non-empty, append `· {S} could not be read`.
 - npm: `npm {user}` or `npm not signed in`.
 
@@ -285,7 +286,7 @@ These prevent the most likely wrong builds. Treat them as acceptance, not advice
 | Fork | Default | Alternative |
 | ---- | ------- | ----------- |
 | Pull / Push placement | Stay in **conn** (also remain on Fleet) | Fleet-tab toolbar only |
-| Empty digest | **All quiet** lamp after `statusReady` | Leave binnacle blank |
+| Empty digest | **All quiet** lamp after `statusReady` when a fleet exists | **No fleet** lamp + Add when nothing is enrolled |
 | Fetch remotes | Stay in **locker** | Second conn control |
 | Narrow stack order | Ident → Situation → Conn → Keel | Ident + Conn, then lamps, then keel |
 | Bay framing | **Hairline dividers** between bays | Corner ticks on each bay |

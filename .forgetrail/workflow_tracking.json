@@ -1941,6 +1941,20 @@
         "Claim the FilePress folder name instead of name-site"
       ],
       "status": "active"
+    },
+    {
+      "id": "d140",
+      "timestamp": "2026-09-18T20:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 50,
+      "decision": "Blank-slate onboarding is dashboard-first. Empty fleet (no manifest or zero rows) is No fleet + Add projects, not All quiet. Docs lead with serve from the repo parent; CLI enroll is optional.",
+      "rationale": "Operator 2026-09-18: a friend will try a clean install. Today’s All quiet looked like success. Minimize CLI except install and serve.",
+      "alternatives_considered": [
+        "Auto-open Add on first load",
+        "Keep CLI scan/enroll as the hero in README",
+        "Guided tour"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

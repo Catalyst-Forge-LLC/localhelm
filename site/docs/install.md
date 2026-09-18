@@ -12,25 +12,25 @@ pnpm add -g localhelm
 
 or `npm i -g localhelm`.
 
-Then:
+Stand in the folder that **contains** your repos (the shared parent), then:
 
 ```bash
-localhelm scan ..
-localhelm enroll ../my-cli --apply
 localhelm serve
 ```
 
-The dashboard is `http://127.0.0.1:4321`. The fleet file is `localhelm.fleet.json` at the shared parent of the repos you enroll.
+Open `http://127.0.0.1:4321`. **Add projects**, scan that folder, tick the ones you keep, then write. The fleet file (`localhelm.fleet.json`) is written next to those repos. Serve from that same tree later so the board finds it.
+
+The CLI can do the same enroll (`localhelm scan .` then `enroll … --apply`) if you prefer a terminal.
 
 ## From a checkout
 
 ```bash
 pnpm install
 pnpm build
-pnpm cli status
+pnpm serve
 ```
 
-The dashboard from the tree is `pnpm serve`. The published CLI is `localhelm serve`.
+The published CLI is `localhelm serve`.
 
 ## Site and docs
 

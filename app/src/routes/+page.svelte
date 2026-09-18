@@ -105,7 +105,7 @@
 	let portSource = $state<string | null>(null);
 	let fetchedAt = $state<string | null>(null);
 
-	let scanRoot = $state('..');
+	let scanRoot = $state('.');
 	let candidates = $state<ScanListRow[]>([]);
 	let addOpen = $state(false);
 	let selectedScan = $state<Record<string, boolean>>({});
@@ -350,6 +350,7 @@
 	const needBulkWrites = $derived(
 		needCommitIds.length + needPublishIds.length + needPushIds.length > 0,
 	);
+	const noFleet = $derived(statusReady && (!inventory || inventory.projects.length === 0));
 	const needChips = $derived(
 		inventory
 			? headerNeedChips({
@@ -1964,9 +1965,13 @@
 		onPush={() => startPush()}
 		onToggleActivity={() => setActivityOpen(!activityOpen)}
 		onWake={() => setActivityOpen(true)}
+		{noFleet}
 		onLamp={(filter) => {
 			setTab('today');
 			needFilter = filter;
+		}}
+		onAdd={() => {
+			addOpen = true;
 		}}
 		onGauge={(id) => {
 			if (id === 'fleet') setTab('fleet');
@@ -2028,6 +2033,7 @@
 				{pluginsReady}
 				{needFilterCounts}
 				{needBulkWrites}
+				{noFleet}
 				{needCommitIds}
 				{needPublishIds}
 				{needPushIds}
@@ -2970,6 +2976,7 @@
 		<input id="scan-root" bind:value={scanRoot} spellcheck="false" />
 		<button class="btn" disabled={Boolean(busy)} onclick={() => scan()}><Icon icon="lucide:search" /> Scan</button>
 	</div>
+	<p class="dim small">Starts as the folder you ran <code>localhelm serve</code> from. Point it at the parent of your repos if they sit one level up.</p>
 	{#if scanCandidates.length}
 		<p class="hint">{scanCandidates.length} not enrolled yet. Enrolled folders stay off this list.</p>
 		<ul class="candidates">
@@ -3013,7 +3020,7 @@
 	{:else if candidates.length}
 		<p class="dim small">Everything in this scan is already enrolled.</p>
 	{:else if !busy}
-		<p class="dim small">Scan a folder to see candidates that are not enrolled yet.</p>
+		<p class="dim small">Scan to list folders that are not enrolled yet. Nothing joins until you Add to fleet.</p>
 	{/if}
 </AddProjectsModal>
 

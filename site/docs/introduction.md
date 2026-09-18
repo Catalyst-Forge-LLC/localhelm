@@ -4,7 +4,7 @@ title: Introduction
 
 **LocalHelm** is the control panel for local development. The local fleet is the apps and sites you keep, including tools that never publish. Ports sit on the same board when [LocalSlip](https://localslip.dev) is present.
 
-You have a folder of repos. `git status` in one of them answers that repo. Scan, enroll, and `status` work with only LocalHelm installed.
+You have a folder of repos. `git status` in one of them answers that repo. Serve the board, Add projects, and read status with only LocalHelm installed.
 
 ## Observations versus writes
 
@@ -31,9 +31,10 @@ Failed remote checks are errors or stale warnings. They are not a green board.
 ## What it is
 
 - A fleet file (`localhelm.fleet.json`) you chose. Nothing auto-enrolls from a disk walk
+- Dashboard **Add projects** (or CLI `enroll --apply`) is the confirm
 - `localhelm status` for local version, npm latest, git, and pins
 - Writes print a plan. `--apply` is the confirm. Never `--force`
-- A dashboard on **4321** (`localhelm serve`) that calls the same library
+- A dashboard on **4321** (`localhelm serve`) that calls the same library. Serve from the fleet’s folder.
 
 It does not claim ports. Start and stop on the board ask [LocalSlip](https://localslip.dev). Sites jobs need a FilePress plugin. Those tabs stay empty without those tools.
 
@@ -49,5 +50,5 @@ The domain never serves your apps or sites.
 ## Next
 
 - [Install](/docs/install): npm or a checkout
-- [Quick start](/docs/quick-start): scan, enroll, status, serve
+- [Quick start](/docs/quick-start): serve, Add projects, optional CLI
 - [Commands](/docs/commands): full reference

@@ -17,39 +17,22 @@ pnpm add -g localhelm
 # or from a checkout:
 pnpm install && pnpm build
 
-localhelm scan ..
-localhelm enroll ../my-cli ../my-lib --apply
+# From the folder that contains your repos:
+localhelm serve
+```
+
+Open `http://127.0.0.1:4321`. **Add projects**, scan that folder (`.` is where you ran serve), tick the ones you keep, then write. Nothing auto-enrolls. LocalSlip and FilePress are optional later.
+
+The same actions exist on the CLI if you want them. `scan` never writes. Other commands print a plan; `--apply` writes. `publish`, `push`, `ship`, and `global` need named ids. Never `--force`.
+
+```bash
+localhelm scan .
+localhelm enroll ./my-cli ./my-lib --apply
 localhelm status
-localhelm status my-cli                 # one enrolled id
-localhelm status --json
-localhelm deps
-localhelm bump my-cli patch             # plan; --apply writes
-localhelm fetch
-localhelm pull                          # plan; --apply is ff-only
-localhelm push                          # plan every enrolled origin
-localhelm push my-cli my-lib --apply    # named ids; never --force
-localhelm export                        # plan; --apply writes JSON
-localhelm ready                         # already unpublished-ahead
-localhelm publish my-lib                # plan
-localhelm auth                          # npm whoami + token hint
-localhelm publish my-lib --apply
-localhelm publish my-lib --apply --otp 123456
-localhelm ship x-facts catalyst-forge   # plan pnpm ship (wrangler / Pages)
-localhelm ship x-facts --apply          # named ids; never --force
-localhelm global localhelm              # plan pnpm add -g for a CLI
-localhelm global localhelm --apply      # named ids; never --force
-localhelm cascade my-lib                # plan pin updates; --apply writes
-localhelm plugins
-localhelm plugin filepress              # FilePress plugin, if present
-localhelm plugin filepress sync
-localhelm plugin xfacts                 # xFacts labels board, if enrolled
-localhelm serve                         # :4321 on all interfaces
 localhelm serve --free-port             # stop the named pid on that port, then serve
 ```
 
-`scan` never writes. Other commands print a plan; `--apply` writes. `publish`, `push`, `ship`, and `global` need named ids. Never `--force`.
-
-`localhelm serve` opens the dashboard on port 4321. A global install runs the packaged board (SSR deps are bundled; no `app/` needed). A checkout still uses Vite. If that port is already taken, serve names the pid and stops. Re-run with `--free-port` to stop it and bind. Never `--force`. Writes stay on loopback.
+`localhelm serve` opens the dashboard on port 4321. A global install runs the packaged board (SSR deps are bundled; no `app/` needed). A checkout still uses Vite. Serve from the same tree as `localhelm.fleet.json` (or a child) or the board stays empty. If that port is already taken, serve names the pid and stops. Re-run with `--free-port` to stop it and bind. Never `--force`. Writes stay on loopback.
 
 Skip folders with `.localhelmignore` at the workspace, or `~/.localhelm/ignore`.
 

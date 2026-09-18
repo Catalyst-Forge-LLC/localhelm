@@ -94,7 +94,7 @@
 					</Tooltip>
 				</p>
 			{:else if statusReady}
-				<p class="hint">No fleet yet — open the Fleet tab, scan a folder, then enroll.</p>
+				<p class="hint">No fleet yet — Add projects on Today or Fleet, scan the folder that holds your repos, then write.</p>
 			{/if}
 			{#if serveLine}<p class="hint">{serveLine}</p>{/if}
 			<p class="hint">

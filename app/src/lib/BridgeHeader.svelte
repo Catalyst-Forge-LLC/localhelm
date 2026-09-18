@@ -30,6 +30,8 @@
 		onWake,
 		onLamp,
 		onGauge,
+		onAdd,
+		noFleet = false,
 		children,
 	}: {
 		busy: string;
@@ -55,6 +57,8 @@
 		onWake: () => void;
 		onLamp: (filter: NeedFilter) => void;
 		onGauge: (id: BridgeGauge['id']) => void;
+		onAdd?: () => void;
+		noFleet?: boolean;
 		children: import('svelte').Snippet;
 	} = $props();
 
@@ -64,7 +68,7 @@
 		if (statusNote) return statusNote.endsWith('…') ? statusNote : `${statusNote}…`;
 		if (error) return error;
 		if (statusReady) {
-			return bridgeIdleLine({ fleetCount, hiddenCount, fetchedAt, staleCount, npmUser });
+			return bridgeIdleLine({ fleetCount, hiddenCount, fetchedAt, staleCount, npmUser, noFleet });
 		}
 		return 'Reading fleet…';
 	});
@@ -120,6 +124,16 @@
 						</button>
 					{/each}
 				</div>
+			{:else if statusReady && noFleet}
+				<button
+					type="button"
+					class="lamp quiet"
+					aria-label="No fleet yet — add projects"
+					onclick={() => onAdd?.()}
+				>
+					<span class="lamp-dot" aria-hidden="true"></span>
+					<span class="lamp-word">No fleet</span>
+				</button>
 			{:else if statusReady}
 				<button
 					type="button"

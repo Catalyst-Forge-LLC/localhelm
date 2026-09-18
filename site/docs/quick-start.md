@@ -2,25 +2,19 @@
 title: Quick start
 ---
 
-## Standalone first
+## Open the board
 
-With only LocalHelm installed:
-
-```bash
-localhelm scan ..
-localhelm enroll ../my-cli ../my-lib --apply
-localhelm status
-```
-
-`scan` proposes folders. Nothing joins until `--apply`. `status` reports dirty trees, local versus published versions, and pin disagreements (a local `package.json` that does not match what dependents or npm last said). That is useful without LocalSlip, FilePress, or xFacts.
-
-## Open the dashboard
+With only LocalHelm installed, stand in the folder that contains your repos:
 
 ```bash
 localhelm serve
 ```
 
-Then visit `http://127.0.0.1:4321` for the operator board. The **Deck** (`/deck`) is the phone tile grid. A phone hitting `/` on LAN or Tailscale lands there. Write APIs stay on loopback.
+Visit `http://127.0.0.1:4321`. Today says **No fleet** until you enroll. **Add projects**, scan `.` (the folder you ran serve from), tick the ones you keep, then write. Nothing joins until that confirm.
+
+You do not need LocalSlip, FilePress, or a terminal enroll to get a useful Fleet and Today.
+
+The **Deck** (`/deck`) is the phone tile grid. A phone hitting `/` on LAN or Tailscale lands there. Write APIs stay on loopback.
 
 ## Optional integrations
 
@@ -30,14 +24,28 @@ Then visit `http://127.0.0.1:4321` for the operator board. The **Deck** (`/deck`
 | FilePress plugin | Sites jobs (`plugin filepress`) | No |
 | xFacts plugin | Labels board for enrolled AppFacts | No |
 
+Those tabs stay empty until you enroll the matching checkout. They are not missing homework on a new board.
+
+## Same thing from a terminal
+
+```bash
+localhelm scan .
+localhelm enroll ./my-cli ./my-lib --apply
+localhelm status
+```
+
+`scan` proposes folders. Nothing joins until `--apply`. `status` reports dirty trees, local versus published versions, and pin disagreements.
+
 ## A write is a plan
+
+On the board, each gold button shows a plan, then Confirm writes. From a terminal:
 
 ```bash
 localhelm bump my-cli patch
 localhelm bump my-cli patch --apply
 ```
 
-Mutating commands print what they would do. Pass `--apply` to write. `publish` and `push` require named project ids. Never `--force`.
+`publish` and `push` require named project ids. Never `--force`.
 
 ## See dependents
 

@@ -11,17 +11,15 @@ See which local projects need attention in one place: uncommitted work, package 
 
 ![LocalHelm dashboard showing Today needs and FilePress sites](/dashboard.jpg "Today: fleet writes you can confirm, and FilePress sites waiting on Land")
 
-Scan a folder, enroll the ones you keep, then read git, npm, and dependents. LocalSlip and FilePress are optional add-ons, not a suite install.
+Install, stand in the folder that contains your repos, then `localhelm serve`. On the board, **Add projects**, scan, tick, and write. LocalSlip and FilePress are optional add-ons, not a suite install.
 
 ```text
-localhelm scan ..
-localhelm enroll ../my-cli ../my-lib --apply
-localhelm status
+localhelm serve
 ```
 
-`scan` never writes. `status` is a read. Other commands print a plan. `--apply` writes. `publish`, `push`, and `ship` need named ids. Never `--force`.
+`scan` never writes. `status` is a read. Other commands print a plan. `--apply` writes. `publish`, `push`, and `ship` need named ids. Never `--force`. The CLI can enroll the same way if you want a terminal.
 
-`localhelm serve` opens the operator board at `http://127.0.0.1:4321`. Writes stay on loopback. The **Deck** at `/deck` is the phone tile grid.
+`localhelm serve` opens the operator board at `http://127.0.0.1:4321`. Serve from the fleet’s parent folder. Writes stay on loopback. The **Deck** at `/deck` is the phone tile grid.
 
 [LocalSlip](https://localslip.dev) is the slip. LocalHelm is the wheel.
 
