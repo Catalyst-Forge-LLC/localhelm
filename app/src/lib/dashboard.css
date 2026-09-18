@@ -44,9 +44,26 @@
 	.bridge-bays {
 		display: grid;
 		grid-template-columns: auto minmax(12rem, 1fr) auto auto;
+		grid-template-areas: 'ident situation scope conn';
 		align-items: stretch;
 		gap: 0.7rem;
 		min-height: 3.2rem;
+	}
+
+	.bridge-ident {
+		grid-area: ident;
+	}
+
+	.bridge-situation {
+		grid-area: situation;
+	}
+
+	.bridge-scope {
+		grid-area: scope;
+	}
+
+	.bridge-conn {
+		grid-area: conn;
 	}
 
 	.bridge-ident,
@@ -65,6 +82,7 @@
 		align-items: stretch;
 		justify-content: center;
 		gap: 0.35rem;
+		overflow: hidden;
 	}
 
 	.bridge-scope {
@@ -81,6 +99,15 @@
 	}
 
 	.bridge-conn .actions {
+		justify-content: flex-end;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.conn-desk {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
 		justify-content: flex-end;
 		gap: 0.5rem;
 	}
@@ -142,22 +169,32 @@
 	}
 
 	.bridge h1 {
-		font-size: 1.85rem;
-		line-height: 0.95;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		margin: 0;
+		font-size: inherit;
+		line-height: 1;
 		color: #f2f0e8;
-		text-shadow: 0 0 16px rgb(126 244 255 / 0.28);
 	}
 
 	.bridge h1 .name-local {
 		font-family: var(--font-tech);
 		font-weight: 600;
-		letter-spacing: 0.06em;
+		font-size: 0.68rem;
+		letter-spacing: 0.22em;
+		text-transform: lowercase;
+		color: var(--cyan);
+		text-shadow: 0 0 10px var(--cyan-glow);
 	}
 
 	.bridge h1 .name-helm {
 		font-family: var(--font-mark);
 		font-weight: 700;
-		letter-spacing: 0.01em;
+		font-size: 1.42rem;
+		letter-spacing: 0.08em;
+		line-height: 0.86;
+		text-shadow: 0 0 16px rgb(126 244 255 / 0.28);
 	}
 
 	.heading-line {
@@ -381,7 +418,7 @@
 	.brand {
 		display: flex;
 		align-items: center;
-		gap: 0.85rem;
+		gap: 0.65rem;
 		min-width: 0;
 	}
 
@@ -390,7 +427,7 @@
 	}
 
 	.mark {
-		width: 4.25rem;
+		width: 3.4rem;
 		height: auto;
 		flex-shrink: 0;
 	}
@@ -743,27 +780,82 @@
 		color: var(--gold-soft);
 	}
 
-	@media (max-width: 48rem) {
+	@media (max-width: 64rem) {
+		header.bridge {
+			padding: 0.35rem 0.75rem;
+		}
+
 		.bridge-bays {
-			grid-template-columns: 1fr;
+			grid-template-columns: auto minmax(0, 1fr) auto;
+			grid-template-areas: 'ident situation conn';
+			gap: 0.45rem;
 			min-height: 0;
+		}
+
+		.bridge-scope,
+		.conn-desk,
+		.conn-wake {
+			display: none;
 		}
 
 		.bridge-ident,
 		.bridge-situation,
-		.bridge-scope,
 		.bridge-conn {
-			padding: 0.4rem 0.6rem;
+			padding: 0.25rem 0.5rem;
 			margin: 0;
-			justify-self: stretch;
 		}
 
-		.bridge-scope {
-			justify-content: flex-start;
+		.bridge-conn {
+			min-width: 0;
+			justify-self: end;
 		}
 
 		.bridge-conn .actions {
-			flex-wrap: wrap;
+			gap: 0;
+		}
+	}
+
+	@media (max-width: 40rem) {
+		header.bridge {
+			padding: 0.3rem 0.6rem;
+		}
+
+		.bridge-bays {
+			grid-template-columns: minmax(0, 1fr) auto;
+			grid-template-areas:
+				'ident conn'
+				'situation situation';
+			gap: 0.3rem;
+		}
+
+		.bridge-ident {
+			padding: 0.15rem 0.3rem;
+		}
+
+		.bridge-situation {
+			padding: 0.1rem 0.3rem 0.2rem;
+		}
+
+		.bridge-conn {
+			align-self: center;
+			justify-self: end;
+		}
+
+		.lamps,
+		.bridge-situation .reading {
+			display: none;
+		}
+
+		.mark {
+			width: 2.55rem;
+		}
+
+		.bridge h1 .name-local {
+			font-size: 0.58rem;
+		}
+
+		.bridge h1 .name-helm {
+			font-size: 1.18rem;
 		}
 	}
 

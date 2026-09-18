@@ -22,6 +22,12 @@
 		demoBoard = false,
 		onToggleDemo,
 		onClearDemo,
+		onRefresh,
+		onPull,
+		onPush,
+		onToggleActivity,
+		activityOpen = false,
+		activityBadge = '',
 	}: {
 		plugins: PluginItem[];
 		busy?: boolean;
@@ -38,6 +44,12 @@
 		demoBoard?: boolean;
 		onToggleDemo?: (next: boolean) => void;
 		onClearDemo?: () => void;
+		onRefresh?: () => void;
+		onPull?: () => void;
+		onPush?: () => void;
+		onToggleActivity?: () => void;
+		activityOpen?: boolean;
+		activityBadge?: string | number;
 	} = $props();
 
 	let open = $state(false);
@@ -153,6 +165,37 @@
 
 			<p class="heading spaced">Board</p>
 			<div class="actions">
+				{#if onRefresh || onPull || onPush || onToggleActivity}
+					<div class="conn-dock">
+						{#if onRefresh}
+							<button type="button" class="item" disabled={Boolean(busy)} onclick={() => { close(); onRefresh(); }}>
+								<Icon icon="lucide:refresh-cw" />
+								Refresh
+							</button>
+						{/if}
+						{#if onPull}
+							<button type="button" class="item" disabled={Boolean(busy) || demoBoard} onclick={() => { close(); onPull(); }}>
+								<Icon icon="lucide:git-pull-request" />
+								Pull
+							</button>
+						{/if}
+						{#if onPush}
+							<button type="button" class="item" disabled={Boolean(busy) || demoBoard} onclick={() => { close(); onPush(); }}>
+								<Icon icon="lucide:upload" />
+								Push
+							</button>
+						{/if}
+						{#if onToggleActivity}
+							<button type="button" class="item" onclick={() => { close(); onToggleActivity(); }}>
+								<Icon icon="lucide:scroll-text" />
+								{activityOpen ? 'Close activity' : 'Activity'}
+								{#if activityBadge}
+									<span class="id">{activityBadge}</span>
+								{/if}
+							</button>
+						{/if}
+					</div>
+				{/if}
 				<a class="item" href="/deck" onclick={close}>
 					<Icon icon="lucide:layout-grid" />
 					Deck
@@ -315,6 +358,22 @@
 		display: grid;
 		gap: 0.05rem;
 		margin-top: 0.3rem;
+	}
+
+	.conn-dock {
+		display: none;
+	}
+
+	@media (max-width: 64rem) {
+		.conn-dock {
+			display: contents;
+		}
+
+		.panel {
+			max-height: min(70dvh, 36rem);
+			overflow: auto;
+			width: min(22.5rem, calc(100vw - 1.25rem));
+		}
 	}
 
 	.item {

@@ -98,7 +98,10 @@
 			<div class="brand">
 				<img class="mark" src="/logo.png" alt="" width="96" height="64" />
 				<div class="brand-copy">
-					<h1><span class="name-local">Local</span><span class="name-helm">Helm</span></h1>
+					<h1 aria-label="LocalHelm">
+						<span class="name-local">local</span>
+						<span class="name-helm">HELM</span>
+					</h1>
 					{#if serveHostPort}
 						<p class="heading-line">
 							{#if serveNote}
@@ -193,35 +196,37 @@
 
 		<div class="bridge-conn hud-frame" data-bridge="conn">
 			<div class="actions">
-				<Tooltip title="Re-read every enrolled project, plus Sites and Ports. For one row, use the refresh icon on that row.">
-					<button class="btn btn-sounding" disabled={Boolean(busy)} onclick={onRefresh}>
-						<Icon icon="lucide:refresh-cw" />
-						Refresh
-					</button>
-				</Tooltip>
-				<Tooltip title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull.">
-					<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={onPull}>
-						<Icon icon="lucide:git-pull-request" />
-						Pull
-					</button>
-				</Tooltip>
-				<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.">
-					<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={onPush}>
-						<Icon icon="lucide:upload" />
-						Push
-					</button>
-				</Tooltip>
-				<span class="conn-log">
-					<IconButton
-						icon="lucide:scroll-text"
-						label={activityOpen ? 'Close activity log' : 'Open activity log'}
-						title="Activity — every plan and write"
-						pressed={activityOpen}
-						hot={activityBadge === 'new'}
-						badge={activityBadge}
-						onclick={onToggleActivity}
-					/>
-				</span>
+				<div class="conn-desk">
+					<Tooltip title="Re-read every enrolled project, plus Sites and Ports. For one row, use the refresh icon on that row.">
+						<button class="btn btn-sounding" disabled={Boolean(busy)} onclick={onRefresh}>
+							<Icon icon="lucide:refresh-cw" />
+							Refresh
+						</button>
+					</Tooltip>
+					<Tooltip title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull.">
+						<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={onPull}>
+							<Icon icon="lucide:git-pull-request" />
+							Pull
+						</button>
+					</Tooltip>
+					<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.">
+						<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={onPush}>
+							<Icon icon="lucide:upload" />
+							Push
+						</button>
+					</Tooltip>
+					<span class="conn-log">
+						<IconButton
+							icon="lucide:scroll-text"
+							label={activityOpen ? 'Close activity log' : 'Open activity log'}
+							title="Activity — every plan and write"
+							pressed={activityOpen}
+							hot={activityBadge === 'new'}
+							badge={activityBadge}
+							onclick={onToggleActivity}
+						/>
+					</span>
+				</div>
 				{@render children()}
 			</div>
 			<Tooltip title="Opens Activity. Each bar is a day’s writes.">

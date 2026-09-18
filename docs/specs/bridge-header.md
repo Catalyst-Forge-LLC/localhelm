@@ -66,7 +66,7 @@ The center of the band is empty. The facts that tell you “where the helm is po
 - Instrument gold already on writes (`#c9a227` / `#fde68a`)
 - Cyan / ice for live instruments (`.info` is already `#93c5fd`)
 - Tight mono for counts and `host:port` (chart table, not display type)
-- Ident wordmark mixes **Oxanium** on *Local* (`--font-tech`) and **Syne** on *Helm* (`--font-mark`). System sans stays on body copy. Not Victorian serif.
+- Ident wordmark stacks **Oxanium** `local` (`--font-tech`) over **Syne** `HELM` (`--font-mark`). Product name stays LocalHelm. System sans stays on body copy. Not Victorian serif.
 - Lamp dots as the motif element that carries meaning; **one** framing device — corner brackets (chosen 2026-09-15 over hairline dividers)
 - Chart-paper grid on the hull at about 11% cyan — brighter after the 2026-09-15 pass; still texture, not scanlines
 - Glow only where a light is on: lamp dots and counts, the keel rule and marker, Refresh, `host:port`. No hull glow, no page gradients.
@@ -135,7 +135,7 @@ Internal / spec terms (binnacle, keel, conn) may appear in docs and class names.
 
 ### 5.1 Ident (left)
 
-- Keep the mark + **LocalHelm**.
+- Keep the mark + stacked lockup **local** / **HELM** (Oxanium / Syne). `aria-label` stays LocalHelm.
 - Add a one-line **heading** from facts we already have:
   - `serveLine` (host:port + LocalSlip lease / `--port` note)
   - npm user, or “npm not signed in” after `statusReady`
@@ -229,9 +229,9 @@ Today / Fleet / Sites / Ports / plugin tabs stay the row below the bridge. They 
 
 ### 5.6 Narrow viewport
 
-- **Breakpoint:** bays stack at **≤ 48rem** (768px). The drawer already breaks at 1100px; the bridge does not need to follow it — the bays fit side by side well below that.
-- **Stack order (locked):** Ident → Situation → Conn → Keel. Operator chose this over Ident + Conn first.
-- No horizontal scroll of the bridge. Conn actions wrap; lamps wrap.
+- **≤ 64rem:** hide gauges, wake spark, and the desk Refresh / Pull / Push / Activity plates. Those four move into the locker. Ident + lamps/keel + menu stay on the glass.
+- **≤ 40rem:** ident + menu on the first row; keel full width under. Lamps hide (Today already carries the count).
+- No horizontal scroll of the bridge. Do not stack all four bays into a tall column.
 
 ### 5.7 Guardrails
 

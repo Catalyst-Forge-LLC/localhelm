@@ -2080,6 +2080,12 @@
 			onExport={() => void startExport()}
 			onToggleDemo={(next) => void setDemoBoard(next)}
 			onClearDemo={() => void startClearDemo()}
+			onRefresh={() => void refresh()}
+			onPull={() => startPull()}
+			onPush={() => startPush()}
+			onToggleActivity={() => setActivityOpen(!activityOpen)}
+			{activityOpen}
+			activityBadge={activityUnseen ? 'new' : entries.length || ''}
 		/>
 	</BridgeHeader>
 

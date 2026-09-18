@@ -180,6 +180,10 @@
         {
           "timestamp": "2026-09-18T21:20:00Z",
           "text": "Demo locker is Main/Demo pills; Clear demo confirms then deletes only demo fleet + .localhelm/demo (d142)."
+        },
+        {
+          "timestamp": "2026-09-18T21:25:00Z",
+          "text": "Stacked local/HELM lockup. Compact bridge folds conn + gauges into the locker (d143)."
         }
       ]
     },
@@ -1985,6 +1989,20 @@
         "Keep the checkbox",
         "Clear without confirm",
         "Clear on leaving Demo"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "d143",
+      "timestamp": "2026-09-18T21:25:00Z",
+      "phase": "2-scaffolding",
+      "session": 50,
+      "decision": "Ident lockup is stacked Oxanium local over Syne HELM. At ≤64rem Refresh/Pull/Push/Activity and gauges leave the bar for the locker; at ≤40rem lamps hide and keel stays under ident.",
+      "rationale": "Operator 2026-09-18: small screens collide; try local/HELM; move more items to the menu.",
+      "alternatives_considered": [
+        "Stack all four bays vertically",
+        "Keep labeled Refresh on the phone bar",
+        "One-line LocalHelm at every width"
       ],
       "status": "active"
     }
