@@ -171,7 +171,8 @@
 	.bridge h1 {
 		display: flex;
 		flex-direction: column;
-		align-items: flex-start;
+		align-items: stretch;
+		width: max-content;
 		margin: 0;
 		font-size: inherit;
 		line-height: 1;
@@ -181,8 +182,10 @@
 	.bridge h1 .name-local {
 		font-family: var(--font-tech);
 		font-weight: 600;
-		font-size: 0.68rem;
-		letter-spacing: 0.22em;
+		font-size: 1.42rem;
+		letter-spacing: 0.18em;
+		margin-right: -0.18em;
+		line-height: 0.86;
 		text-transform: lowercase;
 		color: var(--cyan);
 		text-shadow: 0 0 10px var(--cyan-glow);
@@ -850,10 +853,7 @@
 			width: 2.55rem;
 		}
 
-		.bridge h1 .name-local {
-			font-size: 0.58rem;
-		}
-
+		.bridge h1 .name-local,
 		.bridge h1 .name-helm {
 			font-size: 1.18rem;
 		}
