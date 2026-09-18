@@ -60,7 +60,7 @@
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
 	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
 	import HelmMenu from '$lib/HelmMenu.svelte';
-	import { pluginCellLinks, pluginRowNote, pluginRowOpenHref, siteCellValue, siteLocalHref, siteNeedsEngineSync, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
+	import { pluginCellLinks, pluginRowNote, pluginRowOpenHref, siteCellValue, siteLandReason, siteLocalHref, siteNeedsEngineSync, siteNeedsLand, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		canonicalizeTab,
 		isCoreTab,
@@ -177,6 +177,7 @@
 	let error = $state('');
 	let landPendingIds = $state<string[]>([]);
 	let landPendingReasons = $state<Record<string, string>>({});
+	let landShipFingerprints = $state<Record<string, string>>({});
 
 	const enrolledIds = $derived(new Set((inventory ? inventory.projects : roster).map((p) => p.id)));
 	const archivedSet = $derived(new Set(archivedIds));
@@ -262,7 +263,7 @@
 		visibleSiteRows.filter(
 			(row) =>
 				inShipQueue(row.id) &&
-				(siteNeedsEngineSync(row.cells) || landPendingSet.has(row.id)),
+				siteNeedsLand(row, landShipFingerprints[row.id], landPendingSet.has(row.id)),
 		),
 	);
 	const sitesNeedingYou = $derived(sitesNeedingLand);
@@ -550,18 +551,12 @@
 		return badgeList.length > 0 || writeList.length > 0;
 	}
 
-	function siteNeedReason(siteId: string, cells: Record<string, string>): string {
-		const update = (cells.update ?? '').trim();
-		const headers = (cells.headers ?? '').trim();
-		const updateLc = update.toLowerCase();
-		const parts: string[] = [];
-		if (update && update !== '—' && !updateLc.startsWith('already') && !updateLc.startsWith('skip')) {
-			parts.push(update);
-		}
-		if (headers.toLowerCase().startsWith('merge')) parts.push(headers);
-		const pending = landPendingReasons[siteId];
-		if (pending) parts.push(pending);
-		return parts.join(' · ') || pending || update || '—';
+	function siteNeedReason(siteId: string, cells: Record<string, string>, shipFingerprint?: string | null): string {
+		return siteLandReason(
+			{ cells, shipFingerprint },
+			landShipFingerprints[siteId],
+			landPendingReasons[siteId],
+		);
 	}
 
 	function portNeedsYou(cells: Record<string, string>): boolean {
@@ -982,6 +977,7 @@
 			npmUser?: string | null;
 			landPending?: string[];
 			landPendingReasons?: Record<string, string>;
+			landShipFingerprints?: Record<string, string>;
 		};
 		if (scoped && inventory && data.inventory) inventory = mergeInventory(inventory, data.inventory, opts.gitOnly === true);
 		else inventory = data.inventory;
@@ -996,6 +992,9 @@
 		if (Array.isArray(data.landPending)) landPendingIds = data.landPending;
 		if (data.landPendingReasons && typeof data.landPendingReasons === 'object') {
 			landPendingReasons = data.landPendingReasons;
+		}
+		if (data.landShipFingerprints && typeof data.landShipFingerprints === 'object') {
+			landShipFingerprints = data.landShipFingerprints;
 		}
 		if (opts.fetchRemotes && !scoped) fetchedAt = new Date().toLocaleTimeString();
 		if (!candidates.length) scanRoot = data.scanRoot;

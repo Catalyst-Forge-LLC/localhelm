@@ -79,7 +79,7 @@
 		filepressLandIds: string[];
 		filepressSyncIds: string[];
 		sitesNeedingYou: PluginRow[];
-		siteNeedReason: (siteId: string, cells: Record<string, string>) => string;
+		siteNeedReason: (siteId: string, cells: Record<string, string>, shipFingerprint?: string | null) => string;
 		leaseBoard: PluginBoard | null;
 		portFamilyCards: PortFamily[];
 		portsNeedingYou: PluginRow[];
@@ -345,7 +345,7 @@
 					<p class="hint">
 						{#if filepressBoard && sitesNeedingLand.length}
 							{sitesNeedingLand.length} of {filepressBoard.rows.length} need Land.
-							{#if landPendingIds.length}
+							{#if sitesNeedingLand.some((row) => landPendingIds.includes(row.id))}
 								A failed ship stays here until it succeeds.
 							{:else}
 								Land does Sync, then Push and Ship.
@@ -361,7 +361,7 @@
 				</div>
 				<div class="group-buttons">
 					{#if filepressLandIds.length}
-						<Tooltip title="Plans Land for every site that needs an engine write or a finished ship. Confirm in the modal.">
+						<Tooltip title="Plans Land for sites whose engine is behind or whose tree changed since last Land. Confirm in the modal.">
 							<button class="btn btn-write btn-sm" disabled={busy} onclick={() => onLand(filepressLandIds)}>
 								<Icon icon="lucide:plane-landing" />
 								Land{filepressLandIds.length > 1 ? ` ${filepressLandIds.length}` : ''}
@@ -390,7 +390,7 @@
 							<li class="need-card">
 								<div class="need-main">
 									<div class="id">{site.id}</div>
-									<div class="dim small">{siteNeedReason(site.id, site.cells)}</div>
+									<div class="dim small">{siteNeedReason(site.id, site.cells, site.shipFingerprint)}</div>
 								</div>
 								<div class="need-tools">
 									<div class="need-actions">

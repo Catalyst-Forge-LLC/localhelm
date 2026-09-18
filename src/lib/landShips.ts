@@ -100,6 +100,17 @@ export async function readLandPendingSiteIds(workspaceRoot: string): Promise<str
 		.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 }
 
+/** Last successful ship fingerprint per site. Failed-only rows are omitted. */
+export async function readLandShipFingerprints(workspaceRoot: string): Promise<Record<string, string>> {
+	const file = await readLandShips(workspaceRoot);
+	const out: Record<string, string> = {};
+	for (const [id, row] of Object.entries(file.sites)) {
+		const fp = row.fingerprint?.trim();
+		if (fp) out[id] = fp;
+	}
+	return out;
+}
+
 export async function readLandPendingReasons(workspaceRoot: string): Promise<Record<string, string>> {
 	const file = await readLandShips(workspaceRoot);
 	const out: Record<string, string> = {};

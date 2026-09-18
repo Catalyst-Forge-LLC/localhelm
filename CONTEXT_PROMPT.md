@@ -356,3 +356,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 49 — 2026-09-18
 
 - Header situation lamps were digest `unpublishedAhead` (local semver > npm) and dirty→Today Push. Today Publish also includes bump-then-publish, so 4 to publish / 4 to push showed as **1 unpublished**. Lamps now use the same lists as those buttons (`needPublishIds` / `needPushIds` / `needCommitIds` / pin-behind), plus missing and npm errors. Dirty opens Today `all`. Fleet gauge need uses the same write counts.
+- Today “waiting on Land” was engine-behind or a failed ship only. Land itself ships when HEAD changed since the last successful fingerprint, so a pushed companion with a current `^engine` pin still needs Land. Today now uses that same compare (`siteNeedsLand`). Keep local still drops the row. FilePress board rows carry `shipFingerprint`.

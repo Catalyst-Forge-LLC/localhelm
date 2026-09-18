@@ -168,6 +168,10 @@
         {
           "timestamp": "2026-09-18T19:10:00Z",
           "text": "Header lamps match Today write lists (d137): publish/push/dirty, not digest unpublishedAhead."
+        },
+        {
+          "timestamp": "2026-09-18T19:30:00Z",
+          "text": "Today Land need matches Land’s ship fingerprint skip (d138), not only engine-behind."
         }
       ]
     },
@@ -1903,6 +1907,20 @@
         "Keep unpublishedAhead and add a second publish lamp",
         "Show only unpublishedAhead plus a note",
         "Drop header counts entirely"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "d138",
+      "timestamp": "2026-09-18T19:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 49,
+      "decision": "Today FilePress Land need is siteNeedsLand: engine sync, failed ship, or shipable tree whose fingerprint is not the last successful Land. Same skip as planLand. Keep local still hides the row.",
+      "rationale": "Operator 2026-09-18: Today said none waiting on Land after pushing companions. Engines were already ^0.1.35; Land plans still wanted ship because HEAD changed since land-ships.json.",
+      "alternatives_considered": [
+        "Keep Today as engine-behind only",
+        "Call planLand for every site on each refresh",
+        "Treat every ship:yes row as needing Land"
       ],
       "status": "active"
     }

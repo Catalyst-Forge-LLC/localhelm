@@ -9,7 +9,9 @@ import {
 	siteEngineVersion,
 	siteLiveHref,
 	siteLocalHref,
+	siteLandReason,
 	siteNeedsEngineSync,
+	siteNeedsLand,
 	sitePluginJobVisible,
 	siteSyncLabel,
 	siteSyncTarget,
@@ -77,6 +79,18 @@ describe('siteDisplay', () => {
 		const cells = { pin: 'npm ^0.1.10', locked: '0.1.10', update: 'already ^0.1.10', headers: 'ok' };
 		assert.equal(siteNeedsEngineSync(cells), false);
 		assert.equal(siteSyncLabel(cells), 'Sync engine');
+	});
+
+	it('needs Land when the ship tree is not the last successful fingerprint', () => {
+		const current = { cells: { update: 'already ^0.1.35', headers: 'ok', ship: 'yes' }, shipFingerprint: 'new-head:clean' };
+		assert.equal(siteNeedsLand(current, 'old-head:clean'), true);
+		assert.equal(siteNeedsLand(current, 'new-head:clean'), false);
+		assert.equal(siteNeedsLand(current, null), true);
+		assert.equal(siteNeedsLand({ cells: { update: 'already ^0.1.35', ship: 'no' }, shipFingerprint: 'new-head:clean' }, null), false);
+		assert.equal(siteNeedsLand({ cells: { update: 'already ^0.1.35', ship: 'yes' } }, 'old-head:clean'), false);
+		assert.equal(siteNeedsLand(current, 'old-head:clean', true), true);
+		assert.equal(siteLandReason(current, 'old-head:clean'), 'Ship — tree changed since last Land');
+		assert.equal(siteLandReason({ cells: { update: 'pnpm update getfilepress  (0.1.10 → 0.1.11)', ship: 'yes' } }, 'old'), 'pnpm update getfilepress  (0.1.10 → 0.1.11)');
 	});
 
 	it('treats only http(s) live cells as openable', () => {

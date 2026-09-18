@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { fleetStatus, npmWhoami, readLandPendingReasons, readLandPendingSiteIds } from '../../../../../src/lib/index.js';
+import { fleetStatus, npmWhoami, readLandPendingReasons, readLandPendingSiteIds, readLandShipFingerprints } from '../../../../../src/lib/index.js';
 import { errJson, loadOptional, operatorCwd } from '$lib/server/helm';
 
 type Loaded = NonNullable<Awaited<ReturnType<typeof loadOptional>>>;
@@ -35,6 +35,7 @@ type StatusBody = {
 	npmUser: string | null;
 	landPending?: string[];
 	landPendingReasons?: Record<string, string>;
+	landShipFingerprints?: Record<string, string>;
 	host: string | null;
 	port: string | null;
 	portSource: string | null;
@@ -55,6 +56,7 @@ async function statusBody(
 	const npmUser = opts.gitOnly || opts.skipCommitCounts ? peekNpmUser() : currentNpmUser();
 	const landP = readLandPendingSiteIds(loaded.workspaceRoot);
 	const reasonsP = readLandPendingReasons(loaded.workspaceRoot);
+	const fpsP = readLandShipFingerprints(loaded.workspaceRoot);
 	const inventory = await fleetStatus(loaded, {
 		fetch: opts.fetchRemotes,
 		refreshNpm: opts.refreshNpm,
@@ -64,7 +66,7 @@ async function statusBody(
 		npmUser,
 		onProgress: opts.onProgress,
 	});
-	const [landPending, landPendingReasons] = await Promise.all([landP, reasonsP]);
+	const [landPending, landPendingReasons, landShipFingerprints] = await Promise.all([landP, reasonsP, fpsP]);
 	return {
 		inventory,
 		workspaceRoot: loaded.workspaceRoot,
@@ -74,6 +76,7 @@ async function statusBody(
 		npmUser,
 		landPending,
 		landPendingReasons,
+		landShipFingerprints,
 		...listen(),
 	};
 }

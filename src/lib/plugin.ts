@@ -28,6 +28,8 @@ export type PluginRow = {
 	linkGroups?: Record<string, { label: string; href?: string }[]>;
 	cells: Record<string, string>;
 	actions: PluginAction[];
+	/** FilePress: tree ship would deploy. Helm compares this to the last successful Land. */
+	shipFingerprint?: string | null;
 };
 
 export type PluginBoard = {

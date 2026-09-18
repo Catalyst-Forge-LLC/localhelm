@@ -48,6 +48,60 @@ export function siteNeedsEngineSync(cells: Record<string, string>): boolean {
 	return updateStale || headers.startsWith('merge');
 }
 
+function siteCanShip(cells: Record<string, string>): boolean {
+	const ship = (cells.ship ?? '').trim().toLowerCase();
+	return ship === 'yes' || ship.startsWith('pnpm');
+}
+
+function siteShipFingerprint(row: {
+	cells: Record<string, string>;
+	shipFingerprint?: string | null;
+}): string | null {
+	const fromRow = (row.shipFingerprint ?? '').trim();
+	if (fromRow) return fromRow;
+	const fromCell = (row.cells.shipFp ?? row.cells.shipFingerprint ?? '').trim();
+	return fromCell || null;
+}
+
+/**
+ * Same work Land would do: engine sync, a failed ship, or a shipable tree that
+ * is not the last successful Land fingerprint. Pushing a companion after Land
+ * changes HEAD, so this is true even when the engine pin is already current.
+ */
+export function siteNeedsLand(
+	row: { cells: Record<string, string>; shipFingerprint?: string | null },
+	lastShipFingerprint?: string | null,
+	pending = false,
+): boolean {
+	if (siteNeedsEngineSync(row.cells) || pending) return true;
+	if (!siteCanShip(row.cells)) return false;
+	const current = siteShipFingerprint(row);
+	if (!current) return false;
+	const last = (lastShipFingerprint ?? '').trim();
+	if (!last) return true;
+	return last !== current;
+}
+
+export function siteLandReason(
+	row: { cells: Record<string, string>; shipFingerprint?: string | null },
+	lastShipFingerprint?: string | null,
+	pendingReason?: string | null,
+): string {
+	const parts: string[] = [];
+	const update = (row.cells.update ?? '').trim();
+	const headers = (row.cells.headers ?? '').trim();
+	const updateLc = update.toLowerCase();
+	if (update && update !== '—' && !updateLc.startsWith('already') && !updateLc.startsWith('skip')) {
+		parts.push(update);
+	}
+	if (headers.toLowerCase().startsWith('merge')) parts.push(headers);
+	if (pendingReason?.trim()) parts.push(pendingReason.trim());
+	else if (siteNeedsLand(row, lastShipFingerprint, false) && !siteNeedsEngineSync(row.cells)) {
+		parts.push('Ship — tree changed since last Land');
+	}
+	return parts.join(' · ') || pendingReason || update || '—';
+}
+
 export function siteSyncLabel(cells: Record<string, string>): string {
 	const target = siteSyncTarget(cells);
 	return target ? `Sync engine ${target}` : 'Sync engine';
