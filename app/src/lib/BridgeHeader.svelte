@@ -94,6 +94,9 @@
 
 <header class="bridge">
 	<div class="bridge-bays">
+		<div class="bridge-keel status-rail" data-bridge="keel" aria-live="polite">
+			<p class="line {keelKind}" class:live={reading}>{keelText}</p>
+		</div>
 		<div class="bridge-ident hud-frame" data-bridge="ident">
 			<div class="brand">
 				<img class="mark" src="/logo.png" alt="" width="96" height="64" />
@@ -244,10 +247,6 @@
 					<span class="conn-caption">{sparkCaption}</span>
 				</button>
 			</Tooltip>
-		</div>
-
-		<div class="bridge-keel status-rail" data-bridge="keel" aria-live="polite">
-			<p class="line {keelKind}" class:live={reading}>{keelText}</p>
 		</div>
 	</div>
 </header>
