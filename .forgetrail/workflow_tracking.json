@@ -176,6 +176,10 @@
         {
           "timestamp": "2026-09-18T19:45:00Z",
           "text": "Looks Lease claims a missing site slip via LocalSlip (d139). Fleet+site packages are not a missing-port problem."
+        },
+        {
+          "timestamp": "2026-09-18T21:20:00Z",
+          "text": "Demo locker is Main/Demo pills; Clear demo confirms then deletes only demo fleet + .localhelm/demo (d142)."
         }
       ]
     },
@@ -1967,6 +1971,20 @@
         "Second serve from a temp cwd only",
         "Copy repos into a sandbox",
         "Allow all writes in demo"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "d142",
+      "timestamp": "2026-09-18T21:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 50,
+      "decision": "Demo locker uses Main/Demo pills. Clear demo is confirm-then-delete of localhelm.fleet.demo.json and .localhelm/demo/ only.",
+      "rationale": "Operator 2026-09-18: pill toggle, reset with confirmation, tighten locker spacing.",
+      "alternatives_considered": [
+        "Keep the checkbox",
+        "Clear without confirm",
+        "Clear on leaving Demo"
       ],
       "status": "active"
     }

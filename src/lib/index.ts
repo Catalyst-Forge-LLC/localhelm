@@ -278,15 +278,19 @@ export {
 	DEMO_HEADER,
 	DEMO_MANIFEST_NAME,
 	LIVE_MANIFEST_NAME,
+	applyClearDemo,
 	assertDemoAllowsRepoWrite,
 	demoManifestPath,
 	demoRepoWriteError,
+	demoStateDir,
 	envDemoOn,
 	helmStateDir,
 	isDemoMode,
+	planClearDemo,
 	requestWantsDemo,
 	runWithDemo,
 } from './demoMode.js';
+export type { DemoClearFile, DemoClearPlan } from './demoMode.js';
 export type { BumpKind } from './semver.js';
 export type {
 	EnrollPlan,

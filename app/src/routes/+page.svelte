@@ -1057,8 +1057,52 @@
 		}
 	}
 
+	async function startClearDemo(): Promise<void> {
+		await run(
+			'planning demo clear',
+			async () => {
+				const plan = (await call('/api/demo', {
+					method: 'POST',
+					body: JSON.stringify({ apply: false }),
+				})) as { files?: { path?: string; exists?: boolean }[] };
+				const files = Array.isArray(plan.files) ? plan.files : [];
+				const present = files.filter((file) => file.exists && file.path).map((file) => file.path as string);
+				note(
+					present.length
+						? `demo clear plan — ${present.length} path(s), nothing written`
+						: 'demo clear plan — already empty',
+					plan,
+				);
+				offerConfirm({
+					title: 'Clear the demo board?',
+					hint: 'Deletes localhelm.fleet.demo.json and .localhelm/demo/. The live fleet is not touched.',
+					items: present.length ? present : ['Nothing stored yet — demo is already empty.'],
+					confirmLabel: 'Clear demo',
+					variant: 'danger',
+					canApply: present.length > 0,
+					run: () => void applyClearDemoBoard(),
+				});
+			},
+			planOpts('Clear demo'),
+		);
+	}
+
+	async function applyClearDemoBoard(): Promise<void> {
+		await run('clearing demo', async () => {
+			const plan = await call('/api/demo', {
+				method: 'POST',
+				body: JSON.stringify({ apply: true }),
+			});
+			note('demo cleared — live fleet untouched', plan);
+			await refresh();
+		});
+	}
+
 	async function setDemoBoard(next: boolean): Promise<void> {
 		if (demoBoard === next) return;
+		confirmOpen = false;
+		confirmRun = null;
+		confirmAlt = null;
 		demoBoard = next;
 		try {
 			if (next) sessionStorage.setItem('localhelm.demo', '1');
@@ -2035,6 +2079,7 @@
 			onFetchRemotes={() => refresh(true)}
 			onExport={() => void startExport()}
 			onToggleDemo={(next) => void setDemoBoard(next)}
+			onClearDemo={() => void startClearDemo()}
 		/>
 	</BridgeHeader>
 

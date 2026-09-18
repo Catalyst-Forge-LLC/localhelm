@@ -21,6 +21,7 @@
 		onExport,
 		demoBoard = false,
 		onToggleDemo,
+		onClearDemo,
 	}: {
 		plugins: PluginItem[];
 		busy?: boolean;
@@ -36,6 +37,7 @@
 		onExport: () => void;
 		demoBoard?: boolean;
 		onToggleDemo?: (next: boolean) => void;
+		onClearDemo?: () => void;
 	} = $props();
 
 	let open = $state(false);
@@ -44,6 +46,12 @@
 
 	function close(): void {
 		open = false;
+	}
+
+	function setBoard(next: boolean): void {
+		if (!onToggleDemo || demoBoard === next || busy) return;
+		close();
+		onToggleDemo(next);
 	}
 
 	async function copyFleetPath(): Promise<void> {
@@ -88,6 +96,35 @@
 	{#if open}
 		<div class="panel hud-frame" role="menu" aria-label="LocalHelm menu">
 			<p class="heading">This board</p>
+			{#if onToggleDemo}
+				<div class="pills" role="radiogroup" aria-label="Main or demo board">
+					<button
+						type="button"
+						class="pill"
+						class:on={!demoBoard}
+						role="radio"
+						aria-checked={!demoBoard}
+						disabled={busy}
+						onclick={() => setBoard(false)}
+					>
+						Main
+					</button>
+					<button
+						type="button"
+						class="pill"
+						class:on={demoBoard}
+						role="radio"
+						aria-checked={demoBoard}
+						disabled={busy}
+						onclick={() => setBoard(true)}
+					>
+						Demo
+					</button>
+				</div>
+				{#if demoBoard}
+					<p class="hint">Practice add and remove. Repo writes stay off.</p>
+				{/if}
+			{/if}
 			{#if fleetPath}
 				<p class="meta">
 					<Tooltip title="Copy fleet path">
@@ -115,23 +152,6 @@
 			</p>
 
 			<p class="heading spaced">Board</p>
-			{#if onToggleDemo}
-				<label class="row demo-toggle">
-					<input
-						type="checkbox"
-						checked={demoBoard}
-						disabled={busy}
-						onchange={(event) => {
-							close();
-							onToggleDemo(event.currentTarget.checked);
-						}}
-					/>
-					<span class="copy">
-						<span class="name">Demo board</span>
-						<span class="id">Add and remove without writing the main fleet. Commit, publish, and Land stay off.</span>
-					</span>
-				</label>
-			{/if}
 			<div class="actions">
 				<a class="item" href="/deck" onclick={close}>
 					<Icon icon="lucide:layout-grid" />
@@ -145,10 +165,16 @@
 					<Icon icon="lucide:cloud-download" />
 					Fetch remotes
 				</button>
-				<button type="button" class="item" disabled={busy} onclick={() => { close(); onExport(); }}>
+				<button type="button" class="item" disabled={busy || demoBoard} onclick={() => { close(); onExport(); }}>
 					<Icon icon="lucide:file-json" />
 					Write inventory JSON
 				</button>
+				{#if demoBoard && onClearDemo}
+					<button type="button" class="item danger" disabled={busy} onclick={() => { close(); onClearDemo(); }}>
+						<Icon icon="lucide:trash-2" />
+						Clear demo
+					</button>
+				{/if}
 			</div>
 
 			<p class="heading spaced">Plugins</p>
@@ -190,8 +216,8 @@
 		top: calc(100% + 0.4rem);
 		right: 0;
 		z-index: 40;
-		width: min(24rem, calc(100vw - 2rem));
-		padding: 0.75rem 0.85rem 0.85rem;
+		width: min(22.5rem, calc(100vw - 2rem));
+		padding: 0.65rem 0.75rem 0.7rem;
 		border: 1px solid var(--cyan-dim);
 		background: var(--well);
 		border-radius: var(--plate-radius);
@@ -200,29 +226,68 @@
 
 	.heading {
 		margin: 0;
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--cyan, #b4b4bc);
 	}
 
 	.heading.spaced {
-		margin-top: 0.85rem;
+		margin-top: 0.65rem;
+		padding-top: 0.55rem;
+		border-top: 1px solid var(--steel);
 	}
 
 	.hint,
 	.empty,
 	.meta {
-		margin: 0.4rem 0 0;
+		margin: 0.28rem 0 0;
 		color: var(--dim, #b4b4bc);
-		font-size: 0.82rem;
+		font-size: 0.78rem;
 		line-height: 1.35;
+	}
+
+	.pills {
+		display: flex;
+		margin-top: 0.4rem;
+		border: 1px solid var(--steel);
+		border-radius: 999px;
+		overflow: hidden;
+		background: var(--void, #0c0c10);
+	}
+
+	.pill {
+		flex: 1;
+		padding: 0.28rem 0.55rem;
+		border: 0;
+		background: none;
+		color: var(--dim);
+		font: inherit;
+		font-size: 0.72rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		cursor: pointer;
+	}
+
+	.pill.on {
+		background: rgb(201 162 39 / 0.18);
+		color: var(--gold-soft);
+	}
+
+	.pill:not(.on):hover:not(:disabled) {
+		background: rgb(126 244 255 / 0.08);
+		color: #ececef;
+	}
+
+	.pill:disabled {
+		opacity: 0.42;
+		cursor: not-allowed;
 	}
 
 	.path {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.4rem;
 		width: 100%;
 		padding: 0;
 		border: 0;
@@ -237,32 +302,32 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
-		font-size: 0.75rem;
+		font-size: 0.72rem;
 	}
 
 	.copy-hint {
 		flex-shrink: 0;
 		color: var(--dim);
-		font-size: 0.72rem;
+		font-size: 0.68rem;
 	}
 
 	.actions {
 		display: grid;
-		gap: 0.2rem;
-		margin-top: 0.45rem;
+		gap: 0.05rem;
+		margin-top: 0.3rem;
 	}
 
 	.item {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 0.45rem;
 		width: 100%;
-		padding: 0.4rem 0.45rem;
+		padding: 0.32rem 0.4rem;
 		border: 0;
 		border-radius: var(--plate-radius-sm, 0 0 5px 5px);
 		background: none;
 		color: #ececef;
-		font-size: 0.88rem;
+		font-size: 0.84rem;
 		text-align: left;
 		text-decoration: none;
 		cursor: pointer;
@@ -272,6 +337,14 @@
 		background: rgb(126 244 255 / 0.08);
 	}
 
+	.item.danger {
+		color: #fca5a5;
+	}
+
+	.item.danger:hover:not(:disabled) {
+		background: rgb(239 68 68 / 0.1);
+	}
+
 	.item:disabled {
 		opacity: 0.42;
 		cursor: not-allowed;
@@ -279,17 +352,17 @@
 
 	ul {
 		list-style: none;
-		margin: 0.65rem 0 0;
+		margin: 0.4rem 0 0;
 		padding: 0;
 		display: grid;
-		gap: 0.35rem;
+		gap: 0.1rem;
 	}
 
 	.row {
 		display: flex;
-		align-items: flex-start;
-		gap: 0.55rem;
-		padding: 0.4rem 0.45rem;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.28rem 0.4rem;
 		border-radius: var(--plate-radius-sm, 0 0 5px 5px);
 		cursor: pointer;
 	}
@@ -299,23 +372,26 @@
 	}
 
 	.row input {
-		margin-top: 0.2rem;
+		margin: 0;
+		flex-shrink: 0;
 	}
 
 	.copy {
 		display: grid;
-		gap: 0.1rem;
+		gap: 0.05rem;
 		min-width: 0;
 	}
 
 	.name {
 		color: #ececef;
-		font-size: 0.92rem;
+		font-size: 0.84rem;
+		line-height: 1.2;
 	}
 
 	.id {
 		color: var(--dim);
-		font-size: 0.75rem;
+		font-size: 0.7rem;
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		line-height: 1.2;
 	}
 </style>

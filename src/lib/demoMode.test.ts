@@ -6,9 +6,11 @@ import { describe, it } from 'node:test';
 import {
 	DEMO_MANIFEST_NAME,
 	LIVE_MANIFEST_NAME,
+	applyClearDemo,
 	assertDemoAllowsRepoWrite,
 	demoRepoWriteError,
 	helmStateDir,
+	planClearDemo,
 	runWithDemo,
 } from './demoMode.js';
 import { applyEnroll, planEnroll } from './enroll.js';
@@ -58,5 +60,32 @@ describe('demo mode', () => {
 
 		const liveFound = await findManifest(ws);
 		assert.equal(liveFound?.manifest.projects[0]?.id, 'keep');
+	});
+
+	it('clears only the demo fleet and demo state dir', async () => {
+		const ws = await mkdtemp(path.join(tmpdir(), 'localhelm-demo-clear-'));
+		const live = path.join(ws, LIVE_MANIFEST_NAME);
+		const demo = path.join(ws, DEMO_MANIFEST_NAME);
+		const liveState = path.join(ws, '.localhelm', 'keep.json');
+		const demoState = path.join(ws, '.localhelm', 'demo', 'scratch.json');
+		await writeFile(live, `${JSON.stringify({ workspaceRoot: '.', projects: [{ id: 'keep', path: 'keep' }] }, null, 2)}\n`);
+		await writeFile(demo, `${JSON.stringify({ workspaceRoot: '.', projects: [{ id: 'scratch', path: 'scratch' }] }, null, 2)}\n`);
+		await mkdir(path.dirname(liveState), { recursive: true });
+		await writeFile(liveState, '{"ok":true}\n');
+		await mkdir(path.dirname(demoState), { recursive: true });
+		await writeFile(demoState, '{"demo":true}\n');
+
+		const planned = await planClearDemo(ws);
+		assert.equal(planned.files.filter((file) => file.exists).length, 2);
+		assert.ok(planned.files.every((file) => file.path.includes('demo')));
+
+		const cleared = await applyClearDemo(ws);
+		assert.deepEqual(cleared.removed.map((row) => path.basename(row)).sort(), ['demo', DEMO_MANIFEST_NAME]);
+
+		const liveAfter = JSON.parse(await readFile(live, 'utf8')) as { projects: { id: string }[] };
+		assert.deepEqual(liveAfter.projects.map((row) => row.id), ['keep']);
+		assert.equal(await readFile(liveState, 'utf8'), '{"ok":true}\n');
+		await assert.rejects(() => readFile(demo, 'utf8'));
+		await assert.rejects(() => readFile(demoState, 'utf8'));
 	});
 });
