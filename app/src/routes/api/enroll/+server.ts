@@ -13,10 +13,14 @@ export const POST: RequestHandler = async ({ request }) => {
 		const plan = await planEnroll({ paths: body.paths, npm: body.npm, group: body.group, cwd }, existing);
 		if (body.apply) {
 			const root = existing?.workspaceRoot ?? path.dirname(plan.manifestPath);
-			await withLockAt(root, async () => {
-				await applyEnroll(plan, existing);
-				plan.writes = true;
-			});
+			await withLockAt(
+				root,
+				async () => {
+					await applyEnroll(plan, existing);
+					plan.writes = true;
+				},
+				{ allowInDemo: true },
+			);
 		}
 		return json(plan);
 	} catch (err) {

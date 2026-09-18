@@ -99,6 +99,7 @@
 	let activityOpen = $state(false);
 	let activityUnseen = $state(false);
 	let urlSyncReady = $state(false);
+	let demoBoard = $state(false);
 	let cwd = $state('');
 	let host = $state<string | null>(null);
 	let port = $state<string | null>(null);
@@ -348,7 +349,7 @@
 	const needCommitIds = $derived(visibleProjects.filter((row) => canCommit(row)).map((row) => row.id));
 	const needPushIds = $derived(visibleProjects.filter((row) => canPush(row)).map((row) => row.id));
 	const needBulkWrites = $derived(
-		needCommitIds.length + needPublishIds.length + needPushIds.length > 0,
+		!demoBoard && needCommitIds.length + needPublishIds.length + needPushIds.length > 0,
 	);
 	const noFleet = $derived(statusReady && (!inventory || inventory.projects.length === 0));
 	const needChips = $derived(
@@ -502,6 +503,13 @@
 		if (leasesParam !== null) selectedPorts = idsToSelection(parseListParam(leasesParam));
 		const needParam = parseNeedFilter(params.get('need'));
 		if (needParam) needFilter = needParam;
+		let fromSession = false;
+		try {
+			fromSession = sessionStorage.getItem('localhelm.demo') === '1';
+		} catch {
+			/* ignore */
+		}
+		demoBoard = params.get('demo') === '1' || fromSession;
 	}
 
 	$effect(() => {
@@ -528,6 +536,8 @@
 
 		if (needFilter === 'all') params.delete('need');
 		else params.set('need', needFilter);
+		if (demoBoard) params.set('demo', '1');
+		else params.delete('demo');
 
 		const next = params.toString();
 		const current = typeof window !== 'undefined' ? window.location.search.slice(1) : '';
@@ -585,12 +595,16 @@
 		return ids.filter((id) => !pending.has(id));
 	}
 
+	function demoHeaders(): Record<string, string> {
+		return demoBoard ? { 'x-localhelm-demo': '1' } : {};
+	}
+
 	async function call(url: string, init?: RequestInit): Promise<unknown> {
 		let res: Response;
 		try {
 			res = await fetch(url, {
 				...init,
-				headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
+				headers: { 'content-type': 'application/json', ...demoHeaders(), ...(init?.headers ?? {}) },
 			});
 		} catch (err) {
 			throw new Error(plainFetchError(err));
@@ -618,7 +632,7 @@
 		try {
 			res = await fetch(url, {
 				...init,
-				headers: { 'content-type': 'application/json', ...(init?.headers ?? {}) },
+				headers: { 'content-type': 'application/json', ...demoHeaders(), ...(init?.headers ?? {}) },
 			});
 		} catch (err) {
 			throw new Error(plainFetchError(err));
@@ -975,6 +989,7 @@
 			host?: string | null;
 			port: string | null;
 			portSource: string | null;
+			demo?: boolean;
 			npmUser?: string | null;
 			landPending?: string[];
 			landPendingReasons?: Record<string, string>;
@@ -999,6 +1014,7 @@
 		}
 		if (opts.fetchRemotes && !scoped) fetchedAt = new Date().toLocaleTimeString();
 		if (!candidates.length) scanRoot = data.scanRoot;
+		if (typeof data.demo === 'boolean') demoBoard = data.demo;
 		if (data.inventory?.manifestPath) manifestPath = data.inventory.manifestPath;
 		const kinds = { ...bumpKind };
 		for (const row of data.inventory?.projects ?? []) kinds[row.id] ??= 'patch';
@@ -1039,6 +1055,30 @@
 		} finally {
 			statusNote = '';
 		}
+	}
+
+	async function setDemoBoard(next: boolean): Promise<void> {
+		if (demoBoard === next) return;
+		demoBoard = next;
+		try {
+			if (next) sessionStorage.setItem('localhelm.demo', '1');
+			else sessionStorage.removeItem('localhelm.demo');
+		} catch {
+			/* ignore */
+		}
+		inventory = null;
+		roster = [];
+		statusReady = false;
+		pluginsReady = false;
+		pluginBoards = [];
+		pluginMetas = [];
+		archivedIds = [];
+		localOnlyIds = [];
+		error = '';
+		await readQuiet(next ? 'opening demo board' : 'returning to fleet', async () => {
+			await Promise.all([loadRoster(), loadPluginBoards()]);
+			await loadStatus({ extras: true });
+		});
 	}
 
 	async function refresh(fetchRemotes = false, extras = true): Promise<void> {
@@ -1787,7 +1827,7 @@
 	}
 
 	function needActions(row: Project): NeedAction[] {
-		if (row.pending) return [];
+		if (demoBoard || row.pending) return [];
 		const pins = cascadeFor(row.id)?.writable ?? 0;
 		const acts: NeedAction[] = writesFor(row).map((id) => ({
 			id,
@@ -1966,6 +2006,7 @@
 		onToggleActivity={() => setActivityOpen(!activityOpen)}
 		onWake={() => setActivityOpen(true)}
 		{noFleet}
+		{demoBoard}
 		onLamp={(filter) => {
 			setTab('today');
 			needFilter = filter;
@@ -1989,9 +2030,11 @@
 			{statusReady}
 			{briefCopied}
 			onToggle={(id, enabled) => void setPluginOn(id, enabled)}
+			{demoBoard}
 			onCopyBrief={() => void copyBrief()}
 			onFetchRemotes={() => refresh(true)}
 			onExport={() => void startExport()}
+			onToggleDemo={(next) => void setDemoBoard(next)}
 		/>
 	</BridgeHeader>
 
@@ -2034,6 +2077,7 @@
 				{needFilterCounts}
 				{needBulkWrites}
 				{noFleet}
+				{demoBoard}
 				{needCommitIds}
 				{needPublishIds}
 				{needPushIds}
@@ -2095,37 +2139,37 @@
 								</button>
 							</Tooltip>
 							<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
-								<button class="btn btn-write" disabled={Boolean(busy) || !checkedCommitIds.length} onclick={() => void startCommit(checkedIds)}>
+								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedCommitIds.length} onclick={() => void startCommit(checkedIds)}>
 									<Icon icon="lucide:git-commit-horizontal" />
 									Commit{checkedCommitIds.length ? ` (${checkedCommitIds.length})` : ''}
 								</button>
 							</Tooltip>
 							<Tooltip title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish.">
-								<button class="btn btn-write" disabled={Boolean(busy) || !checkedIds.length} onclick={() => startBump(checkedIds)}>
+								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedIds.length} onclick={() => startBump(checkedIds)}>
 									<Icon icon="lucide:chevrons-up" />
 									Bump{checkedIds.length ? ` (${checkedIds.length})` : ''}
 								</button>
 							</Tooltip>
 							<Tooltip title="Shows which checked repos would push to origin. The count is how many are ahead, not how many are checked. Confirm in the modal. Never --force.">
-								<button class="btn btn-write" disabled={Boolean(busy) || !checkedPushIds.length} onclick={() => startPush(checkedIds)}>
+								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedPushIds.length} onclick={() => startPush(checkedIds)}>
 									<Icon icon="lucide:upload" />
 									Push{checkedPushIds.length ? ` (${checkedPushIds.length})` : ''}
 								</button>
 							</Tooltip>
 							<Tooltip title="Shows bump, push, and npm publish for the checked public packages. Confirm in the modal.">
-								<button class="btn btn-write" disabled={Boolean(busy) || !checkedPublishIds.length} onclick={() => startPublish(checkedPublishIds)}>
+								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedPublishIds.length} onclick={() => startPublish(checkedPublishIds)}>
 									<Icon icon="lucide:package-up" />
 									Publish{checkedPublishIds.length ? ` (${checkedPublishIds.length})` : ''}
 								</button>
 							</Tooltip>
 							<Tooltip title="Runs pnpm ship for checked repos that have the script (wrangler / Pages). Confirm in the modal. Not FilePress Land.">
-								<button class="btn btn-write" disabled={Boolean(busy) || !checkedShipIds.length} onclick={() => void startShip(checkedShipIds)}>
+								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedShipIds.length} onclick={() => void startShip(checkedShipIds)}>
 									<Icon icon="lucide:ship" />
 									Ship{checkedShipIds.length ? ` (${checkedShipIds.length})` : ''}
 								</button>
 							</Tooltip>
 							<Tooltip title="Installs or updates the checked CLIs on this machine (pnpm add -g). Confirm in the modal. Never --force.">
-								<button class="btn btn-write" disabled={Boolean(busy) || !checkedGlobalIds.length} onclick={() => void startGlobal(checkedGlobalIds)}>
+								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedGlobalIds.length} onclick={() => void startGlobal(checkedGlobalIds)}>
 									<Icon icon="lucide:hard-drive-download" />
 									Install global{checkedGlobalIds.length ? ` (${checkedGlobalIds.length})` : ''}
 								</button>
@@ -2283,7 +2327,7 @@
 												<Tooltip title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish.">
 													<button
 														class="btn btn-sm btn-write"
-														disabled={Boolean(busy) || Boolean(row.pending)}
+														disabled={Boolean(busy) || demoBoard || Boolean(row.pending)}
 														onclick={() => startBump([row.id])}
 													>
 														{bumpTo ? `Bump ${bumpTo}` : 'Bump'}

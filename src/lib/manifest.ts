@@ -5,6 +5,7 @@ import {
 	isDir,
 	pathExists,
 } from './pkg.js';
+import { LIVE_MANIFEST_NAME, demoManifestPath, isDemoMode } from './demoMode.js';
 import {
 	joinRoot,
 	manifestName,
@@ -77,15 +78,32 @@ export async function readManifestFile(filePath: string): Promise<LoadedManifest
 	return { manifest, manifestPath: toPosix(filePath), workspaceRoot };
 }
 
-export async function findManifest(cwd = process.cwd()): Promise<LoadedManifest | null> {
+async function findNamedManifest(cwd: string, name: string): Promise<LoadedManifest | null> {
 	let dir = resolveUserPath(cwd);
 	for (let i = 0; i < 64; i += 1) {
-		const candidate = toPosix(path.join(dir, manifestName()));
+		const candidate = toPosix(path.join(dir, name));
 		if (await pathExists(candidate)) return readManifestFile(candidate);
 		const parent = parentDir(dir);
 		if (parent === dir) break;
 		dir = parent;
 	}
+	return null;
+}
+
+export async function findManifest(cwd = process.cwd()): Promise<LoadedManifest | null> {
+	if (isDemoMode()) {
+		const live = await findNamedManifest(cwd, LIVE_MANIFEST_NAME);
+		const workspace = live?.workspaceRoot ?? resolveUserPath(cwd);
+		const demoPath = demoManifestPath(workspace);
+		if (await pathExists(demoPath)) return readManifestFile(demoPath);
+		return {
+			manifest: emptyManifest(),
+			manifestPath: demoPath,
+			workspaceRoot: toPosix(workspace),
+		};
+	}
+	const found = await findNamedManifest(cwd, LIVE_MANIFEST_NAME);
+	if (found) return found;
 	const globalPath = userGlobalManifestPath();
 	if (await pathExists(globalPath)) return readManifestFile(globalPath);
 	return null;

@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import {
 	acquireJobLock,
+	assertDemoAllowsRepoWrite,
 	findManifest,
 	operatorCwd,
 	requireManifest,
@@ -21,7 +22,12 @@ export async function loadRequired(): Promise<LoadedManifest> {
 	return requireManifest(operatorCwd());
 }
 
-export async function withLockAt<T>(root: string, fn: () => Promise<T>): Promise<T> {
+export async function withLockAt<T>(
+	root: string,
+	fn: () => Promise<T>,
+	opts?: { allowInDemo?: boolean },
+): Promise<T> {
+	if (!opts?.allowInDemo) assertDemoAllowsRepoWrite();
 	const lock = await acquireJobLock(root);
 	try {
 		return await fn();

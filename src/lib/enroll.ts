@@ -2,7 +2,8 @@ import path from 'node:path';
 import type { LoadedManifest } from './manifest.js';
 import { emptyManifest, writeManifest } from './manifest.js';
 import { isDir, pathExists, readPkg, rootPkgPath } from './pkg.js';
-import { manifestName, parentDir, relativeToRoot, resolveUserPath, slugId, toPosix } from './paths.js';
+import { activeManifestName } from './demoMode.js';
+import { parentDir, relativeToRoot, resolveUserPath, slugId, toPosix } from './paths.js';
 import type { EnrollPlan, FleetManifest, FleetProject } from './types.js';
 
 export type EnrollRequest = {
@@ -14,12 +15,13 @@ export type EnrollRequest = {
 };
 
 export function inferManifestPath(absPaths: string[], cwd: string): string {
-	if (absPaths.length === 0) return toPosix(path.join(cwd, manifestName()));
+	const name = activeManifestName();
+	if (absPaths.length === 0) return toPosix(path.join(cwd, name));
 	const parents = absPaths.map((p) => parentDir(p));
 	if (parents.every((p) => p === parents[0])) {
-		return toPosix(path.join(parents[0], manifestName()));
+		return toPosix(path.join(parents[0], name));
 	}
-	return toPosix(path.join(cwd, manifestName()));
+	return toPosix(path.join(cwd, name));
 }
 
 /** Relative enroll names are workspace folders, not folders under the Helm checkout. */
@@ -127,5 +129,5 @@ export async function applyUnenroll(plan: EnrollPlan, loaded: LoadedManifest): P
 }
 
 export function defaultManifestPath(cwd = process.cwd()): string {
-	return toPosix(path.join(cwd, manifestName()));
+	return toPosix(path.join(cwd, activeManifestName()));
 }

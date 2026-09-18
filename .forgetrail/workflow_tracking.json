@@ -1955,6 +1955,20 @@
         "Guided tour"
       ],
       "status": "active"
+    },
+    {
+      "id": "d141",
+      "timestamp": "2026-09-18T21:00:00Z",
+      "phase": "2-scaffolding",
+      "session": 50,
+      "decision": "Demo board is a toggle (or serve --demo): localhelm.fleet.demo.json and .localhelm/demo/ beside the live workspace. Enroll/unenroll allowed. Repo-mutating writes refused.",
+      "rationale": "Operator 2026-09-18: try first-run Add/Remove without touching the main fleet.",
+      "alternatives_considered": [
+        "Second serve from a temp cwd only",
+        "Copy repos into a sandbox",
+        "Allow all writes in demo"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

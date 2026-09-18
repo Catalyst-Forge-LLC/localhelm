@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { helmStateDir } from './demoMode.js';
 import { toPosix } from './paths.js';
 
 export const PLUGIN_PREFS_FILE = 'plugins.json';
@@ -10,7 +11,7 @@ export type PluginPrefs = {
 };
 
 export function pluginPrefsPath(workspaceRoot: string): string {
-	return toPosix(path.join(workspaceRoot, '.localhelm', PLUGIN_PREFS_FILE));
+	return toPosix(path.join(helmStateDir(workspaceRoot), PLUGIN_PREFS_FILE));
 }
 
 function emptyPrefs(): PluginPrefs {

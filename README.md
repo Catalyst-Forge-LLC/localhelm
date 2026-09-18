@@ -32,6 +32,8 @@ localhelm status
 localhelm serve --free-port             # stop the named pid on that port, then serve
 ```
 
+Menu **Demo board** (or `localhelm serve --demo`) is a sandbox fleet (`localhelm.fleet.demo.json`). Add and remove stay off the main file. Commit, publish, push, and Land stay off.
+
 `localhelm serve` opens the dashboard on port 4321. A global install runs the packaged board (SSR deps are bundled; no `app/` needed). A checkout still uses Vite. Serve from the same tree as `localhelm.fleet.json` (or a child) or the board stays empty. If that port is already taken, serve names the pid and stops. Re-run with `--free-port` to stop it and bind. Never `--force`. Writes stay on loopback.
 
 Skip folders with `.localhelmignore` at the workspace, or `~/.localhelm/ignore`.

@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { helmStateDir } from './demoMode.js';
 import { toPosix } from './paths.js';
 
 const LAND_SHIPS_FILE = 'land-ships.json';
@@ -20,7 +21,7 @@ export type LandShipsFile = {
 };
 
 export function landShipsPath(workspaceRoot: string): string {
-	return toPosix(path.join(workspaceRoot, '.localhelm', LAND_SHIPS_FILE));
+	return toPosix(path.join(helmStateDir(workspaceRoot), LAND_SHIPS_FILE));
 }
 
 function parseRecord(row: unknown): LandShipRecord | null {

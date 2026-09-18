@@ -32,6 +32,7 @@
 		onGauge,
 		onAdd,
 		noFleet = false,
+		demoBoard = false,
 		children,
 	}: {
 		busy: string;
@@ -59,6 +60,7 @@
 		onGauge: (id: BridgeGauge['id']) => void;
 		onAdd?: () => void;
 		noFleet?: boolean;
+		demoBoard?: boolean;
 		children: import('svelte').Snippet;
 	} = $props();
 
@@ -68,7 +70,15 @@
 		if (statusNote) return statusNote.endsWith('…') ? statusNote : `${statusNote}…`;
 		if (error) return error;
 		if (statusReady) {
-			return bridgeIdleLine({ fleetCount, hiddenCount, fetchedAt, staleCount, npmUser, noFleet });
+			return bridgeIdleLine({
+				fleetCount,
+				hiddenCount,
+				fetchedAt,
+				staleCount,
+				npmUser,
+				noFleet,
+				demo: demoBoard,
+			});
 		}
 		return 'Reading fleet…';
 	});
@@ -190,13 +200,13 @@
 					</button>
 				</Tooltip>
 				<Tooltip title="Shows which clean, behind repos would fast-forward. Confirm in the modal to pull.">
-					<button class="btn btn-write" disabled={Boolean(busy)} onclick={onPull}>
+					<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={onPull}>
 						<Icon icon="lucide:git-pull-request" />
 						Pull
 					</button>
 				</Tooltip>
 				<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.">
-					<button class="btn btn-write" disabled={Boolean(busy)} onclick={onPush}>
+					<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={onPush}>
 						<Icon icon="lucide:upload" />
 						Push
 					</button>

@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { helmStateDir } from './demoMode.js';
 import { toPosix } from './paths.js';
 
 export const ARCHIVE_FILE = 'archive.json';
@@ -11,7 +12,7 @@ export type ArchiveFile = {
 };
 
 export function archivePath(workspaceRoot: string): string {
-	return toPosix(path.join(workspaceRoot, '.localhelm', ARCHIVE_FILE));
+	return toPosix(path.join(helmStateDir(workspaceRoot), ARCHIVE_FILE));
 }
 
 function emptyFile(): ArchiveFile {

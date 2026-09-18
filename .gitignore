@@ -28,4 +28,5 @@ Thumbs.db
 
 .localhelm/
 /localhelm.fleet.json
+/localhelm.fleet.demo.json
 

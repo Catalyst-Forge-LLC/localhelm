@@ -274,6 +274,19 @@ export type { PortOccupant } from './servePort.js';
 export { fleetStatus, statusPhaseLabel } from './status.js';
 export type { StatusPhase, StatusProgress } from './status.js';
 export { operatorCwd } from './workspace.js';
+export {
+	DEMO_HEADER,
+	DEMO_MANIFEST_NAME,
+	LIVE_MANIFEST_NAME,
+	assertDemoAllowsRepoWrite,
+	demoManifestPath,
+	demoRepoWriteError,
+	envDemoOn,
+	helmStateDir,
+	isDemoMode,
+	requestWantsDemo,
+	runWithDemo,
+} from './demoMode.js';
 export type { BumpKind } from './semver.js';
 export type {
 	EnrollPlan,

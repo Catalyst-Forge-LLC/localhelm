@@ -10,10 +10,14 @@ export const POST: RequestHandler = async ({ request }) => {
 		const loaded = await loadRequired();
 		const plan = await planUnenroll(body.ids, loaded);
 		if (body.apply) {
-			await withLockAt(loaded.workspaceRoot, async () => {
-				await applyUnenroll(plan, loaded);
-				plan.writes = true;
-			});
+			await withLockAt(
+				loaded.workspaceRoot,
+				async () => {
+					await applyUnenroll(plan, loaded);
+					plan.writes = true;
+				},
+				{ allowInDemo: true },
+			);
 		}
 		return json(plan);
 	} catch (err) {

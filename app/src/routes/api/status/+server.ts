@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { fleetStatus, npmWhoami, readLandPendingReasons, readLandPendingSiteIds, readLandShipFingerprints } from '../../../../../src/lib/index.js';
+import { fleetStatus, isDemoMode, npmWhoami, readLandPendingReasons, readLandPendingSiteIds, readLandShipFingerprints } from '../../../../../src/lib/index.js';
 import { errJson, loadOptional, operatorCwd } from '$lib/server/helm';
 
 type Loaded = NonNullable<Awaited<ReturnType<typeof loadOptional>>>;
@@ -39,6 +39,7 @@ type StatusBody = {
 	host: string | null;
 	port: string | null;
 	portSource: string | null;
+	demo: boolean;
 };
 
 async function statusBody(
@@ -77,6 +78,7 @@ async function statusBody(
 		landPending,
 		landPendingReasons,
 		landShipFingerprints,
+		demo: isDemoMode(),
 		...listen(),
 	};
 }
@@ -92,6 +94,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				scanRoot: cwd,
 				cwd,
 				npmUser: currentNpmUser(),
+				demo: isDemoMode(),
 				...listen(),
 			});
 		}

@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { helmStateDir } from './demoMode.js';
 import { toPosix } from './paths.js';
 
 export const LOCAL_ONLY_FILE = 'local-only.json';
@@ -11,7 +12,7 @@ export type LocalOnlyFile = {
 };
 
 export function localOnlyPath(workspaceRoot: string): string {
-	return toPosix(path.join(workspaceRoot, '.localhelm', LOCAL_ONLY_FILE));
+	return toPosix(path.join(helmStateDir(workspaceRoot), LOCAL_ONLY_FILE));
 }
 
 function emptyFile(): LocalOnlyFile {

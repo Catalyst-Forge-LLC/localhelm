@@ -1,5 +1,6 @@
 import { mkdir, open, readFile, unlink } from 'node:fs/promises';
 import path from 'node:path';
+import { helmStateDir } from './demoMode.js';
 import { toPosix } from './paths.js';
 
 export type JobLock = {
@@ -59,7 +60,7 @@ async function createLockFile(lockPath: string): Promise<void> {
 export async function clearStaleJobLock(
 	workspaceRoot: string,
 ): Promise<{ path: string; cleared: boolean; pid?: number }> {
-	const lockPath = toPosix(path.join(workspaceRoot, '.localhelm', 'job.lock'));
+	const lockPath = toPosix(path.join(helmStateDir(workspaceRoot), 'job.lock'));
 	const holder = await readJobLockHolder(lockPath);
 	if (!holder) return { path: lockPath, cleared: false };
 	if (isPidAlive(holder.pid)) return { path: lockPath, cleared: false, pid: holder.pid };
@@ -72,7 +73,7 @@ export async function clearStaleJobLock(
 }
 
 export async function acquireJobLock(workspaceRoot: string): Promise<JobLock> {
-	const dir = toPosix(path.join(workspaceRoot, '.localhelm'));
+	const dir = helmStateDir(workspaceRoot);
 	await mkdir(dir, { recursive: true });
 	const lockPath = toPosix(path.join(dir, 'job.lock'));
 	try {

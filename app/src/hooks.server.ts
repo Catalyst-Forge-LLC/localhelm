@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { Handle } from '@sveltejs/kit';
+import { requestWantsDemo, runWithDemo } from '../../src/lib/demoMode.js';
 import { isOperatorFace, readClientAddress } from '../../src/lib/loopback.js';
 
 const OPEN_API = new Set(['/api/visitor']);
@@ -11,5 +12,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 			return json({ error: 'This API is for the operator board on loopback.' }, { status: 403 });
 		}
 	}
-	return resolve(event);
+	const demo = requestWantsDemo(event.request.headers, event.url);
+	return runWithDemo(demo, () => resolve(event));
 };

@@ -128,6 +128,16 @@ describe('fleetDisplay', () => {
 			}),
 			'No fleet yet · Add projects on Today',
 		);
+		assert.equal(
+			bridgeIdleLine({
+				fleetCount: 0,
+				fetchedAt: null,
+				npmUser: null,
+				noFleet: true,
+				demo: true,
+			}),
+			'Demo · No fleet yet · Add projects on Today',
+		);
 	});
 
 	it('maps gauge need to a 0..1 arc share', () => {

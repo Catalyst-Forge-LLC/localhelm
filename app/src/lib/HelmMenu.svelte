@@ -19,6 +19,8 @@
 		onCopyBrief,
 		onFetchRemotes,
 		onExport,
+		demoBoard = false,
+		onToggleDemo,
 	}: {
 		plugins: PluginItem[];
 		busy?: boolean;
@@ -32,6 +34,8 @@
 		onCopyBrief: () => void;
 		onFetchRemotes: () => void;
 		onExport: () => void;
+		demoBoard?: boolean;
+		onToggleDemo?: (next: boolean) => void;
 	} = $props();
 
 	let open = $state(false);
@@ -111,6 +115,23 @@
 			</p>
 
 			<p class="heading spaced">Board</p>
+			{#if onToggleDemo}
+				<label class="row demo-toggle">
+					<input
+						type="checkbox"
+						checked={demoBoard}
+						disabled={busy}
+						onchange={(event) => {
+							close();
+							onToggleDemo(event.currentTarget.checked);
+						}}
+					/>
+					<span class="copy">
+						<span class="name">Demo board</span>
+						<span class="id">Add and remove without writing the main fleet. Commit, publish, and Land stay off.</span>
+					</span>
+				</label>
+			{/if}
 			<div class="actions">
 				<a class="item" href="/deck" onclick={close}>
 					<Icon icon="lucide:layout-grid" />
@@ -120,7 +141,7 @@
 					<Icon icon="lucide:clipboard" />
 					{briefCopied ? 'Copied brief' : 'Copy brief'}
 				</button>
-				<button type="button" class="item" disabled={busy} onclick={() => { close(); onFetchRemotes(); }}>
+				<button type="button" class="item" disabled={busy || demoBoard} onclick={() => { close(); onFetchRemotes(); }}>
 					<Icon icon="lucide:cloud-download" />
 					Fetch remotes
 				</button>

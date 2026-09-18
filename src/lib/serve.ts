@@ -112,8 +112,9 @@ function serveEnv(host: string, port: number, source: PortSource): NodeJS.Proces
 }
 
 export async function serveDashboard(
-	opts: { host?: string; port?: number; freePort?: boolean } = {},
+	opts: { host?: string; port?: number; freePort?: boolean; demo?: boolean } = {},
 ): Promise<void> {
+	if (opts.demo) process.env.LOCALHELM_DEMO = '1';
 	const host = opts.host ?? DEFAULT_DASHBOARD_HOST;
 	const { port, source } = choosePort(opts.port);
 	const { freed } = await ensureServePort(host, port, Boolean(opts.freePort));
@@ -142,7 +143,9 @@ export async function serveDashboard(
 		host === '0.0.0.0' || host === '::'
 			? `http://127.0.0.1:${port}${how}  (all interfaces)`
 			: `http://${host}:${port}${how}`;
-	console.error(`localhelm serve  ${where}${dash.mode === 'built' ? '  (packaged)' : ''}`);
+	console.error(
+		`localhelm serve  ${where}${dash.mode === 'built' ? '  (packaged)' : ''}${opts.demo || process.env.LOCALHELM_DEMO === '1' ? '  (demo)' : ''}`,
+	);
 	await new Promise<void>((resolve, reject) => {
 		child.on('exit', (code) => {
 			if (code === 0 || code === null) resolve();

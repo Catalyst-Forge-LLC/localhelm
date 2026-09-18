@@ -86,6 +86,7 @@ export type BridgeIdleInput = {
 	npmUser: string | null;
 	/** No manifest, or a manifest with zero rows. Not “all archived.” */
 	noFleet?: boolean;
+	demo?: boolean;
 };
 
 export type BridgeGauge = {
@@ -106,8 +107,10 @@ export const BRIDGE_GAUGE_C = 2 * Math.PI * 14;
 
 /** Keel idle copy. Order: Fleet N · hidden · remotes · stale · npm */
 export function bridgeIdleLine(input: BridgeIdleInput): string {
-	if (input.noFleet) return 'No fleet yet · Add projects on Today';
-	const parts = [`Fleet ${input.fleetCount}`];
+	if (input.noFleet) {
+		return input.demo ? 'Demo · No fleet yet · Add projects on Today' : 'No fleet yet · Add projects on Today';
+	}
+	const parts = input.demo ? [`Demo · Fleet ${input.fleetCount}`] : [`Fleet ${input.fleetCount}`];
 	if ((input.hiddenCount ?? 0) > 0) parts.push(`${input.hiddenCount} hidden`);
 	parts.push(input.fetchedAt ? `remotes fetched ${input.fetchedAt}` : 'remotes not fetched this session');
 	if ((input.staleCount ?? 0) > 0) parts.push(`${input.staleCount} could not be read`);

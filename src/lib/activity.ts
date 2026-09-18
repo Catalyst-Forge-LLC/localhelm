@@ -1,5 +1,6 @@
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { helmStateDir } from './demoMode.js';
 import { toPosix } from './paths.js';
 
 export const ACTIVITY_LIMIT = 200;
@@ -17,7 +18,7 @@ type ActivityFile = {
 };
 
 export function activityPath(workspaceRoot: string): string {
-	return toPosix(path.join(workspaceRoot, '.localhelm', ACTIVITY_FILE));
+	return toPosix(path.join(helmStateDir(workspaceRoot), ACTIVITY_FILE));
 }
 
 function emptyFile(): ActivityFile {

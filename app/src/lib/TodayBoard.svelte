@@ -22,6 +22,7 @@
 		needPublishIds,
 		needPushIds,
 		noFleet = false,
+		demoBoard = false,
 		attentionEmpty,
 		filteredEmpty,
 		filteredAttentionRows,
@@ -63,6 +64,7 @@
 		needFilterCounts: { all: number; publish: number; push: number; pins: number };
 		needBulkWrites: boolean;
 		noFleet?: boolean;
+		demoBoard?: boolean;
 		needCommitIds: string[];
 		needPublishIds: string[];
 		needPushIds: string[];
@@ -210,10 +212,20 @@
 				<p class="dim small"><CellWait label="Reading fleet…" showLabel /></p>
 			{:else if noFleet}
 				<p class="quiet-banner">
-					No fleet yet. Serve from the folder that contains your repos, then Add projects. LocalSlip and FilePress are optional later.
+					{#if demoBoard}
+						Demo board — enrollments write <code>localhelm.fleet.demo.json</code>, not your main fleet. Repo writes stay off.
+					{:else}
+						No fleet yet. Serve from the folder that contains your repos, then Add projects. LocalSlip and FilePress are optional later.
+					{/if}
 				</p>
 			{:else if attentionEmpty}
-				<p class="quiet-banner">All quiet on the fleet. Looks, FilePress, and LocalSlip stay in the other panes.</p>
+				<p class="quiet-banner">
+					{#if demoBoard}
+						Demo board is quiet. Add or remove here does not touch your main fleet.
+					{:else}
+						All quiet on the fleet. Looks, FilePress, and LocalSlip stay in the other panes.
+					{/if}
+				</p>
 			{:else if filteredEmpty}
 				<p class="dim small">
 					{#if needFilter === 'publish'}
