@@ -46,9 +46,10 @@ describe('fleetDisplay', () => {
 	it('only lists header chips that need work', () => {
 		assert.deepEqual(
 			headerNeedChips({
-				unpublishedAhead: 0,
+				publish: 0,
+				push: 0,
+				pins: 0,
 				dirty: 0,
-				cascadeBehind: 0,
 				missing: 0,
 				npmErrors: 0,
 			}),
@@ -56,30 +57,33 @@ describe('fleetDisplay', () => {
 		);
 		assert.deepEqual(
 			headerNeedChips({
-				unpublishedAhead: 2,
+				publish: 4,
+				push: 4,
+				pins: 0,
 				dirty: 1,
-				cascadeBehind: 0,
 				missing: 0,
 				npmErrors: 0,
 			}),
 			[
 				{
-					id: 'unpublished',
-					label: '2 unpublished',
-					count: 2,
-					word: 'unpublished',
+					id: 'publish',
+					label: '4 publish',
+					count: 4,
+					word: 'publish',
 					tone: 'hot',
 					tab: 'today',
 					need: 'publish',
 				},
-				{ id: 'dirty', label: '1 dirty', count: 1, word: 'dirty', tone: 'warm', tab: 'today', need: 'push' },
+				{ id: 'push', label: '4 push', count: 4, word: 'push', tone: 'hot', tab: 'today', need: 'push' },
+				{ id: 'dirty', label: '1 dirty', count: 1, word: 'dirty', tone: 'warm', tab: 'today', need: 'all' },
 			],
 		);
 		assert.deepEqual(
 			headerNeedChips({
-				unpublishedAhead: 0,
+				publish: 0,
+				push: 0,
+				pins: 3,
 				dirty: 0,
-				cascadeBehind: 3,
 				missing: 0,
 				npmErrors: 0,
 			}),

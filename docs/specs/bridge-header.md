@@ -145,15 +145,16 @@ Internal / spec terms (binnacle, keel, conn) may appear in docs and class names.
 
 ### 5.2 Situation (center / binnacle)
 
-- Need chips become **instrument lamps** with counts: unpublished, dirty, pins behind, missing, npm errors.
-- Same data as `headerNeedChips` in `src/lib/fleetDisplay.ts` — still hide zeros.
-- Each lamp is a `<button>` (not a div with a dot) with an `aria-label` that includes the count and destination, e.g. `3 unpublished — open Today`.
+- Need chips become **instrument lamps** with counts: publish, push, dirty, pins behind, missing, npm errors.
+- Same data as `headerNeedChips` in `src/lib/fleetDisplay.ts` — still hide zeros. Counts are **Today’s write lists** (`canPublish` / `canPush` / `canCommit` / pin-behind), not digest `unpublishedAhead` (local semver > npm) or digest `dirty` mapped to Push.
+- Each lamp is a `<button>` (not a div with a dot) with an `aria-label` that includes the count and destination, e.g. `4 publish — open Today`.
 - **Click → Today with the matching filter** (`NeedFilter` in `src/lib/dashboardTypes.ts`):
 
   | Lamp | Today filter |
   | ---- | ------------ |
-  | unpublished | `publish` |
-  | dirty | `push` |
+  | publish | `publish` |
+  | push | `push` |
+  | dirty | `all` (no commit filter; Today still lists Commit dirty) |
   | pins behind | `pins` (sets `?need=pins`, unchanged) |
   | missing | `all` |
   | npm errors | `all` |
@@ -162,7 +163,7 @@ Internal / spec terms (binnacle, keel, conn) may appear in docs and class names.
 
   | Tone | Existing class | Lamps |
   | ---- | -------------- | ----- |
-  | gold | `hot` / `warm` | unpublished, dirty, pins behind — a write is waiting |
+  | gold | `hot` / `warm` | publish, push, dirty, pins behind — a write is waiting |
   | red | `bad` | missing, npm errors — something is broken |
   | cyan | `info` | live / reading |
   | dim | — | All quiet: dim ice, steady dot |
@@ -259,7 +260,7 @@ These prevent the most likely wrong builds. Treat them as acceptance, not advice
 | npm whoami | `npmUser` (menu) | Ident heading + keel idle |
 | Remotes age | `fetchedAt` (menu) | Keel idle |
 | Stale remotes | `staleRemotes` (rail) | Keel |
-| Digest needs | `headerNeedChips` | Situation lamps |
+| Today write counts | `headerNeedChips` | Situation lamps |
 | Live Refresh phases | `statusNote` | Keel busy |
 
 ### Stay in the locker
@@ -297,7 +298,7 @@ Locked 2026-09-14 from operator answers. Narrow stack is the override; the other
 ## 8. Acceptance (when built)
 
 1. With a loaded fleet and quiet digest, `[data-bridge="keel"]` shows the §5.4 idle line (Fleet N / remotes / npm) and `[data-bridge="situation"]` shows one All quiet lamp — no blank keel spacer.
-2. With unpublished / dirty / pins behind, situation shows those lamps; each click opens Today with the §5.2 filter (`publish` / `push` / `pins`).
+2. With publish / push / dirty / pins behind, situation shows those lamps; each click opens Today with the §5.2 filter (`publish` / `push` / `all` / `pins`).
 3. Refresh updates the keel through packages → npm → git → Sites and Ports, then returns to idle keel copy. Lamps do **not** disappear or flash All quiet while it runs.
 4. An error set during a read stays on the keel until the next read or write starts.
 5. Locker still exposes plugins, Deck, brief, fetch remotes, export, fleet path.

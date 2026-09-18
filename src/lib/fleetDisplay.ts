@@ -22,10 +22,12 @@ export function fleetVersionNote(row: FleetVersionRow): string | null {
 	return null;
 }
 
-export type FleetDigestCounts = {
-	unpublishedAhead: number;
+/** Situation lamps: same lists as Today’s write buttons, plus broken-folder / npm errors. */
+export type HeaderNeedCounts = {
+	publish: number;
+	push: number;
+	pins: number;
 	dirty: number;
-	cascadeBehind: number;
 	missing: number;
 	npmErrors: number;
 };
@@ -51,30 +53,27 @@ function needChip(
 }
 
 /** Header only shows work. Zero counts stay off the chrome. */
-export function headerNeedChips(digest: FleetDigestCounts): HeaderNeedChip[] {
+export function headerNeedChips(counts: HeaderNeedCounts): HeaderNeedChip[] {
 	const chips: HeaderNeedChip[] = [];
-	if (digest.unpublishedAhead > 0) {
-		chips.push(needChip('unpublished', digest.unpublishedAhead, 'unpublished', 'hot', 'publish'));
+	if (counts.publish > 0) {
+		chips.push(needChip('publish', counts.publish, 'publish', 'hot', 'publish'));
 	}
-	if (digest.dirty > 0) {
-		chips.push(needChip('dirty', digest.dirty, 'dirty', 'warm', 'push'));
+	if (counts.push > 0) {
+		chips.push(needChip('push', counts.push, 'push', 'hot', 'push'));
 	}
-	if (digest.cascadeBehind > 0) {
+	if (counts.dirty > 0) {
+		chips.push(needChip('dirty', counts.dirty, 'dirty', 'warm', 'all'));
+	}
+	if (counts.pins > 0) {
 		chips.push(
-			needChip(
-				'pins',
-				digest.cascadeBehind,
-				digest.cascadeBehind === 1 ? 'pin behind' : 'pins behind',
-				'warm',
-				'pins',
-			),
+			needChip('pins', counts.pins, counts.pins === 1 ? 'pin behind' : 'pins behind', 'warm', 'pins'),
 		);
 	}
-	if (digest.missing > 0) {
-		chips.push(needChip('missing', digest.missing, 'missing', 'bad', 'all'));
+	if (counts.missing > 0) {
+		chips.push(needChip('missing', counts.missing, 'missing', 'bad', 'all'));
 	}
-	if (digest.npmErrors > 0) {
-		chips.push(needChip('npm', digest.npmErrors, 'npm errors', 'bad', 'all'));
+	if (counts.npmErrors > 0) {
+		chips.push(needChip('npm', counts.npmErrors, 'npm errors', 'bad', 'all'));
 	}
 	return chips;
 }

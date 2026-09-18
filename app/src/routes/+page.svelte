@@ -230,7 +230,6 @@
 					: '';
 		return `${where}${lease}`;
 	});
-	const needChips = $derived(inventory ? headerNeedChips(inventory.digest) : []);
 	const cascadeTargets = $derived.by((): CascadeTarget[] => {
 		const projects = inventory?.projects ?? [];
 		return projects
@@ -288,19 +287,6 @@
 	const portsNeedingYou = $derived((leaseBoard?.rows ?? []).filter((row) => portNeedsYou(row.cells)));
 	const siteCount = $derived(visibleSiteRows.length);
 	const slipCount = $derived(leaseBoardAll?.rows.length ?? 0);
-	const fleetNeed = $derived(
-		inventory
-			? inventory.digest.unpublishedAhead +
-				inventory.digest.dirty +
-				inventory.digest.cascadeBehind +
-				inventory.digest.missing
-			: 0,
-	);
-	const bridgeGauges = $derived.by((): BridgeGauge[] => [
-		{ id: 'fleet', label: 'Fleet', count: fleetCount, need: fleetNeed },
-		{ id: 'sites', label: 'Sites', count: siteCount, need: sitesNeedingYou.length },
-		{ id: 'slips', label: 'Slips', count: slipCount, need: portsNeedingYou.length },
-	]);
 	const portFamilyCards = $derived(
 		portFamilies({
 			fleetIds: visibleProjects.map((row) => row.id),
@@ -363,6 +349,30 @@
 	const needBulkWrites = $derived(
 		needCommitIds.length + needPublishIds.length + needPushIds.length > 0,
 	);
+	const needChips = $derived(
+		inventory
+			? headerNeedChips({
+					publish: needPublishIds.length,
+					push: needPushIds.length,
+					pins: needFilterCounts.pins,
+					dirty: needCommitIds.length,
+					missing: inventory.digest.missing,
+					npmErrors: inventory.digest.npmErrors,
+				})
+			: [],
+	);
+	const fleetNeed = $derived(
+		needPublishIds.length +
+			needPushIds.length +
+			needCommitIds.length +
+			needFilterCounts.pins +
+			(inventory?.digest.missing ?? 0),
+	);
+	const bridgeGauges = $derived.by((): BridgeGauge[] => [
+		{ id: 'fleet', label: 'Fleet', count: fleetCount, need: fleetNeed },
+		{ id: 'sites', label: 'Sites', count: siteCount, need: sitesNeedingYou.length },
+		{ id: 'slips', label: 'Slips', count: slipCount, need: portsNeedingYou.length },
+	]);
 	const fleetIds = $derived(visibleProjects.map((row) => row.id));
 	const siteIds = $derived(visibleSiteRows.map((row) => row.id));
 	const leaseIds = $derived((leaseBoardAll?.rows ?? []).map((row) => row.id));

@@ -164,6 +164,10 @@
         {
           "timestamp": "2026-08-26T21:25:00Z",
           "text": "Needs you filter All/Publish/Cut/Push via ?need= (d47)."
+        },
+        {
+          "timestamp": "2026-09-18T19:10:00Z",
+          "text": "Header lamps match Today write lists (d137): publish/push/dirty, not digest unpublishedAhead."
         }
       ]
     },
@@ -1885,6 +1889,20 @@
         "Reuse Archive (d135)",
         "Per-action no-publish / no-ship / no-land bits",
         "Quiet flag on fleet.json"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "d137",
+      "timestamp": "2026-09-18T19:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 49,
+      "decision": "Header situation lamps are Today write counts: publish (canPublish), push (canPush), dirty (canCommit → Today all), pins behind, plus missing and npm errors. Do not show digest unpublishedAhead as a lamp.",
+      "rationale": "Operator 2026-09-18: 4 to publish and 4 to push, but the header said 1 unpublished. unpublishedAhead is local semver > npm; Publish also includes bump-then-publish. Dirty is commit, not push.",
+      "alternatives_considered": [
+        "Keep unpublishedAhead and add a second publish lamp",
+        "Show only unpublishedAhead plus a note",
+        "Drop header counts entirely"
       ],
       "status": "active"
     }

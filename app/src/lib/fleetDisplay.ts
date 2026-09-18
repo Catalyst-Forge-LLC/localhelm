@@ -8,4 +8,4 @@ export {
 	fleetVersionNote,
 	headerNeedChips,
 } from '../../../src/lib/fleetDisplay.js';
-export type { BridgeGauge, BridgeIdleInput, HeaderNeedChip } from '../../../src/lib/fleetDisplay.js';
+export type { BridgeGauge, BridgeIdleInput, HeaderNeedChip, HeaderNeedCounts } from '../../../src/lib/fleetDisplay.js';
