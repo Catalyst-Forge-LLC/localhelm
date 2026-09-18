@@ -161,7 +161,7 @@
 						<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
 							<button class="btn btn-write" disabled={busy} onclick={() => onCommit(needCommitIds)}>
 								<Icon icon="lucide:git-commit-horizontal" />
-								Commit dirty
+								Commit dirty{needCommitIds.length ? ` (${needCommitIds.length})` : ''}
 							</button>
 						</Tooltip>
 					{/if}
@@ -169,7 +169,7 @@
 						<Tooltip title="Shows bump (when needed), push, and npm publish. Confirm in the modal.">
 							<button class="btn btn-write" disabled={busy} onclick={() => onPublish(needPublishIds)}>
 								<Icon icon="lucide:package-up" />
-								Publish
+								Publish{needPublishIds.length ? ` (${needPublishIds.length})` : ''}
 							</button>
 						</Tooltip>
 					{/if}
@@ -177,7 +177,7 @@
 						<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.">
 							<button class="btn btn-write" disabled={busy} onclick={() => onPush(needPushIds)}>
 								<Icon icon="lucide:upload" />
-								Push ahead
+								Push{needPushIds.length ? ` (${needPushIds.length})` : ''}
 							</button>
 						</Tooltip>
 					{/if}
