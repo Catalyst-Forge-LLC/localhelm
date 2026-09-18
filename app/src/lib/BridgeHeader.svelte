@@ -160,9 +160,6 @@
 			{:else}
 				<p class="reading">Reading…</p>
 			{/if}
-			<div class="bridge-keel status-rail" data-bridge="keel" aria-live="polite">
-				<p class="line {keelKind}" class:live={reading}>{keelText}</p>
-			</div>
 		</div>
 
 		<div class="bridge-scope hud-frame" data-bridge="scope" role="group" aria-label="Fleet, sites, and slips">
@@ -247,6 +244,10 @@
 					<span class="conn-caption">{sparkCaption}</span>
 				</button>
 			</Tooltip>
+		</div>
+
+		<div class="bridge-keel status-rail" data-bridge="keel" aria-live="polite">
+			<p class="line {keelKind}" class:live={reading}>{keelText}</p>
 		</div>
 	</div>
 </header>

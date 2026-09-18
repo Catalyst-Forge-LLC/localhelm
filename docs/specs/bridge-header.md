@@ -229,7 +229,8 @@ Today / Fleet / Sites / Ports / plugin tabs stay the row below the bridge. They 
 
 ### 5.6 Narrow viewport
 
-- **≤ 64rem:** hide gauges, wake spark, and the desk Refresh / Pull / Push / Activity plates. Those four move into the locker. Ident + lamps/keel + menu stay on the glass.
+- **Desktop:** lamps and gauges sit on one row. The keel (remotes / npm / live step) spans **under both**, not inside the lamp bay.
+- **≤ 64rem:** hide gauges, wake spark, and the desk Refresh / Pull / Push / Activity plates. Those four move into the locker. Ident + lamps + menu stay on the glass; keel is full width under.
 - **≤ 40rem:** ident + menu on the first row; keel full width under. Lamps hide (Today already carries the count).
 - No horizontal scroll of the bridge. Do not stack all four bays into a tall column.
 

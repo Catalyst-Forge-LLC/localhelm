@@ -363,4 +363,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 
 - First-run is dashboard-first (d140). Empty fleet is not All quiet: Today offers **Add projects**, header lamp **No fleet**, keel names Add. Sites/Ports plugin nags wait until a fleet exists. Docs lead with `cd` to the parent of the repos + `localhelm serve`; CLI scan/enroll is optional. Scan field defaults to `.` (serve cwd).
 - Demo board (d141–d142): locker **Main / Demo** pills, or `localhelm serve --demo`. Isolated `localhelm.fleet.demo.json` + `.localhelm/demo/`. Same workspace for scan. Repo writes refused. **Clear demo** confirms, then deletes only those demo paths. Request header `x-localhelm-demo: 1` / `?demo=1`.
-- Bridge lockup is stacked **local** / **HELM**. Narrow widths fold Refresh, Pull, Push, Activity, and gauges into the locker so the header does not collide (d143).
+- Bridge lockup is stacked **local** / **HELM**. Narrow widths fold Refresh, Pull, Push, Activity, and gauges into the locker so the header does not collide (d143). Keel (remotes / npm) spans under lamps + gauges so it is not clipped on mid widths.
