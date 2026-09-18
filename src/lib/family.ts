@@ -13,6 +13,21 @@ export function familyRole(id: string): 'ui' | 'api' | 'site' {
 	return 'ui';
 }
 
+/** FilePress preview slip. `coldeye` claims `coldeye-site`; a name that already ends in `-site` stays. */
+export function siteLeaseName(id: string): string {
+	const value = id.trim();
+	if (!value) return value;
+	return familyRole(value) === 'site' ? value : `${value}-site`;
+}
+
+export function hasExactOrSiteLease(id: string, claimed: Iterable<string>): boolean {
+	const names = [...claimed].map((name) => name.trim()).filter(Boolean);
+	if (names.includes(id) || names.includes(siteLeaseName(id))) return true;
+	const stem = familyStem(id);
+	if (!stem) return false;
+	return names.some((name) => familyRole(name) === 'site' && familyStem(name) === stem);
+}
+
 export function familyMemberNames(seed: string, names: Iterable<string>): string[] {
 	const stem = familyStem(seed);
 	if (!stem) return [];

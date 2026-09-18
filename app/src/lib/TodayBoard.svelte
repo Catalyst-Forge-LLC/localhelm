@@ -52,6 +52,7 @@
 		onOpenCross,
 		onOpenPortsFamily,
 		onOpenPortsStacks,
+		onClaimLease,
 		onOpenAdd,
 	}: {
 		busy: boolean;
@@ -94,6 +95,7 @@
 		onOpenCross: (id: string, kind: 'fleet' | 'sites' | 'ports') => void;
 		onOpenPortsFamily: (ids: string[]) => void;
 		onOpenPortsStacks: () => void;
+		onClaimLease: (leaseName: string) => void;
 		onOpenAdd: () => void;
 	} = $props();
 
@@ -119,6 +121,10 @@
 			onOpenCross(look.title, 'fleet');
 			return;
 		}
+		if (jump.id === 'claim') {
+			onClaimLease(look.leaseName ?? look.title);
+			return;
+		}
 		onOpenPortsFamily(look.leaseIds);
 	}
 </script>
@@ -132,7 +138,7 @@
 					{#if !statusReady}
 						Reading fleet…
 					{:else}
-						Fleet writes you can confirm. Looks, below, is Ports facts with no gold button.
+						Fleet writes you can confirm. Looks, below, is Ports facts. Lease claims a missing site slip.
 					{/if}
 				</p>
 				<div class="need-filters" role="group" aria-label="Needs you filter">
@@ -323,7 +329,12 @@
 								<div class="need-actions">
 									{#each lookJumps(look) as jump (jump.id)}
 										<Tooltip title={jump.title}>
-											<button type="button" class="btn btn-sm" onclick={() => runLookJump(look, jump)}>
+											<button
+												type="button"
+												class="btn btn-sm"
+												class:btn-write={jump.id === 'claim'}
+												onclick={() => runLookJump(look, jump)}
+											>
 												{jump.label}
 											</button>
 										</Tooltip>

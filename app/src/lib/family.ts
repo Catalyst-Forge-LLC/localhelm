@@ -1,1 +1,1 @@
-export { familyMemberNames, familyRole, familyStem, groupIdsByFamily } from '../../../src/lib/family.js';
+export { familyMemberNames, familyRole, familyStem, groupIdsByFamily, hasExactOrSiteLease, siteLeaseName } from '../../../src/lib/family.js';

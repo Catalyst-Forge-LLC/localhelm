@@ -31,7 +31,7 @@ describe('port looks and families', () => {
 		assert.ok(looks.some((look) => look.kind === 'family-split' && look.detail.includes('API down')));
 		assert.ok(looks.some((look) => look.kind === 'lease-without-fleet' && look.title === 'ghost'));
 		assert.ok(!looks.some((look) => look.kind === 'lease-without-fleet' && look.title === 'dictawhisper-api'));
-		assert.ok(looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'temper-pass'));
+		assert.ok(!looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'temper-pass'));
 		assert.ok(!looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'dictawhisper'));
 	});
 
@@ -57,7 +57,8 @@ describe('port looks and families', () => {
 		assert.equal(lookJump('family-split').id, 'stacks');
 		assert.equal(lookJump('cwd-missing', { enrolled: true }).id, 'fleet');
 		assert.equal(lookJump('cwd-missing').id, 'ports');
-		assert.equal(lookJump('fleet-without-lease').id, 'ports');
+		assert.equal(lookJump('fleet-without-lease').id, 'claim');
+		assert.equal(lookJump('fleet-without-lease').label, 'Lease');
 		const mixed = lookJumpsFor(['no-recipe', 'lease-without-fleet']);
 		assert.deepEqual(mixed.map((jump) => jump.id), ['ports', 'add']);
 	});
@@ -68,18 +69,24 @@ describe('port looks and families', () => {
 			leaseRows: [{ id: 'finetuna-site', cells: { listening: 'no', recipe: 'pnpm site:dev', cwdOk: 'yes' } }],
 		});
 		assert.ok(!looks.some((look) => look.kind === 'lease-without-fleet'));
-		assert.ok(looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'finetuna'));
+		assert.ok(!looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'finetuna'));
 	});
 
-	it('lists enrolled fleet and site ids that have no exact lease name', () => {
+	it('only nags FilePress / -site ids that have no site slip', () => {
 		const looks = portLooks({
-			fleetIds: ['detangler', 'acmegeek'],
-			siteIds: ['detangler', 'orphan-site'],
+			fleetIds: ['detangler', 'acmegeek', 'aegis'],
+			siteIds: ['detangler', 'orphan-site', 'coldeye', 'gap-last'],
 			leaseRows: [{ id: 'acmegeek', cells: { listening: 'yes', recipe: '—', cwdOk: 'yes' } }],
-			claimedIds: ['acmegeek', 'parked-only'],
+			claimedIds: ['acmegeek', 'parked-only', 'coldeye-site', 'gaplast-site'],
 		});
-		assert.ok(looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'detangler' && look.detail === 'Enrolled, no port lease'));
-		assert.ok(looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'orphan-site' && look.detail === 'Site has no port lease'));
+		const detangler = looks.find((look) => look.kind === 'fleet-without-lease' && look.title === 'detangler');
+		assert.ok(detangler);
+		assert.equal(detangler.detail, 'Site has no port lease');
+		assert.equal(detangler.leaseName, 'detangler-site');
+		assert.ok(looks.some((look) => look.kind === 'fleet-without-lease' && look.title === 'orphan-site' && look.leaseName === 'orphan-site'));
+		assert.ok(!looks.some((look) => look.title === 'coldeye'));
+		assert.ok(!looks.some((look) => look.title === 'gap-last'));
+		assert.ok(!looks.some((look) => look.title === 'aegis'));
 		assert.ok(!looks.some((look) => look.title === 'acmegeek' && look.kind === 'fleet-without-lease'));
 		assert.ok(!looks.some((look) => look.title === 'parked-only'));
 	});

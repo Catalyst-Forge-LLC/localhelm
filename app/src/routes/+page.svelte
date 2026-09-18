@@ -2065,6 +2065,7 @@
 					addOpen = true;
 				}}
 				onOpenPortsStacks={openPortsStacks}
+				onClaimLease={(leaseName) => void startPluginJob('localslip', 'claim', [leaseName], 'Lease')}
 			/>
 		{:else if tab === 'fleet'}
 			<div class="fleet-layout">

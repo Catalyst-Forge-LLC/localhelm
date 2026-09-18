@@ -1,4 +1,4 @@
-import { familyRole, familyStem, groupIdsByFamily } from './family.js';
+import { familyRole, familyStem, groupIdsByFamily, hasExactOrSiteLease, siteLeaseName } from './family.js';
 
 export type LeaseRowInput = {
 	id: string;
@@ -34,6 +34,8 @@ export type PortLook = {
 	detail: string;
 	leaseIds: string[];
 	kind: PortLookKind;
+	/** LocalSlip name to claim when this look is a missing site slip. */
+	leaseName?: string;
 };
 
 export type PortLookGroup = {
@@ -42,9 +44,10 @@ export type PortLookGroup = {
 	details: string[];
 	kinds: PortLookKind[];
 	leaseIds: string[];
+	leaseName?: string;
 };
 
-export type LookJumpId = 'ports' | 'stacks' | 'fleet' | 'add';
+export type LookJumpId = 'ports' | 'stacks' | 'fleet' | 'add' | 'claim';
 
 export type LookJump = {
 	id: LookJumpId;
@@ -52,7 +55,7 @@ export type LookJump = {
 	title: string;
 };
 
-/** Where the operator can act — Ports cannot enroll, and claim stays on LocalSlip. */
+/** Where the operator can act — Ports cannot enroll. Claim is a LocalSlip plugin write. */
 export function lookJump(kind: PortLookKind, opts?: { enrolled?: boolean }): LookJump {
 	if (kind === 'no-recipe') {
 		return { id: 'ports', label: 'Open Ports', title: 'Save a start recipe on this lease.' };
@@ -65,9 +68,9 @@ export function lookJump(kind: PortLookKind, opts?: { enrolled?: boolean }): Loo
 	}
 	if (kind === 'fleet-without-lease') {
 		return {
-			id: 'ports',
-			label: 'Open Ports',
-			title: 'Helm does not claim ports. Open Ports to see slips; claim this name with localslip claim.',
+			id: 'claim',
+			label: 'Lease',
+			title: 'Claim a LocalSlip port for this site. LocalSlip picks a free port (--or-next).',
 		};
 	}
 	if (kind === 'cwd-missing' && opts?.enrolled) {
@@ -207,14 +210,17 @@ export function portLooks(opts: {
 	}
 
 	const enrolledIds = [...new Set([...fleetIds, ...siteIds])].sort((a, b) => a.localeCompare(b));
+	const siteSet = new Set(siteIds);
 	for (const id of enrolledIds) {
-		if (claimed.has(id)) continue;
-		const onFleet = fleetIds.includes(id);
+		if (hasExactOrSiteLease(id, claimed)) continue;
+		const wantsSiteLease = familyRole(id) === 'site' || siteSet.has(id);
+		if (!wantsSiteLease) continue;
 		looks.push({
 			id: `fleet-without-lease:${id}`,
 			title: id,
-			detail: onFleet ? 'Enrolled, no port lease' : 'Site has no port lease',
+			detail: 'Site has no port lease',
 			leaseIds: [],
+			leaseName: siteLeaseName(id),
 			kind: 'fleet-without-lease',
 		});
 	}
@@ -233,9 +239,11 @@ export function groupPortLooks(looks: PortLook[]): PortLookGroup[] {
 				details: [look.detail],
 				kinds: [look.kind],
 				leaseIds: [...look.leaseIds],
+				leaseName: look.leaseName,
 			});
 			continue;
 		}
+		if (!existing.leaseName && look.leaseName) existing.leaseName = look.leaseName;
 		if (!existing.details.includes(look.detail)) existing.details.push(look.detail);
 		if (!existing.kinds.includes(look.kind)) existing.kinds.push(look.kind);
 		for (const id of look.leaseIds) {

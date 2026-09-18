@@ -172,6 +172,10 @@
         {
           "timestamp": "2026-09-18T19:30:00Z",
           "text": "Today Land need matches Land’s ship fingerprint skip (d138), not only engine-behind."
+        },
+        {
+          "timestamp": "2026-09-18T19:45:00Z",
+          "text": "Looks Lease claims a missing site slip via LocalSlip (d139). Fleet+site packages are not a missing-port problem."
         }
       ]
     },
@@ -1921,6 +1925,20 @@
         "Keep Today as engine-behind only",
         "Call planLand for every site on each refresh",
         "Treat every ship:yes row as needing Land"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "d139",
+      "timestamp": "2026-09-18T19:45:00Z",
+      "phase": "2-scaffolding",
+      "session": 49,
+      "decision": "Looks only flags FilePress / -site ids with no site slip. Lease plans localslip claim <name>-site --or-next through the LocalSlip plugin. Fleet packages that have a site are not a missing-port look.",
+      "rationale": "Operator 2026-09-18: coldeye site should have a lease; a skill-only package with a FilePress site does not need its own port. Helm must not write the slip registry.",
+      "alternatives_considered": [
+        "Keep Enrolled, no port lease for every fleet id",
+        "Copy the claim CLI only",
+        "Claim the FilePress folder name instead of name-site"
       ],
       "status": "active"
     }
