@@ -199,6 +199,9 @@ export function pluginJobHint(
 		}
 		return 'LocalSlip starts the lease recipe (default pnpm serve) detached. Closing LocalHelm does not stop it.';
 	}
+	if (plugin === 'filepress' && (action === 'enroll' || action === 'enroll-from')) {
+		return 'Writes FilePress extras.json for folders with getfilepress and filepress.config.ts. Workspace siblings already appear. Folder stays put.';
+	}
 	if (action === 'push') {
 		return 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.';
 	}

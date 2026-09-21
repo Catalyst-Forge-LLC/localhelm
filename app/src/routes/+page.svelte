@@ -110,6 +110,18 @@
 	let candidates = $state<ScanListRow[]>([]);
 	let addOpen = $state(false);
 	let selectedScan = $state<Record<string, boolean>>({});
+	type SiteScanRow = {
+		name: string;
+		path: string;
+		absPath: string;
+		kind?: string;
+		enrolled?: boolean;
+		url?: string | null;
+	};
+	let addSitesOpen = $state(false);
+	let siteScanRoot = $state('');
+	let siteCandidates = $state<SiteScanRow[]>([]);
+	let selectedSiteScan = $state<Record<string, boolean>>({});
 	let selectedIds = $state<Record<string, boolean>>({});
 	let selectedSites = $state<Record<string, boolean>>({});
 	let selectedPorts = $state<Record<string, boolean>>({});
@@ -204,6 +216,10 @@
 		Object.entries(selectedScan)
 			.filter(([, on]) => on)
 			.map(([p]) => p),
+	);
+	const siteScanFresh = $derived(siteCandidates.filter((row) => !row.enrolled));
+	const checkedSiteScan = $derived(
+		siteScanFresh.filter((row) => selectedSiteScan[row.absPath]).map((row) => row.absPath),
 	);
 	const checkedIds = $derived(
 		Object.entries(selectedIds)
@@ -1172,6 +1188,62 @@
 		});
 	}
 
+	function openAddSites(): void {
+		if (!siteScanRoot.trim()) siteScanRoot = scanRoot;
+		addSitesOpen = true;
+	}
+
+	async function scanFilepressSites(): Promise<void> {
+		const root = siteScanRoot.trim() || scanRoot;
+		await run(`scanning FilePress sites in ${root}`, async () => {
+			const data = (await call('/api/plugin', {
+				method: 'POST',
+				body: JSON.stringify({ id: 'filepress', action: 'scan', ids: root ? [root] : [] }),
+			})) as { root?: string; candidates?: SiteScanRow[] };
+			if (data.root) siteScanRoot = data.root;
+			siteCandidates = Array.isArray(data.candidates) ? data.candidates : [];
+			selectedSiteScan = Object.fromEntries(
+				siteCandidates.filter((row) => !row.enrolled).map((row) => [row.absPath, true]),
+			);
+			const fresh = siteCandidates.filter((row) => !row.enrolled).length;
+			note(
+				`FilePress scan ${siteScanRoot} — ${fresh} new, ${siteCandidates.length - fresh} already listed`,
+				data,
+			);
+		});
+	}
+
+	async function applyFilepressSites(paths: string[]): Promise<void> {
+		const named = paths.filter(Boolean);
+		if (!named.length) {
+			error = 'Check at least one FilePress site first.';
+			return;
+		}
+		await run(
+			named.length === 1 ? 'adding FilePress site' : `adding ${named.length} FilePress sites`,
+			async () => {
+				const data = (await call('/api/plugin', {
+					method: 'POST',
+					body: JSON.stringify({ id: 'filepress', action: 'enroll', ids: named, apply: true }),
+				})) as { added?: string[] };
+				const added = Array.isArray(data.added) ? data.added : [];
+				if (!added.length) {
+					throw new Error(
+						'Nothing joined FilePress. Tick a folder that has getfilepress and filepress.config.ts.',
+					);
+				}
+				note(`FilePress listed ${added.length} site${added.length === 1 ? '' : 's'}`, data);
+				const addedKeys = new Set(added.map((p) => p.replace(/\\/g, '/').toLowerCase()));
+				selectedSiteScan = {};
+				siteCandidates = siteCandidates.filter(
+					(row) => !addedKeys.has(row.absPath.replace(/\\/g, '/').toLowerCase()),
+				);
+				if (!siteScanFresh.length) addSitesOpen = false;
+				await loadPluginBoards();
+			},
+		);
+	}
+
 	function offerConfirm(spec: {
 		title: string;
 		hint: string;
@@ -1559,10 +1631,16 @@
 					skipped[0]?.reason ?? 'Nothing joined the fleet. The ticked folder was skipped.',
 				);
 			}
+			const fp = (plan as { filepress?: { added?: string[]; error?: string } }).filepress;
+			const fpNote = fp?.added?.length
+				? `, FilePress listed ${fp.added.length} site${fp.added.length === 1 ? '' : 's'}`
+				: fp?.error
+					? '; FilePress list unchanged'
+					: '';
 			note(
 				skipped.length
-					? `enrolled ${added.length}, skipped ${skipped.length}`
-					: `enrolled ${added.length} project${added.length === 1 ? '' : 's'}`,
+					? `enrolled ${added.length}, skipped ${skipped.length}${fpNote}`
+					: `enrolled ${added.length} project${added.length === 1 ? '' : 's'}${fpNote}`,
 				plan,
 			);
 			selectedScan = {};
@@ -2032,7 +2110,7 @@
 
 <svelte:window
 	onkeydown={(event) => {
-		if (event.key === 'Escape' && activityOpen && !confirmOpen && !addOpen) setActivityOpen(false);
+		if (event.key === 'Escape' && activityOpen && !confirmOpen && !addOpen && !addSitesOpen) setActivityOpen(false);
 	}}
 />
 
@@ -2435,7 +2513,7 @@
 							<h2>{board.title}</h2>
 							<InfoHint
 								summary={board.plugin === 'filepress'
-									? 'Content sites. Check rows, then Land, Sync, or Ship. Keep local drops Land until you Include; the site stays here to run and update. Archive hides a site from Today until you Restore. Git push is on Fleet.'
+									? 'Content sites. Add sites lists folders FilePress does not see as a sibling. Check rows, then Land, Sync, or Ship. Keep local drops Land until you Include; the site stays here to run and update. Archive hides a site from Today until you Restore. Git push is on Fleet.'
 									: 'Check rows, then run a job on the selection.'}
 								detail={siteBoardHelp(board)}
 							/>
@@ -2448,6 +2526,12 @@
 								{@const syncIds = viewRows
 									.filter((row) => selectedSites[row.id] && siteNeedsEngineSync(row.cells))
 									.map((row) => row.id)}
+								<Tooltip title={demoBoard ? 'Leave demo to add FilePress sites.' : 'Scan a folder for getfilepress + filepress.config.ts, then add the ticked sites to FilePress. Workspace siblings already appear.'}>
+									<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => openAddSites()}>
+										<Icon icon="lucide:folder-plus" />
+										Add sites
+									</button>
+								</Tooltip>
 								<Tooltip title="Plans Sync → Push → Ship for the checked sites. This count is the checkboxes, not Today’s waiting list. Confirm in the modal.">
 									<button class="btn btn-write" disabled={Boolean(busy) || landIds.length === 0} onclick={() => startLand(landIds)}>
 										<Icon icon="lucide:plane-landing" />
@@ -3127,6 +3211,66 @@
 		<p class="dim small">Everything in this scan is already enrolled.</p>
 	{:else if !busy}
 		<p class="dim small">Scan to list folders that are not enrolled yet. Nothing joins until you Add to fleet.</p>
+	{/if}
+</AddProjectsModal>
+
+<AddProjectsModal
+	bind:open={addSitesOpen}
+	busy={Boolean(busy)}
+	busyLabel={busy}
+	title="Add FilePress sites"
+	titleId="add-sites-title"
+	hint="Scan the folder that holds the sites. FilePress only lists folders with getfilepress and filepress.config.ts. Tick, then Add sites. Workspace siblings already appear without this."
+>
+	<label for="site-scan-root">Folder to scan</label>
+	<div class="row">
+		<input id="site-scan-root" bind:value={siteScanRoot} spellcheck="false" />
+		<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => void scanFilepressSites()}>
+			<Icon icon="lucide:search" /> Scan
+		</button>
+	</div>
+	<p class="dim small">Same parent folder as Add projects is usually right. Nested sites (not next to FilePress) need this extra list.</p>
+	{#if siteScanFresh.length}
+		<p class="hint">{siteScanFresh.length} not listed yet. Already-listed sites stay off this pick list.</p>
+		<ul class="candidates">
+			{#each siteScanFresh as row (row.absPath)}
+				<li>
+					<input
+						type="checkbox"
+						aria-label={`add ${row.name}`}
+						checked={Boolean(selectedSiteScan[row.absPath])}
+						onchange={(event) => {
+							selectedSiteScan = { ...selectedSiteScan, [row.absPath]: event.currentTarget.checked };
+						}}
+					/>
+					<div>
+						<div class="id">{row.name}</div>
+						{#if row.path !== row.name}
+							<div class="path" use:tip={row.absPath}>{row.path}</div>
+						{/if}
+						<div class="dim small">
+							{row.kind ?? 'site'}{row.url ? ` · ${row.url}` : ''}
+						</div>
+					</div>
+				</li>
+			{/each}
+		</ul>
+		<div class="group-buttons">
+			<Tooltip title="Writes the ticked folders into FilePress extras.json. Does not copy or delete folders. Fleet enroll is a separate list.">
+				<button
+					class="btn btn-write"
+					disabled={Boolean(busy) || demoBoard || !checkedSiteScan.length}
+					onclick={() => void applyFilepressSites(checkedSiteScan)}
+				>
+					<Icon icon="lucide:folder-plus" />
+					Add sites{checkedSiteScan.length ? ` (${checkedSiteScan.length})` : ''}
+				</button>
+			</Tooltip>
+		</div>
+	{:else if siteCandidates.length}
+		<p class="dim small">Everything in this scan is already on FilePress Sites.</p>
+	{:else if !busy}
+		<p class="dim small">Scan to list FilePress sites that are not on the board yet. Nothing joins until you Add sites.</p>
 	{/if}
 </AddProjectsModal>
 

@@ -114,4 +114,10 @@ export type EnrollPlan = {
 	manifestPath: string;
 	rows: EnrollPlanRow[];
 	writes: boolean;
+	/** Set after apply when FilePress listed sites under the new folders. */
+	filepress?: {
+		added: string[];
+		already: string[];
+		error?: string;
+	};
 };

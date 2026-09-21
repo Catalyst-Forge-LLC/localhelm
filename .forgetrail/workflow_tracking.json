@@ -2018,9 +2018,31 @@
         "Accept named board/plan/apply without id and label"
       ],
       "status": "active"
+    },
+    {
+      "id": "d145",
+      "timestamp": "2026-09-21T21:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 51,
+      "decision": "Fleet enroll and FilePress Sites stay separate lists. Helm Add sites and post-enroll FilePress listing go through the FilePress plugin scan/enroll. Helm does not write extras.json itself.",
+      "rationale": "Operator added fleet packages and expected them on FilePress Sites. FilePress only auto-discovers workspace siblings with getfilepress + filepress.config.ts. Nested or off-sibling sites need extras.json, which only FilePress owned.",
+      "alternatives_considered": [
+        "Treat every fleet row as a FilePress site",
+        "Have Helm write FilePress extras.json directly",
+        "Send operators to the FilePress dashboard only"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-21T21:50:00Z",
+      "phase": "2-scaffolding",
+      "session": 51,
+      "issue": "Adding a folder to the Helm fleet does not list it under FilePress Sites. Helm had no Add sites control.",
+      "resolution": "FilePress plugin gained scan/enroll. Helm Add sites uses that. Live fleet enroll also asks FilePress to list sites under the new folders.",
+      "category": "integration"
+    },
     {
       "timestamp": "2026-09-21T20:20:00Z",
       "phase": "2-scaffolding",

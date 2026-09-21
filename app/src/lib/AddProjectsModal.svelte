@@ -5,10 +5,21 @@
 		open: boolean;
 		busy?: boolean;
 		busyLabel?: string;
+		title?: string;
+		hint?: string;
+		titleId?: string;
 		children?: Snippet;
 	};
 
-	let { open = $bindable(), busy = false, busyLabel = '', children }: Props = $props();
+	let {
+		open = $bindable(),
+		busy = false,
+		busyLabel = '',
+		title = 'Add projects',
+		hint = 'Scan the folder that holds your repos — usually the same folder you ran serve from. Tick, then Add to fleet. That write is the confirm.',
+		titleId = 'add-projects-title',
+		children,
+	}: Props = $props();
 
 	let dialogEl = $state<HTMLDialogElement | null>(null);
 
@@ -27,7 +38,7 @@
 <dialog
 	bind:this={dialogEl}
 	class="add"
-	aria-labelledby="add-projects-title"
+	aria-labelledby={titleId}
 	onclose={() => {
 		if (!open) return;
 		if (busy) {
@@ -43,8 +54,8 @@
 	<div class="panel hud-frame">
 		<div class="head">
 			<div>
-				<h2 id="add-projects-title">Add projects</h2>
-				<p class="hint">Scan the folder that holds your repos — usually the same folder you ran serve from. Tick, then Add to fleet. That write is the confirm.</p>
+				<h2 id={titleId}>{title}</h2>
+				<p class="hint">{hint}</p>
 			</div>
 			<button type="button" class="btn" disabled={busy} onclick={cancel}>Close</button>
 		</div>

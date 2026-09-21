@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { applyBump, planBump } from '../lib/bump.js';
 import { applyCascade, planCascade } from '../lib/cascade.js';
 import { fleetDeps } from '../lib/deps.js';
@@ -6,6 +7,7 @@ import { isPluginEnabled, readPluginPrefs } from '../lib/pluginPrefs.js';
 import { pluginPlanWriteIds } from '../lib/pluginPlan.js';
 import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
+import { enrollFilepressFromFleet } from '../lib/filepressFromFleet.js';
 import { applyExport, planExport } from '../lib/export.js';
 import { applyDirtCommit, dirtFileLine, planDirtCommit, requireCommitIds } from '../lib/dirtCommit.js';
 import { applyFetches, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
@@ -131,6 +133,11 @@ function formatPlan(plan: EnrollPlan, kind: 'enroll' | 'unenroll'): string {
 		lines.push('', adds ? 'Nothing written. Re-run with --apply to write.' : 'Nothing to apply.');
 	} else {
 		lines.push('', `Wrote ${plan.manifestPath}`);
+		if (plan.filepress?.added.length) {
+			lines.push(`FilePress listed ${plan.filepress.added.length} site(s).`);
+		} else if (plan.filepress?.error) {
+			lines.push(`FilePress list unchanged (${plan.filepress.error})`);
+		}
 	}
 	return `${lines.join('\n')}\n`;
 }
@@ -236,8 +243,14 @@ async function main(): Promise<void> {
 			const root = existing?.workspaceRoot ?? plan.manifestPath.replace(/[/\\][^/\\]+$/, '');
 			const lock = await acquireJobLock(root);
 			try {
-				await applyEnroll(plan, existing);
+				const manifest = await applyEnroll(plan, existing);
 				plan.writes = true;
+				if (existing) {
+					const addedAbs = plan.rows
+						.filter((row) => row.action === 'add')
+						.map((row) => path.resolve(existing.workspaceRoot, row.path));
+					plan.filepress = await enrollFilepressFromFleet({ ...existing, manifest }, addedAbs);
+				}
 			} finally {
 				await lock.release();
 			}

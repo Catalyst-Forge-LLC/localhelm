@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import path from 'node:path';
 import type { RequestHandler } from './$types';
-import { applyEnroll, findManifest, planEnroll } from '../../../../../src/lib/index.js';
+import { applyEnroll, enrollFilepressFromFleet, findManifest, planEnroll } from '../../../../../src/lib/index.js';
 import { errJson, operatorCwd, withLockAt } from '$lib/server/helm';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -16,8 +16,14 @@ export const POST: RequestHandler = async ({ request }) => {
 			await withLockAt(
 				root,
 				async () => {
-					await applyEnroll(plan, existing);
+					const manifest = await applyEnroll(plan, existing);
 					plan.writes = true;
+					if (existing) {
+						const addedAbs = plan.rows
+							.filter((row) => row.action === 'add')
+							.map((row) => path.resolve(existing.workspaceRoot, row.path));
+						plan.filepress = await enrollFilepressFromFleet({ ...existing, manifest }, addedAbs);
+					}
 				},
 				{ allowInDemo: true },
 			);
