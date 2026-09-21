@@ -24,6 +24,7 @@
 		excludedIds?: string[];
 		failNote?: string;
 		messageById?: Record<string, string>;
+		diffs?: Record<string, string>;
 		draftHint?: string;
 		draftingIds?: string[];
 		draftNoteById?: Record<string, string>;
@@ -58,6 +59,7 @@
 		excludedIds = $bindable<string[]>([]),
 		failNote = '',
 		messageById = {},
+		diffs = {},
 		draftHint = '',
 		draftingIds = [],
 		draftNoteById = {},
@@ -121,6 +123,8 @@
 	const draftsReady = $derived(
 		draftIds.filter((id) => !excludedIds.includes(id)).every((id) => Boolean(messageById[id]?.trim())),
 	);
+	const previewId = $derived(selected?.id || draftId);
+	const preview = $derived((previewId && diffs[previewId]?.trim()) || '');
 	const liveDraftHint = $derived(
 		draftingIds.length || Object.keys(draftNoteById).length
 			? commitDraftProgressHint({
@@ -211,7 +215,7 @@
 <dialog
 	bind:this={dialogEl}
 	class="confirm"
-	class:wide={Boolean(groups)}
+	class:wide={Boolean(groups) || Boolean(preview)}
 	aria-labelledby="confirm-title"
 	onclose={() => {
 		if (!open) return;
@@ -342,6 +346,7 @@
 				{/each}
 			</ul>
 		{/if}
+		{@render diffPreview(preview)}
 		{#if failNote}
 			<p class="fail-note">{failNote}</p>
 		{/if}
@@ -397,6 +402,14 @@
 	</div>
 </dialog>
 
+{#snippet diffPreview(text: string)}
+	{#if text}
+		<pre class="diff" aria-label="Changed lines">{#each text.split('\n') as line, i (i)}<span
+				class:add={line.startsWith('+') && !line.startsWith('+++')}
+				class:del={line.startsWith('-') && !line.startsWith('---')}>{line}{'\n'}</span>{/each}</pre>
+	{/if}
+{/snippet}
+
 <style>
 	.confirm {
 		position: fixed;
@@ -450,8 +463,10 @@
 		flex-direction: column;
 		min-height: 0;
 		flex: 1;
+		overflow: auto;
 		padding: 1.15rem 1.25rem 1.1rem;
 	}
+
 
 	h2 {
 		flex-shrink: 0;
@@ -490,9 +505,16 @@
 		grid-template-columns: minmax(10.5rem, 13.5rem) minmax(0, 1fr);
 		gap: 0.55rem;
 		margin: 0.75rem 0 0;
-		min-height: 0;
-		flex: 1 1 auto;
-		height: min(22rem, calc(100dvh - 16rem));
+		flex: 0 0 auto;
+		min-height: 7.5rem;
+		max-height: 12rem;
+		overflow: hidden;
+	}
+
+	.split > .roster,
+	.split > ol.steps {
+		height: 100%;
+		max-height: 12rem;
 	}
 
 	.roster,
@@ -524,6 +546,30 @@
 		font-size: 0.78rem;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 		line-height: 1.45;
+	}
+
+	.diff {
+		flex-shrink: 0;
+		margin: 0.55rem 0 0;
+		max-height: 14rem;
+		overflow: auto;
+		padding: 0.55rem 0.7rem;
+		border: 1px solid var(--steel);
+		border-radius: var(--plate-radius);
+		background: var(--well);
+		color: #c5d0d8;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: 0.72rem;
+		line-height: 1.35;
+		white-space: pre;
+	}
+
+	.diff .add {
+		color: #86efac;
+	}
+
+	.diff .del {
+		color: #fca5a5;
 	}
 
 	.roster-row {

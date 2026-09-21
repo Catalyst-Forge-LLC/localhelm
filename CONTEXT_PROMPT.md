@@ -368,3 +368,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 51 — 2026-09-21
 
 - One bad `localhelm.plugin.mjs` failed `GET /api/plugins`, and Today reported FilePress and Ports as not loaded. Helm now skips that file, keeps the other boards, and puts the message on the keel and in the locker (d144). FeatureFacts exports the host shape (`id`, `label`, `board`).
+- Commit confirm shows a short text diff of the dirty files as soon as the plan opens. Ollama still fills the message afterward. Secret-looking paths stay out of the diff.

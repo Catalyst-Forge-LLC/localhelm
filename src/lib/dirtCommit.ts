@@ -17,6 +17,8 @@ import { pathExists } from './pkg.js';
 
 const DIFF_LIMIT = 12_000;
 const UNTRACKED_PREVIEW = 40;
+const PREVIEW_FILE_LINES = 60;
+const PREVIEW_TOTAL_LINES = 200;
 const TAGS_MS = 8_000;
 const OLLAMA_MS = 60_000;
 
@@ -41,6 +43,8 @@ export type DirtCommitRow = {
 	action: 'commit' | 'skip';
 	reason?: string;
 	files: DirtFile[];
+	/** Text diff for the confirm. Ready before an Ollama draft. Secrets are omitted. */
+	diff?: string;
 	message: string;
 	suggestSource?: 'ollama' | 'fallback';
 	suggestNote?: string;
@@ -259,6 +263,54 @@ export async function ollamaCommitMessage(
 	}
 }
 
+function clipPreview(text: string, maxLines: number): { text: string; lines: number; clipped: boolean } {
+	const rows = text.split(/\r?\n/);
+	if (rows.length <= maxLines) return { text, lines: rows.length, clipped: false };
+	return { text: `${rows.slice(0, maxLines).join('\n')}\n… truncated`, lines: maxLines + 1, clipped: true };
+}
+
+export function formatUntrackedPreview(rel: string, raw: string): string {
+	const rows = raw.split(/\r?\n/);
+	const keep = rows.slice(0, PREVIEW_FILE_LINES);
+	const body = keep.map((line) => `+${line}`).join('\n');
+	const tail = rows.length > keep.length ? '\n… truncated' : '';
+	return `diff --git a/${rel} b/${rel}\nnew file mode 100644\n${body}${tail}`;
+}
+
+/** Short unified diff for the confirm. Skips secret-looking paths. Does not wait on Ollama. */
+export async function commitDiffPreview(repoRoot: string, files: readonly DirtFile[]): Promise<string> {
+	const chunks: string[] = [];
+	let used = 0;
+	for (const file of files) {
+		if (file.skip) continue;
+		if (used >= PREVIEW_TOTAL_LINES) {
+			chunks.push('… more files not shown');
+			break;
+		}
+		const room = Math.min(PREVIEW_FILE_LINES, PREVIEW_TOTAL_LINES - used);
+		let text = '';
+		if (file.code.includes('?')) {
+			const abs = path.join(repoRoot, file.path);
+			try {
+				const raw = await readFile(abs);
+				if (raw.includes(0)) text = `Binary file ${file.path}`;
+				else text = formatUntrackedPreview(file.path, raw.toString('utf8'));
+			} catch {
+				text = `${file.path}  (unreadable)`;
+			}
+		} else {
+			const paths = file.from ? [file.from, file.path] : [file.path];
+			const diff = runGit(repoRoot, ['diff', '--no-color', '--find-renames', 'HEAD', '--', ...paths]);
+			const body = diff.ok ? diff.stdout.trim() : '';
+			text = body || `${dirtFileLine(file)}\n(no text diff)`;
+		}
+		const clipped = clipPreview(text, room);
+		chunks.push(clipped.text);
+		used += clipped.lines;
+	}
+	return chunks.join('\n\n');
+}
+
 async function listDirtyFiles(repoRoot: string): Promise<{ files: DirtFile[]; error?: string }> {
 	const status = runGit(repoRoot, ['status', '--porcelain=v1', '-z']);
 	if (!status.ok) return { files: [], error: status.stderr || 'git status failed' };
@@ -361,6 +413,7 @@ export async function planDirtCommit(
 			path: project.path,
 			action: 'commit',
 			files: listed.files,
+			diff: await commitDiffPreview(abs, listed.files),
 			...suggestion,
 		});
 	}

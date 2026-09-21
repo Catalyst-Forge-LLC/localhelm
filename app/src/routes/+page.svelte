@@ -137,6 +137,7 @@
 	let confirmCanApply = $state(true);
 	let confirmShowOtp = $state(false);
 	let confirmMessages = $state<Record<string, string>>({});
+	let confirmDiffs = $state<Record<string, string>>({});
 	let confirmDraftHint = $state('');
 	let confirmDrafting = $state<string[]>([]);
 	let confirmDraftNotes = $state<Record<string, string>>({});
@@ -1182,6 +1183,7 @@
 		canApply: boolean;
 		showOtp?: boolean;
 		messages?: Record<string, string>;
+		diffs?: Record<string, string>;
 		draftHint?: string;
 		altLabel?: string;
 		itemPhases?: ConfirmPhase[];
@@ -1206,6 +1208,7 @@
 		confirmCanApply = spec.canApply;
 		confirmShowOtp = Boolean(spec.showOtp);
 		confirmMessages = spec.messages ?? {};
+		confirmDiffs = spec.diffs ?? {};
 		confirmDraftHint = spec.draftHint ?? '';
 		confirmDrafting = [];
 		confirmDraftNotes = {};
@@ -3146,6 +3149,7 @@
 	itemPhases={confirmPhases}
 	failNote={error}
 	messageById={confirmMessages}
+	diffs={confirmDiffs}
 	draftHint={confirmDraftHint}
 	draftingIds={confirmDrafting}
 	draftNoteById={confirmDraftNotes}

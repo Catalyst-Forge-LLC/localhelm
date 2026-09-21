@@ -12,6 +12,8 @@ import {
 	ollamaCommitMessage,
 	parseStatusPorcelain,
 	pickOllanetServer,
+	commitDiffPreview,
+	formatUntrackedPreview,
 	planDirtCommit,
 	requireCommitIds,
 	secretCommitSkip,
@@ -191,12 +193,33 @@ describe('dirtCommit plan/apply', () => {
 		const plan = await planDirtCommit(loaded, ['widget'], { suggest: false });
 		assert.equal(plan.rows[0]?.action, 'commit');
 		assert.equal(plan.rows[0]?.files.some((file) => file.path === 'src.ts'), true);
+		assert.match(plan.rows[0]?.diff ?? '', /export const n = 1/);
+		assert.match(plan.rows[0]?.diff ?? '', /^\+export const n = 1/m);
 		const applied = applyDirtCommit(loaded, plan.rows[0]!, 'Add src.ts.');
 		assert.equal(applied.action, 'commit');
 		assert.equal(applied.reason, undefined);
 		const log = runGit(pkgDir, ['log', '-1', '--pretty=%s']);
 		assert.equal(log.stdout.trim(), 'Add src.ts.');
 		assert.equal(runGit(pkgDir, ['status', '--porcelain']).stdout.trim(), '');
+	});
+
+	it('previews a tracked edit and leaves secrets out of the diff', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-commit-diff-'));
+		await gitRepo(root);
+		await writeFile(path.join(root, 'README.md'), 'hello\nworld\n');
+		await writeFile(path.join(root, '.env'), 'TOKEN=secret\n');
+		const diff = await commitDiffPreview(root, [
+			{ code: ' M', path: 'README.md' },
+			{ code: '??', path: '.env', skip: 'looks like a secret' },
+		]);
+		assert.match(diff, /diff --git a\/README.md/);
+		assert.match(diff, /\+world/);
+		assert.doesNotMatch(diff, /TOKEN=secret/);
+	});
+
+	it('formats an untracked file as additions', () => {
+		assert.match(formatUntrackedPreview('notes.md', 'one\ntwo\n'), /new file mode 100644/);
+		assert.match(formatUntrackedPreview('notes.md', 'one\ntwo\n'), /\+one\n\+two/);
 	});
 
 	it('skips a clean tree', async () => {

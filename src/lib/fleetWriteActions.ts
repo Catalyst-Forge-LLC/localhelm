@@ -215,6 +215,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 					items,
 					itemKeys,
 					messages: Object.fromEntries(can.map((row) => [row.id, row.message])),
+					diffs: Object.fromEntries(can.filter((row) => row.diff).map((row) => [row.id, row.diff ?? ''])),
 					draftHint: can.length ? commitDraftProgressHint({ ids: can.map((row) => row.id), pending: can.map((row) => row.id) }) : '',
 					confirmLabel: can.length === 1 ? `Commit ${can[0]?.id}` : `Commit ${can.length}`,
 					canApply: can.length > 0,
