@@ -893,14 +893,19 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 		const json = takeFlag(argv, '--json');
 		if (argv.length) fail('usage: localhelm plugins [--json]');
 		const loaded = await requireManifest();
-		const { plugins } = await loadPluginDashboard(loaded);
-		if (json) printJson({ plugins });
-		else if (plugins.length === 0) {
+		const { plugins, faults } = await loadPluginDashboard(loaded);
+		if (json) printJson({ plugins, faults });
+		else if (plugins.length === 0 && faults.length === 0) {
 			process.stdout.write('No plugins. An enrolled project can expose localhelm.plugin.mjs.\n');
 		} else {
-			process.stdout.write(
-				`${['id\tlabel\tenabled\tsource', ...plugins.map((p) => `${p.id}\t${p.label}\t${p.enabled ? 'on' : 'off'}\t${p.source}`)].join('\n')}\n`,
-			);
+			if (plugins.length) {
+				process.stdout.write(
+					`${['id\tlabel\tenabled\tsource', ...plugins.map((p) => `${p.id}\t${p.label}\t${p.enabled ? 'on' : 'off'}\t${p.source}`)].join('\n')}\n`,
+				);
+			}
+			for (const fault of faults) {
+				process.stdout.write(`failed\t${fault.source}\t${fault.message}\n`);
+			}
 		}
 		return;
 	}

@@ -1,4 +1,4 @@
-import { asPluginBoards, loadPlugins } from '../../../../src/lib/index.js';
+import { boardsForPlugins, loadPlugins } from '../../../../src/lib/index.js';
 import { visitorPageHost } from '../../../../src/lib/loopback.js';
 import { visitorSnapshotFromBoards } from '../../../../src/lib/visitorMachine.js';
 import type { VisitorSnapshot } from '../../../../src/lib/visitorTiles.js';
@@ -10,9 +10,7 @@ export async function loadVisitorSnapshot(): Promise<VisitorSnapshot> {
 	const loaded = await loadOptional();
 	if (!loaded) return empty;
 	const plugins = await loadPlugins(loaded);
-	const boards = (
-		await Promise.all(plugins.map(async (plug) => asPluginBoards(await plug.plugin.board())))
-	).flat();
+	const { boards } = await boardsForPlugins(plugins);
 	const helmPort = Number(process.env.LOCALHELM_PORT);
 	return visitorSnapshotFromBoards(boards, {
 		helmPort: Number.isInteger(helmPort) ? helmPort : undefined,

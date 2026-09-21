@@ -2005,9 +2005,30 @@
         "One-line LocalHelm at every width"
       ],
       "status": "active"
+    },
+    {
+      "id": "d144",
+      "timestamp": "2026-09-21T20:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 51,
+      "decision": "A plugin file that fails to load, or whose board() throws, is reported and skipped. The other enrolled plugins still load.",
+      "rationale": "FeatureFacts exported named functions. That 400 hid FilePress and LocalSlip. The host shape stays a default export with id, label, and board.",
+      "alternatives_considered": [
+        "Fail the whole plugin dashboard on the first bad file",
+        "Accept named board/plan/apply without id and label"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
+    {
+      "timestamp": "2026-09-21T20:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 51,
+      "issue": "GET /api/plugins 400 on the first bad localhelm.plugin.mjs. The dashboard catch left pluginsReady true and Today said FilePress and Ports were not enrolled.",
+      "resolution": "loadPluginDashboard returns faults and still loads the other plugins. The keel and locker show the message. FeatureFacts now default-exports { id, label, board }.",
+      "category": "integration"
+    },
     {
       "timestamp": "2026-09-15T18:27:00Z",
       "phase": "2-scaffolding",

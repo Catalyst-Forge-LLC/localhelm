@@ -5,9 +5,11 @@
 	import Tooltip from './Tooltip.svelte';
 
 	type PluginItem = { id: string; label: string; source?: string; enabled: boolean };
+	type PluginFault = { source: string; message: string };
 
 	let {
 		plugins,
+		faults = [],
 		busy = false,
 		fleetPath = '',
 		serveLine = '',
@@ -30,6 +32,7 @@
 		activityBadge = '',
 	}: {
 		plugins: PluginItem[];
+		faults?: PluginFault[];
 		busy?: boolean;
 		fleetPath?: string;
 		serveLine?: string;
@@ -222,7 +225,7 @@
 
 			<p class="heading spaced">Plugins</p>
 			<p class="hint">Off plugins stay enrolled. Their tab and jobs hide until you turn them back on.</p>
-			{#if plugins.length === 0}
+			{#if plugins.length === 0 && faults.length === 0}
 				<p class="empty">None loaded. Enroll a project that has <code>localhelm.plugin.mjs</code>.</p>
 			{:else}
 				<ul>
@@ -243,6 +246,18 @@
 						</li>
 					{/each}
 				</ul>
+				{#if faults.length}
+					<ul class="faults">
+						{#each faults as fault (fault.source + fault.message)}
+							<li>
+								<span class="name">{fault.message}</span>
+								{#if fault.source && !fault.message.includes(fault.source)}
+									<span class="id">{fault.source}</span>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+				{/if}
 			{/if}
 		</div>
 	{/if}
@@ -452,5 +467,22 @@
 		font-size: 0.7rem;
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		line-height: 1.2;
+	}
+
+	.faults {
+		margin-top: 0.45rem;
+	}
+
+	.faults li {
+		display: grid;
+		gap: 0.05rem;
+		padding: 0.28rem 0.4rem;
+	}
+
+	.faults .name {
+		color: var(--alarm, #f87171);
+		font-size: 0.75rem;
+		line-height: 1.35;
+		word-break: break-word;
 	}
 </style>

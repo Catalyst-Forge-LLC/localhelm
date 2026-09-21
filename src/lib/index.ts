@@ -102,7 +102,7 @@ export {
 	shipUnchanged,
 } from './landShips.js';
 export type { LandShipRecord, LandShipsFile } from './landShips.js';
-export { asPluginBoards, loadPluginDashboard, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
+export { asPluginBoards, boardsForPlugins, loadPluginDashboard, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
 export type { PluginListing } from './plugin.js';
 export {
 	isPluginEnabled,
@@ -138,7 +138,7 @@ export { activityLinkedIds } from './activityLinks.js';
 export { crosswalkChips } from './crosswalk.js';
 export type { CrossChip } from './crosswalk.js';
 export { formatPluginPlanLines, pluginPlanLineKeys, pluginPlanWriteIds } from './pluginPlan.js';
-export type { HelmPlugin, LoadedPlugin, PluginBoard, PluginTab } from './plugin.js';
+export type { HelmPlugin, LoadedPlugin, PluginBoard, PluginLoadFault, PluginTab } from './plugin.js';
 export { applyBump, planBump } from './bump.js';
 export type { BumpPlan } from './bump.js';
 export { listFactsFiles, rewriteFactsVersion } from './factsVersion.js';

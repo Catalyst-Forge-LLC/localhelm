@@ -65,6 +65,16 @@ export type LoadedPlugin = {
 	plugin: HelmPlugin;
 };
 
+/** One enrolled plugin file that did not load or whose board() threw. Others still load. */
+export type PluginLoadFault = {
+	source: string;
+	message: string;
+};
+
+function faultMessage(err: unknown): string {
+	return err instanceof Error ? err.message : String(err);
+}
+
 function isPlugin(value: unknown): value is HelmPlugin {
 	if (!value || typeof value !== 'object') return false;
 	const body = value as Record<string, unknown>;
@@ -82,19 +92,53 @@ export async function loadPluginFile(file: string): Promise<HelmPlugin> {
 	return candidate;
 }
 
-export async function loadPlugins(loaded: LoadedManifest): Promise<LoadedPlugin[]> {
-	const found: LoadedPlugin[] = [];
+export async function readPluginModules(loaded: LoadedManifest): Promise<{
+	plugins: LoadedPlugin[];
+	faults: PluginLoadFault[];
+}> {
+	const plugins: LoadedPlugin[] = [];
+	const faults: PluginLoadFault[] = [];
 	for (const project of loaded.manifest.projects) {
 		const abs = joinRoot(loaded.workspaceRoot, project.path);
 		for (const name of PLUGIN_FILE_NAMES) {
 			const file = toPosix(path.join(abs, name));
 			if (!(await pathExists(file))) continue;
-			const plugin = await loadPluginFile(file);
-			found.push({ id: plugin.id, label: plugin.label, source: file, plugin });
+			try {
+				const plugin = await loadPluginFile(file);
+				plugins.push({ id: plugin.id, label: plugin.label, source: file, plugin });
+			} catch (err) {
+				faults.push({ source: file, message: faultMessage(err) });
+			}
 			break;
 		}
 	}
-	return found;
+	return { plugins, faults };
+}
+
+export async function loadPlugins(loaded: LoadedManifest): Promise<LoadedPlugin[]> {
+	return (await readPluginModules(loaded)).plugins;
+}
+
+export async function boardsForPlugins(plugins: LoadedPlugin[]): Promise<{
+	boards: PluginBoard[];
+	faults: PluginLoadFault[];
+}> {
+	const settled = await Promise.all(
+		plugins.map(async (plug) => {
+			try {
+				return { boards: asPluginBoards(await plug.plugin.board()), fault: null as PluginLoadFault | null };
+			} catch (err) {
+				return {
+					boards: [] as PluginBoard[],
+					fault: { source: plug.source, message: faultMessage(err) },
+				};
+			}
+		}),
+	);
+	return {
+		boards: settled.flatMap((row) => row.boards),
+		faults: settled.flatMap((row) => (row.fault ? [row.fault] : [])),
+	};
 }
 
 export function requirePlugin(plugins: LoadedPlugin[], id: string): LoadedPlugin {
@@ -116,8 +160,9 @@ export type PluginListing = {
 export async function loadPluginDashboard(loaded: LoadedManifest): Promise<{
 	plugins: PluginListing[];
 	boards: PluginBoard[];
+	faults: PluginLoadFault[];
 }> {
-	const found = await loadPlugins(loaded);
+	const { plugins: found, faults: loadFaults } = await readPluginModules(loaded);
 	const prefs = await readPluginPrefs(loaded.workspaceRoot);
 	const plugins = found.map((plug) => ({
 		id: plug.id,
@@ -126,8 +171,6 @@ export async function loadPluginDashboard(loaded: LoadedManifest): Promise<{
 		enabled: isPluginEnabled(plug.id, prefs),
 	}));
 	const enabled = found.filter((plug) => isPluginEnabled(plug.id, prefs));
-	const boards = (
-		await Promise.all(enabled.map(async (plug) => asPluginBoards(await plug.plugin.board())))
-	).flat();
-	return { plugins, boards };
+	const { boards, faults: boardFaults } = await boardsForPlugins(enabled);
+	return { plugins, boards, faults: [...loadFaults, ...boardFaults] };
 }

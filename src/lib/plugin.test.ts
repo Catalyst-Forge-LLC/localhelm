@@ -41,6 +41,91 @@ describe('plugins', () => {
 		const dash = await loadPluginDashboard(loaded);
 		assert.deepEqual(dash.plugins.map((p) => ({ id: p.id, enabled: p.enabled })), [{ id: 'demo', enabled: false }]);
 		assert.equal(dash.boards.length, 0);
+		assert.deepEqual(dash.faults, []);
+	});
+
+	it('keeps the other plugins when one file is not a plugin', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-plug-skip-'));
+		const broken = path.join(root, 'feature-facts');
+		const good = path.join(root, 'filepress');
+		await mkdir(broken);
+		await mkdir(good);
+		await writeFile(
+			path.join(broken, 'localhelm.plugin.mjs'),
+			`export function board() { return { plugin: 'featurefacts', title: 'FeatureFacts', columns: [], rows: [] }; }\n`,
+		);
+		await writeFile(
+			path.join(good, 'localhelm.plugin.mjs'),
+			`export default {
+  id: 'filepress',
+  label: 'FilePress',
+  async board() {
+    return { plugin: 'filepress', title: 'Sites', columns: [], rows: [{ id: 'one', cells: {}, actions: [] }] };
+  }
+};
+`,
+		);
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: {
+				workspaceRoot: '.',
+				projects: [
+					{ id: 'feature-facts', path: 'feature-facts' },
+					{ id: 'filepress', path: 'filepress' },
+				],
+			},
+		};
+		const dash = await loadPluginDashboard(loaded);
+		assert.deepEqual(dash.plugins.map((plug) => plug.id), ['filepress']);
+		assert.equal(dash.boards.length, 1);
+		assert.equal(dash.faults.length, 1);
+		assert.match(dash.faults[0]?.message ?? '', /does not export a LocalHelm plugin/);
+		assert.match(dash.faults[0]?.source ?? '', /feature-facts/);
+	});
+
+	it('keeps the other boards when one board() throws', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-plug-board-'));
+		for (const [id, body] of [
+			['alpha', `throw new Error('alpha board down');`],
+			['beta', `return { plugin: 'beta', title: 'Beta', columns: [], rows: [] };`],
+		] as const) {
+			const proj = path.join(root, id);
+			await mkdir(proj);
+			await writeFile(
+				path.join(proj, 'localhelm.plugin.mjs'),
+				`export default {
+  id: '${id}',
+  label: '${id}',
+  async board() {
+    ${body}
+  }
+};
+`,
+			);
+		}
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: {
+				workspaceRoot: '.',
+				projects: [
+					{ id: 'alpha', path: 'alpha' },
+					{ id: 'beta', path: 'beta' },
+				],
+			},
+		};
+		const dash = await loadPluginDashboard(loaded);
+		assert.deepEqual(
+			dash.plugins.map((plug) => plug.id),
+			['alpha', 'beta'],
+		);
+		assert.deepEqual(
+			dash.boards.map((board) => board.title),
+			['Beta'],
+		);
+		assert.equal(dash.faults.length, 1);
+		assert.match(dash.faults[0]?.message ?? '', /alpha board down/);
 	});
 
 	it('loads enabled plugin boards in parallel', async () => {

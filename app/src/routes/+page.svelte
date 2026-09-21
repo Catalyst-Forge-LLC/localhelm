@@ -118,8 +118,11 @@
 	let bumpKind = $state<Record<string, BumpKind>>({});
 
 	type PluginCatalogItem = PluginTabMeta & { source?: string; enabled: boolean };
+	type PluginFault = { source: string; message: string };
 	let pluginBoards = $state<PluginBoard[]>([]);
 	let pluginMetas = $state<PluginCatalogItem[]>([]);
+	let pluginFaults = $state<PluginFault[]>([]);
+	const pluginFaultNote = $derived(pluginFaults.map((fault) => fault.message).filter(Boolean).join(' · '));
 	let publishOtp = $state('');
 	let npmUser = $state<string | null>(null);
 	let publishAuthHint = $state('');
@@ -874,6 +877,7 @@
 	function applyPluginDashboard(plug: {
 		boards: PluginBoard[];
 		plugins?: { id: string; label: string; source?: string; enabled?: boolean }[];
+		faults?: PluginFault[];
 	}): void {
 		pluginMetas = (plug.plugins ?? []).map((item) => ({
 			id: item.id,
@@ -882,6 +886,7 @@
 			enabled: item.enabled !== false,
 		}));
 		pluginBoards = plug.boards;
+		pluginFaults = plug.faults ?? [];
 		if (!isCoreTab(tab) && pluginMetas.some((item) => item.id === canonicalizeTab(tab) && !item.enabled)) {
 			setTab('today');
 		}
@@ -892,9 +897,10 @@
 			applyPluginDashboard((await call('/api/plugins')) as {
 				boards: PluginBoard[];
 				plugins?: { id: string; label: string; source?: string; enabled?: boolean }[];
+				faults?: PluginFault[];
 			});
-		} catch {
-			/* keep the last boards */
+		} catch (err) {
+			pluginFaults = [{ source: '', message: err instanceof Error ? err.message : String(err) }];
 		} finally {
 			pluginsReady = true;
 		}
@@ -1116,6 +1122,7 @@
 		pluginsReady = false;
 		pluginBoards = [];
 		pluginMetas = [];
+		pluginFaults = [];
 		archivedIds = [];
 		localOnlyIds = [];
 		error = '';
@@ -2030,7 +2037,7 @@
 	<BridgeHeader
 		{busy}
 		{statusNote}
-		{error}
+		error={error || pluginFaultNote}
 		staleCount={staleRemoteCount}
 		{statusReady}
 		serveHostPort={serveHeading.hostPort}
@@ -2066,6 +2073,7 @@
 	>
 		<HelmMenu
 			plugins={pluginMetas}
+			faults={pluginFaults}
 			busy={Boolean(busy)}
 			fleetPath={inventory?.manifestPath ?? manifestPath}
 			{serveLine}
