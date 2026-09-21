@@ -193,8 +193,8 @@ describe('dirtCommit plan/apply', () => {
 		const plan = await planDirtCommit(loaded, ['widget'], { suggest: false });
 		assert.equal(plan.rows[0]?.action, 'commit');
 		assert.equal(plan.rows[0]?.files.some((file) => file.path === 'src.ts'), true);
-		assert.match(plan.rows[0]?.diff ?? '', /export const n = 1/);
-		assert.match(plan.rows[0]?.diff ?? '', /^\+export const n = 1/m);
+		assert.match(plan.rows[0]?.diffs?.['src.ts'] ?? '', /export const n = 1/);
+		assert.match(plan.rows[0]?.diffs?.['src.ts'] ?? '', /^\+export const n = 1/m);
 		const applied = applyDirtCommit(loaded, plan.rows[0]!, 'Add src.ts.');
 		assert.equal(applied.action, 'commit');
 		assert.equal(applied.reason, undefined);
@@ -212,9 +212,11 @@ describe('dirtCommit plan/apply', () => {
 			{ code: ' M', path: 'README.md' },
 			{ code: '??', path: '.env', skip: 'looks like a secret' },
 		]);
-		assert.match(diff, /diff --git a\/README.md/);
-		assert.match(diff, /\+world/);
-		assert.doesNotMatch(diff, /TOKEN=secret/);
+		assert.match(diff['README.md'] ?? '', /diff --git a\/README.md/);
+		assert.match(diff['README.md'] ?? '', /\+world/);
+		assert.match(diff['.env'] ?? '', /skipped/);
+		assert.doesNotMatch(diff['README.md'] ?? '', /TOKEN=secret/);
+		assert.doesNotMatch(diff['.env'] ?? '', /TOKEN=secret/);
 	});
 
 	it('formats an untracked file as additions', () => {

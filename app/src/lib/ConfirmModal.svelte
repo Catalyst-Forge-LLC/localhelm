@@ -85,6 +85,7 @@
 	);
 
 	let pinned = $state<string | null>(null);
+	let filePick = $state(0);
 	let rosterEl = $state<HTMLElement | null>(null);
 	let stepListEl = $state<HTMLElement | null>(null);
 	const rosterSig = $derived(`${items.join('\n')}\0${itemKeys.join('\n')}`);
@@ -93,6 +94,7 @@
 		rosterSig;
 		pinned = null;
 		excludedIds = [];
+		filePick = 0;
 	});
 
 	const selectedId = $derived(groups ? confirmRosterSelected(groups, pinned) : null);
@@ -123,8 +125,22 @@
 	const draftsReady = $derived(
 		draftIds.filter((id) => !excludedIds.includes(id)).every((id) => Boolean(messageById[id]?.trim())),
 	);
-	const previewId = $derived(selected?.id || draftId);
-	const preview = $derived((previewId && diffs[previewId]?.trim()) || '');
+	const fileKeys = $derived(
+		groups && selected
+			? selected.steps.map((_, i) => `${selected.id}:${i}`)
+			: itemKeys.length === items.length
+				? itemKeys
+				: items.map((_, i) => String(i)),
+	);
+	const showFilePick = $derived(Object.keys(diffs).length > 0);
+	const fileIndex = $derived(Math.min(filePick, Math.max(0, fileKeys.length - 1)));
+	const fileKey = $derived(fileKeys[fileIndex] ?? '');
+	const preview = $derived((fileKey && diffs[fileKey]?.trim()) || '');
+
+	$effect(() => {
+		selectedId;
+		filePick = 0;
+	});
 	const liveDraftHint = $derived(
 		draftingIds.length || Object.keys(draftNoteById).length
 			? commitDraftProgressHint({
@@ -145,12 +161,17 @@
 
 	$effect(() => {
 		if (!stepListEl) return;
-		const current = stepListEl.querySelector('li.current');
+		const current =
+			stepListEl.querySelector('li.on') ?? stepListEl.querySelector('li.current');
 		current?.scrollIntoView({ block: 'nearest' });
 	});
 
 	function pick(id: string): void {
 		pinned = id === liveId ? null : id;
+	}
+
+	function pickFile(index: number): void {
+		filePick = index;
 	}
 
 	function setIncluded(id: string, on: boolean): void {
@@ -297,7 +318,12 @@
 				<ol class="steps" class:tracked={showPhases} bind:this={stepListEl}>
 					{#each selected.steps as step, i (`${selected.id}:${i}:${step.text}`)}
 						{@const link = itemLink(step.text)}
-						<li class:current={step.phase === 'current'} class:done={step.phase === 'done'} class:fail={step.phase === 'fail'}>
+						<li
+							class:on={showFilePick && fileIndex === i}
+							class:current={step.phase === 'current'}
+							class:done={step.phase === 'done'}
+							class:fail={step.phase === 'fail'}
+						>
 							{#if showPhases}
 								<span class="mark" aria-hidden="true">
 									{#if phaseMark(step.phase)}
@@ -308,23 +334,38 @@
 									{/if}
 								</span>
 							{/if}
-							<span>
-								{#if link}
-									{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
-								{:else}
-									{step.text}
-								{/if}
-							</span>
+							{#if showFilePick}
+								<button type="button" class="file-pick" onclick={() => pickFile(i)}>
+									{#if link}
+										{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+									{:else}
+										{step.text}
+									{/if}
+								</button>
+							{:else}
+								<span>
+									{#if link}
+										{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+									{:else}
+										{step.text}
+									{/if}
+								</span>
+							{/if}
 						</li>
 					{/each}
 				</ol>
 			</div>
 		{:else if items.length}
-			<ul class:tracked={showPhases}>
+			<ul class:tracked={showPhases} bind:this={stepListEl}>
 				{#each items as item, i (`${i}:${item}`)}
 					{@const phase = itemPhases[i] ?? 'pending'}
 					{@const link = itemLink(item)}
-					<li class:current={phase === 'current'} class:done={phase === 'done'} class:fail={phase === 'fail'}>
+					<li
+						class:on={showFilePick && fileIndex === i}
+						class:current={phase === 'current'}
+						class:done={phase === 'done'}
+						class:fail={phase === 'fail'}
+					>
 						{#if showPhases}
 							<span class="mark" aria-hidden="true">
 								{#if phaseMark(phase)}
@@ -335,13 +376,23 @@
 								{/if}
 							</span>
 						{/if}
-						<span>
-							{#if link}
-								{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
-							{:else}
-								{item}
-							{/if}
-						</span>
+						{#if showFilePick}
+							<button type="button" class="file-pick" onclick={() => pickFile(i)}>
+								{#if link}
+									{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+								{:else}
+									{item}
+								{/if}
+							</button>
+						{:else}
+							<span>
+								{#if link}
+									{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+								{:else}
+									{item}
+								{/if}
+							</span>
+						{/if}
 					</li>
 				{/each}
 			</ul>
@@ -546,6 +597,30 @@
 		font-size: 0.78rem;
 		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 		line-height: 1.45;
+	}
+
+	ol.steps li,
+	ul li {
+		border-radius: var(--plate-radius-sm);
+	}
+
+	ol.steps li.on,
+	ul li.on {
+		background: rgb(126 244 255 / 0.08);
+		color: var(--cyan);
+	}
+
+	.file-pick {
+		display: block;
+		width: 100%;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
 	}
 
 	.diff {

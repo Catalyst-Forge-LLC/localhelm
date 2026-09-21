@@ -16,7 +16,7 @@ export type ConfirmOffer = {
 	canApply: boolean;
 	showOtp?: boolean;
 	messages?: Record<string, string>;
-	/** Repo id → text diff. Commit confirm only. */
+	/** Confirm item key (`id:index`) → text diff. Commit confirm only. */
 	diffs?: Record<string, string>;
 	draftHint?: string;
 	altLabel?: string;
@@ -48,7 +48,7 @@ export type CommitPlanRow = {
 	action: string;
 	reason?: string;
 	files: CommitPlanFile[];
-	diff?: string;
+	diffs?: Record<string, string>;
 	message: string;
 	suggestSource?: string;
 	suggestNote?: string;

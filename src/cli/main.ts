@@ -380,10 +380,11 @@ async function main(): Promise<void> {
 					continue;
 				}
 				process.stdout.write(`${row.id}\tcommit\t${row.path}\n`);
-				for (const file of row.files) process.stdout.write(`  ${dirtFileLine(file)}\n`);
-				if (!apply && row.diff) {
-					process.stdout.write('  diff:\n');
-					for (const line of row.diff.split(/\r?\n/)) process.stdout.write(`    ${line}\n`);
+				for (const file of row.files) {
+					process.stdout.write(`  ${dirtFileLine(file)}\n`);
+					if (!apply && row.diffs?.[file.path]) {
+						for (const line of row.diffs[file.path].split(/\r?\n/)) process.stdout.write(`    ${line}\n`);
+					}
 				}
 				if (row.message) {
 					const src = row.suggestSource === 'ollama' && row.suggestModel
