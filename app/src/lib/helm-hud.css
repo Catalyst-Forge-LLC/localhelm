@@ -57,9 +57,15 @@
 	left: 0;
 	width: 32%;
 	border-radius: inherit;
-	background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+	background-image: linear-gradient(90deg, transparent, var(--cyan), transparent);
+	background-repeat: no-repeat;
+	/* Wider than the blob so the bright peak can travel inside it. */
+	background-size: 175% 100%;
+	background-position: 100% 0;
 	box-shadow: 0 0 10px var(--cyan-glow);
-	animation: helm-knight 1.15s ease-in-out infinite alternate;
+	animation:
+		helm-knight 1.15s ease-in-out infinite alternate,
+		helm-knight-peak 1.15s cubic-bezier(0.7, 0, 1, 0.4) infinite alternate;
 }
 
 @keyframes helm-knight {
@@ -71,10 +77,22 @@
 	}
 }
 
+/* Peak starts in the tail and accelerates toward the leading edge. Reverse does the same. */
+@keyframes helm-knight-peak {
+	from {
+		background-position: 100% 0;
+	}
+	to {
+		background-position: 0% 0;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.hud-scan-blob {
 		animation: none;
 		left: 34%;
+		background-size: 100% 100%;
+		background-position: center;
 		opacity: 0.7;
 	}
 }
