@@ -157,9 +157,13 @@ export function plainPluginError(raw: string): string {
 		.split(/\n| · /)
 		.map((line) => line.trim())
 		.filter((line) => line.length > 0 && !PLUGIN_NOISE.test(line));
+	const thrown = lines.find((line) => /^[A-Za-z]*Error(?: \[[^\]]+\])?: \S/.test(line));
+	if (thrown) return tidyPluginLine(thrown);
 	const named = lines.find(
 		(line) =>
-			/error|failed|assert|denied|unauthorized|ERR_/i.test(line) && !GENERIC_PLUGIN_EXIT.test(line),
+			/error|failed|assert|denied|unauthorized|ERR_/i.test(line) &&
+			!GENERIC_PLUGIN_EXIT.test(line) &&
+			!line.endsWith(':'),
 	);
 	const useful = lines.filter((line) => !GENERIC_PLUGIN_EXIT.test(line));
 	const hit = named ?? useful.at(-1) ?? lines.at(-1) ?? 'plugin failed';

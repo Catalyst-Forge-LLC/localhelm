@@ -5,7 +5,28 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 import type { LoadedManifest } from './manifest.js';
 import { shipScriptTarget } from './pkg.js';
-import { applyScriptShip, isShippedReason, planScriptShip, requireShipIds } from './scriptShip.js';
+import { plainPluginError } from './plainError.js';
+import { applyScriptShip, isShippedReason, planScriptShip, requireShipIds, shipEnv } from './scriptShip.js';
+
+describe('shipEnv', () => {
+	it('drops NODE_ENV so a project build is not a dev build', () => {
+		const env = shipEnv({ NODE_ENV: 'development', PATH: '/bin', HOME: '/h' });
+		assert.equal(env.NODE_ENV, undefined);
+		assert.equal(env.PATH, '/bin');
+	});
+});
+
+describe('plainPluginError for a failed vite build', () => {
+	it('reports the thrown error, not the "error during build:" header', () => {
+		const raw = [
+			'(node:6588) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true',
+			'error during build:',
+			'Error: NODE_ENV=development is set. Unset it before building for production.',
+			'    at config (file:///Z:/x/vite.config.js:1262:15)',
+		].join('\n');
+		assert.match(plainPluginError(raw), /^Error: NODE_ENV=development is set/);
+	});
+});
 
 function loaded(root: string, projects: Array<{ id: string; path: string }>): LoadedManifest {
 	return {

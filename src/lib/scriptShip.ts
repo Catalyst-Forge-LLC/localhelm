@@ -33,15 +33,20 @@ export function isShippedReason(reason: string | undefined): boolean {
 	return Boolean(reason?.startsWith('shipped '));
 }
 
+/** LocalHelm's own dev server sets NODE_ENV=development; a project's ship must not inherit it. */
+export function shipEnv(env: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+	const { NODE_ENV: _nodeEnv, ...rest } = env;
+	return rest;
+}
+
 export function defaultScriptShipRunner(cwd: string): Promise<ScriptShipResult> {
-	const win = process.platform === 'win32';
-	const pnpm = win ? 'pnpm.cmd' : 'pnpm';
 	return new Promise((resolve) => {
-		const child = spawn(pnpm, ['run', 'ship'], {
+		const child = spawn('pnpm run ship', {
 			cwd,
+			env: shipEnv(),
 			stdio: ['ignore', 'pipe', 'pipe'],
 			windowsHide: true,
-			shell: win,
+			shell: true,
 		});
 		let stdout = '';
 		let stderr = '';
