@@ -6,7 +6,14 @@
 
 **Control panel for local development.**
 
-See which local projects need attention: uncommitted work, package versions, dependents, and supported site or port status. Scan proposes. You enroll. `status` is a read. Writes need `--apply`. [LocalSlip](https://localslip.dev) is the slip. LocalHelm is the wheel. Ports and FilePress jobs are optional.
+One control panel for the repos you choose. See which ones have uncommitted work, unpushed commits, unpublished versions, or dependents pinned to an old release. Then act from the same board: commit, push, publish, bump versions, update dependents, and start or stop dev servers. Every write opens a plan first and waits for you to confirm.
+
+The controls depend on where you open it:
+
+- **Operator board** at `http://127.0.0.1:4321`, on the machine that runs `localhelm serve`: every read and every write.
+- **Deck** at `/deck`, from a phone or any other device on your LAN or Tailscale: read-only. One tile per running app that has a [LocalSlip](https://localslip.dev) claim and listens beyond `127.0.0.1`. Tap to open, long-press to copy the link. No commit, publish, start, or stop. Write requests from anywhere but loopback get a 403.
+
+Start and stop need LocalSlip. The Sites tab needs a FilePress site. Both are optional. LocalSlip is the slip. LocalHelm is the wheel.
 
 <p align="center">
   <img src="https://localhelm.dev/dashboard.jpg" alt="LocalHelm dashboard: Today needs and FilePress sites" />
@@ -21,9 +28,9 @@ pnpm install && pnpm build
 localhelm serve
 ```
 
-Open `http://127.0.0.1:4321`. **Add projects**, scan that folder (`.` is where you ran serve), tick the ones you keep, then write. Nothing auto-enrolls. LocalSlip and FilePress are optional later.
+Open `http://127.0.0.1:4321`. Click **Add projects**, scan that folder (`.` is where you ran serve), tick the ones you keep, and confirm. Nothing auto-enrolls.
 
-The same actions exist on the CLI if you want them. `scan` never writes. Other commands print a plan; `--apply` writes. `publish`, `push`, `ship`, and `global` need named ids. Never `--force`.
+The same actions exist on the CLI if you want them. `scan`, `status`, and `deps` only read. Other commands print a plan; `--apply` writes. `publish`, `push`, `ship`, and `global` need named ids. Never `--force`.
 
 ```bash
 localhelm scan .

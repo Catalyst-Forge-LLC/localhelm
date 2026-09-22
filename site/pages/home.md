@@ -1,26 +1,35 @@
 ---
 title: LocalHelm
-description: See which local projects need attention in one place.
+description: One control panel for the projects on your machine. See which need work, then commit, push, publish, and start or stop dev servers from the same board.
 ---
 
 <aside class="dict">
 <p><strong>helm</strong> <span class="pos">n.</span> the wheel by which a ship is steered.</p>
 </aside>
 
-See which local projects need attention in one place: uncommitted work, package versions, dependents, and supported site or port status. Choose the repositories you track, then inspect their current state.
+One control panel for the repos you choose. The board shows which ones have uncommitted work, unpushed commits, unpublished versions, or dependents pinned to an old release. Then act from the same board: commit, push, publish, bump versions, update dependents, and start or stop dev servers. Every write opens a plan first and waits for you to confirm.
+
+The controls depend on where you open it:
+
+- **Operator board**, `http://127.0.0.1:4321` on the machine that runs `localhelm serve`: every read and every write.
+- **Deck**, `/deck` from a phone or any other device on your LAN or Tailscale: read-only. It shows one tile per running app that has a [LocalSlip](https://localslip.dev) claim and listens beyond `127.0.0.1`. Tap a tile to open that app. Long-press to copy its link. No commit, publish, start, or stop.
+
+LocalHelm refuses write requests unless they come from loopback, so a phone cannot run them even with the right URL.
 
 ![LocalHelm dashboard showing Today needs and FilePress sites](/dashboard.jpg "Today: fleet writes you can confirm, and FilePress sites waiting on Land")
 
-Install, stand in the folder that contains your repos, then `localhelm serve`. On the board, **Add projects**, scan, tick, and write. LocalSlip and FilePress are optional add-ons, not a suite install.
+Install, stand in the folder that contains your repos, then run:
 
 ```text
 localhelm serve
 ```
 
-`scan` never writes. `status` is a read. Other commands print a plan. `--apply` writes. `publish`, `push`, and `ship` need named ids. Never `--force`. The CLI can enroll the same way if you want a terminal.
+On the board, click **Add projects**, scan the folder, tick the repos you keep, and confirm. Nothing enrolls on its own.
 
-`localhelm serve` opens the operator board at `http://127.0.0.1:4321`. Serve from the fleet’s parent folder. Writes stay on loopback. The **Deck** at `/deck` is the phone tile grid.
+The CLI runs the same actions. `scan`, `status`, and `deps` only read. Other commands print a plan, and `--apply` writes. `publish`, `push`, `ship`, and `global` need named ids. Never `--force`.
 
-[LocalSlip](https://localslip.dev) is the slip. LocalHelm is the wheel.
+Start and stop need LocalSlip. The Sites tab needs a FilePress site. Both are optional; without them those tabs stay empty.
+
+LocalSlip is the slip. LocalHelm is the wheel.
 
 [Docs](/docs) · [Install](/install) · [Why a wheel](/posts/why-a-wheel)

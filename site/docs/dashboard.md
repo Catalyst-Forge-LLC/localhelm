@@ -15,7 +15,7 @@ An empty board is not “all quiet.” Today and the header say **No fleet** and
 
 ![LocalHelm dashboard showing Today needs and FilePress sites](/dashboard.jpg "Today: fleet writes you can confirm, and FilePress sites waiting on Land")
 
-A phone on LAN or Tailscale opens the **Deck** (`/deck`): tiles for listening leases the phone can reach. Tap a tile to open it on that host. From the operator board, menu **Deck** is the same page. `/visitor` still redirects there. Write APIs stay on loopback.
+A phone or any other device on LAN or Tailscale opens the **Deck** (`/deck`). It is read-only: one tile per running app that has a LocalSlip claim and listens beyond `127.0.0.1`. Tap a tile to open it on that host. Long-press copies the link. From the operator board, menu **Deck** is the same page. `/visitor` still redirects there. Write APIs stay on loopback.
 
 ## Tabs
 
@@ -32,7 +32,7 @@ The same product can appear on three tabs. **Also on** chips jump and check that
 
 Header **Refresh** re-reads enrolled projects, Sites, and Ports. Row refresh is the same for one id. **Fetch remotes** runs `git fetch` and clears the five-minute npm cache. Those are observations plus a remote update. They do not publish.
 
-Start and stop on Ports ask LocalSlip. Push, Publish, Ship, Install global, Write pins, enroll, and plugin jobs open a plan modal right away — a spinner and the current step show while the plan loads, then the list fills in. Confirm applies. Close leaves disk unchanged. Publish covers both an already-bumped version and a bump plus npm when origin has commits since the last published version. After a laptop npm publish, confirm can offer to install that CLI globally. If some of a batch fail, the confirm lists those first with a reason; click a name. Activity keeps the full npm log. Install checks that exact version on npm first; if a new publish is not visible yet, confirm offers Wait or Try again.
+Start and stop on Ports ask LocalSlip. Commit, Push, Publish, Ship, Install global, Write pins, enroll, and plugin jobs (including start and stop) open a plan modal right away. A spinner and the current step show while the plan loads, then the list fills in. Confirm applies. Close leaves disk unchanged. Publish covers both an already-bumped version and a bump plus npm when origin has commits since the last published version. After a laptop npm publish, confirm can offer to install that CLI globally. If some of a batch fail, the confirm lists those first with a reason; click a name. Activity keeps the full npm log. Install checks that exact version on npm first; if a new publish is not visible yet, confirm offers Wait or Try again.
 
 Publish OTP lives in the confirm modal. Never `--force`.
 
