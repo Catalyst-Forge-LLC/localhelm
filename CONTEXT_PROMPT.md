@@ -370,3 +370,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - One bad `localhelm.plugin.mjs` failed `GET /api/plugins`, and Today reported FilePress and Ports as not loaded. Helm now skips that file, keeps the other boards, and puts the message on the keel and in the locker (d144). FeatureFacts exports the host shape (`id`, `label`, `board`).
 - Commit confirm shows a short text diff of the selected dirty file as soon as the plan opens (first file selected). Ollama still fills the message afterward. Secret-looking paths stay out of the diff.
 - Fleet enroll and FilePress Sites are separate lists (d145). Adding a package to the fleet does not by itself put it on FilePress. FilePress auto-lists workspace siblings with getfilepress + filepress.config.ts; everything else needs extras.json. Helm **Add sites** scans through the FilePress plugin. After a live fleet enroll, Helm also asks FilePress to list sites found under those folders.
+
+### Session 52 — 2026-09-22
+
+- After a multi-row write, the keel stayed on the last `reading git (n of n)` line. That progress note outlived the job. The fleet read now clears it when that read finishes.

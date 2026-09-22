@@ -191,6 +191,8 @@
 	});
 	let busy = $state('');
 	let statusNote = $state('');
+	/** Latest fleet read. An older read must not clear a newer progress line. */
+	let statusReads = 0;
 	let error = $state('');
 	let landPendingIds = $state<string[]>([]);
 	let landPendingReasons = $state<Record<string, string>>({});
@@ -990,6 +992,8 @@
 		gitOnly?: boolean;
 		skipCommitCounts?: boolean;
 	} = {}): Promise<void> {
+		const ticket = ++statusReads;
+		try {
 		const ids = opts.ids?.filter(Boolean) ?? [];
 		const scoped = ids.length > 0;
 		const query = new URLSearchParams();
@@ -1001,6 +1005,7 @@
 		const csv = scoped ? serializeListParam(ids) : null;
 		if (csv) query.set('ids', csv);
 		const data = (await callNdjson(`/api/status?${query}`, { method: 'GET' }, (event) => {
+			if (ticket !== statusReads) return;
 			if (event.type === 'progress' && typeof event.label === 'string' && event.label.trim()) {
 				statusNote = event.label;
 				if (busy) busy = event.label;
@@ -1047,6 +1052,10 @@
 			statusNote = 'reading Sites and Ports';
 			if (busy) busy = 'reading Sites and Ports';
 			await Promise.all([loadPluginBoards(), loadActivity(), loadArchive(), loadLocalOnly()]);
+		}
+		} finally {
+			// The last progress line ("reading git (n of n)") would stay after the job clears busy.
+			if (ticket === statusReads) statusNote = '';
 		}
 	}
 
