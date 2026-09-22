@@ -14,7 +14,19 @@
 	@property --knight-peak {
 		syntax: '<percentage>';
 		inherits: false;
-		initial-value: 78%;
+		initial-value: 84%;
+	}
+
+	@property --knight-before {
+		syntax: '<percentage>';
+		inherits: false;
+		initial-value: 38%;
+	}
+
+	@property --knight-after {
+		syntax: '<percentage>';
+		inherits: false;
+		initial-value: 16%;
 	}
 
 	.knight {
@@ -36,13 +48,16 @@
 		left: 0;
 		width: 32%;
 		border-radius: inherit;
-		--knight-peak: 78%;
+		--knight-peak: 84%;
+		--knight-before: 38%;
+		--knight-after: 16%;
+		/* Long fade sits behind the peak. Short fade sits in front. Those swap when the sweep turns. */
 		background-image: linear-gradient(
 			90deg,
 			var(--knight-clear) 0%,
-			var(--knight-clear) calc(var(--knight-peak) - 38%),
+			var(--knight-clear) calc(var(--knight-peak) - var(--knight-before)),
 			var(--knight-color) var(--knight-peak),
-			var(--knight-clear) calc(var(--knight-peak) + 16%)
+			var(--knight-clear) calc(var(--knight-peak) + var(--knight-after))
 		);
 		filter: drop-shadow(0 0 6px var(--knight-glow));
 		animation:
@@ -64,18 +79,30 @@
 		}
 	}
 
-	/* Each direction eases the peak to the nose and leaves the tail clear. Alternate would linger on one pass. */
+	/* Peak eases to the nose. The long fade stays behind it, and flips at each turn. */
 	@keyframes knight-peak {
 		0% {
-			--knight-peak: 24%;
+			--knight-peak: 16%;
+			--knight-before: 38%;
+			--knight-after: 16%;
 			animation-timing-function: cubic-bezier(0.2, 0.75, 0.25, 1);
 		}
 		50% {
 			--knight-peak: 84%;
+			--knight-before: 38%;
+			--knight-after: 16%;
+			animation-timing-function: step-end;
+		}
+		50.01% {
+			--knight-peak: 84%;
+			--knight-before: 16%;
+			--knight-after: 38%;
 			animation-timing-function: cubic-bezier(0.2, 0.75, 0.25, 1);
 		}
 		100% {
-			--knight-peak: 24%;
+			--knight-peak: 16%;
+			--knight-before: 16%;
+			--knight-after: 38%;
 		}
 	}
 
@@ -84,6 +111,8 @@
 			animation: none;
 			left: 34%;
 			--knight-peak: 62%;
+			--knight-before: 38%;
+			--knight-after: 16%;
 			filter: none;
 			opacity: 0.7;
 		}
