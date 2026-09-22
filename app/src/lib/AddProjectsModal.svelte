@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import KnightRiderBar from './KnightRiderBar.svelte';
 
 	type Props = {
 		open: boolean;
@@ -63,7 +64,7 @@
 			{#if busy}
 				<div class="working" role="status" aria-live="polite">
 					<span class="working-copy">{busyLabel || 'Scanning…'}</span>
-					<span class="hud-scan" aria-hidden="true"><span class="hud-scan-blob"></span></span>
+					<KnightRiderBar />
 				</div>
 			{/if}
 			{#if children}{@render children()}{/if}

@@ -3,6 +3,7 @@
 	import { commitDraftProgressHint, commitDraftSubjectIds } from './confirmProgress';
 	import { buildConfirmRoster, confirmCountText, confirmRosterSelected } from './confirmRoster';
 	import Icon from './Icon.svelte';
+	import KnightRiderBar from './KnightRiderBar.svelte';
 
 	type Phase = 'pending' | 'current' | 'done' | 'fail';
 
@@ -264,7 +265,7 @@
 		{#if busy && busyLabel}
 			<div class="working" class:solo={!items.length} role="status" aria-live="polite">
 				<span class="working-copy">{busyLabel}</span>
-				<span class="hud-scan" aria-hidden="true"><span class="hud-scan-blob"></span></span>
+				<KnightRiderBar />
 			</div>
 		{/if}
 		{#if groups && selected}
