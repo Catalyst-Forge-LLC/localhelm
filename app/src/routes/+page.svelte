@@ -17,6 +17,8 @@
 	import { tip } from '$lib/helmTippy';
 	import { archiveHidesId } from '$lib/archiveVis';
 	import { localOnlyCoversId } from '$lib/localOnlyVis';
+	import SelectionGroups from '$lib/SelectionGroups.svelte';
+	import { matchingGroupIds, type SelectionGroup } from '$lib/groupSelect';
 	import { activityLinkedIds } from '$lib/activityLinks';
 	import { crosswalkChips } from '$lib/crosswalk';
 	import { formatPluginPlanLines, pluginPlanLineKeys } from '$lib/pluginPlan';
@@ -173,6 +175,7 @@
 	let archivedIds = $state<string[]>([]);
 	let showArchived = $state(false);
 	let localOnlyIds = $state<string[]>([]);
+	let selectionGroups = $state<SelectionGroup[]>([]);
 	let showLocalOnly = $state(false);
 	let showParked = $state(false);
 	let briefCopied = $state(false);
@@ -199,6 +202,7 @@
 	let landShipFingerprints = $state<Record<string, string>>({});
 
 	const enrolledIds = $derived(new Set((inventory ? inventory.projects : roster).map((p) => p.id)));
+	const fleetRowIds = $derived((inventory ? inventory.projects : roster).map((row) => row.id));
 	const archivedSet = $derived(new Set(archivedIds));
 	const localOnlySet = $derived(new Set(localOnlyIds));
 	const visibleProjects = $derived(
@@ -943,6 +947,45 @@
 		}
 	}
 
+	async function loadGroups(): Promise<void> {
+		try {
+			const data = (await call('/api/groups')) as { groups?: SelectionGroup[] };
+			selectionGroups = Array.isArray(data.groups) ? data.groups : [];
+		} catch {
+			/* keep the last group list */
+		}
+	}
+
+	async function saveSelectionGroup(name: string, ids: string[]): Promise<string> {
+		const data = (await call('/api/groups', {
+			method: 'POST',
+			body: JSON.stringify({ name, ids }),
+		})) as { groups?: SelectionGroup[] };
+		selectionGroups = Array.isArray(data.groups) ? data.groups : [];
+		const stored = selectionGroups.find((group) => group.name.toLocaleLowerCase() === name.trim().toLocaleLowerCase());
+		return stored?.name ?? name.trim();
+	}
+
+	async function deleteSelectionGroup(name: string): Promise<void> {
+		const data = (await call('/api/groups', {
+			method: 'POST',
+			body: JSON.stringify({ name, delete: true }),
+		})) as { groups?: SelectionGroup[] };
+		selectionGroups = Array.isArray(data.groups) ? data.groups : [];
+	}
+
+	function applyFleetGroup(ids: string[]): void {
+		selectedIds = idsToSelection(matchingGroupIds(ids, fleetRowIds));
+	}
+
+	function applySiteGroup(rows: { id: string }[], ids: string[]): void {
+		selectedSites = idsToSelection(matchingGroupIds(ids, rows.map((row) => row.id)));
+	}
+
+	function applyPortGroup(rows: { id: string }[], ids: string[]): void {
+		selectedPorts = idsToSelection(matchingGroupIds(ids, rows.map((row) => row.id)));
+	}
+
 	async function loadRoster(): Promise<void> {
 		try {
 			const data = (await call('/api/roster')) as {
@@ -1051,7 +1094,7 @@
 		if (opts.extras !== false && !scoped) {
 			statusNote = 'reading Sites and Ports';
 			if (busy) busy = 'reading Sites and Ports';
-			await Promise.all([loadPluginBoards(), loadActivity(), loadArchive(), loadLocalOnly()]);
+			await Promise.all([loadPluginBoards(), loadActivity(), loadArchive(), loadLocalOnly(), loadGroups()]);
 		}
 		} finally {
 			// The last progress line ("reading git (n of n)") would stay after the job clears busy.
@@ -2275,6 +2318,15 @@
 							<p class="hint">Needs you is the write for that row. The refresh icon re-reads that row only. Check rows for bulk refresh, bump, push, publish, or remove. Removing never deletes a folder. Bump writes package.json and commits that file.</p>
 						</div>
 						<div class="group-buttons">
+							<SelectionGroups
+								groups={selectionGroups}
+								checkedIds={matchingGroupIds(checkedIds, fleetRowIds)}
+								presentIds={fleetRowIds}
+								busy={Boolean(busy)}
+								onapply={applyFleetGroup}
+								onsave={(name) => saveSelectionGroup(name, matchingGroupIds(checkedIds, fleetRowIds))}
+								ondelete={deleteSelectionGroup}
+							/>
 							<Tooltip title="Re-read package.json, git, and npm for the checked rows only. Does not fetch remotes or reload Sites/Ports.">
 								<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => void refreshRows(checkedIds)}>
 									<Icon icon="lucide:refresh-cw" />
@@ -2528,6 +2580,19 @@
 							/>
 						</div>
 						<div class="group-buttons">
+							<SelectionGroups
+								groups={selectionGroups}
+								checkedIds={board.rows.filter((row) => selectedSites[row.id]).map((row) => row.id)}
+								presentIds={board.rows.map((row) => row.id)}
+								busy={Boolean(busy)}
+								onapply={(ids) => applySiteGroup(board.rows, ids)}
+								onsave={(name) =>
+									saveSelectionGroup(
+										name,
+										board.rows.filter((row) => selectedSites[row.id]).map((row) => row.id),
+									)}
+								ondelete={deleteSelectionGroup}
+							/>
 							{#if board.plugin === 'filepress'}
 								{@const landIds = viewRows
 									.filter((row) => selectedSites[row.id] && inShipQueue(row.id))
@@ -2936,6 +3001,19 @@
 							</div>
 							{#if leaseActions}
 								<div class="group-buttons">
+									<SelectionGroups
+										groups={selectionGroups}
+										checkedIds={board.rows.filter((row) => selectedPorts[row.id]).map((row) => row.id)}
+										presentIds={board.rows.map((row) => row.id)}
+										busy={Boolean(busy)}
+										onapply={(ids) => applyPortGroup(board.rows, ids)}
+										onsave={(name) =>
+											saveSelectionGroup(
+												name,
+												board.rows.filter((row) => selectedPorts[row.id]).map((row) => row.id),
+											)}
+										ondelete={deleteSelectionGroup}
+									/>
 									<Tooltip title="Stops every listening *-site lease. The dashboard stays up. Confirm lists names.">
 										<button
 											class="btn btn-write"

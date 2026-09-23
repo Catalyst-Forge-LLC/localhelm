@@ -7,7 +7,7 @@ _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking
 - **App:** TypeScript ESM CLI (`src/`) + SvelteKit dashboard (`app/`) + FilePress site (`site/` + `/docs`)
 - **Language:** TypeScript strict, Node 22+
 - **Package manager:** pnpm
-- **Storage:** `localhelm.fleet.json` (`workspaceRoot: "."`) + `.localhelmignore` (scan) + `.localhelm/job.lock` + `.localhelm/activity.json` (dashboard log, gitignored). No PocketBase, no accounts, no telemetry.
+- **Storage:** `localhelm.fleet.json` (`workspaceRoot: "."`) + `.localhelmignore` (scan) + `.localhelm/job.lock` + `.localhelm/activity.json` (dashboard log, gitignored) + `.localhelm/groups.json` (named row selections, shared across tabs). No PocketBase, no accounts, no telemetry.
 - **AI/LLM:** none in the product core. Optional **Ollama** drafts commit messages only; git owns the file list. Helm uses **ollanet** to find a host (**network / dedicated box first**, this machine last; last scan / Tailscale / config; LAN only if needed). `LOCALHELM_OLLAMA_MACHINE` / `LOCALHELM_OLLAMA_MODEL` pin; `LOCALHELM_OLLAMA_URL` is a last-resort base URL still via ollanet’s client. The confirm opens on fallbacks immediately; drafts fill in one repo at a time.
 - **Deploy:** npm `localhelm` (operator publishes). FilePress site at **localhelm.dev** (`pnpm ship` from `site/`; not in the npm tarball)
 - **Key dependencies:** Node built-ins + TypeScript + **ollanet** (Ollama discovery / chat). No catalog adapter.
@@ -374,3 +374,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 52 — 2026-09-22
 
 - After a multi-row write, the keel stayed on the last `reading git (n of n)` line. That progress note outlived the job. The fleet read now clears it when that read finishes.
+
+### Session 53 — 2026-09-23
+
+- Named groups (d146): one list of ids in `.localhelm/groups.json`, shared by Fleet, Sites, and Ports. Save stores the checked rows. Picking the name checks the overlap on the current list and skips the rest. Saving the same name replaces that list. The fleet-row `group` field is unchanged.

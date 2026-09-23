@@ -127,6 +127,10 @@ export { archiveHidesId, archiveIds, archivePath, isArchived, planArchive, readA
 export type { ArchiveFile, ArchivePlanRow } from './archive.js';
 export { clearLocalOnly, localOnlyCoversId, localOnlyPath, markLocalOnly, readLocalOnly } from './localOnly.js';
 export type { LocalOnlyFile } from './localOnly.js';
+export { deleteGroup, groupsPath, readGroups, saveGroup } from './groups.js';
+export type { GroupsFile } from './groups.js';
+export { matchingGroupIds, sameGroupName } from './groupSelect.js';
+export type { SelectionGroup } from './groupSelect.js';
 export { fleetRoster } from './roster.js';
 export type { FleetRosterRow } from './roster.js';
 export { buildBrief, formatBrief } from './brief.js';

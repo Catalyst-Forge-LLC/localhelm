@@ -2032,6 +2032,19 @@
         "Send operators to the FilePress dashboard only"
       ],
       "status": "active"
+    },
+    {
+      "id": "d146",
+      "timestamp": "2026-09-23T21:30:00Z",
+      "phase": "2-scaffolding",
+      "session": 53,
+      "decision": "A named group is one shared list of ids in .localhelm/groups.json. Picking it checks the rows on the current list whose ids match. Ids with no row there are skipped.",
+      "rationale": "Operator wants to recall a set such as the facts projects and run the existing toolbar action on whichever tab they are on.",
+      "alternatives_considered": [
+        "A separate group list per tab",
+        "Reuse the optional group field on a fleet row"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [
