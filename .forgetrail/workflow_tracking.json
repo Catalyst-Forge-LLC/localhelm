@@ -2045,6 +2045,19 @@
         "Reuse the optional group field on a fleet row"
       ],
       "status": "active"
+    },
+    {
+      "id": "d147",
+      "timestamp": "2026-09-24T04:20:00Z",
+      "phase": "2-scaffolding",
+      "session": 53,
+      "decision": "Fleet, site, and port toolbars are two bands. Groups and view chips sit on the first. The write line shows only actions that have work. Refresh, Add, and the quieter writes live in More. The group name field stays inside the Groups menu.",
+      "rationale": "The single wrap of Groups, the name field, and every write button crowded the Fleet header. Operator accepted the two-band layout.",
+      "alternatives_considered": [
+        "Leave every button on one wrapping row",
+        "Move Groups into the page menu"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

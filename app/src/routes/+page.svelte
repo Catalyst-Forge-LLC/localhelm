@@ -17,6 +17,7 @@
 	import { tip } from '$lib/helmTippy';
 	import { archiveHidesId } from '$lib/archiveVis';
 	import { localOnlyCoversId } from '$lib/localOnlyVis';
+	import OverflowMenu from '$lib/OverflowMenu.svelte';
 	import SelectionGroups from '$lib/SelectionGroups.svelte';
 	import { matchingGroupIds, type SelectionGroup } from '$lib/groupSelect';
 	import { activityLinkedIds } from '$lib/activityLinks';
@@ -2317,7 +2318,9 @@
 							<h2>Fleet</h2>
 							<p class="hint">Needs you is the write for that row. The refresh icon re-reads that row only. Check rows for bulk refresh, bump, push, publish, or remove. Removing never deletes a folder. Bump writes package.json and commits that file.</p>
 						</div>
-						<div class="group-buttons">
+					</div>
+					<div class="panel-tools">
+						<div class="tool-band">
 							<SelectionGroups
 								groups={selectionGroups}
 								checkedIds={matchingGroupIds(checkedIds, fleetRowIds)}
@@ -2327,94 +2330,110 @@
 								onsave={(name) => saveSelectionGroup(name, matchingGroupIds(checkedIds, fleetRowIds))}
 								ondelete={deleteSelectionGroup}
 							/>
-							<Tooltip title="Re-read package.json, git, and npm for the checked rows only. Does not fetch remotes or reload Sites/Ports.">
-								<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => void refreshRows(checkedIds)}>
-									<Icon icon="lucide:refresh-cw" />
-									Refresh{checkedIds.length ? ` (${checkedIds.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip title="Scan a folder and pick which projects to enroll.">
-								<button class="btn" disabled={Boolean(busy)} onclick={() => (addOpen = true)}>
-									<Icon icon="lucide:folder-plus" />
-									Add projects
-								</button>
-							</Tooltip>
-							<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
-								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedCommitIds.length} onclick={() => void startCommit(checkedIds)}>
-									<Icon icon="lucide:git-commit-horizontal" />
-									Commit{checkedCommitIds.length ? ` (${checkedCommitIds.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish.">
-								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedIds.length} onclick={() => startBump(checkedIds)}>
-									<Icon icon="lucide:chevrons-up" />
-									Bump{checkedIds.length ? ` (${checkedIds.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip title="Shows which checked repos would push to origin. The count is how many are ahead, not how many are checked. Confirm in the modal. Never --force.">
-								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedPushIds.length} onclick={() => startPush(checkedIds)}>
-									<Icon icon="lucide:upload" />
-									Push{checkedPushIds.length ? ` (${checkedPushIds.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip title="Shows bump, push, and npm publish for the checked public packages. Confirm in the modal.">
-								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedPublishIds.length} onclick={() => startPublish(checkedPublishIds)}>
-									<Icon icon="lucide:package-up" />
-									Publish{checkedPublishIds.length ? ` (${checkedPublishIds.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip title="Runs pnpm ship for checked repos that have the script (wrangler / Pages). Confirm in the modal. Not FilePress Land.">
-								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedShipIds.length} onclick={() => void startShip(checkedShipIds)}>
-									<Icon icon="lucide:ship" />
-									Ship{checkedShipIds.length ? ` (${checkedShipIds.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip title="Installs or updates the checked CLIs on this machine (pnpm add -g). Confirm in the modal. Never --force.">
-								<button class="btn btn-write" disabled={Boolean(busy) || demoBoard || !checkedGlobalIds.length} onclick={() => void startGlobal(checkedGlobalIds)}>
-									<Icon icon="lucide:hard-drive-download" />
-									Install global{checkedGlobalIds.length ? ` (${checkedGlobalIds.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip title="Shows which fleet rows would be removed. Confirm in the modal. Never deletes a folder.">
-								<button class="btn btn-write" disabled={Boolean(busy) || !checkedIds.length} onclick={() => startUnenroll()}>
-									<Icon icon="lucide:folder-minus" />
-									Remove{checkedIds.length ? ` (${checkedIds.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip title={showArchived ? 'Puts checked rows back on Today (fleet writes and site Land). Folder was never moved.' : 'Hides checked rows on Today, including matching -site Land. Folder and port stay.'}>
-								<button class="btn" disabled={Boolean(busy) || !checkedIds.length} onclick={() => void startArchive(checkedIds, showArchived)}>
-									<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
-									{showArchived ? 'Restore' : 'Archive'}{checkedIds.length ? ` (${checkedIds.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip
-								title={showLocalOnly
-									? 'Puts checked rows back on Publish, Ship, and Today Land. Start, commit, and bump stay as they are.'
-									: 'Stays on Fleet and Sites for start, commit, and updates. Drops off Publish, Ship, and Today Land until you Include.'}
-							>
-								<button
-									class="btn"
-									disabled={Boolean(busy) || !checkedIds.length}
-									onclick={() => void applyLocalOnly(checkedIds, showLocalOnly)}
-								>
-									<Icon icon={showLocalOnly ? 'lucide:globe' : 'lucide:house'} />
-									{showLocalOnly ? 'Include' : 'Keep local'}{checkedIds.length ? ` (${checkedIds.length})` : ''}
-								</button>
-							</Tooltip>
 							{#if localOnlyIds.length}
 								<Tooltip title="Local-only rows stay enrolled and usable. This only hides them from Publish, Ship, and Land until you Include.">
-									<button type="button" class="btn" onclick={() => (showLocalOnly = !showLocalOnly)}>
+									<button type="button" class="chip" class:on={showLocalOnly} aria-pressed={showLocalOnly} onclick={() => (showLocalOnly = !showLocalOnly)}>
 										{showLocalOnly ? 'Show all' : `Local only (${localOnlyIds.length})`}
 									</button>
 								</Tooltip>
 							{/if}
 							{#if archivedIds.length}
 								<Tooltip title="Archived rows stay enrolled. This only changes what Today and Fleet show.">
-									<button type="button" class="btn" onclick={() => (showArchived = !showArchived)}>
+									<button type="button" class="chip" class:on={showArchived} aria-pressed={showArchived} onclick={() => (showArchived = !showArchived)}>
 										{showArchived ? 'Hide archived' : `Archived (${archivedIds.length})`}
 									</button>
 								</Tooltip>
 							{/if}
+						</div>
+						<div class="tool-band">
+							{#if checkedCommitIds.length}
+								<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
+									<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => void startCommit(checkedIds)}>
+										<Icon icon="lucide:git-commit-horizontal" />
+										Commit ({checkedCommitIds.length})
+									</button>
+								</Tooltip>
+							{/if}
+							{#if checkedIds.length}
+								<Tooltip title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish.">
+									<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => startBump(checkedIds)}>
+										<Icon icon="lucide:chevrons-up" />
+										Bump ({checkedIds.length})
+									</button>
+								</Tooltip>
+							{/if}
+							{#if checkedPushIds.length}
+								<Tooltip title="Shows which checked repos would push to origin. The count is how many are ahead, not how many are checked. Confirm in the modal. Never --force.">
+									<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => startPush(checkedIds)}>
+										<Icon icon="lucide:upload" />
+										Push ({checkedPushIds.length})
+									</button>
+								</Tooltip>
+							{/if}
+							{#if checkedPublishIds.length}
+								<Tooltip title="Shows bump, push, and npm publish for the checked public packages. Confirm in the modal.">
+									<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => startPublish(checkedPublishIds)}>
+										<Icon icon="lucide:package-up" />
+										Publish ({checkedPublishIds.length})
+									</button>
+								</Tooltip>
+							{/if}
+							{#if checkedShipIds.length}
+								<Tooltip title="Runs pnpm ship for checked repos that have the script (wrangler / Pages). Confirm in the modal. Not FilePress Land.">
+									<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => void startShip(checkedShipIds)}>
+										<Icon icon="lucide:ship" />
+										Ship ({checkedShipIds.length})
+									</button>
+								</Tooltip>
+							{/if}
+							<OverflowMenu>
+								{#if checkedIds.length}
+									<Tooltip title="Re-read package.json, git, and npm for the checked rows only. Does not fetch remotes or reload Sites/Ports.">
+										<button class="btn" disabled={Boolean(busy)} onclick={() => void refreshRows(checkedIds)}>
+											<Icon icon="lucide:refresh-cw" />
+											Refresh ({checkedIds.length})
+										</button>
+									</Tooltip>
+								{/if}
+								<Tooltip title="Scan a folder and pick which projects to enroll.">
+									<button class="btn" disabled={Boolean(busy)} onclick={() => (addOpen = true)}>
+										<Icon icon="lucide:folder-plus" />
+										Add projects
+									</button>
+								</Tooltip>
+								{#if checkedGlobalIds.length}
+									<Tooltip title="Installs or updates the checked CLIs on this machine (pnpm add -g). Confirm in the modal. Never --force.">
+										<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => void startGlobal(checkedGlobalIds)}>
+											<Icon icon="lucide:hard-drive-download" />
+											Install global ({checkedGlobalIds.length})
+										</button>
+									</Tooltip>
+								{/if}
+								{#if checkedIds.length}
+									<Tooltip title="Shows which fleet rows would be removed. Confirm in the modal. Never deletes a folder.">
+										<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startUnenroll()}>
+											<Icon icon="lucide:folder-minus" />
+											Remove ({checkedIds.length})
+										</button>
+									</Tooltip>
+									<Tooltip title={showArchived ? 'Puts checked rows back on Today (fleet writes and site Land). Folder was never moved.' : 'Hides checked rows on Today, including matching -site Land. Folder and port stay.'}>
+										<button class="btn" disabled={Boolean(busy)} onclick={() => void startArchive(checkedIds, showArchived)}>
+											<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
+											{showArchived ? 'Restore' : 'Archive'} ({checkedIds.length})
+										</button>
+									</Tooltip>
+									<Tooltip
+										title={showLocalOnly
+											? 'Puts checked rows back on Publish, Ship, and Today Land. Start, commit, and bump stay as they are.'
+											: 'Stays on Fleet and Sites for start, commit, and updates. Drops off Publish, Ship, and Today Land until you Include.'}
+									>
+										<button class="btn" disabled={Boolean(busy)} onclick={() => void applyLocalOnly(checkedIds, showLocalOnly)}>
+											<Icon icon={showLocalOnly ? 'lucide:globe' : 'lucide:house'} />
+											{showLocalOnly ? 'Include' : 'Keep local'} ({checkedIds.length})
+										</button>
+									</Tooltip>
+								{/if}
+							</OverflowMenu>
 						</div>
 					</div>
 
@@ -2579,7 +2598,9 @@
 								detail={siteBoardHelp(board)}
 							/>
 						</div>
-						<div class="group-buttons">
+						</div>
+					<div class="panel-tools">
+						<div class="tool-band">
 							<SelectionGroups
 								groups={selectionGroups}
 								checkedIds={board.rows.filter((row) => selectedSites[row.id]).map((row) => row.id)}
@@ -2593,6 +2614,22 @@
 									)}
 								ondelete={deleteSelectionGroup}
 							/>
+							{#if localOnlyIds.length}
+								<Tooltip title="Local-only sites stay on this list. This only hides them from Today Land until you Include.">
+									<button type="button" class="chip" class:on={showLocalOnly} aria-pressed={showLocalOnly} onclick={() => (showLocalOnly = !showLocalOnly)}>
+										{showLocalOnly ? 'Show all' : `Local only (${localOnlyIds.length})`}
+									</button>
+								</Tooltip>
+							{/if}
+							{#if archivedIds.length}
+								<Tooltip title={showArchived ? 'Hide archived sites and fleet rows again.' : 'Show archived sites so you can Restore them to Today Land.'}>
+									<button type="button" class="chip" class:on={showArchived} aria-pressed={showArchived} onclick={() => (showArchived = !showArchived)}>
+										{showArchived ? 'Hide archived' : `Archived (${archivedIds.length})`}
+									</button>
+								</Tooltip>
+							{/if}
+						</div>
+						<div class="tool-band">
 							{#if board.plugin === 'filepress'}
 								{@const landIds = viewRows
 									.filter((row) => selectedSites[row.id] && inShipQueue(row.id))
@@ -2600,80 +2637,69 @@
 								{@const syncIds = viewRows
 									.filter((row) => selectedSites[row.id] && siteNeedsEngineSync(row.cells))
 									.map((row) => row.id)}
-								<Tooltip title={demoBoard ? 'Leave demo to add FilePress sites.' : 'Scan a folder for getfilepress + filepress.config.ts, then add the ticked sites to FilePress. Workspace siblings already appear.'}>
-									<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => openAddSites()}>
-										<Icon icon="lucide:folder-plus" />
-										Add sites
-									</button>
-								</Tooltip>
-								<Tooltip title="Plans Sync → Push → Ship for the checked sites. This count is the checkboxes, not Today’s waiting list. Confirm in the modal.">
-									<button class="btn btn-write" disabled={Boolean(busy) || landIds.length === 0} onclick={() => startLand(landIds)}>
-										<Icon icon="lucide:plane-landing" />
-										{landIds.length ? `Land checked (${landIds.length})` : 'Land'}
-									</button>
-								</Tooltip>
-								<Tooltip title="Retargets getfilepress and merges headers for the checked sites that are behind. Confirm in the modal.">
-									<button
-										class="btn btn-write"
-										disabled={Boolean(busy) || syncIds.length === 0}
-										onclick={() => startPluginJob(board.plugin, 'sync', syncIds, 'Sync engine')}
-									>
-										<Icon icon="lucide:refresh-cw" />
-										Sync engine{syncIds.length ? ` (${syncIds.length})` : ''}
-									</button>
-								</Tooltip>
+								{#if landIds.length}
+									<Tooltip title="Plans Sync → Push → Ship for the checked sites. This count is the checkboxes, not Today’s waiting list. Confirm in the modal.">
+										<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startLand(landIds)}>
+											<Icon icon="lucide:plane-landing" />
+											Land checked ({landIds.length})
+										</button>
+									</Tooltip>
+								{/if}
+								{#if syncIds.length}
+									<Tooltip title="Retargets getfilepress and merges headers for the checked sites that are behind. Confirm in the modal.">
+										<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startPluginJob(board.plugin, 'sync', syncIds, 'Sync engine')}>
+											<Icon icon="lucide:refresh-cw" />
+											Sync engine ({syncIds.length})
+										</button>
+									</Tooltip>
+								{/if}
 							{/if}
 							{#each boardActions(board) as act (act.id)}
-								{@const icon = actionIcon(act)}
-								{@const bulkLabel = board.plugin === 'xfacts' && act.id === 'refresh' ? 'Add / refresh labels' : act.label}
-								<Tooltip
-									title={board.plugin === 'xfacts' && act.id === 'refresh'
-										? 'Creates APP_FACTS.md when missing, or refreshes an existing label. Confirm in the modal.'
-										: `Shows what ${act.label.toLowerCase()} would do for the checked sites. Confirm in the modal.`}
-								>
-								<button
-									class="btn btn-write"
-									disabled={Boolean(busy) || checkedSiteIds(board, act.id).length === 0}
-									onclick={() => startPluginJob(board.plugin, act.id, checkedSiteIds(board, act.id), bulkLabel)}
-								>
-									{#if icon}<Icon {icon} />{/if}
-									{bulkLabel}{checkedSiteIds(board, act.id).length ? ` (${checkedSiteIds(board, act.id).length})` : ''}
-								</button>
-								</Tooltip>
+								{@const ready = checkedSiteIds(board, act.id)}
+								{#if ready.length}
+									{@const icon = actionIcon(act)}
+									{@const bulkLabel = board.plugin === 'xfacts' && act.id === 'refresh' ? 'Add / refresh labels' : act.label}
+									<Tooltip
+										title={board.plugin === 'xfacts' && act.id === 'refresh'
+											? 'Creates APP_FACTS.md when missing, or refreshes an existing label. Confirm in the modal.'
+											: `Shows what ${act.label.toLowerCase()} would do for the checked sites. Confirm in the modal.`}
+									>
+										<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startPluginJob(board.plugin, act.id, ready, bulkLabel)}>
+											{#if icon}<Icon {icon} />{/if}
+											{bulkLabel} ({ready.length})
+										</button>
+									</Tooltip>
+								{/if}
 							{/each}
-							<Tooltip title={showArchived ? 'Puts checked sites back on Today Land. Folder was never moved.' : 'Hides checked sites from Today Land and this list. Folder and port stay.'}>
-								<button class="btn" disabled={Boolean(busy) || !checkedOnBoard.length} onclick={() => void startArchive(checkedOnBoard, showArchived)}>
-									<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
-									{showArchived ? 'Restore' : 'Archive'}{checkedOnBoard.length ? ` (${checkedOnBoard.length})` : ''}
-								</button>
-							</Tooltip>
-							<Tooltip
-								title={showLocalOnly
-									? 'Puts checked sites back on Today Land. The folder stays; you can still Sync and run locally either way.'
-									: 'Stays on Sites to run and update. Drops off Today Land until you Include.'}
-							>
-								<button
-									class="btn"
-									disabled={Boolean(busy) || !checkedOnBoard.length}
-									onclick={() => void applyLocalOnly(checkedOnBoard, showLocalOnly)}
-								>
-									<Icon icon={showLocalOnly ? 'lucide:globe' : 'lucide:house'} />
-									{showLocalOnly ? 'Include' : 'Keep local'}{checkedOnBoard.length ? ` (${checkedOnBoard.length})` : ''}
-								</button>
-							</Tooltip>
-							{#if localOnlyIds.length}
-								<Tooltip title="Local-only sites stay on this list. This only hides them from Today Land until you Include.">
-									<button type="button" class="btn" onclick={() => (showLocalOnly = !showLocalOnly)}>
-										{showLocalOnly ? 'Show all' : `Local only (${localOnlyIds.length})`}
-									</button>
-								</Tooltip>
-							{/if}
-							{#if archivedIds.length}
-								<Tooltip title={showArchived ? 'Hide archived sites and fleet rows again.' : 'Show archived sites so you can Restore them to Today Land.'}>
-									<button type="button" class="btn" onclick={() => (showArchived = !showArchived)}>
-										{showArchived ? 'Hide archived' : `Archived (${archivedIds.length})`}
-									</button>
-								</Tooltip>
+							{#if board.plugin === 'filepress' || checkedOnBoard.length}
+								<OverflowMenu>
+									{#if board.plugin === 'filepress'}
+										<Tooltip title={demoBoard ? 'Leave demo to add FilePress sites.' : 'Scan a folder for getfilepress + filepress.config.ts, then add the ticked sites to FilePress. Workspace siblings already appear.'}>
+											<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => openAddSites()}>
+												<Icon icon="lucide:folder-plus" />
+												Add sites
+											</button>
+										</Tooltip>
+									{/if}
+									{#if checkedOnBoard.length}
+										<Tooltip title={showArchived ? 'Puts checked sites back on Today Land. Folder was never moved.' : 'Hides checked sites from Today Land and this list. Folder and port stay.'}>
+											<button class="btn" disabled={Boolean(busy)} onclick={() => void startArchive(checkedOnBoard, showArchived)}>
+												<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
+												{showArchived ? 'Restore' : 'Archive'} ({checkedOnBoard.length})
+											</button>
+										</Tooltip>
+										<Tooltip
+											title={showLocalOnly
+												? 'Puts checked sites back on Today Land. The folder stays; you can still Sync and run locally either way.'
+												: 'Stays on Sites to run and update. Drops off Today Land until you Include.'}
+										>
+											<button class="btn" disabled={Boolean(busy)} onclick={() => void applyLocalOnly(checkedOnBoard, showLocalOnly)}>
+												<Icon icon={showLocalOnly ? 'lucide:globe' : 'lucide:house'} />
+												{showLocalOnly ? 'Include' : 'Keep local'} ({checkedOnBoard.length})
+											</button>
+										</Tooltip>
+									{/if}
+								</OverflowMenu>
 							{/if}
 						</div>
 					</div>
@@ -2999,8 +3025,11 @@
 									detail={board.note}
 								/>
 							</div>
-							{#if leaseActions}
-								<div class="group-buttons">
+						</div>
+						{#if leaseActions}
+							{@const checkedFamilies = familyIdsFromChecked()}
+							<div class="panel-tools">
+								<div class="tool-band">
 									<SelectionGroups
 										groups={selectionGroups}
 										checkedIds={board.rows.filter((row) => selectedPorts[row.id]).map((row) => row.id)}
@@ -3014,69 +3043,76 @@
 											)}
 										ondelete={deleteSelectionGroup}
 									/>
-									<Tooltip title="Stops every listening *-site lease. The dashboard stays up. Confirm lists names.">
-										<button
-											class="btn btn-write"
-											disabled={Boolean(busy) || !quietSiteIds.length}
-											onclick={() => startPluginJob(board.plugin, 'quiet', quietSiteIds, 'Quiet sites')}
-										>
-											<Icon icon="lucide:moon" />
-											Quiet sites{quietSiteIds.length ? ` (${quietSiteIds.length})` : ''}
-										</button>
-									</Tooltip>
-									<Tooltip title="Saves a guessed folder and command for every lease that has none. Does not start.">
-										<button
-											class="btn btn-write"
-											disabled={Boolean(busy) || !guessRecipeIds.length}
-											onclick={() => startPluginJob(board.plugin, 'recipe-all', guessRecipeIds, 'Save all guesses')}
-										>
-											<Icon icon="lucide:save" />
-											Save all guesses{guessRecipeIds.length ? ` (${guessRecipeIds.length})` : ''}
-										</button>
-									</Tooltip>
-									<Tooltip title="Plans start for every unparked lease in the checked families.">
-										<button
-											class="btn btn-write"
-											disabled={Boolean(busy) || !familyIdsFromChecked().length}
-											onclick={() => startFamilyJob('start')}
-										>
-											<Icon icon="lucide:play" />
-											Start family
-										</button>
-									</Tooltip>
-									<Tooltip title="Plans stop for every unparked lease in the checked families.">
-										<button
-											class="btn btn-write"
-											disabled={Boolean(busy) || !familyIdsFromChecked().length}
-											onclick={() => startFamilyJob('stop')}
-										>
-											<Icon icon="lucide:square" />
-											Stop family
-										</button>
-									</Tooltip>
 									{#if parkedLeaseCount}
 										<Tooltip title="Parked leases keep their port. Unpark does not start them.">
-											<button type="button" class="btn" onclick={() => (showParked = !showParked)}>
+											<button type="button" class="chip" class:on={showParked} aria-pressed={showParked} onclick={() => (showParked = !showParked)}>
 												{showParked ? 'Hide parked' : `Parked (${parkedLeaseCount})`}
 											</button>
 										</Tooltip>
 									{/if}
+								</div>
+								<div class="tool-band">
 									{#each boardActions(board) as act (act.id)}
-										{@const icon = actionIcon(act)}
-										<Tooltip title={`Shows what ${act.label.toLowerCase()} would do for the checked leases. Confirm in the modal.`}>
-											<button
-												class="btn btn-write"
-												disabled={Boolean(busy) || checkedPortIds(board, act.id).length === 0}
-												onclick={() => startPluginJob(board.plugin, act.id, checkedPortIds(board, act.id), act.label)}
-											>
-												{#if icon}<Icon {icon} />{/if}
-												{act.label}{checkedPortIds(board, act.id).length ? ` (${checkedPortIds(board, act.id).length})` : ''}
+										{@const ready = checkedPortIds(board, act.id)}
+										{#if (act.id === 'start' || act.id === 'stop') && ready.length}
+											{@const icon = actionIcon(act)}
+											<Tooltip title={`Shows what ${act.label.toLowerCase()} would do for the checked leases. Confirm in the modal.`}>
+												<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startPluginJob(board.plugin, act.id, ready, act.label)}>
+													{#if icon}<Icon {icon} />{/if}
+													{act.label} ({ready.length})
+												</button>
+											</Tooltip>
+										{/if}
+									{/each}
+									{#if checkedFamilies.length}
+										<Tooltip title="Plans start for every unparked lease in the checked families.">
+											<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startFamilyJob('start')}>
+												<Icon icon="lucide:play" />
+												Start family
 											</button>
 										</Tooltip>
-									{/each}
+										<Tooltip title="Plans stop for every unparked lease in the checked families.">
+											<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startFamilyJob('stop')}>
+												<Icon icon="lucide:square" />
+												Stop family
+											</button>
+										</Tooltip>
+									{/if}
+									{#if quietSiteIds.length || guessRecipeIds.length || boardActions(board).some((act) => act.id !== 'start' && act.id !== 'stop' && checkedPortIds(board, act.id).length)}
+										<OverflowMenu>
+											{#if quietSiteIds.length}
+												<Tooltip title="Stops every listening *-site lease. The dashboard stays up. Confirm lists names.">
+													<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startPluginJob(board.plugin, 'quiet', quietSiteIds, 'Quiet sites')}>
+														<Icon icon="lucide:moon" />
+														Quiet sites ({quietSiteIds.length})
+													</button>
+												</Tooltip>
+											{/if}
+											{#if guessRecipeIds.length}
+												<Tooltip title="Saves a guessed folder and command for every lease that has none. Does not start.">
+													<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startPluginJob(board.plugin, 'recipe-all', guessRecipeIds, 'Save all guesses')}>
+														<Icon icon="lucide:save" />
+														Save all guesses ({guessRecipeIds.length})
+													</button>
+												</Tooltip>
+											{/if}
+											{#each boardActions(board) as act (act.id)}
+												{@const ready = checkedPortIds(board, act.id)}
+												{#if act.id !== 'start' && act.id !== 'stop' && ready.length}
+													{@const icon = actionIcon(act)}
+													<Tooltip title={`Shows what ${act.label.toLowerCase()} would do for the checked leases. Confirm in the modal.`}>
+														<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startPluginJob(board.plugin, act.id, ready, act.label)}>
+															{#if icon}<Icon {icon} />{/if}
+															{act.label} ({ready.length})
+														</button>
+													</Tooltip>
+												{/if}
+											{/each}
+										</OverflowMenu>
+									{/if}
 								</div>
-							{/if}
-						</div>
+							</div>
+						{/if}
 						{#if leaseActions}
 							<PortFilterBar variant="leases" bind:filters={leaseFilters} shown={viewRows.length} total={board.rows.length} />
 						{:else}

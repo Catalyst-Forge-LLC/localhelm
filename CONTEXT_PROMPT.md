@@ -378,3 +378,4 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 53 — 2026-09-23
 
 - Named groups (d146): one list of ids in `.localhelm/groups.json`, shared by Fleet, Sites, and Ports. Save stores the checked rows. Picking the name checks the overlap on the current list and skips the rest. Saving the same name replaces that list. The fleet-row `group` field is unchanged.
+- Panel toolbars are two bands. Groups and view chips (Local only, Archived, Parked) sit on the first. The write line shows only actions that have work (Fleet: Commit, Bump, Push, Publish, Ship). Refresh, Add, Install global, Remove, Archive, and Keep local live in More. The group name field stays inside the Groups menu.
