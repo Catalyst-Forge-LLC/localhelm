@@ -5,7 +5,7 @@ export default defineFilepressConfig({
 	description: 'See which local projects need attention in one place.',
 	url: 'https://localhelm.dev',
 	author: 'Catalyst Forge, LLC',
-	tagline: 'One control panel for the projects you track on your machine.',
+	tagline: 'Commit, push, publish, and start or stop dev servers.',
 	lede: 'Git · npm · dependents',
 	logo: '/logo.png',
 	ogImage: '/logo.png',
