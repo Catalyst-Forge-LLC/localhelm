@@ -61,7 +61,6 @@
 				<h2 id={titleId}>{title}</h2>
 				<p class="hint">{hint}</p>
 			</div>
-			<button type="button" class="btn" disabled={busy} onclick={cancel}>Close</button>
 		</div>
 		<div class="body">
 			{#if busy}
@@ -71,6 +70,9 @@
 				</div>
 			{/if}
 			{#if children}{@render children()}{/if}
+		</div>
+		<div class="actions">
+			<button type="button" class="btn" disabled={busy} onclick={cancel}>Close</button>
 		</div>
 	</div>
 </dialog>
@@ -146,9 +148,17 @@
 	}
 
 	.body {
-		padding: 0 1.25rem 1.15rem;
+		padding: 0 1.25rem;
 		overflow: auto;
 		min-height: 0;
+	}
+
+	.actions {
+		display: flex;
+		justify-content: flex-end;
+		flex-shrink: 0;
+		gap: 0.4rem;
+		padding: 0.85rem 1.25rem 1.15rem;
 	}
 
 	.working {
