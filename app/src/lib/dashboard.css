@@ -1219,6 +1219,17 @@
 		gap: 0.4rem;
 	}
 
+	.tool-band:not(:has(button)) {
+		display: none;
+	}
+
+	.tool-band .chip {
+		padding: 0.28rem 0.62rem;
+		font-size: 0.8rem;
+		line-height: 1.2;
+		border-radius: var(--plate-radius);
+	}
+
 	.plugin-board {
 		margin-top: 0;
 	}

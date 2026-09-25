@@ -2702,6 +2702,44 @@
 									</button>
 								</Tooltip>
 							{/if}
+							{#if board.plugin === 'filepress' || board.plugin === 'featurefacts' || checkedOnBoard.length}
+								<OverflowMenu>
+									{#if board.plugin === 'featurefacts'}
+										<Tooltip title={demoBoard ? 'Leave demo to init a FeatureFacts register.' : 'Scan a folder for repos with no .featurefacts/ yet. Init writes an empty register. It does not scan code.'}>
+											<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => openAddFacts()}>
+												<Icon icon="lucide:folder-plus" />
+												Add repos
+											</button>
+										</Tooltip>
+									{/if}
+									{#if board.plugin === 'filepress'}
+										<Tooltip title={demoBoard ? 'Leave demo to add FilePress sites.' : 'Scan a folder for getfilepress + filepress.config.ts, then add the ticked sites to FilePress. Workspace siblings already appear.'}>
+											<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => openAddSites()}>
+												<Icon icon="lucide:folder-plus" />
+												Add sites
+											</button>
+										</Tooltip>
+									{/if}
+									{#if checkedOnBoard.length}
+										<Tooltip title={showArchived ? 'Puts checked sites back on Today Land. Folder was never moved.' : 'Hides checked sites from Today Land and this list. Folder and port stay.'}>
+											<button class="btn" disabled={Boolean(busy)} onclick={() => void startArchive(checkedOnBoard, showArchived)}>
+												<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
+												{showArchived ? 'Restore' : 'Archive'} ({checkedOnBoard.length})
+											</button>
+										</Tooltip>
+										<Tooltip
+											title={showLocalOnly
+												? 'Puts checked sites back on Today Land. The folder stays; you can still Sync and run locally either way.'
+												: 'Stays on Sites to run and update. Drops off Today Land until you Include.'}
+										>
+											<button class="btn" disabled={Boolean(busy)} onclick={() => void applyLocalOnly(checkedOnBoard, showLocalOnly)}>
+												<Icon icon={showLocalOnly ? 'lucide:globe' : 'lucide:house'} />
+												{showLocalOnly ? 'Include' : 'Keep local'} ({checkedOnBoard.length})
+											</button>
+										</Tooltip>
+									{/if}
+								</OverflowMenu>
+							{/if}
 						</div>
 						<div class="tool-band">
 							{#if board.plugin === 'filepress'}
@@ -2745,44 +2783,6 @@
 									</Tooltip>
 								{/if}
 							{/each}
-							{#if board.plugin === 'filepress' || board.plugin === 'featurefacts' || checkedOnBoard.length}
-								<OverflowMenu>
-									{#if board.plugin === 'featurefacts'}
-										<Tooltip title={demoBoard ? 'Leave demo to init a FeatureFacts register.' : 'Scan a folder for repos with no .featurefacts/ yet. Init writes an empty register. It does not scan code.'}>
-											<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => openAddFacts()}>
-												<Icon icon="lucide:folder-plus" />
-												Add repos
-											</button>
-										</Tooltip>
-									{/if}
-									{#if board.plugin === 'filepress'}
-										<Tooltip title={demoBoard ? 'Leave demo to add FilePress sites.' : 'Scan a folder for getfilepress + filepress.config.ts, then add the ticked sites to FilePress. Workspace siblings already appear.'}>
-											<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => openAddSites()}>
-												<Icon icon="lucide:folder-plus" />
-												Add sites
-											</button>
-										</Tooltip>
-									{/if}
-									{#if checkedOnBoard.length}
-										<Tooltip title={showArchived ? 'Puts checked sites back on Today Land. Folder was never moved.' : 'Hides checked sites from Today Land and this list. Folder and port stay.'}>
-											<button class="btn" disabled={Boolean(busy)} onclick={() => void startArchive(checkedOnBoard, showArchived)}>
-												<Icon icon={showArchived ? 'lucide:archive-restore' : 'lucide:archive'} />
-												{showArchived ? 'Restore' : 'Archive'} ({checkedOnBoard.length})
-											</button>
-										</Tooltip>
-										<Tooltip
-											title={showLocalOnly
-												? 'Puts checked sites back on Today Land. The folder stays; you can still Sync and run locally either way.'
-												: 'Stays on Sites to run and update. Drops off Today Land until you Include.'}
-										>
-											<button class="btn" disabled={Boolean(busy)} onclick={() => void applyLocalOnly(checkedOnBoard, showLocalOnly)}>
-												<Icon icon={showLocalOnly ? 'lucide:globe' : 'lucide:house'} />
-												{showLocalOnly ? 'Include' : 'Keep local'} ({checkedOnBoard.length})
-											</button>
-										</Tooltip>
-									{/if}
-								</OverflowMenu>
-							{/if}
 						</div>
 					</div>
 					<div class="table-wrap">
