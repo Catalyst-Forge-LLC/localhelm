@@ -7,7 +7,11 @@ description: One control panel for the projects on your machine. See which need 
 <p><strong>helm</strong> <span class="pos">n.</span> the wheel by which a ship is steered.</p>
 </aside>
 
-One control panel for the repos you choose. The board shows which ones have uncommitted work, unpushed commits, unpublished versions, or dependents pinned to an old release. Then act from the same board: commit, push, publish, bump versions, update dependents, and start or stop dev servers. Every write opens a plan first and waits for you to confirm.
+See which projects need a commit, push, release, or dependency update. Review the proposed changes before applying them.
+
+Start with the repository board. Add LocalSlip for the documented dev-server workflow, FilePress for site builds, and ollanet for optional model-assisted drafting. Those are optional. The core board is the repo list.
+
+Commit, publish, and dependent-update actions show a plan for you to confirm before they run. Actions run on the computer hosting LocalHelm.
 
 The controls depend on where you open it:
 
