@@ -51,6 +51,9 @@
 	onkeydown={(event) => {
 		if (event.key === 'Escape' && busy) event.preventDefault();
 	}}
+	onclick={(event) => {
+		if (event.target === dialogEl) cancel();
+	}}
 >
 	<div class="panel hud-frame">
 		<div class="head">
@@ -116,12 +119,17 @@
 
 	.head {
 		display: flex;
-		flex-wrap: wrap;
+		flex-wrap: nowrap;
 		align-items: flex-start;
 		justify-content: space-between;
 		gap: 0.75rem;
 		padding: 1.15rem 1.25rem 0.75rem;
 		flex-shrink: 0;
+	}
+
+	.head > div {
+		min-width: 0;
+		flex: 1;
 	}
 
 	h2 {
@@ -155,6 +163,7 @@
 	}
 
 	.btn {
+		flex-shrink: 0;
 		border: 1px solid var(--steel);
 		background: var(--well);
 		color: #ececef;

@@ -1319,9 +1319,7 @@
 			})) as { root?: string; candidates?: SiteScanRow[] };
 			if (data.root) factsScanRoot = data.root;
 			factsCandidates = Array.isArray(data.candidates) ? data.candidates : [];
-			selectedFactsScan = Object.fromEntries(
-				factsCandidates.filter((row) => !row.enrolled).map((row) => [row.absPath, true]),
-			);
+			selectedFactsScan = {};
 			const fresh = factsCandidates.filter((row) => !row.enrolled).length;
 			note(
 				`FeatureFacts scan ${factsScanRoot} — ${fresh} without a register, ${factsCandidates.length - fresh} already inited`,
@@ -3496,7 +3494,13 @@
 	</div>
 	<p class="dim small">Same parent folder as Add projects is usually right. Repos that already have <code>.featurefacts/</code> stay off this list.</p>
 	{#if factsScanFresh.length}
-		<p class="hint">{factsScanFresh.length} without a register. Already-inited repos stay off this pick list.</p>
+		<p class="hint pick-line">
+			<span>{factsScanFresh.length} without a register. Already-inited repos stay off this pick list.</span>
+			<button type="button" class="btn btn-sm" disabled={Boolean(busy)} onclick={() => {
+				selectedFactsScan = Object.fromEntries(factsScanFresh.map((row) => [row.absPath, true]));
+			}}>Select all</button>
+			<button type="button" class="btn btn-sm" disabled={Boolean(busy) || !checkedFactsScan.length} onclick={() => (selectedFactsScan = {})}>Select none</button>
+		</p>
 		<ul class="candidates">
 			{#each factsScanFresh as row (row.absPath)}
 				<li>

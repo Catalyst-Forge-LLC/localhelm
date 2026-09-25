@@ -1579,6 +1579,17 @@
 		gap: 0.3rem;
 	}
 
+	.pick-line {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.pick-line span {
+		margin-right: 0.2rem;
+	}
+
 	.candidates {
 		list-style: none;
 		margin: 0.5rem 0;
