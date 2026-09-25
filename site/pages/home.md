@@ -1,5 +1,5 @@
 ---
-title: Control panel for local development
+title: See which local projects need work.
 description: One control panel for the projects on your machine. See which need work, then commit, push, publish, and start or stop dev servers from the same board.
 ---
 
