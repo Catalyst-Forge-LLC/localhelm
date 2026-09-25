@@ -2058,6 +2058,19 @@
         "Move Groups into the page menu"
       ],
       "status": "active"
+    },
+    {
+      "id": "d148",
+      "timestamp": "2026-09-25T15:10:00Z",
+      "phase": "2-scaffolding",
+      "session": 54,
+      "decision": "FeatureFacts Add repos scans a folder and inits an empty register in each ticked repo through the FeatureFacts plugin. Helm does not write .featurefacts/ itself. A repo that already has a register is skipped.",
+      "rationale": "The FeatureFacts tab was one hardcoded row. The operator wants the same browse-and-add flow as Fleet and FilePress, then init.",
+      "alternatives_considered": [
+        "Keep init as a CLI-only --root flag",
+        "Have Helm write FEATURE_FACTS.md itself"
+      ],
+      "status": "active"
     }
   ],
   "gotchas": [

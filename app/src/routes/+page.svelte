@@ -125,6 +125,10 @@
 	let siteScanRoot = $state('');
 	let siteCandidates = $state<SiteScanRow[]>([]);
 	let selectedSiteScan = $state<Record<string, boolean>>({});
+	let addFactsOpen = $state(false);
+	let factsScanRoot = $state('');
+	let factsCandidates = $state<SiteScanRow[]>([]);
+	let selectedFactsScan = $state<Record<string, boolean>>({});
 	let selectedIds = $state<Record<string, boolean>>({});
 	let selectedSites = $state<Record<string, boolean>>({});
 	let selectedPorts = $state<Record<string, boolean>>({});
@@ -227,6 +231,10 @@
 	const siteScanFresh = $derived(siteCandidates.filter((row) => !row.enrolled));
 	const checkedSiteScan = $derived(
 		siteScanFresh.filter((row) => selectedSiteScan[row.absPath]).map((row) => row.absPath),
+	);
+	const factsScanFresh = $derived(factsCandidates.filter((row) => !row.enrolled));
+	const checkedFactsScan = $derived(
+		factsScanFresh.filter((row) => selectedFactsScan[row.absPath]).map((row) => row.absPath),
 	);
 	const checkedIds = $derived(
 		Object.entries(selectedIds)
@@ -1297,6 +1305,64 @@
 		);
 	}
 
+	function openAddFacts(): void {
+		if (!factsScanRoot.trim()) factsScanRoot = scanRoot;
+		addFactsOpen = true;
+	}
+
+	async function scanFeaturefactsRepos(): Promise<void> {
+		const root = factsScanRoot.trim() || scanRoot;
+		await run(`scanning FeatureFacts repos in ${root}`, async () => {
+			const data = (await call('/api/plugin', {
+				method: 'POST',
+				body: JSON.stringify({ id: 'featurefacts', action: 'discover', ids: root ? [root] : [] }),
+			})) as { root?: string; candidates?: SiteScanRow[] };
+			if (data.root) factsScanRoot = data.root;
+			factsCandidates = Array.isArray(data.candidates) ? data.candidates : [];
+			selectedFactsScan = Object.fromEntries(
+				factsCandidates.filter((row) => !row.enrolled).map((row) => [row.absPath, true]),
+			);
+			const fresh = factsCandidates.filter((row) => !row.enrolled).length;
+			note(
+				`FeatureFacts scan ${factsScanRoot} — ${fresh} without a register, ${factsCandidates.length - fresh} already inited`,
+				data,
+			);
+		});
+	}
+
+	async function applyFeaturefactsInit(paths: string[]): Promise<void> {
+		const named = paths.filter(Boolean);
+		if (!named.length) {
+			error = 'Check at least one repo first.';
+			return;
+		}
+		await run(named.length === 1 ? 'init FeatureFacts register' : `init ${named.length} FeatureFacts registers`, async () => {
+			const data = (await call('/api/plugin', {
+				method: 'POST',
+				body: JSON.stringify({ id: 'featurefacts', action: 'init', ids: named, apply: true }),
+			})) as { added?: string[]; already?: string[]; skipped?: string[] };
+			const added = Array.isArray(data.added) ? data.added : [];
+			if (!added.length) {
+				throw new Error('Nothing was inited. Tick a repo that has package.json or .git and no .featurefacts/ yet.');
+			}
+			const extra = [
+				...(data.already ?? []).map((name) => `${name} already has a register`),
+				...(data.skipped ?? []),
+			];
+			note(
+				`FeatureFacts inited ${added.length} repo${added.length === 1 ? '' : 's'}${extra.length ? ` · ${extra.join(' · ')}` : ''}`,
+				data,
+			);
+			const addedKeys = new Set(added.map((p) => p.replace(/\\/g, '/').toLowerCase()));
+			selectedFactsScan = {};
+			factsCandidates = factsCandidates.filter(
+				(row) => !addedKeys.has(row.absPath.replace(/\\/g, '/').toLowerCase()),
+			);
+			if (!factsScanFresh.length) addFactsOpen = false;
+			await loadPluginBoards();
+		});
+	}
+
 	function offerConfirm(spec: {
 		title: string;
 		hint: string;
@@ -2112,6 +2178,12 @@
 				'Git push stays on Fleet — that board already shows branch, ahead, and origin.',
 			);
 		}
+		if (board.plugin === 'featurefacts') {
+			bits.push(
+				'Add repos scans a folder for package.json or git checkouts. Init writes an empty register into each ticked repo. A repo that already has .featurefacts/ stays off that list.',
+				'Scan, Check, and Report run in the checked repo. Init does not scan code.',
+			);
+		}
 		if (board.plugin === 'xfacts') {
 			bits.push(
 				'This is the enrolled fleet, not a short shelf list. Hidden archived rows stay off.',
@@ -2163,7 +2235,7 @@
 
 <svelte:window
 	onkeydown={(event) => {
-		if (event.key === 'Escape' && activityOpen && !confirmOpen && !addOpen && !addSitesOpen) setActivityOpen(false);
+		if (event.key === 'Escape' && activityOpen && !confirmOpen && !addOpen && !addSitesOpen && !addFactsOpen) setActivityOpen(false);
 	}}
 />
 
@@ -2594,7 +2666,9 @@
 							<InfoHint
 								summary={board.plugin === 'filepress'
 									? 'Content sites. Add sites lists folders FilePress does not see as a sibling. Check rows, then Land, Sync, or Ship. Keep local drops Land until you Include; the site stays here to run and update. Archive hides a site from Today until you Restore. Git push is on Fleet.'
-									: 'Check rows, then run a job on the selection.'}
+									: board.plugin === 'featurefacts'
+										? 'Repos with a FeatureFacts register. Add repos inits an empty register in a checkout you tick. Scan, Check, and Report run there.'
+										: 'Check rows, then run a job on the selection.'}
 								detail={siteBoardHelp(board)}
 							/>
 						</div>
@@ -2671,8 +2745,16 @@
 									</Tooltip>
 								{/if}
 							{/each}
-							{#if board.plugin === 'filepress' || checkedOnBoard.length}
+							{#if board.plugin === 'filepress' || board.plugin === 'featurefacts' || checkedOnBoard.length}
 								<OverflowMenu>
+									{#if board.plugin === 'featurefacts'}
+										<Tooltip title={demoBoard ? 'Leave demo to init a FeatureFacts register.' : 'Scan a folder for repos with no .featurefacts/ yet. Init writes an empty register. It does not scan code.'}>
+											<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => openAddFacts()}>
+												<Icon icon="lucide:folder-plus" />
+												Add repos
+											</button>
+										</Tooltip>
+									{/if}
 									{#if board.plugin === 'filepress'}
 										<Tooltip title={demoBoard ? 'Leave demo to add FilePress sites.' : 'Scan a folder for getfilepress + filepress.config.ts, then add the ticked sites to FilePress. Workspace siblings already appear.'}>
 											<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => openAddSites()}>
@@ -3394,6 +3476,63 @@
 		<p class="dim small">Everything in this scan is already on FilePress Sites.</p>
 	{:else if !busy}
 		<p class="dim small">Scan to list FilePress sites that are not on the board yet. Nothing joins until you Add sites.</p>
+	{/if}
+</AddProjectsModal>
+
+<AddProjectsModal
+	bind:open={addFactsOpen}
+	busy={Boolean(busy)}
+	busyLabel={busy}
+	title="Add FeatureFacts repos"
+	titleId="add-facts-title"
+	hint="Scan the folder that holds the repos. A repo is a folder with package.json or git. Tick, then Init. That writes an empty register into the repo. It does not scan the code."
+>
+	<label for="facts-scan-root">Folder to scan</label>
+	<div class="row">
+		<input id="facts-scan-root" bind:value={factsScanRoot} spellcheck="false" />
+		<button class="btn" disabled={Boolean(busy) || demoBoard} onclick={() => void scanFeaturefactsRepos()}>
+			<Icon icon="lucide:search" /> Scan
+		</button>
+	</div>
+	<p class="dim small">Same parent folder as Add projects is usually right. Repos that already have <code>.featurefacts/</code> stay off this list.</p>
+	{#if factsScanFresh.length}
+		<p class="hint">{factsScanFresh.length} without a register. Already-inited repos stay off this pick list.</p>
+		<ul class="candidates">
+			{#each factsScanFresh as row (row.absPath)}
+				<li>
+					<input
+						type="checkbox"
+						aria-label={`init ${row.name}`}
+						checked={Boolean(selectedFactsScan[row.absPath])}
+						onchange={(event) => {
+							selectedFactsScan = { ...selectedFactsScan, [row.absPath]: event.currentTarget.checked };
+						}}
+					/>
+					<div>
+						<div class="id">{row.name}</div>
+						{#if row.path !== row.name}
+							<div class="path" use:tip={row.absPath}>{row.path}</div>
+						{/if}
+					</div>
+				</li>
+			{/each}
+		</ul>
+		<div class="group-buttons">
+			<Tooltip title="Writes FEATURE_FACTS.md and .featurefacts/ into each ticked repo. Does not scan code. Skips a repo that already has a register.">
+				<button
+					class="btn btn-write"
+					disabled={Boolean(busy) || demoBoard || !checkedFactsScan.length}
+					onclick={() => void applyFeaturefactsInit(checkedFactsScan)}
+				>
+					<Icon icon="lucide:folder-plus" />
+					Init{checkedFactsScan.length ? ` (${checkedFactsScan.length})` : ''}
+				</button>
+			</Tooltip>
+		</div>
+	{:else if factsCandidates.length}
+		<p class="dim small">Everything in this scan already has a FeatureFacts register.</p>
+	{:else if !busy}
+		<p class="dim small">Scan to list repos that are not inited yet. Nothing is written until you Init.</p>
 	{/if}
 </AddProjectsModal>
 
