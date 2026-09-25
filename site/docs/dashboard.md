@@ -13,7 +13,7 @@ An empty board is not “all quiet.” Today and the header say **No fleet** and
 
 **Demo board** (menu **Main / Demo** pills, or `localhelm serve --demo`) writes `localhelm.fleet.demo.json` and `.localhelm/demo/` next to the real workspace. Add and remove stay off the main fleet. **Clear demo** asks first, then deletes only those demo paths. Writes that would change a repo (commit, publish, push, Land) are refused until you leave demo.
 
-![LocalHelm dashboard showing Today needs and FilePress sites](/dashboard.jpg "Today: fleet writes you can confirm, and FilePress sites waiting on Land")
+![LocalHelm operator board with Today needs, FilePress sites, and LocalSlip ports](/dashboard.jpg "The operator board. Today lists writes to confirm. FilePress sites and LocalSlip ports sit beside it.")
 
 A phone or any other device on LAN or Tailscale opens the **Deck** (`/deck`). It is read-only: one tile per running app that has a LocalSlip claim and listens beyond `127.0.0.1`. Tap a tile to open it on that host. Long-press copies the link. From the operator board, menu **Deck** is the same page. `/visitor` still redirects there. Write APIs stay on loopback.
 

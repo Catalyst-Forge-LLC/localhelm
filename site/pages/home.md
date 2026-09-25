@@ -20,7 +20,7 @@ The controls depend on where you open it:
 
 LocalHelm refuses write requests unless they come from loopback, so a phone cannot run them even with the right URL.
 
-![LocalHelm dashboard showing Today needs and FilePress sites](/dashboard.jpg "Today: fleet writes you can confirm, and FilePress sites waiting on Land")
+![LocalHelm operator board with Today needs, FilePress sites, and LocalSlip ports](/dashboard.jpg "The operator board. Today lists writes to confirm. FilePress sites and LocalSlip ports sit beside it.")
 
 Install, stand in the folder that contains your repos, then run:
 

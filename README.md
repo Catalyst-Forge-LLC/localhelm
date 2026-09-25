@@ -16,7 +16,7 @@ The controls depend on where you open it:
 Start and stop need LocalSlip. The Sites tab needs a FilePress site. Both are optional. LocalSlip is the slip. LocalHelm is the wheel.
 
 <p align="center">
-  <img src="https://localhelm.dev/dashboard.jpg" alt="LocalHelm dashboard: Today needs and FilePress sites" />
+  <img src="https://localhelm.dev/dashboard.jpg" alt="LocalHelm operator board with Today needs, FilePress sites, and LocalSlip ports" />
 </p>
 
 ```bash
