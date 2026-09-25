@@ -1,5 +1,5 @@
 ---
-title: LocalHelm
+title: Control panel for local development
 description: One control panel for the projects on your machine. See which need work, then commit, push, publish, and start or stop dev servers from the same board.
 ---
 
@@ -10,6 +10,11 @@ description: One control panel for the projects on your machine. See which need 
 See which projects need a commit, push, release, or dependency update. Review the proposed changes before applying them.
 
 Start with the repository board. Add LocalSlip for the documented dev-server workflow, FilePress for site builds, and ollanet for optional model-assisted drafting. Those are optional. The core board is the repo list.
+
+<div class="cta-row">
+  <a class="cta cta-primary" href="/install">Install LocalHelm</a>
+  <a class="cta cta-secondary" href="https://github.com/Catalyst-Forge-LLC/localhelm">View on GitHub</a>
+</div>
 
 Commit, publish, and dependent-update actions show a plan for you to confirm before they run. Actions run on the computer hosting LocalHelm.
 

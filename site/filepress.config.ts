@@ -6,7 +6,7 @@ export default defineFilepressConfig({
 	url: 'https://localhelm.dev',
 	author: 'Catalyst Forge, LLC',
 	tagline: 'Control panel for local development',
-	lede: 'Scan, enroll, then read git, npm, and dependents. Ports are optional.',
+	lede: 'Git · npm · dependents',
 	logo: '/logo.png',
 	ogImage: '/logo.png',
 	homePage: 'home',
@@ -16,6 +16,7 @@ export default defineFilepressConfig({
 		{ label: 'Notes', href: '/writing' },
 		{ label: 'Install', href: '/install' },
 		{ label: 'npm', href: 'https://www.npmjs.com/package/localhelm' },
+		{ label: 'GitHub', href: 'https://github.com/Catalyst-Forge-LLC/localhelm', icon: 'github' },
 	],
 	footerLinks: [
 		{ label: 'See the rest of the Catalyst Forge shelf.', href: 'https://catalystforge.com/tools/' },
