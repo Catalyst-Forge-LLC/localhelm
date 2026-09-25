@@ -1,5 +1,5 @@
 ---
-title: See which local projects need work.
+title: Commit, push, publish, bump versions, update dependents, and start or stop dev servers.
 description: One control panel for the projects on your machine. See which need work, then commit, push, publish, and start or stop dev servers from the same board.
 ---
 
