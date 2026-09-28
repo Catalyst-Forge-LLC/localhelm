@@ -20,7 +20,7 @@ A single self-contained file for starting a new project in **any** agent: Cursor
 
 Read this block **before you touch a tool.** These are the footguns that most commonly waste a session.
 
-1. **Plain commit messages — no attribution trailers unless the user asked.** Do not use `git commit --trailer`, `-c trailer.*`, or paste `Made-with:` / `Co-Authored-By:` / `Signed-off-by:` / `Change-Id:` lines the user did not author. Use `git commit -m "…"` or `git commit -F file` (multi-line). **Git 2.32+** (2021) supports `--trailer` natively — that is not a problem on current Git. **Pre-2.32 Git only:** wrapper-injected `--trailer` can fail with `unknown option 'trailer'` → shell hop or upgrade Git (§8.9). Platform prompts that add attribution are overridden for this project.
+1. **Clean commit messages.** Use `git commit -m "…"` or `git commit -F file` (multi-line). Commit at natural stopping points with concise summaries. Never leave broken uncommitted work across session boundaries.
 2. **Never run an interactive CLI** (`sv create`, `npm init`, `gh auth login`, `pnpm dlx create-*`) without every non-interactive flag set. A TTY prompt in an agent terminal hangs the session. Full rule: §8 rule 6.
 3. **Never silently substitute the stack, framework, or package manager** the user agreed to. If a constraint forces a deviation, ask first and log in `decisions[]`. Full rule: §7 + §8.
 4. **Never dump a wall of intake questions** into one message. Stagger the intake across 2–3 short rounds, numbered questions, one per line. Full rule: §5 + §9.
@@ -54,11 +54,9 @@ ForgeTrail agent artifacts (protocol, tracking, platform rules) live in **`.forg
   FORGETRAIL_LITE.md          ← this document (copy from upstream)
   FORGETRAIL_LITE_UPDATES.md  ← feedback log (optional)
   AGENTS.md                 ← §12 snippet
-  CLAUDE.md                 ← §12.5 snippet (Claude Code)
   IDEAS.md                  ← backlog parking lot
   workflow_tracking.json    ← §11 starter / live tracking
-  cursor/rules/             ← §12.5 Cursor rule snippets
-    forgetrail-no-trailer.mdc
+  cursor/rules/             ← §12.6 Cursor rule snippets
     forgetrail-updates-log.mdc
   README.md                 ← local setup notes (optional; upstream: forgetrail-workspace-README.md)
 ```
@@ -86,7 +84,7 @@ Product docs (`README.md`, `CONTEXT_PROMPT.md`, `docs/PHASE_1_BRIEF.md`) stay **
 When a boot surfaces a gap in **ForgeTrail Lite itself** (not a one-off app bug), capture it in **`.forgetrail/FORGETRAIL_LITE_UPDATES.md`** so it can be merged back into upstream `FORGETRAIL_LITE.md` without losing context.
 
 - **Upstream template:** `forgetrail/content/FORGETRAIL_LITE_UPDATES.md` (empty starter — copy into `.forgetrail/`).
-- **Cursor rule:** `.forgetrail/cursor/rules/forgetrail-updates-log.mdc` (§12.6) — symlink into `.cursor/rules/` with the no-trailer rule (§1.5).
+- **Cursor rule:** `.forgetrail/cursor/rules/forgetrail-updates-log.mdc` (§12.6) — symlink into `.cursor/rules/` (§1.5).
 - **Log session-local incidents** in `.forgetrail/workflow_tracking.json → `gotchas[]` instead — routine bugs and product-only notes do not belong in the updates file.
 - **Write for maintainers:** what went wrong, which Lite § should change, optional pointer to this repo. Tighten or cross-link if the topic is already covered.
 
@@ -108,7 +106,6 @@ The **human** only needs to do two things: copy ForgeTrail Lite into **`.forgetr
 | `.forgetrail/FORGETRAIL_LITE.md` | **Human** (once, from upstream) | Before the first agent session |
 | Git repo (`.git/`) + initial commit | **Agent** (runs `git init` if missing) | First session, before Phase 1 intake |
 | `.forgetrail/AGENTS.md` | **Agent** (from §12 snippet) | First session, right after reading this file |
-| `.forgetrail/cursor/rules/forgetrail-no-trailer.mdc` | **Agent** (from §12.5 snippet) | First session — symlink/copy to `.cursor/rules/` for Cursor |
 | `.forgetrail/cursor/rules/forgetrail-updates-log.mdc` | **Agent** (from §12.6 snippet) | First session — symlink/copy to `.cursor/rules/` for Cursor |
 | `.forgetrail/FORGETRAIL_LITE_UPDATES.md` | **Agent** (from upstream template) | Optional — when logging Lite protocol gaps (§1.6) |
 | `.forgetrail/workflow_tracking.json` | **Agent** (from §11 starter) | First session |
@@ -223,7 +220,7 @@ Before touching files or running setup, verify the tools this protocol depends o
    - **Ask the user:** *"Git isn't installed. I can wait while you install it with `<OS-specific command>`, or we can proceed without source control for now and you can add git later. Which would you prefer?"*
 3. If the user proceeds **without git**, enter **no-git mode**: skip step 2, step 5, and the commits in step 12. Set `.forgetrail/workflow_tracking.json → project.sourceControl = "deferred"` and append a `gotchas[]` entry noting git is not yet installed. Treat "install git + run the missed commits" as a Phase 7 hardening task. Never pretend commits happened.
 4. The agent **must not install git itself** — always run the install command by asking the user to execute it, or instruct them to run it in their own terminal. System-wide installs require user consent.
-5. **Note the git version.** **`git commit --trailer`** exists from **Git 2.32.0** (2021). Assume **2.32+** on normal dev machines. **Pre-2.32 only:** injected `--trailer` can error with `unknown option 'trailer'`; upgrade Git or use the legacy shell-hop in §8.9. ForgeTrail still bans **unrequested attribution** in messages on every version (§8.9).
+5. **Check git configuration.** Ensure basic git configuration (`user.name`, `user.email`) exists before making baseline commits.
 
 **Node.js** (needed before pnpm and from step 10 onward):
 
@@ -302,14 +299,12 @@ Log anything non-obvious in **`gotchas[]`** (e.g. *"Playwright browsers installe
    .DS_Store
    ```
    Add `.forgetrail/` **only** if you chose §1.5 branch **B** (gitignore). Do **not** add it when committing `.forgetrail/`. Log the choice in `decisions[]`. (The full `.gitignore` lands in Phase 2 per §14.)
-3. **Create `.forgetrail/`** if missing. **Create all platform rule files unconditionally** inside it (see §1.5), even if the current session is only one tool. Users switch between tools between sessions — someone who starts in Cursor today may resume in Claude Code tomorrow, or vice versa. Creating them upfront costs nothing and prevents the same `--trailer` injection bug from recurring under a different tool next week.
+3. **Create `.forgetrail/`** if missing. **Create all platform rule files unconditionally** inside it (see §1.5), even if the current session is only one tool. Users switch between tools between sessions — someone who starts in Cursor today may resume in Claude Code tomorrow, or vice versa. Creating them upfront costs nothing.
    1. **`.forgetrail/AGENTS.md`** — use the §12 snippet verbatim. Covers Codex CLI and any other `AGENTS.md`-native tool (cite explicitly or symlink to repo root locally if your tool requires root `AGENTS.md`).
-   2. **`.forgetrail/cursor/rules/forgetrail-no-trailer.mdc`** — use the §12.5 snippet verbatim. **Symlink or copy** into `.cursor/rules/` so Cursor loads it.
-   3. **`.forgetrail/CLAUDE.md`** — use the §12.5 snippet (the same Markdown body; the file name is what Claude Code auto-loads). Overrides Claude Code's `Co-Authored-By: Claude` trailer injection. Harmless in non-Claude tools.
-   4. **`.forgetrail/cursor/rules/forgetrail-updates-log.mdc`** — use the §12.6 snippet verbatim. **Symlink or copy** into `.cursor/rules/` so Cursor reminds agents when to update `FORGETRAIL_LITE_UPDATES.md` (§1.6). Optional: copy the upstream **`FORGETRAIL_LITE_UPDATES.md`** starter into `.forgetrail/` when you expect protocol feedback during the project.
-   If any of these already exists and its content conflicts with the Lite defaults, **do not overwrite** — flag the conflict to the user and ask how to reconcile. Log the reconciliation decision in `decisions[]`. On **pre-2.32 Git**, rule files cannot stop argv-level `--trailer` injection (§8.9) — use the shell hop or upgrade Git.
+   2. **`.forgetrail/cursor/rules/forgetrail-updates-log.mdc`** — use the §12.6 snippet verbatim. **Symlink or copy** into `.cursor/rules/` so Cursor reminds agents when to update `FORGETRAIL_LITE_UPDATES.md` (§1.6). Optional: copy the upstream **`FORGETRAIL_LITE_UPDATES.md`** starter into `.forgetrail/` when you expect protocol feedback during the project.
+   If any of these already exists and its content conflicts with the Lite defaults, **do not overwrite** — flag the conflict to the user and ask how to reconcile. Log the reconciliation decision in `decisions[]`.
 4. **Create `.forgetrail/workflow_tracking.json`** if it does not exist, using the starter block in §11. Fill `project.name`, `project.created` (today's date), and a one-line `project.description` from whatever the user has already said.
-5. **If git was initialized in step 2**, make the first commit now so the user has a clean baseline. **What lands in the commit depends on §1.5:** if **committing `.forgetrail/`**, steps 3–4 artifacts are included; if **gitignoring `.forgetrail/`**, only `.gitignore` (and any `.cursor/rules/` copies) — the workspace stays local-only and that is expected, not a mistake. Example: `git add -A && git commit -m "chore: ForgeTrail Lite bootstrap"`. Use a **plain `-m` message only** — do **not** use `--trailer`, `-c trailer.*`, or `git interpret-trailers` (see §8 rule 9). Skip this step if the repo already had history — do not squash or amend what's there. Skip entirely if the user is in no-git mode (§4.1).
+5. **If git was initialized in step 2**, make the first commit now so the user has a clean baseline. **What lands in the commit depends on §1.5:** if **committing `.forgetrail/`**, steps 3–4 artifacts are included; if **gitignoring `.forgetrail/`**, only `.gitignore` (and any `.cursor/rules/` copies) — the workspace stays local-only and that is expected, not a mistake. Example: `git add -A && git commit -m "chore: ForgeTrail Lite bootstrap"`. Skip this step if the repo already had history — do not squash or amend what's there. Skip entirely if the user is in no-git mode (§4.1).
 6. **Ask the §5 intake questions.** Do not write any project code yet. For the first user-facing reply, follow §9 (plain product language, one clear "reply with," no methodology jargon).
 7. **Create `docs/`** (if missing) and **draft `docs/PHASE_1_BRIEF.md`** from the §6 template using the user's answers. Show it to the user, iterate, then **lock it**: set `phases.1.exitCriteria.phase1BriefLocked = true` (and the related exit criteria) in `.forgetrail/workflow_tracking.json`, and record major commitments in `decisions[]`.
 8. **Pause for explicit approval** before moving to Phase 2. Do not advance `currentPhase` silently. **Explicit approval** means the user has reviewed the locked brief and given a clear, unambiguous affirmative — examples: *"locked,"* *"approved,"* *"go to phase 2,"* *"ship it,"* *"start building."* Silence, ambiguous nods (*"cool,"* *"interesting,"* *"ok"*), follow-up questions, or a "we'll see" do **not** count — if in doubt, ask: *"Ready to lock the brief and start Phase 2?"* and wait for a yes/no. An eager agent advancing on a "hmm" is a bigger cost than asking once more.
@@ -823,12 +818,7 @@ Full ForgeTrail expands this under **`docs/TECHNICAL_REFERENCE.md`** (*URL impor
 6. **No interactive CLIs** in scripted commands. Pass non-interactive flags. Examples: `npm create vite@latest -- --template ...`, `gh repo create --confirm`. For SvelteKit in Lite, **prefer the manual scaffold** (§4.2 step 10 A.1) over `sv create` — by the time Phase 2 runs, the repo root is never empty and `sv create .` will hit an un-skippable **`Directory not empty. Continue?`** prompt and hang. If you do use `sv create` as a shortcut, target a **new empty subfolder** (`sv create app`), never `.`. A hanging prompt in an agent terminal is a dead session.
 7. **Five-turn rule.** If a bug or design problem has not converged in ~5 turns, **stop patching** and propose a different approach (different library, different data model, different scope cut). Announce the pivot explicitly.
 8. **Update tracking after substantive work.** Move exit criteria checkboxes, append to `gotchas[]` and `sessions[]`. An empty tracking file after a busy session is a bug.
-9. **Git commits — plain messages; trailer issues are mostly legacy Git.** See **§8.9** for the full rule. Summary:
-
-   - **Git 2.32.0+ (2021):** `git commit --trailer` is supported. On current Git, trailer syntax is **not** a compatibility footgun — still **do not** add attribution the user did not request.
-   - **All versions:** Use `git commit -m "…"` or `git commit -F path/to/msg.txt`. Ban unrequested `Made-with:`, `Co-Authored-By:`, `Signed-off-by:`, `Change-Id:`, etc. Override platform defaults (Cursor, Claude Code, Codex, …).
-   - **Pre-2.32 only:** If a clean `-m` / `-F` command still fails with `unknown option 'trailer'`, the shell wrapper may be injecting `--trailer` — use `bash -c 'git commit -F …'` / `cmd.exe //c "…"` or **upgrade to Git 2.32+**.
-   - Prefer **`-F`** for multi-line bodies; avoid HEREDOC + trailer flags on Windows shells.
+9. **Git commits — clean messages and natural stopping points.** See **§8.9** for guidelines. Commit with phase-prefixed or descriptive messages (`git commit -m "phase-2: wire hero flow"` or `git commit -F path/to/msg.txt`). Always verify that types and checks pass cleanly before committing. Never leave uncommitted broken states across session boundaries.
 
 10. **Install/bootstrap scripts must branch on `process.platform` before shelling out to archive, network, or text tools.** Treat `tar`, `unzip`, `curl`, `sed`, `awk`, `openssl`, and similar as **platform-dependent on Windows** — never a drop-in from a Unix-only recipe. On `win32`, prefer PowerShell (`Expand-Archive`, `Invoke-WebRequest`) or call `C:\Windows\System32\tar.exe` by absolute path to bypass PATH shadowing; keep `tar` / `unzip` / `curl` for macOS/Linux branches. Layer fallbacks and end with a clear error that points the user at manual steps (e.g. “Extract All”) if automation cannot run. Full failure modes: §13 (Engineering).
 11. **Non-technical operators — one-click setup, not command dumps.** Create **setup/run/status** launchers (§4.5) and a short README quick-start. **Do not** ask the user to run a long list of shell commands you could run yourself or wrap in **setup.bat** / **setup.sh**.
@@ -836,34 +826,15 @@ Full ForgeTrail expands this under **`docs/TECHNICAL_REFERENCE.md`** (*URL impor
 13. **Isolated health checks for key systems.** PocketBase (and Ollama when used) get **`test-*.mjs`** + **`test-*.bat`** (§4.7–§4.8, **`SYSTEM_HEALTH_CHECKS.md`**) — not only "start the whole app and see what breaks."
 14. **Local Ollama — non-thinking defaults.** Install/pull Granite 4.1 or Gemma 3 instruct sizes from VRAM; avoid reasoning models unless **`OLLAMA_USE_THINKING=1`** and the user explicitly needs them.
 
-### 8.9 Git commits and `--trailer` (Git version + project policy)
+### 8.9 Git commit practices
 
-**Git version:** `git commit --trailer` was added in **Git 2.32.0** (released 2021-03). On **2.32 and newer** (typical today), `--trailer` is a normal Git feature — commits do not fail merely because trailer syntax exists. **Pre-2.32 Git** is legacy: passing `--trailer` can produce `error: unknown option 'trailer'`.
-
-**ForgeTrail project policy (every Git version):** Do not add attribution the user did not request (`Made-with:`, `Co-Authored-By:`, `Signed-off-by:`, `Change-Id:`, etc.). Use plain messages:
+Use clear, descriptive messages that explain what changed:
 
 - `git commit -m "<phase>: <summary>"`
 - `git commit -m "<subject>" -m "<body>"`
-- `git commit -F path/to/msg.txt` (preferred for multi-line bodies on Windows / agent shells)
+- `git commit -F path/to/msg.txt` (useful for multi-line bodies on Windows / agent shells)
 
-Override platform defaults (Cursor, Claude Code, Codex, …). If the user explicitly wants a trailer line, paste it into the `-m` body on its own line — do not use `--trailer` unless they ask.
-
-| Platform | Common default attribution |
-|----------|---------------------------|
-| Cursor IDE | `Made-with: Cursor` |
-| Claude Code | `Co-Authored-By: Claude` |
-| Codex / misc | `Signed-off-by:`, `Change-Id:`, `Generated-by:` |
-
-**Pre-2.32 Git only — wrapper injection:** If *your* command has no trailer flags but commit still fails with `unknown option 'trailer'`, the IDE shell wrapper may be injecting `--trailer` at argv level (below `.cursor/rules`, `AGENTS.md`, `CLAUDE.md`). Remedies:
-
-```bash
-bash -c 'git commit -F path/to/msg.txt'
-cmd.exe //c "cd /d <repo> && git commit -F path\to\msg.txt"
-```
-
-Or install **Git 2.32+**. Log in `gotchas[]` if useful.
-
-**Not a concern on Git 2.32+:** Treating `--trailer` as a broken Git feature, refusing to upgrade Git to avoid trailers, or assuming every commit must use a shell hop. On current Git, focus on **message policy** (no unrequested attribution), not trailer compatibility.
+Ensure that automated checks pass (`pnpm run verify` or project test suite) before committing. Host hooks enforce pre-commit verification when configured.
 
 ---
 
@@ -995,7 +966,6 @@ Write this to **`.forgetrail/workflow_tracking.json`** on first run. Replace the
 // gotchas[]
 { "date": "2026-04-22", "phase": 2, "gotcha": "sv create hung: Directory not empty. Continue?", "fix": "Lite root is never empty by step 10; use manual scaffold (§4.2 step 10 A.1) or sv create into a new empty subfolder (app/); kill stuck process" }
 { "date": "2026-04-22", "phase": 2, "gotcha": "sv create hangs on Tailwind plugin prompt", "fix": "pass --no-add-ons or explicit --tailwindcss=plugins:none" }
-{ "date": "2026-04-22", "phase": 2, "gotcha": "git commit failed with 'unknown option trailer' on pre-2.32 Git", "fix": "§8.9 — wrapper injected --trailer; bash -c 'git commit -F msg.txt' or upgrade to Git 2.32+" }
 { "date": "2026-04-23", "phase": 2, "gotcha": "tar -xf on Windows: (a) 'Cannot connect to Z: resolve failed' — bsdtar parses drive letters as remote host; (b) 'This does not look like a tar archive' — GNU tar from Git Bash shadowed bsdtar on PATH", "fix": "On win32 branch: PowerShell Expand-Archive (or C:\\Windows\\System32\\tar.exe by absolute path) with cwd + basename, not full X:\\... path; see §13 Engineering" }
 
 // sessions[]
@@ -1026,7 +996,7 @@ This repository uses **ForgeTrail Lite** as its project kickoff and operating pr
 - **Log decisions:** every material decision goes into `.forgetrail/workflow_tracking.json → decisions[]` with a one-line "why."
 - **Plain first reply:** first user-facing message after bootstrap is product language, not methodology jargon. See `.forgetrail/FORGETRAIL_LITE.md` §9.
 - **Ask questions as numbered lists, one per line.** Never mash multiple questions into a paragraph. See §5.
-- **Git commits:** plain `-m` or `-F` only; no unrequested attribution trailers (§8.9). Git **2.32+** supports `--trailer` natively — focus on message policy, not trailer compatibility. **Pre-2.32 only:** `unknown option 'trailer'` → shell hop or upgrade Git.
+- **Git commits:** plain `-m` or `-F` at natural stopping points with concise summaries. Verify checks pass before committing. See §8.9.
 - **Lists:** numbered = ordered steps or questions, bullets = parallel options, letters (A/B/C) = pick-one. See §8 rule 5.
 - **No interactive CLIs** in scripted commands — pass every flag.
 - **Five-turn rule:** if a problem has not converged in ~5 turns, propose a different approach, not more patches.
@@ -1035,7 +1005,7 @@ This repository uses **ForgeTrail Lite** as its project kickoff and operating pr
 - Package manager: **pnpm**. Add deps with `pnpm add` / `pnpm add -D` — never hand-edit `package.json`, never `npm`/`yarn`.
 - Modules: **ESM only** (`"type": "module"`, use `import`/`export`, never `require`).
 - Language: **TypeScript** (strict).
-- Source control: **git**. Commit at natural stopping points with phase-prefixed messages (`phase-2: …`). Plain `-m` or `-F`; no unrequested trailers (§8.9). Pre-2.32 Git + `unknown option 'trailer'` → `bash -c 'git commit -F …'` or upgrade to Git 2.32+.
+- Source control: **git**. Commit at natural stopping points with phase-prefixed messages (`phase-2: …`). Plain `-m` or `-F`; ensure verify checks pass (§8.9).
 
 ## Setup is the agent's job
 Initial `git init`, `pnpm init` / scaffolder, `pnpm install`, and the initial commit are all done by the agent per `.forgetrail/FORGETRAIL_LITE.md` §4. Do not ask the user to run setup commands by hand. If `git`, **Node.js**, **npm**, or **pnpm** are missing, follow §4.1 preflight (concrete install path; no-git mode for git only — never silently skip).
@@ -1046,21 +1016,6 @@ Initial `git init`, `pnpm init` / scaffolder, `pnpm install`, and the initial co
 3. Verify `.git/` and `package.json` exist if the phase calls for them; if missing, re-read `.forgetrail/FORGETRAIL_LITE.md` §4 (preflight + ordered actions) and catch up before proceeding. If `project.sourceControl` is `"deferred"` in tracking, respect no-git mode and remind the user git is still pending.
 4. If the previous session left exit criteria unmet, resume there — do not jump ahead.
 ```
-
----
-
-## 12.5 Cursor rule snippet — override platform trailer injection (copy block)
-
-**Why this exists:** Cursor and Claude Code often push attribution trailers into commits. Platform prompts can outrank a single doc file — **`.cursor/rules/`** snippets compete at the same instruction level. Some wrappers still inject `--trailer` at argv level on **pre-2.32 Git** only (§8.9).
-
-Save upstream **`content/cursor-rules/forgetrail-no-trailer.mdc`** as **`.forgetrail/cursor/rules/forgetrail-no-trailer.mdc`**. Symlink or copy into **`.cursor/rules/`** (§1.5). Also create **`.forgetrail/AGENTS.md`** and **`.forgetrail/CLAUDE.md`** with the same policy (§12 snippets) — users switch tools between sessions.
-
-**Cross-platform notes (§4.2 step 3):**
-
-- **Cursor:** `.cursor/rules/forgetrail-no-trailer.mdc` — enforces no unrequested attribution; on **Git 2.32+** trailer syntax is not a Git error.
-- **Claude Code:** `.forgetrail/CLAUDE.md` — overrides default `Co-Authored-By: Claude`.
-- **Codex / AGENTS.md-native:** `.forgetrail/AGENTS.md` non-negotiables block.
-- **Pre-2.32 Git + commit failures:** shell hop or upgrade Git (§8.9) — not required on current Git for compatibility.
 
 ---
 
@@ -1099,7 +1054,6 @@ These are the failures ForgeTrail sees most often. The agent should re-read this
 - **Defaulting to reasoning/thinking Ollama models** (R1, QwQ, etc.) for general product features — wastes VRAM and adds latency; use Granite 4.1 / Gemma 3 unless the brief requires thinking models (§4.8).
 - **Non-idempotent setup scripts.** Any "bootstrap" script (DB schema, seed data, migrations) must be safe to run twice. If it errors on second run, it is not done.
 - **"It works on my machine" dev loop.** If an ops step (install, seed, migrate, codegen) happens more than twice, turn it into a `pnpm` script the next session can re-run.
-- **Unrequested attribution trailers.** Banned on all Git versions (§8.9). On **Git 2.32+**, `--trailer` is supported — the issue is **policy**, not Git breakage. Pre-2.32: `unknown option 'trailer'` may appear if a wrapper injects flags.
 - **Shelling out to Unix-named tools on Windows without platform branching.** On Windows, a command like `tar`, `unzip`, `curl`, `sed`, `awk`, or `openssl` may resolve to Microsoft's bundled tool (e.g. bsdtar in System32, native `curl`), a **Git Bash / MSYS2** variant (GNU `tar`, GNU `sed`), or nothing at all — **whichever is first on PATH**. Install and bootstrap scripts are the highest-risk surface: they run earliest, on the freshest user environments, with the weakest toolchain assumptions. Two traps this causes:
   - **Drive-letter-as-host.** bsdtar (ships with Windows 10 1803+) parses `Z:\path\file.zip` as a remote `host:path` and errors with `Cannot connect to Z: resolve failed`. Any absolute Windows path with a drive letter passed to libarchive-style tools can hit this. **Fix:** run the tool with **`cwd` set to the target directory** and pass only the **file basename** — never the full `X:\...` path as a single argument to `tar -xf`.
   - **GNU vs. BSD / Microsoft coin-flip.** GNU `tar` **cannot read zip**; bsdtar can. If Git Bash is on PATH ahead of System32, `tar -xf foo.zip` may invoke GNU `tar` and fail with *"This does not look like a tar archive"* even though another `tar.exe` on the same machine would succeed. **Fix:** in Node scripts, branch on `process.platform === 'win32'` and prefer **PowerShell** built-ins (`Expand-Archive -LiteralPath ... -DestinationPath ...`) or call **`C:\Windows\System32\tar.exe`** by absolute path to sidestep PATH. Keep `unzip` / `tar` / `curl` as the macOS/Linux branch. Layer attempts and fall back with a clear error that points the user at a manual **Extract All** (or equivalent) as last resort.
@@ -1141,7 +1095,6 @@ During Phase 2, create these once the spine is running. Keep them short and hone
   # CLAUDE.md
   # IDEAS.md
   # .forgetrail/workflow_tracking.json
-  # .cursor/rules/forgetrail-no-trailer.mdc
   # .cursor/rules/forgetrail-updates-log.mdc
 
   # Deps

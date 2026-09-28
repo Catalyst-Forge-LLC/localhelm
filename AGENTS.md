@@ -14,7 +14,7 @@ This repository uses **ForgeTrail Lite**. Full protocol: `.forgetrail/FORGETRAIL
 - **Phase 1 before code:** do not write project code until `docs/PHASE_1_BRIEF.md` is **locked** and the operator says to start the spine.
 - **Phase 2 = full runnable spine** in one pass (M1: scan folders → confirm enroll, status, deps, JSON).
 - **Log decisions** in `.forgetrail/workflow_tracking.json → decisions[]`.
-- **Git commits:** plain `-m` or `-F` only; no unrequested attribution trailers.
+- **Git commits:** plain `-m` or `-F` only.
 - **Lists:** numbered = order; bullets = parallel; letters = pick-one.
 - **No interactive CLIs** without every flag.
 - **Never** `git push --force`. Named `push` to `origin` is allowed after a plan.
