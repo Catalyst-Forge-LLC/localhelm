@@ -56,7 +56,7 @@
 	} from '$lib/publishBatch';
 	import { clearLandBatch, loadLandBatch, persistLandSnap } from '$lib/landBatch';
 	import { emptyConfirmPhases, markConfirmKey, type ConfirmPhase } from '$lib/confirmProgress';
-	import { applyWritePatches, digestFromProjects, writeReloadBusy, type WritePatch, type WriteReloadMode } from '$lib/inventoryPatch';
+	import { applyWritePatches, digestFromProjects, writeReloadBusy, writeReloadPlan, type WritePatch, type WriteReloadMode } from '$lib/inventoryPatch';
 	import { bridgeServeHeading, fleetProjectMeta, fleetVersionLabel, headerNeedChips, type BridgeGauge } from '$lib/fleetDisplay';
 	import { npmPackageHref } from '$lib/npmPage';
 	import { formatActivityAt } from '$lib/formatTime';
@@ -1076,6 +1076,7 @@
 			landPendingReasons?: Record<string, string>;
 			landShipFingerprints?: Record<string, string>;
 		};
+		if (ticket !== statusReads) return;
 		if (scoped && inventory && data.inventory) inventory = mergeInventory(inventory, data.inventory, opts.gitOnly === true);
 		else inventory = data.inventory;
 		cwd = data.cwd;
@@ -1121,12 +1122,14 @@
 	async function reloadAfterWrite(ids: string[], mode: WriteReloadMode = 'git'): Promise<void> {
 		const named = ids.filter(Boolean);
 		if (!named.length) return;
+		const plan = writeReloadPlan(mode);
 		busy = writeReloadBusy(mode, named);
 		await loadStatus({
 			ids: named,
 			extras: false,
-			gitOnly: mode === 'git',
-			skipCommitCounts: true,
+			gitOnly: plan.gitOnly,
+			skipCommitCounts: plan.skipCommitCounts,
+			freshNpm: plan.freshNpm,
 		});
 	}
 

@@ -136,7 +136,7 @@ export type { FleetRosterRow } from './roster.js';
 export { buildBrief, formatBrief } from './brief.js';
 export type { BriefLease, BriefProject } from './brief.js';
 export { familyMemberNames, familyRole, familyStem, groupIdsByFamily, hasExactOrSiteLease, siteLeaseName } from './family.js';
-export { applyWritePatch, applyWritePatches, digestFromProjects, unpublishedAheadOf, writeReloadBusy } from './inventoryPatch.js';
+export { applyWritePatch, applyWritePatches, digestFromProjects, unpublishedAheadOf, writeReloadBusy, writeReloadPlan } from './inventoryPatch.js';
 export type { WritePatch, WriteReloadMode } from './inventoryPatch.js';
 export { familyListenBits, groupPortLooks, lookJump, lookJumpsFor, portFamilies, portLooks } from './looks.js';
 export type { FamilyMember, LeaseRowInput, LookJump, LookJumpId, PortFamily, PortLook, PortLookGroup, PortLookKind } from './looks.js';

@@ -1,7 +1,18 @@
 import { compareSemver } from './semver.js';
 import type { FleetDigest, GitCell, NpmCell, ProjectStatus } from './types.js';
 
-export type WriteReloadMode = 'git' | 'light';
+export type WriteReloadMode = 'git' | 'light' | 'ready';
+
+/** What a post-write reload asks `/api/status` to recompute. `ready` matches Refresh for those rows: npm, versions, and commits, so Publish can turn on. */
+export function writeReloadPlan(mode: WriteReloadMode): {
+	gitOnly: boolean;
+	skipCommitCounts: boolean;
+	freshNpm: boolean;
+} {
+	if (mode === 'ready') return { gitOnly: false, skipCommitCounts: false, freshNpm: true };
+	if (mode === 'light') return { gitOnly: false, skipCommitCounts: true, freshNpm: false };
+	return { gitOnly: true, skipCommitCounts: true, freshNpm: false };
+}
 
 export type WritePatch = {
 	id: string;

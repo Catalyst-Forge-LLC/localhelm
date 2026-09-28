@@ -255,7 +255,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 				host.setConfirmPhases(markCommitKeys(id, 'done'));
 				host.patchWrite({ id, gitDirty: false });
 			});
-			await host.reloadAfterWrite(named, 'git');
+			await host.reloadAfterWrite(named, 'ready');
 		});
 	}
 
@@ -285,7 +285,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 					}
 				},
 			);
-			await host.reloadAfterWrite(jobs.map((job) => job.id), 'git');
+			await host.reloadAfterWrite(jobs.map((job) => job.id), 'ready');
 		});
 	}
 
@@ -398,7 +398,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 					: `push --apply — ${ok} pushed`,
 				{ rows },
 			);
-			await host.reloadAfterWrite(ids, 'git');
+			await host.reloadAfterWrite(ids, 'ready');
 			if (failed.length) {
 				host.setError(failed.map((r) => `${r.id}: ${r.reason ?? 'push failed'}`).join(' · '));
 			}

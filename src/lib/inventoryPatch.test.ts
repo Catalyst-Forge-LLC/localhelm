@@ -5,6 +5,7 @@ import {
 	applyWritePatches,
 	unpublishedAheadOf,
 	writeReloadBusy,
+	writeReloadPlan,
 } from './inventoryPatch.js';
 import type { ProjectStatus } from './types.js';
 
@@ -37,6 +38,13 @@ describe('inventoryPatch', () => {
 		assert.equal(writeReloadBusy('git', ['temper-pass']), 'reading git · temper-pass');
 		assert.equal(writeReloadBusy('git', ['a', 'b']), 'reading git (2 projects)');
 		assert.equal(writeReloadBusy('light', ['a', 'b', 'c']), 'reading fleet (3 projects)');
+		assert.equal(writeReloadBusy('ready', ['a', 'b']), 'reading fleet (2 projects)');
+	});
+
+	it('re-reads npm and commit counts after a push so Publish can appear', () => {
+		assert.deepEqual(writeReloadPlan('git'), { gitOnly: true, skipCommitCounts: true, freshNpm: false });
+		assert.deepEqual(writeReloadPlan('light'), { gitOnly: false, skipCommitCounts: true, freshNpm: false });
+		assert.deepEqual(writeReloadPlan('ready'), { gitOnly: false, skipCommitCounts: false, freshNpm: true });
 	});
 
 	it('treats a bumped local version as unpublished-ahead', () => {
