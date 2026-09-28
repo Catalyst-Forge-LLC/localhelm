@@ -58,6 +58,7 @@
 	import { emptyConfirmPhases, markConfirmKey, type ConfirmPhase } from '$lib/confirmProgress';
 	import { applyWritePatches, digestFromProjects, writeReloadBusy, type WritePatch, type WriteReloadMode } from '$lib/inventoryPatch';
 	import { bridgeServeHeading, fleetProjectMeta, fleetVersionLabel, headerNeedChips, type BridgeGauge } from '$lib/fleetDisplay';
+	import { npmPackageHref } from '$lib/npmPage';
 	import { formatActivityAt } from '$lib/formatTime';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
@@ -2562,7 +2563,21 @@
 											</div>
 										</td>
 										<td class="mono" class:ahead={row.unpublishedAhead}>
-											{#if row.pending}<CellWait label={`Reading version for ${row.id}`} />{:else}{fleetVersionLabel(row)}{/if}
+											{#if row.pending}
+												<CellWait label={`Reading version for ${row.id}`} />
+											{:else}
+												{fleetVersionLabel(row)}
+												{#if row.npm.name && row.npm.status !== 'none'}
+													<a
+														class="live-link npm-page"
+														href={npmPackageHref(row.npm.name)}
+														target="_blank"
+														rel="noopener noreferrer"
+														aria-label={`Open ${row.npm.name} on npm`}
+														use:tip={`Open ${row.npm.name} on npm`}
+													><Icon icon="lucide:external-link" /></a>
+												{/if}
+											{/if}
 										</td>
 										<td class="small">
 											{#if row.pending}<CellWait label={`Reading git for ${row.id}`} />{:else}{gitSummary(row)}{/if}

@@ -3,6 +3,7 @@
 	import { commitDraftProgressHint, commitDraftSubjectIds } from './confirmProgress';
 	import { buildConfirmRoster, confirmCountText, confirmRosterSelected } from './confirmRoster';
 	import Icon from './Icon.svelte';
+	import { findNpmPackageLink } from './npmPage';
 	import KnightRiderBar from './KnightRiderBar.svelte';
 
 	type Phase = 'pending' | 'current' | 'done' | 'fail';
@@ -216,14 +217,17 @@
 		onalt?.(includedApply);
 	}
 
-	function itemLink(item: string): { before: string; href: string; after: string } | null {
+	function itemLink(item: string): { before: string; href: string; label: string; after: string } | null {
 		const match = /(https:\/\/[^\s]+)/.exec(item);
-		if (!match?.[1] || match.index == null) return null;
-		return {
-			before: item.slice(0, match.index),
-			href: match[1],
-			after: item.slice(match.index + match[1].length),
-		};
+		if (match?.[1] && match.index != null) {
+			return {
+				before: item.slice(0, match.index),
+				href: match[1],
+				label: match[1],
+				after: item.slice(match.index + match[1].length),
+			};
+		}
+		return findNpmPackageLink(item);
 	}
 
 	function phaseMark(phase: Phase) {
@@ -338,7 +342,7 @@
 							{#if showFilePick}
 								<button type="button" class="file-pick" onclick={() => pickFile(i)}>
 									{#if link}
-										{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+										{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>{link.after}
 									{:else}
 										{step.text}
 									{/if}
@@ -346,7 +350,7 @@
 							{:else}
 								<span>
 									{#if link}
-										{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+										{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>{link.after}
 									{:else}
 										{step.text}
 									{/if}
@@ -380,7 +384,7 @@
 						{#if showFilePick}
 							<button type="button" class="file-pick" onclick={() => pickFile(i)}>
 								{#if link}
-									{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+									{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>{link.after}
 								{:else}
 									{item}
 								{/if}
@@ -388,7 +392,7 @@
 						{:else}
 							<span>
 								{#if link}
-									{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.href}</a>{link.after}
+									{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>{link.after}
 								{:else}
 									{item}
 								{/if}

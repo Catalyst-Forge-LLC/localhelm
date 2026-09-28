@@ -2,6 +2,7 @@
 	import CellWait from '$lib/CellWait.svelte';
 	import CrossChips from '$lib/CrossChips.svelte';
 	import Icon from '$lib/Icon.svelte';
+	import { npmPackageHref } from '$lib/npmPage';
 	import IconButton from '$lib/IconButton.svelte';
 	import Tooltip from '$lib/Tooltip.svelte';
 	import type { CrossChip } from '$lib/crosswalk';
@@ -255,7 +256,12 @@
 									<span class="id">{row.id}</span>
 								</div>
 								<div class="dim small">
-									{row.npm.name ?? row.path} · {gitSummary(row)}
+									{#if row.npm.name && row.npm.status !== 'none'}
+										<a class="live-link" href={npmPackageHref(row.npm.name)} target="_blank" rel="noopener noreferrer">{row.npm.name}</a>
+									{:else}
+										{row.npm.name ?? row.path}
+									{/if}
+									· {gitSummary(row)}
 									{#if cascadeTarget}
 										· dependents {cascadeTarget.behind ? `${cascadeTarget.behind} behind` : ''}{cascadeTarget.behind && cascadeTarget.linked ? ', ' : ''}{cascadeTarget.linked ? `${cascadeTarget.linked} local link` : ''}
 									{/if}
