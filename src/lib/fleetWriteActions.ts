@@ -330,7 +330,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 			});
 			const eligible = rows.filter((r) => r.action === 'pull');
 			host.note(`pull --apply — ${eligible.length} repo(s) fast-forwarded`, { rows });
-			await host.reloadAfterWrite(ids, 'git');
+			await host.reloadAfterWrite(ids, 'ready');
 		});
 	}
 
@@ -580,7 +580,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 							: `global --apply — ${ok} installed`,
 					{ rows },
 				);
-				await host.reloadAfterWrite(ids, 'git');
+				await host.reloadAfterWrite(ids, 'ready');
 				if (waiting.length) {
 					offerNpmWait(waiting, versions);
 					return;
@@ -832,7 +832,8 @@ export function createFleetWrites(host: DashboardJobHost) {
 				});
 				host.note(publishApplyTitle(rows), { rows: slimPublishRows(rows) });
 				host.setPublishOtp('');
-				await host.reloadAfterWrite(rows.map((row) => row.id), 'git');
+				// Pins live on dependents. A git read of the publisher leaves Write pins hidden until Refresh.
+				await host.loadStatus({ freshNpm: true, extras: false });
 			},
 			{ closeConfirm: false },
 		);
@@ -877,7 +878,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 			})) as { to: string; npm: string; rows: { action: string; writes?: boolean; fromId: string }[]; note: string };
 			host.note(`cascade ${data.npm}@${data.to} — wrote ${data.rows.filter((r) => r.writes).length} pin(s)`, data);
 			const wrote = data.rows.filter((row) => row.writes).map((row) => row.fromId);
-			await host.reloadAfterWrite([...new Set([id, ...wrote])], 'light');
+			await host.reloadAfterWrite([...new Set([id, ...wrote])], 'ready');
 		});
 	}
 
