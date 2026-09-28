@@ -5,6 +5,7 @@ import {
 	mapPool,
 	npmCliNotFound,
 	npmHasVersion,
+	npmLatest,
 	npmLatestMany,
 	parseMaintainerSearchJson,
 	parseNpmrcAuthToken,
@@ -109,6 +110,38 @@ describe('npm maintainer search + view', () => {
 		assert.equal(parseNpmrcAuthToken('//registry.npmjs.org/:_authToken=npm_test_token\n'), 'npm_test_token');
 		assert.equal(npmCliNotFound('npm ERR! code E404', 1), true);
 		assert.equal(npmCliNotFound('npm ERR! code E429', 1), false);
+	});
+
+	it('retries a dropped registry read twice, then keeps the version', async () => {
+		clearNpmCache();
+		let calls = 0;
+		const cell = await npmLatest('localhelm', {
+			token: null,
+			sleep: async () => undefined,
+			fetch: (async () => {
+				calls += 1;
+				if (calls < 3) throw new Error('socket hang up');
+				return { status: 200, ok: true, json: async () => ({ version: '0.1.29' }) } as Response;
+			}) as typeof fetch,
+		});
+		assert.equal(calls, 3);
+		assert.equal(cell.status, 'ok');
+		assert.equal(cell.latest, '0.1.29');
+	});
+
+	it('does not retry a missing package', async () => {
+		clearNpmCache();
+		let calls = 0;
+		const cell = await npmLatest('missing-pkg', {
+			token: null,
+			sleep: async () => undefined,
+			fetch: (async () => {
+				calls += 1;
+				return { status: 404, ok: false, json: async () => ({}) } as Response;
+			}) as typeof fetch,
+		});
+		assert.equal(calls, 1);
+		assert.equal(cell.status, 'none');
 	});
 
 	it('reads latest from the registry and treats 404 as unpublished', async () => {

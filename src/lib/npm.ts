@@ -7,6 +7,9 @@ import type { NpmCell } from './types.js';
 
 const TTL_MS = 5 * 60_000;
 const ERROR_TTL_MS = 10_000;
+/** Extra tries after a timeout, a dropped connection, 429, or 5xx. Not used for 404. */
+const LOOKUP_RETRIES = 2;
+const LOOKUP_RETRY_MS = 400;
 const DEFAULT_CONCURRENCY = 8;
 const SEARCH_LIMIT = '250';
 const SEARCH_TIMEOUT_MS = 45_000;
@@ -30,6 +33,8 @@ export type NpmLookupOpts = {
 	fetch?: typeof fetch;
 	/** Explicit registry token. `null` = anonymous. Omit to read `~/.npmrc`. */
 	token?: string | null;
+	/** Test hook. Transient registry failures wait between tries. */
+	sleep?: (ms: number) => Promise<void>;
 };
 
 /** Run `fn` over items with a fixed worker pool. Order of results matches `items`. */
@@ -216,27 +221,33 @@ function versionFromPackument(body: unknown): string | undefined {
 	return version || undefined;
 }
 
+function retryableStatus(status: number): boolean {
+	return status === 0 || status === 429 || status >= 500;
+}
+
 async function registryGet(
 	url: string,
 	opts: NpmLookupOpts | undefined,
-	retry429: boolean,
 ): Promise<{ status: number; body: unknown; error?: string }> {
 	const doFetch = opts?.fetch ?? fetch;
-	try {
-		const res = await doFetch(url, {
-			headers: registryHeaders(resolveToken(opts)),
-			signal: AbortSignal.timeout(15_000),
-		});
-		if (res.status === 429 && retry429) {
-			await new Promise((resolve) => setTimeout(resolve, 400));
-			return registryGet(url, opts, false);
+	const sleep = opts?.sleep ?? ((ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));
+	let last: { status: number; body: unknown; error?: string } = { status: 0, body: null, error: 'npm lookup failed' };
+	for (let attempt = 0; attempt <= LOOKUP_RETRIES; attempt++) {
+		try {
+			const res = await doFetch(url, {
+				headers: registryHeaders(resolveToken(opts)),
+				signal: AbortSignal.timeout(15_000),
+			});
+			if (res.status === 404) return { status: 404, body: null };
+			if (!res.ok) last = { status: res.status, body: null, error: `npm HTTP ${res.status}` };
+			else return { status: res.status, body: await res.json() };
+		} catch (err) {
+			last = { status: 0, body: null, error: err instanceof Error ? err.message : String(err) };
 		}
-		if (res.status === 404) return { status: 404, body: null };
-		if (!res.ok) return { status: res.status, body: null, error: `npm HTTP ${res.status}` };
-		return { status: res.status, body: await res.json() };
-	} catch (err) {
-		return { status: 0, body: null, error: err instanceof Error ? err.message : String(err) };
+		if (!retryableStatus(last.status) || attempt === LOOKUP_RETRIES) return last;
+		await sleep(LOOKUP_RETRY_MS);
 	}
+	return last;
 }
 
 function cellFromRegistry(name: string, got: { status: number; body: unknown; error?: string }): NpmCell {
@@ -251,7 +262,7 @@ function cellFromRegistry(name: string, got: { status: number; body: unknown; er
 
 async function registryLatest(name: string, opts?: NpmLookupOpts): Promise<NpmCell> {
 	const url = `https://registry.npmjs.org/${encodeName(name)}/latest`;
-	return cellFromRegistry(name, await registryGet(url, opts, true));
+	return cellFromRegistry(name, await registryGet(url, opts));
 }
 
 export function npmCliNotFound(stderr: string, status: number): boolean {
@@ -369,7 +380,7 @@ export async function waitForNpmVersion(
 
 export async function npmHasVersion(name: string, version: string, opts?: NpmLookupOpts): Promise<NpmCell> {
 	const url = `https://registry.npmjs.org/${encodeName(name)}/${encodeURIComponent(version)}`;
-	return cellFromRegistry(name, await registryGet(url, opts, true));
+	return cellFromRegistry(name, await registryGet(url, opts));
 }
 
 export function clearNpmCache(): void {
