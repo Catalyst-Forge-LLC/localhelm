@@ -1566,8 +1566,26 @@
 		flex-wrap: nowrap;
 	}
 
+	td.clip {
+		white-space: nowrap;
+		width: 1%;
+	}
+
 	.cell-clip {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
 		cursor: help;
+		white-space: nowrap;
+	}
+
+	.clip-more {
+		flex-shrink: 0;
+		border: 1px solid var(--steel);
+		border-radius: var(--plate-radius-sm);
+		padding: 0.02rem 0.35rem;
+		font-size: 0.68rem;
+		color: var(--dim);
 	}
 
 	.need-actions {

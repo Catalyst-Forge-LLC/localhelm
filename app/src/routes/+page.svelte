@@ -2853,9 +2853,9 @@
 										{#each siteCols as col (col.id)}
 											{@const cellLabel = siteCellValue(col.id, row.cells)}
 											{@const cellLinks = pluginCellLinks(row, col.id, cellLabel)}
-											<td class="small" class:mono={col.id === 'engine'}>
+											{@const clip = col.id === 'agent' ? pluginListPreview(cellLinks) : null}
+											<td class="small" class:mono={col.id === 'engine'} class:clip={Boolean(clip?.rest)}>
 												{#if cellLinks.length}
-													{@const clip = col.id === 'agent' ? pluginListPreview(cellLinks) : null}
 													{@const shown = clip?.rest ? clip.shown : cellLinks}
 													<span class:cell-clip={Boolean(clip?.rest)} use:tip={clip?.tip ?? ''}>
 														{#each shown as item, i (`${col.id}:${item.label}:${i}`)}
@@ -2866,7 +2866,7 @@
 																<span>{item.label}</span>
 															{/if}
 														{/each}
-														{#if clip?.rest}<span class="dim"> · …</span>{/if}
+														{#if clip?.rest}<span class="clip-more">+{clip.rest}</span>{/if}
 													</span>
 												{:else}
 													{cellLabel}

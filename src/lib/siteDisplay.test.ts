@@ -141,7 +141,7 @@ describe('siteDisplay', () => {
 		);
 	});
 
-	it('keeps two agent names in the cell and lists the rest for the tooltip', () => {
+	it('keeps the first agent name in the cell and counts the rest', () => {
 		const items = [
 			{ label: 'ForgeTrail Reference Agent', href: null },
 			{ label: 'Autonomous Web Researcher', href: null },
@@ -151,11 +151,12 @@ describe('siteDisplay', () => {
 		const preview = pluginListPreview(items);
 		assert.deepEqual(
 			preview.shown.map((item) => item.label),
-			['ForgeTrail Reference Agent', 'Autonomous Web Researcher'],
+			['ForgeTrail Reference Agent'],
 		);
-		assert.equal(preview.rest, 2);
-		assert.match(preview.tip, /• CI Triage Workflow Agent\n• Customer Support Chatbot/);
-		assert.equal(pluginListPreview(items.slice(0, 2)).tip, '');
+		assert.equal(preview.rest, 3);
+		assert.match(preview.tip, /• Autonomous Web Researcher\n• CI Triage Workflow Agent/);
+		assert.equal(pluginListPreview(items.slice(0, 1)).rest, 0);
+		assert.equal(pluginListPreview(items.slice(0, 1)).tip, '');
 	});
 
 	it('opens the *-site lease, not the dashboard lease', () => {

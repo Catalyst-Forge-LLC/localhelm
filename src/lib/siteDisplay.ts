@@ -143,7 +143,7 @@ export function pluginRowOpenHref(row: {
 export type PluginCellLink = { label: string; href: string | null };
 
 /** Names kept in the cell before the rest move into a tooltip. */
-export const PLUGIN_LIST_PREVIEW = 2;
+export const PLUGIN_LIST_PREVIEW = 1;
 
 /** A long label list: a short preview, then one name per line for the tooltip. */
 export function pluginListPreview(
