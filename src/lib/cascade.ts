@@ -24,6 +24,8 @@ export type CascadeRow = {
 	reason?: string;
 	writes?: boolean;
 	committed?: boolean;
+	/** pnpm update rewrote package.json as well as the lockfile. */
+	pkgChanged?: boolean;
 };
 
 export type CascadePlan = {
@@ -187,6 +189,19 @@ export async function planCascade(
 	return plan;
 }
 
+/** Files a finished cascade row should commit. Refresh includes package.json only when pnpm rewrote it. */
+export function cascadeCommitFiles(input: {
+	action: 'retarget' | 'refresh';
+	pkgFile: string;
+	lockFile: string | null;
+	pkgChanged: boolean;
+}): string[] {
+	const files: string[] = [];
+	if (input.action === 'retarget' || input.pkgChanged) files.push(input.pkgFile);
+	if (input.lockFile) files.push(input.lockFile);
+	return files;
+}
+
 export type CascadeProjectProgress = {
 	index: number;
 	total: number;
@@ -267,6 +282,10 @@ async function applyCascadeRows(plan: CascadePlan, writable: CascadeRow[]): Prom
 			}
 		}
 		if (refreshes.length) {
+			const pkgBefore = new Map<string, string>();
+			for (const row of refreshes) {
+				if (!pkgBefore.has(row.file)) pkgBefore.set(row.file, await readFile(row.file, 'utf8'));
+			}
 			const before = await readFile(lockFile, 'utf8');
 			const names = [...new Set(refreshes.map((row) => row.name))];
 			const updated = runPnpm(lockRoot, ['update', ...names, '--lockfile-only']);
@@ -276,16 +295,19 @@ async function applyCascadeRows(plan: CascadePlan, writable: CascadeRow[]): Prom
 			}
 			const after = await readFile(lockFile, 'utf8');
 			for (const row of refreshes) {
+				const pkgChanged = (await readFile(row.file, 'utf8')) !== pkgBefore.get(row.file);
+				const lockChanged = after !== before;
 				if (!lockResolves(after, row.name, plan.to)) {
-					row.writes = false;
+					row.writes = pkgChanged;
 					row.reason = `lockfile did not resolve ${row.name}@${plan.to}`;
-				} else if (after === before) {
+				} else if (!pkgChanged && !lockChanged) {
 					row.writes = false;
 					row.reason = `already resolves ${plan.to}`;
 				} else {
 					row.writes = true;
-					row.reason = `updated lockfile to ${plan.to}`;
+					row.reason = pkgChanged ? `updated ${row.name} to ${plan.to}` : `updated lockfile to ${plan.to}`;
 				}
+				if (pkgChanged) row.pkgChanged = true;
 			}
 		}
 	}
@@ -295,9 +317,16 @@ async function applyCascadeRows(plan: CascadePlan, writable: CascadeRow[]): Prom
 		for (const row of writable) {
 			if (!row.writes) continue;
 			const entry = byRepo.get(row.projectAbs) ?? { files: new Set<string>(), rows: [] };
-			if (row.action === 'retarget') entry.files.add(row.file);
 			const lockFile = path.join(row.lockRoot, 'pnpm-lock.yaml');
-			if (await pathExists(lockFile)) entry.files.add(lockFile);
+			const hasLock = await pathExists(lockFile);
+			for (const file of cascadeCommitFiles({
+				action: row.action === 'refresh' ? 'refresh' : 'retarget',
+				pkgFile: row.file,
+				lockFile: hasLock ? lockFile : null,
+				pkgChanged: row.pkgChanged === true,
+			})) {
+				entry.files.add(file);
+			}
 			entry.rows.push(row);
 			byRepo.set(row.projectAbs, entry);
 		}

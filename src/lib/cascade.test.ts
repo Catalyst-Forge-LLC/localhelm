@@ -3,7 +3,7 @@ import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
-import { applyCascade, planCascade } from './cascade.js';
+import { applyCascade, cascadeCommitFiles, planCascade } from './cascade.js';
 import { helmRetargetMessage } from './commit.js';
 import { runGit } from './git.js';
 import type { LoadedManifest } from './manifest.js';
@@ -17,6 +17,29 @@ function gitInit(dir: string): void {
 	assert.equal(runGit(dir, ['config', 'user.email', 'localhelm@test']).ok, true);
 	assert.equal(runGit(dir, ['config', 'user.name', 'LocalHelm Test']).ok, true);
 }
+
+describe('cascadeCommitFiles', () => {
+	it('commits package.json when a refresh rewrites the pin', () => {
+		assert.deepEqual(
+			cascadeCommitFiles({
+				action: 'refresh',
+				pkgFile: 'site/package.json',
+				lockFile: 'site/pnpm-lock.yaml',
+				pkgChanged: true,
+			}),
+			['site/package.json', 'site/pnpm-lock.yaml'],
+		);
+		assert.deepEqual(
+			cascadeCommitFiles({
+				action: 'refresh',
+				pkgFile: 'site/package.json',
+				lockFile: 'site/pnpm-lock.yaml',
+				pkgChanged: false,
+			}),
+			['site/pnpm-lock.yaml'],
+		);
+	});
+});
 
 describe('cascade helpers', () => {
 	it('rewrites only the named specifier', () => {
