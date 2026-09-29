@@ -206,7 +206,7 @@ export function pluginJobHint(
 		return 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.';
 	}
 	if (plugin === 'xfacts' && action === 'check') {
-		return 'Reads each repo. Does not write. Confirm runs the schema checks and the AppFacts fingerprint. A missing or empty label fails.';
+		return 'Reads each repo. Does not write. Confirm checks app, feature, skill, tool, agent, and model. AppFacts and a FeatureFacts register are required. SkillFacts is required next to SKILL.md. Tool, agent, and model are checked when those files exist.';
 	}
 	if (plugin === 'xfacts' && action === 'ship') {
 		return 'Runs pnpm ship in that repo (wrangler / Pages). Confirm to deploy. Not FilePress Land. Never --force.';
