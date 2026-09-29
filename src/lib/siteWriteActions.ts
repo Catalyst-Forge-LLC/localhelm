@@ -176,7 +176,7 @@ export function createSiteWrites(host: DashboardJobHost) {
 				? `${failed.length} of ${results.length} need a label`
 				: `Checked ${results.length}`,
 			hint: failed.length
-				? 'Each line is one finding. Add labels fills missing files and leaves an existing label. Update rewrites a stale AppFacts file from the repo scan, without a model.'
+				? 'Each line is one finding. Add labels fills missing files and leaves an existing label. Update rewrites a stale AppFacts file from the repo scan, without a model. Both commit only the label files they wrote. Neither pushes.'
 				: `${okCount} passed.`,
 			items,
 			itemKeys,

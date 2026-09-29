@@ -229,7 +229,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Dirty repos get **Commit** on Today and Fleet (and a checked-row toolbar). The confirm lists files plus an editable fallback immediately. **ollanet** finds Ollama (network host first, this machine last; LAN only if needed) and replaces the text; otherwise the fallback stays. Confirm is git add + git commit only — no push. CLI: `localhelm commit <id>... [--message TEXT] [--apply]`.
 - Add projects lists folders A–Z, ignoring case, with nested folders under their parent. Default string sort put `FocusFreely` above `acmegeek`.
 - Needs you head has bulk Commit dirty / Publish / Push with counts, not only Publish.
-- xFacts labels lists the enrolled fleet (not a 13-name shelf). Check validates label files and the AppFacts fingerprint. Add labels writes missing AppFacts, FeatureFacts, and SkillFacts and leaves an existing label in place. Ship appears when that repo has `scripts.ship`.
+- xFacts labels lists the enrolled fleet (not a 13-name shelf). Check validates label files and the AppFacts fingerprint. Add labels writes missing AppFacts, FeatureFacts, and SkillFacts, leaves an existing label in place, and commits only those files. Update commits a rewritten AppFacts file. Neither pushes. Ship appears when that repo has `scripts.ship`.
 
 ### Session 28 — 2026-09-05
 

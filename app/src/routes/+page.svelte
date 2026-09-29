@@ -2197,7 +2197,7 @@
 		if (board.plugin === 'xfacts') {
 			bits.push(
 				'This is the enrolled fleet, not a short shelf list. Hidden archived rows stay off.',
-				'Check reads labels and does not write. Confirm runs it. Add labels fills a missing AppFacts file, an empty FeatureFacts register, and missing SkillFacts. It leaves an existing label in place.',
+				'Check reads labels and does not write. Confirm runs it. Add labels fills a missing AppFacts file, an empty FeatureFacts register, and missing SkillFacts, then commits those files. It leaves an existing label in place and does not push.',
 				'Ship runs that repo’s pnpm ship script (wrangler / Pages). Same job as Fleet Ship. Not FilePress Land.',
 			);
 		}
