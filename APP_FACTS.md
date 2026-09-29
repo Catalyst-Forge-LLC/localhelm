@@ -1,6 +1,6 @@
 ---
 app_facts_version: 0.1.0
-name: localhelm
+name: LocalHelm
 type: CLI tool
 status: active
 license: Apache-2.0
@@ -34,7 +34,7 @@ credits:
   built_by: "Catalyst Forge — https://www.catalystforge.com/"
 ---
 
-# localhelm
+# LocalHelm
 
 `CLI tool` · **active** · Apache-2.0
 
@@ -68,4 +68,4 @@ Curated stack label for this repository — aimed at an under-a-minute skim.
 ---
 *Generated with [AppFacts](https://appfacts.dev) · Built by [Catalyst Forge](https://www.catalystforge.com/) · [Visual label][appfacts-label]*
 
-[appfacts-label]: https://appfacts.dev/v#af1.eNpNkUFv2zAMhf-KwLMSrzvq1MHAgLbBLil6KYqBkRlbjSQKEu3UCPLfB9ltuiv13uPjpwtMYO40RAwEBjxb9AP5ABpkTnXU7h6UMHvQUARlLGAArbiJQIN3lmKpsl8J7UCbn9sfq9CewFzAY-xH7KvgeU60t9kl0Wo_kRfS6hEnXGegIY9R3NLiD3e0fS-g4Zgx0JnzCQyspicny4LZu9jXWHT-7GKn2v2-lmb-fHhxdUOKKcBVQ0epgHm9QAQD92WJei_NaUlLYOBMB3Xbpo6cVYdlODDmDq569Un5-FRXNmUpruiD7CiO42Jqdw_fcpfSvN5RPS4K5ZXcAlRcUpZD4khRys117yxHd5ybteSX2XJUZS5CAa5vGg6j810lnNCesKe_ASP2lMHA18kDB0or-0EkFdM0t-_ddjRV5JS4OOE8_yfqnQzjYWs5NC0K-rnI5jfnnja7XfsdAdd_q5PB9g
+[appfacts-label]: https://appfacts.dev/v#af1.eNpNkc1u2zAQhF-F2DNttT3ylEJA0bRCLy5yCYpgTa0lxiSXIFdyBMPvHlDKT6_LmdnZj1eYwXzVEDEQGOjYov9JPoAGWVIdtd29EmYPGoqgTAUMoBU3E2jwzlIsVfY9oR1p923_ZRPaM5greIzDhEMV_F0SHWx2SbQ6zOSFtPqFM24z0JCnKG5t8Yd72j8X0HDKGOjC-QwGNtNvJ-uCxbs41Fh0_uJir9rDoZZmfnt4cHVDiinATUNPqYB5vEIEA3dljXouzXlNS2DgQkf1sU2dOKsey3hkzD3c9OaT8vKmrmzKWlzRC9lJHMfV1Hb3n3KX0rLdUT0uCuWN3ApUXFKWQ-JIUcqH685Zju60NFvJd7PlqMpShALc_mk4Ts73lXBCe8aBngJGHCiDgfeTRw6UNvajSCqmaXz93pF82Pc0V-SUuDjhvPwnGpyM03FvOTQtCvqlyO4H54F2Xdd-RsDtFSDzwbY

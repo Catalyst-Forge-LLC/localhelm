@@ -27,7 +27,7 @@ export default defineFilepressConfig({
 		{ label: 'LocalSlip', href: 'https://localslip.dev' },
 		{
 			label: 'AppFacts',
-			href: 'https://appfacts.dev/v#af1.eNpFkcFqwzAQRH_FzFmJ2x51agkUSkMvKb2UEjby1lYiS0JaJzEh_15kp-Qqzey8nb3gCP2o4KlnaLhgyHXseijIGMvTav1WSQgOCllIhgwNMmKPDAVnDftcZC-RTMeLp-XDLDQH6Asc-Xagtgg-x8gbk2wUKKTBi50SP0LDy32Gwm-ink8hHaCxObITfreiKsnnaeLorG_LHLLuZH1TrTYbKOwG65rtBKjxZYVxVWg4ZujvCzw0nvM0bJ_rgy3ZERon3lUN5W4XKDXVPfmqZs8cWpSlhTxhV3xmM4gNvvoNqSq9mND35Jt8993gTM43_z_4v-JYEOevCX3u9vpz26SUFskcqOVtT55aTtCIPvZlr8QxZCshjdDoRGLWdd1a6Ybd0oS-XpGQG7MsXkNqebFer-r7Ra9_Do2lOw',
+			href: 'https://appfacts.dev/v#af1.eNpNkc1u2zAQhF-F2DNttT3ylEJA0bRCLy5yCYpgTa0lxiSXIFdyBMPvHlDKT6_LmdnZj1eYwXzVEDEQGOjYov9JPoAGWVIdtd29EmYPGoqgTAUMoBU3E2jwzlIsVfY9oR1p923_ZRPaM5greIzDhEMV_F0SHWx2SbQ6zOSFtPqFM24z0JCnKG5t8Yd72j8X0HDKGOjC-QwGNtNvJ-uCxbs41Fh0_uJir9rDoZZmfnt4cHVDiinATUNPqYB5vEIEA3dljXouzXlNS2DgQkf1sU2dOKsey3hkzD3c9OaT8vKmrmzKWlzRC9lJHMfV1Hb3n3KX0rLdUT0uCuWN3ApUXFKWQ-JIUcqH685Zju60NFvJd7PlqMpShALc_mk4Ts73lXBCe8aBngJGHCiDgfeTRw6UNvajSCqmaXz93pF82Pc0V-SUuDjhvPwnGpyM03FvOTQtCvqlyO4H54F2Xdd-RsDtFSDzwbY',
 		},
 	],
 	topics: [{ label: 'Notes', tag: 'notes' }],

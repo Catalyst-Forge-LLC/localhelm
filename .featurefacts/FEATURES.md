@@ -1,4 +1,4 @@
-# Feature register: localhelm
+# Feature register: LocalHelm
 
 Scan `scan-init`. Candidates are not confirmed capabilities.
 
