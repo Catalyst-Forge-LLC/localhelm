@@ -18,7 +18,7 @@ import {
 import { isJobCancelled } from './jobCancel.js';
 import { formatPluginPlanLines, pluginPlanLineKeys, pluginPlanWriteIds } from './pluginPlan.js';
 import { landPluginApplyOk } from './writeGate.js';
-import { checkResultFollowUp, planOpts, pluginJobHint } from './writeConfirm.js';
+import { checkResultFollowUp, checkResultLines, planOpts, pluginJobHint } from './writeConfirm.js';
 
 function pluginApplyDetail(data: unknown, id: string): { ok: boolean; detail: string } {
 	const rows =
@@ -154,16 +154,27 @@ export function createSiteWrites(host: DashboardJobHost) {
 				? `Update ${updateIds[0]}`
 				: `Update ${updateIds.length}`;
 		const okCount = results.length - failed.length;
+		const items: string[] = [];
+		const itemKeys: string[] = [];
+		const itemPhases: Array<'done' | 'fail'> = [];
+		for (const row of results) {
+			const lines = row.ok ? ['Passed'] : checkResultLines(row.detail);
+			lines.forEach((line, index) => {
+				items.push(`${row.id}  ${line}`);
+				itemKeys.push(`${row.id}:${index}`);
+				itemPhases.push(row.ok ? 'done' : 'fail');
+			});
+		}
 		host.offerConfirm({
 			title: failed.length
 				? `${failed.length} of ${results.length} need a label`
 				: `Checked ${results.length}`,
 			hint: failed.length
-				? 'Results stay here. Add labels fills missing files and leaves an existing label. Update rewrites a stale AppFacts file from the repo scan, without a model.'
+				? 'Each line is one finding. Add labels fills missing files and leaves an existing label. Update rewrites a stale AppFacts file from the repo scan, without a model.'
 				: `${okCount} passed.`,
-			items: results.map((row) => `${row.id}  ${row.ok ? 'ok' : row.detail}`),
-			itemKeys: results.map((row) => row.id),
-			itemPhases: results.map((row) => (row.ok ? 'done' : 'fail')),
+			items,
+			itemKeys,
+			itemPhases,
 			applyIds: pool,
 			confirmLabel: primaryLabel,
 			canApply: primary.length > 0,

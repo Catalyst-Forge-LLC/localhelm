@@ -154,6 +154,25 @@ export function firstPlanReason(data: unknown): string {
 	return typeof reason === 'string' ? reason : '';
 }
 
+/** One readable line per check finding. */
+export function checkResultLines(detail: string): string[] {
+	const parts = detail
+		.split(' · ')
+		.map((part) => part.trim())
+		.filter(Boolean);
+	if (!parts.length) return ['Check failed'];
+	return parts.map((part) => {
+		if (part === 'no APP_FACTS.md') return 'Missing AppFacts';
+		if (part.includes('no .featurefacts/features.yaml')) return 'Missing FeatureFacts';
+		if (part === 'FeatureFacts register is empty') return 'FeatureFacts has no capabilities';
+		const skill = /missing (\S*SKILL_FACTS\.md)/i.exec(part);
+		if (skill?.[1]) return `Missing SkillFacts (${skill[1]})`;
+		if (/is stale \(file=/i.test(part)) return 'AppFacts fingerprint is stale';
+		if (/inputs_fingerprint/i.test(part)) return 'AppFacts has no fingerprint';
+		return part;
+	});
+}
+
 /** Which follow-up a check detail can take. A row can need both. */
 export function checkResultFollowUp(detail: string): { add: boolean; update: boolean } {
 	const update = /inputs_fingerprint|is stale \(file=/i.test(detail);

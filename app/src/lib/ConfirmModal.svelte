@@ -314,7 +314,7 @@
 									<span class="now">now</span>
 								{/if}
 								{#if group.total > 1}
-									<span class="count">{group.done}/{group.total}</span>
+									<span class="count">{group.phase === 'fail' && group.done === 0 ? group.total : `${group.done}/${group.total}`}</span>
 								{/if}
 							</button>
 						</div>

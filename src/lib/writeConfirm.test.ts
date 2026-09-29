@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
 	checkResultFollowUp,
+	checkResultLines,
 	dirtPlanLine,
 	firstPlanReason,
 	githubPendingRows,
@@ -87,6 +88,15 @@ describe('slimPublishRows', () => {
 	it('drops steps from the activity payload', () => {
 		assert.deepEqual(slimPublishRows([{ id: 'helm', action: 'publish', version: '0.1.20', reason: 'published 0.1.20' }]), [
 			{ id: 'helm', action: 'publish', version: '0.1.20', reason: 'published 0.1.20' },
+		]);
+	});
+});
+
+describe('checkResultLines', () => {
+	it('lists each missing label on its own line', () => {
+		assert.deepEqual(checkResultLines('no APP_FACTS.md · no .featurefacts/features.yaml'), [
+			'Missing AppFacts',
+			'Missing FeatureFacts',
 		]);
 	});
 });
