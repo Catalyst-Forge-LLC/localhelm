@@ -142,6 +142,23 @@ export function pluginRowOpenHref(row: {
 
 export type PluginCellLink = { label: string; href: string | null };
 
+/** Names kept in the cell before the rest move into a tooltip. */
+export const PLUGIN_LIST_PREVIEW = 2;
+
+/** A long label list: a short preview, then one name per line for the tooltip. */
+export function pluginListPreview(
+	items: readonly PluginCellLink[],
+	limit = PLUGIN_LIST_PREVIEW,
+): { shown: PluginCellLink[]; rest: number; tip: string } {
+	const names = items.map((item) => item.label.trim()).filter(Boolean);
+	if (names.length <= limit) return { shown: [...items], rest: 0, tip: '' };
+	return {
+		shown: items.slice(0, limit),
+		rest: names.length - limit,
+		tip: names.map((name) => `• ${name}`).join('\n'),
+	};
+}
+
 /** Named links for one column. A group wins over a single `links` URL. */
 export function pluginCellLinks(
 	row: {

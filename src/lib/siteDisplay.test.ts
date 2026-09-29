@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import {
 	pluginCellHref,
 	pluginCellLinks,
+	pluginListPreview,
 	pluginRowNote,
 	pluginRowOpenHref,
 	siteCellValue,
@@ -138,6 +139,23 @@ describe('siteDisplay', () => {
 			),
 			[{ label: 'ok', href: 'https://appfacts.dev/v#af1.x' }],
 		);
+	});
+
+	it('keeps two agent names in the cell and lists the rest for the tooltip', () => {
+		const items = [
+			{ label: 'ForgeTrail Reference Agent', href: null },
+			{ label: 'Autonomous Web Researcher', href: null },
+			{ label: 'CI Triage Workflow Agent', href: null },
+			{ label: 'Customer Support Chatbot', href: null },
+		];
+		const preview = pluginListPreview(items);
+		assert.deepEqual(
+			preview.shown.map((item) => item.label),
+			['ForgeTrail Reference Agent', 'Autonomous Web Researcher'],
+		);
+		assert.equal(preview.rest, 2);
+		assert.match(preview.tip, /• CI Triage Workflow Agent\n• Customer Support Chatbot/);
+		assert.equal(pluginListPreview(items.slice(0, 2)).tip, '');
 	});
 
 	it('opens the *-site lease, not the dashboard lease', () => {

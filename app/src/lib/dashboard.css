@@ -1566,6 +1566,10 @@
 		flex-wrap: nowrap;
 	}
 
+	.cell-clip {
+		cursor: help;
+	}
+
 	.need-actions {
 		margin-left: 0;
 	}

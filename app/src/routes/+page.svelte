@@ -64,7 +64,7 @@
 	import { portCellValue, portTableColumns } from '$lib/portDisplay';
 	import { rowMatchesPortFilters, type PortBoardFilters } from '$lib/portFilters';
 	import HelmMenu from '$lib/HelmMenu.svelte';
-	import { pluginCellLinks, pluginRowNote, pluginRowOpenHref, siteCellValue, siteLandReason, siteLocalHref, siteNeedsEngineSync, siteNeedsLand, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
+	import { pluginCellLinks, pluginListPreview, pluginRowNote, pluginRowOpenHref, siteCellValue, siteLandReason, siteLocalHref, siteNeedsEngineSync, siteNeedsLand, sitePluginJobVisible, siteSyncLabel, siteTableColumns } from '$lib/siteDisplay';
 	import {
 		canonicalizeTab,
 		isCoreTab,
@@ -2855,14 +2855,19 @@
 											{@const cellLinks = pluginCellLinks(row, col.id, cellLabel)}
 											<td class="small" class:mono={col.id === 'engine'}>
 												{#if cellLinks.length}
-													{#each cellLinks as item, i (`${col.id}:${item.label}:${i}`)}
-														{#if i > 0}<span class="dim"> · </span>{/if}
-														{#if item.href}
-															<a class="live-link" href={item.href} target="_blank" rel="noopener noreferrer" use:tip={`Open ${item.href}`}>{item.label}</a>
-														{:else}
-															<span>{item.label}</span>
-														{/if}
-													{/each}
+													{@const clip = col.id === 'agent' ? pluginListPreview(cellLinks) : null}
+													{@const shown = clip?.rest ? clip.shown : cellLinks}
+													<span class:cell-clip={Boolean(clip?.rest)} use:tip={clip?.tip ?? ''}>
+														{#each shown as item, i (`${col.id}:${item.label}:${i}`)}
+															{#if i > 0}<span class="dim"> · </span>{/if}
+															{#if item.href}
+																<a class="live-link" href={item.href} target="_blank" rel="noopener noreferrer" use:tip={`Open ${item.href}`}>{item.label}</a>
+															{:else}
+																<span>{item.label}</span>
+															{/if}
+														{/each}
+														{#if clip?.rest}<span class="dim"> · …</span>{/if}
+													</span>
 												{:else}
 													{cellLabel}
 												{/if}
