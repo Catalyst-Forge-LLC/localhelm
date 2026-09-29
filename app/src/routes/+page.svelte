@@ -70,6 +70,7 @@
 		isCoreTab,
 		isPortsPluginTab,
 		parseDashboardTab,
+		replacePluginBoards,
 		pluginTabCount,
 		pluginTabIcon,
 		pluginTabMetas,
@@ -925,15 +926,22 @@
 		}
 	}
 
-	async function loadPluginBoards(): Promise<void> {
+	async function loadPluginBoards(pluginId?: string): Promise<void> {
+		const query = pluginId ? `?id=${encodeURIComponent(pluginId)}` : '';
 		try {
-			applyPluginDashboard((await call('/api/plugins')) as {
+			const data = (await call(`/api/plugins${query}`)) as {
 				boards: PluginBoard[];
 				plugins?: { id: string; label: string; source?: string; enabled?: boolean }[];
 				faults?: PluginFault[];
-			});
+			};
+			if (pluginId) {
+				pluginBoards = replacePluginBoards(pluginBoards, pluginId, data.boards ?? []);
+				return;
+			}
+			applyPluginDashboard(data);
 		} catch (err) {
-			pluginFaults = [{ source: '', message: err instanceof Error ? err.message : String(err) }];
+			const fault = { source: pluginId ?? '', message: err instanceof Error ? err.message : String(err) };
+			pluginFaults = pluginId ? [...pluginFaults.filter((item) => item.source !== pluginId), fault] : [fault];
 		} finally {
 			pluginsReady = true;
 		}

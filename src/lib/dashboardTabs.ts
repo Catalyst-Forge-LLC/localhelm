@@ -15,6 +15,15 @@ export type PluginTabMeta = {
 
 const TAB_ID = /^[a-z][a-z0-9-]*$/;
 
+/** Swap one plugin's boards and leave the others in place. */
+export function replacePluginBoards<T extends { plugin: string }>(
+	prev: readonly T[],
+	pluginId: string,
+	next: readonly T[],
+): T[] {
+	return [...prev.filter((board) => board.plugin !== pluginId), ...next];
+}
+
 export function canonicalizeTab(raw: string): string {
 	return TAB_ALIASES[raw] ?? raw;
 }

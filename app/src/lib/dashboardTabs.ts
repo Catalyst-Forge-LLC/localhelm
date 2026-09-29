@@ -3,6 +3,7 @@ export {
 	isCoreTab,
 	isPortsPluginTab,
 	parseDashboardTab,
+	replacePluginBoards,
 	pluginTabCount,
 	pluginTabIcon,
 	pluginTabMetas,

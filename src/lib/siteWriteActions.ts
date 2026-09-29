@@ -105,6 +105,12 @@ export function createSiteWrites(host: DashboardJobHost) {
 		});
 	}
 
+	function boardRefreshLabel(plugin: string): string {
+		if (plugin === 'filepress') return 'reading sites';
+		if (plugin === 'localslip') return 'reading ports';
+		return `reading ${plugin}`;
+	}
+
 	async function applyPluginJob(plugin: string, action: string, ids: string[]): Promise<void> {
 		if (plugin === 'xfacts' && action === 'check') {
 			await applyXfactsCheck(ids);
@@ -114,8 +120,8 @@ export function createSiteWrites(host: DashboardJobHost) {
 			try {
 				await applyPluginItems(plugin, action, ids);
 			} finally {
-				host.setBusy('reading Sites and Ports');
-				await host.loadPluginBoards();
+				host.setBusy(boardRefreshLabel(plugin));
+				await host.loadPluginBoards(plugin);
 			}
 		});
 	}
@@ -366,8 +372,8 @@ export function createSiteWrites(host: DashboardJobHost) {
 					host.note(landApplyTitle(rows), { rows });
 				} finally {
 					host.setPublishOtp('');
-					host.setBusy('reading Sites and Ports');
-					await host.loadPluginBoards();
+					host.setBusy(boardRefreshLabel('filepress'));
+					await host.loadPluginBoards('filepress');
 					await host.reloadAfterWrite(ids, 'git');
 				}
 			},

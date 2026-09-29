@@ -36,7 +36,7 @@ export type DashboardJobHost = {
 	}): Promise<void>;
 	reloadAfterWrite(ids: string[], mode?: WriteReloadMode): Promise<void>;
 	patchWrite(patch: WritePatch): void;
-	loadPluginBoards(): Promise<void>;
+	loadPluginBoards(pluginId?: string): Promise<void>;
 	readyNamed(ids: string[]): string[];
 	persistNpmUser(value: string): void;
 	savePublishBatch(snap: PublishBatchSnap): void;

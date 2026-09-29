@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 import type { LoadedManifest } from './manifest.js';
-import { asPluginBoards, loadPluginDashboard, loadPluginFile, loadPlugins } from './plugin.js';
+import { asPluginBoards, loadPluginBoard, loadPluginDashboard, loadPluginFile, loadPlugins } from './plugin.js';
 import { setPluginEnabled } from './pluginPrefs.js';
 import { formatPluginPlanLines, pluginPlanWriteIds, splitCommandCwd } from './pluginPlan.js';
 
@@ -170,6 +170,43 @@ describe('plugins', () => {
 		const order = g.__helmPlugOrder ?? [];
 		const firstEnd = order.findIndex((step) => step.startsWith('end:'));
 		assert.ok(firstEnd >= 2, `expected both starts before either end, got ${order.join(',')}`);
+	});
+
+	it('reads one plugin board without calling the others', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-plug-one-'));
+		const g = globalThis as { __helmPlugOne?: string[] };
+		g.__helmPlugOne = [];
+		for (const id of ['alpha', 'beta']) {
+			const proj = path.join(root, id);
+			await mkdir(proj);
+			await writeFile(
+				path.join(proj, 'localhelm.plugin.mjs'),
+				`export default {
+  id: '${id}',
+  label: '${id}',
+  async board() {
+    globalThis.__helmPlugOne ??= [];
+    globalThis.__helmPlugOne.push('${id}');
+    return { plugin: '${id}', title: '${id}', columns: [], rows: [] };
+  }
+};
+`,
+			);
+		}
+		const loaded: LoadedManifest = {
+			manifestPath: path.join(root, 'localhelm.fleet.json'),
+			workspaceRoot: root,
+			manifest: {
+				workspaceRoot: '.',
+				projects: [
+					{ id: 'alpha', path: 'alpha' },
+					{ id: 'beta', path: 'beta' },
+				],
+			},
+		};
+		const one = await loadPluginBoard(loaded, 'beta');
+		assert.deepEqual(one.boards.map((board) => board.plugin), ['beta']);
+		assert.deepEqual(g.__helmPlugOne, ['beta']);
 	});
 
 	it('reads write ids from a plugin plan and ignores already-current rows', () => {

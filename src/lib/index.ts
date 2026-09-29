@@ -104,7 +104,7 @@ export {
 	shipUnchanged,
 } from './landShips.js';
 export type { LandShipRecord, LandShipsFile } from './landShips.js';
-export { asPluginBoards, boardsForPlugins, loadPluginDashboard, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
+export { asPluginBoards, boardsForPlugins, loadPluginBoard, loadPluginDashboard, loadPlugins, pluginTab, requirePlugin } from './plugin.js';
 export type { PluginListing } from './plugin.js';
 export {
 	isPluginEnabled,
@@ -118,6 +118,7 @@ export {
 	isCoreTab,
 	isPortsPluginTab,
 	parseDashboardTab,
+	replacePluginBoards,
 	pluginTabCount,
 	pluginTabIcon,
 	pluginTabMetas,

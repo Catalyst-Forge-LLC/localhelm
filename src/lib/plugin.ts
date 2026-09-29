@@ -174,3 +174,20 @@ export async function loadPluginDashboard(loaded: LoadedManifest): Promise<{
 	const { boards, faults: boardFaults } = await boardsForPlugins(enabled);
 	return { plugins, boards, faults: [...loadFaults, ...boardFaults] };
 }
+
+/** One plugin's boards. A Stop or Land should not rescan every other board. */
+export async function loadPluginBoard(
+	loaded: LoadedManifest,
+	id: string,
+): Promise<{ boards: PluginBoard[]; faults: PluginLoadFault[] }> {
+	const { plugins: found, faults: loadFaults } = await readPluginModules(loaded);
+	const plug = found.find((row) => row.id === id);
+	if (!plug) {
+		const have = found.map((row) => row.id).join(', ') || 'none';
+		throw new Error(`plugin not loaded: ${id} (found ${have}). Enroll the project that has localhelm.plugin.mjs.`);
+	}
+	const prefs = await readPluginPrefs(loaded.workspaceRoot);
+	if (!isPluginEnabled(plug.id, prefs)) return { boards: [], faults: loadFaults };
+	const { boards, faults: boardFaults } = await boardsForPlugins([plug]);
+	return { boards, faults: [...loadFaults, ...boardFaults] };
+}

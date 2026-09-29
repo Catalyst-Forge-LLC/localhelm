@@ -1,12 +1,15 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { loadPluginDashboard, loadPlugins, setPluginEnabled } from '../../../../../src/lib/index.js';
+import { loadPluginBoard, loadPluginDashboard, loadPlugins, setPluginEnabled } from '../../../../../src/lib/index.js';
 import { errJson, loadRequired } from '$lib/server/helm';
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ url }) => {
 	try {
 		const loaded = await loadRequired();
-		return json(await loadPluginDashboard(loaded));
+		const id = url.searchParams.get('id')?.trim() ?? '';
+		if (!id) return json(await loadPluginDashboard(loaded));
+		if (!/^[a-z][a-z0-9-]*$/.test(id)) return errJson('bad plugin id');
+		return json(await loadPluginBoard(loaded, id));
 	} catch (err) {
 		return errJson(err);
 	}

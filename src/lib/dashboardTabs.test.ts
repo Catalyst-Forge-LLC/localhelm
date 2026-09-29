@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
 	canonicalizeTab,
+	replacePluginBoards,
 	isPortsPluginTab,
 	parseDashboardTab,
 	pluginTabCount,
@@ -18,6 +19,18 @@ describe('dashboardTabs', () => {
 		assert.equal(parseDashboardTab('today'), 'today');
 		assert.equal(parseDashboardTab('Not A Tab'), null);
 		assert.equal(canonicalizeTab('sites'), 'filepress');
+		assert.deepEqual(
+			replacePluginBoards(
+				[
+					{ plugin: 'filepress', title: 'Sites' },
+					{ plugin: 'localslip', title: 'Leases' },
+					{ plugin: 'xfacts', title: 'Labels' },
+				],
+				'localslip',
+				[{ plugin: 'localslip', title: 'Leases' }],
+			).map((board) => board.plugin),
+			['filepress', 'xfacts', 'localslip'],
+		);
 		assert.equal(isPortsPluginTab('ports'), true);
 		assert.equal(isPortsPluginTab('localslip'), true);
 		assert.equal(isPortsPluginTab('filepress'), false);
