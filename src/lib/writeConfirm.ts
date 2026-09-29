@@ -21,6 +21,8 @@ export type ConfirmOffer = {
 	draftHint?: string;
 	altLabel?: string;
 	itemPhases?: ConfirmPhase[];
+	/** Optional confirm checkbox. Off unless the operator ticks it. */
+	extraCheck?: { label: string; hint: string };
 	run?: (includedIds: string[]) => void;
 	alt?: (includedIds: string[]) => void;
 	oncancel?: () => void;

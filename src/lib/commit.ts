@@ -6,6 +6,10 @@ export function helmRetargetMessage(pkg: string, version: string): string {
 	return `Helm: retarget ${pkg} to ${version}.`;
 }
 
+export function helmUpdateMessage(pkg: string, version: string): string {
+	return `Helm: update ${pkg} to ${version}.`;
+}
+
 export function helmBumpMessage(pkg: string, version: string): string {
 	return `Helm: bump ${pkg} to ${version}.`;
 }

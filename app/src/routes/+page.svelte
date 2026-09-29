@@ -168,6 +168,9 @@
 	let confirmExcluded = $state<string[]>([]);
 	let confirmRun = $state<((includedIds: string[]) => void) | null>(null);
 	let confirmAltLabel = $state('');
+	let confirmExtraLabel = $state('');
+	let confirmExtraHint = $state('');
+	let confirmExtraOn = $state(false);
 	let confirmAlt = $state<((includedIds: string[]) => void) | null>(null);
 	let confirmOnCancel = $state<(() => void) | null>(null);
 	let jobCancel = $state(false);
@@ -780,6 +783,9 @@
 		confirmRun = null;
 		confirmAltLabel = '';
 		confirmAlt = null;
+		confirmExtraLabel = '';
+		confirmExtraHint = '';
+		confirmExtraOn = false;
 		error = '';
 		confirmOpen = true;
 	}
@@ -1387,6 +1393,7 @@
 		diffs?: Record<string, string>;
 		draftHint?: string;
 		altLabel?: string;
+		extraCheck?: { label: string; hint: string };
 		itemPhases?: ConfirmPhase[];
 		run?: (includedIds: string[]) => void;
 		alt?: (includedIds: string[]) => void;
@@ -1422,6 +1429,9 @@
 		confirmRun = spec.canApply && spec.run ? spec.run : null;
 		confirmAltLabel = spec.altLabel ?? '';
 		confirmAlt = spec.canApply && spec.alt ? spec.alt : null;
+		confirmExtraLabel = spec.extraCheck?.label ?? '';
+		confirmExtraHint = spec.extraCheck?.hint ?? '';
+		confirmExtraOn = false;
 		confirmOnCancel = spec.oncancel ?? null;
 		confirmOpen = true;
 	}
@@ -1501,6 +1511,7 @@
 			lastPublishPlan = rows;
 		},
 		inventory: () => inventory,
+		confirmUpdateDeps: () => confirmExtraOn,
 		publishOtp: () => publishOtp,
 		setPublishOtp: (otp) => {
 			publishOtp = otp;
@@ -3604,6 +3615,9 @@
 	applyIds={confirmWriteIds}
 	bind:excludedIds={confirmExcluded}
 	altLabel={confirmAltLabel}
+	extraLabel={confirmExtraLabel}
+	extraHint={confirmExtraHint}
+	bind:extraChecked={confirmExtraOn}
 	onconfirm={(included) => {
 		const fn = confirmRun;
 		confirmRun = null;

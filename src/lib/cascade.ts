@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { commitPaths, helmRetargetMessage } from './commit.js';
+import { commitPaths, helmRetargetMessage, helmUpdateMessage } from './commit.js';
 import { fleetDeps } from './deps.js';
 import type { LoadedManifest } from './manifest.js';
 import { npmHasVersion, npmLatest } from './npm.js';
@@ -20,7 +20,7 @@ export type CascadeRow = {
 	name: string;
 	fromSpec: string;
 	toSpec: string | null;
-	action: 'retarget' | 'skip';
+	action: 'retarget' | 'refresh' | 'skip';
 	reason?: string;
 	writes?: boolean;
 	committed?: boolean;
@@ -98,6 +98,8 @@ export async function planCascade(
 	opts: {
 		to?: string;
 		commit?: boolean;
+		/** Also refresh lockfiles whose range already allows `to`. */
+		refresh?: boolean;
 		confirmTo?: (name: string, version: string) => Promise<boolean>;
 	} = {},
 ): Promise<CascadePlan> {
@@ -160,7 +162,11 @@ export async function planCascade(
 			continue;
 		}
 		if (rangeCovers(pin.spec, target.to)) {
-			rows.push({ ...base, action: 'skip', reason: `already covers ${target.to}` });
+			if (opts.refresh) {
+				rows.push({ ...base, action: 'refresh', reason: `refresh lockfile to ${target.to}` });
+			} else {
+				rows.push({ ...base, action: 'skip', reason: `already covers ${target.to}` });
+			}
 			continue;
 		}
 		rows.push({ ...base, action: 'retarget' });
@@ -182,11 +188,12 @@ export async function planCascade(
 }
 
 export async function applyCascade(plan: CascadePlan): Promise<CascadeApplyResult> {
-	const writable = plan.rows.filter((row) => row.action === 'retarget');
+	const writable = plan.rows.filter((row) => row.action === 'retarget' || row.action === 'refresh');
 	if (writable.length === 0) return { ...plan, writes: false };
 
 	const byFile = new Map<string, CascadeRow[]>();
 	for (const row of writable) {
+		if (row.action !== 'retarget') continue;
 		const list = byFile.get(row.file) ?? [];
 		list.push(row);
 		byFile.set(row.file, list);
@@ -217,15 +224,41 @@ export async function applyCascade(plan: CascadePlan): Promise<CascadeApplyResul
 			}
 			continue;
 		}
-		const installed = runPnpm(lockRoot, ['install', '--lockfile-only']);
-		if (!installed.ok) {
-			for (const row of group) row.reason = `lockfile: ${installed.stderr}`;
-			continue;
+		const retargets = group.filter((row) => row.action === 'retarget');
+		const refreshes = group.filter((row) => row.action === 'refresh');
+		if (retargets.length) {
+			const installed = runPnpm(lockRoot, ['install', '--lockfile-only']);
+			if (!installed.ok) {
+				for (const row of retargets) row.reason = `lockfile: ${installed.stderr}`;
+			} else {
+				const lockText = await readFile(lockFile, 'utf8');
+				for (const row of retargets) {
+					if (!lockResolves(lockText, row.name, plan.to)) {
+						row.reason = `lockfile did not resolve ${row.name}@${plan.to}`;
+					}
+				}
+			}
 		}
-		const lockText = await readFile(lockFile, 'utf8');
-		for (const row of group) {
-			if (!lockResolves(lockText, row.name, plan.to)) {
-				row.reason = `lockfile did not resolve ${row.name}@${plan.to}`;
+		if (refreshes.length) {
+			const before = await readFile(lockFile, 'utf8');
+			const names = [...new Set(refreshes.map((row) => row.name))];
+			const updated = runPnpm(lockRoot, ['update', ...names, '--lockfile-only']);
+			if (!updated.ok) {
+				for (const row of refreshes) row.reason = `lockfile: ${updated.stderr}`;
+				continue;
+			}
+			const after = await readFile(lockFile, 'utf8');
+			for (const row of refreshes) {
+				if (!lockResolves(after, row.name, plan.to)) {
+					row.writes = false;
+					row.reason = `lockfile did not resolve ${row.name}@${plan.to}`;
+				} else if (after === before) {
+					row.writes = false;
+					row.reason = `already resolves ${plan.to}`;
+				} else {
+					row.writes = true;
+					row.reason = `updated lockfile to ${plan.to}`;
+				}
 			}
 		}
 	}
@@ -235,14 +268,16 @@ export async function applyCascade(plan: CascadePlan): Promise<CascadeApplyResul
 		for (const row of writable) {
 			if (!row.writes) continue;
 			const entry = byRepo.get(row.projectAbs) ?? { files: new Set<string>(), rows: [] };
-			entry.files.add(row.file);
+			if (row.action === 'retarget') entry.files.add(row.file);
 			const lockFile = path.join(row.lockRoot, 'pnpm-lock.yaml');
 			if (await pathExists(lockFile)) entry.files.add(lockFile);
 			entry.rows.push(row);
 			byRepo.set(row.projectAbs, entry);
 		}
-		const message = helmRetargetMessage(plan.npm, plan.to);
 		for (const [repo, entry] of byRepo) {
+			const message = entry.rows.every((row) => row.action === 'refresh')
+				? helmUpdateMessage(plan.npm, plan.to)
+				: helmRetargetMessage(plan.npm, plan.to);
 			const result = commitPaths(repo, [...entry.files], message);
 			for (const row of entry.rows) {
 				if (result.ok) row.committed = true;

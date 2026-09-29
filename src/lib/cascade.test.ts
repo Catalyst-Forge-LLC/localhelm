@@ -158,6 +158,21 @@ describe('cascade plan/apply', () => {
 		assert.equal(byId['site-link']?.action, 'skip');
 		assert.match(byId['site-link']?.reason ?? '', /local link/);
 
+		const covered = await planCascade(loaded, 'press', {
+			to: '0.1.9',
+			commit: false,
+			confirmTo: async () => true,
+		});
+		assert.equal(covered.rows.find((row) => row.fromId === 'site-clean')?.action, 'skip');
+		const refresh = await planCascade(loaded, 'press', {
+			to: '0.1.9',
+			commit: false,
+			refresh: true,
+			confirmTo: async () => true,
+		});
+		assert.equal(refresh.rows.find((row) => row.fromId === 'site-clean')?.action, 'refresh');
+		assert.equal(refresh.rows.find((row) => row.fromId === 'site-dirty')?.action, 'skip');
+
 		const applied = await applyCascade({ ...plan, commit: false });
 		assert.equal(applied.writes, true);
 		const { readFile } = await import('node:fs/promises');

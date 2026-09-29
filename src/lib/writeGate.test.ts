@@ -35,6 +35,7 @@ import {
 	writableCascadeCount,
 	type PublishGateRow,
 } from './writeGate.js';
+import { depUpdateProjectIds, globalDepUpdateCheck } from './fleetWrites.js';
 
 function git(partial: Partial<PublishGateRow['git']> = {}): PublishGateRow['git'] {
 	return {
@@ -313,6 +314,45 @@ describe('fleetWriteIds', () => {
 	it('offers Commit first when the tree is dirty', () => {
 		assert.deepEqual(fleetWriteIds(row({ git: git({ dirty: true }) })), ['commit']);
 		assert.equal(fleetWriteLabel('commit', row({ git: git({ dirty: true }) })), 'Commit');
+	});
+});
+
+describe('globalDepUpdateCheck', () => {
+	const projects = [
+		{ id: 'lib', missing: false, git: { dirty: false }, pins: [] },
+		{
+			id: 'site',
+			missing: false,
+			git: { dirty: false },
+			pins: [{ targetId: 'lib', kind: 'registry', spec: '0.1.40' }],
+		},
+		{
+			id: 'covered',
+			missing: false,
+			git: { dirty: false },
+			pins: [{ targetId: 'lib', kind: 'registry', spec: '^0.1.40' }],
+		},
+		{
+			id: 'dirty-site',
+			missing: false,
+			git: { dirty: true },
+			pins: [{ targetId: 'lib', kind: 'registry', spec: '0.1.40' }],
+		},
+		{
+			id: 'linked',
+			missing: false,
+			git: { dirty: false },
+			pins: [{ targetId: 'lib', kind: 'link', spec: 'link:../lib' }],
+		},
+	];
+
+	it('lists clean projects that depend on the package', () => {
+		assert.deepEqual(depUpdateProjectIds('lib', '0.1.47', projects), ['site', 'covered']);
+		const offer = globalDepUpdateCheck([{ id: 'lib', npm: 'getfilepress', version: '0.1.47' }], projects);
+		assert.match(offer?.label ?? '', /Also update 2 projects that depend on getfilepress/);
+		assert.match(offer?.hint ?? '', /site, covered/);
+		assert.match(offer?.hint ?? '', /Dirty trees are skipped/);
+		assert.equal(globalDepUpdateCheck([{ id: 'other', npm: 'other', version: '1.0.0' }], projects), null);
 	});
 });
 

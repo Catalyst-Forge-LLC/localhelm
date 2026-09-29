@@ -10,12 +10,14 @@ export const POST: RequestHandler = async ({ request }) => {
 			to?: string;
 			apply?: boolean;
 			commit?: boolean;
+			refresh?: boolean;
 		};
 		if (!body.id) return errJson('id required');
 		const loaded = await loadRequired();
 		const plan = await planCascade(loaded, body.id, {
 			to: body.to,
 			commit: body.commit !== false,
+			refresh: body.refresh === true,
 		});
 		if (!body.apply) return json({ ...plan, writes: false });
 		return json(await withLockAt(loaded.workspaceRoot, () => applyCascade(plan)));

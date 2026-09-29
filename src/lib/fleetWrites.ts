@@ -246,6 +246,53 @@ type CascadeConsumer = {
 	pins: Array<{ targetId?: string; kind: string; onLatest?: boolean }>;
 };
 
+/** Clean projects whose registry pin does not already allow `version`. Dirty trees are left out. */
+export function depUpdateProjectIds(
+	publisherId: string,
+	version: string,
+	projects: Array<CascadeConsumer & { pins: Array<{ targetId?: string; kind: string; spec?: string }> }>,
+): string[] {
+	const ids: string[] = [];
+	for (const consumer of projects) {
+		if (consumer.id === publisherId) continue;
+		if (consumer.missing || consumer.git.dirty || consumer.git.busy) continue;
+		const needs = consumer.pins.some(
+			(pin) => pin.targetId === publisherId && pin.kind === 'registry' && Boolean(pin.spec),
+		);
+		if (needs) ids.push(consumer.id);
+	}
+	return ids;
+}
+
+export function globalDepUpdateCheck(
+	installs: Array<{ id: string; npm?: string; version: string | null }>,
+	projects: Array<CascadeConsumer & { pins: Array<{ targetId?: string; kind: string; spec?: string }> }>,
+): { label: string; hint: string } | null {
+	const touched: { name: string; ids: string[] }[] = [];
+	for (const row of installs) {
+		if (!row.version) continue;
+		const ids = depUpdateProjectIds(row.id, row.version, projects);
+		if (!ids.length) continue;
+		touched.push({ name: row.npm ?? row.id, ids });
+	}
+	const total = touched.reduce((sum, row) => sum + row.ids.length, 0);
+	if (!total) return null;
+	const noun = total === 1 ? 'project' : 'projects';
+	const verb = total === 1 ? 'depends' : 'depend';
+	const who = touched.length === 1 ? touched[0].name : 'these packages';
+	const listed =
+		touched.length === 1
+			? touched[0].ids.join(', ')
+			: touched.map((row) => `${row.name} (${row.ids.join(', ')})`).join(' · ');
+	return {
+		label: `Also update ${total} ${noun} that ${verb} on ${who}`,
+		hint:
+			listed.length <= 180
+				? `${listed}. Writes pins and lockfiles, then commits those files. A range that already allows this version only refreshes the lockfile. Dirty trees are skipped.`
+				: 'Writes pins and lockfiles, then commits those files. A range that already allows this version only refreshes the lockfile. Dirty trees are skipped.',
+	};
+}
+
 /** Registry pins the cascade plan would actually retarget (clean consumer, not link:/file:). */
 export function writableCascadeCount(publisherId: string, projects: CascadeConsumer[]): number {
 	let n = 0;

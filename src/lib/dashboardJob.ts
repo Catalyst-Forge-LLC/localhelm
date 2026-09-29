@@ -68,6 +68,8 @@ export type DashboardJobHost = {
 	lastPublishPlan(): PublishRow[];
 	setLastPublishPlan(rows: PublishRow[]): void;
 	inventory(): Inventory | null;
+	/** True when the confirm's extra checkbox is ticked. */
+	confirmUpdateDeps(): boolean;
 	publishOtp(): string;
 	setPublishOtp(otp: string): void;
 	setNpmUser(user: string | null): void;

@@ -5,6 +5,7 @@ import { bulkProgressLabel } from './bulkProgress.js';
 import { applyConfirmStep, commitDraftProgressHint, markConfirmKey } from './confirmProgress.js';
 import type { DashboardJobHost } from './dashboardJob.js';
 import type { BumpKind, BumpPlan, GitRow, GlobalInstallRow, PublishRow, ScriptShipRow } from './dashboardTypes.js';
+import { globalDepUpdateCheck } from './fleetWrites.js';
 import { formatPluginPlanLines } from './pluginPlan.js';
 import { publishNeedsGithub, publishNeedsNpm } from './publishDisplay.js';
 import {
@@ -473,7 +474,18 @@ export function createFleetWrites(host: DashboardJobHost) {
 		});
 	}
 
-	function offerNpmWait(rows: GlobalInstallRow[], versions?: Record<string, string>): void {
+	function depCheck(
+		rows: Array<{ id: string; npm?: string; version: string | null }>,
+	): { label: string; hint: string } | undefined {
+		const projects = host.inventory()?.projects ?? [];
+		return globalDepUpdateCheck(rows, projects) ?? undefined;
+	}
+
+	function offerNpmWait(
+		rows: GlobalInstallRow[],
+		versions?: Record<string, string>,
+		updateDeps?: boolean,
+	): void {
 		const ids = rows.map((row) => row.id);
 		host.offerConfirm({
 			title: npmNotReadyTitle(rows),
@@ -484,8 +496,8 @@ export function createFleetWrites(host: DashboardJobHost) {
 			altLabel: 'Try again',
 			canApply: true,
 			applyIds: ids,
-			run: (included) => void applyGlobal(included, versions, { wait: true }),
-			alt: (included) => void applyGlobal(included, versions),
+			run: (included) => void applyGlobal(included, versions, { wait: true, updateDeps }),
+			alt: (included) => void applyGlobal(included, versions, { updateDeps }),
 		});
 	}
 
@@ -532,10 +544,12 @@ export function createFleetWrites(host: DashboardJobHost) {
 							: `Install ${eligible.length} globally`,
 					canApply: eligible.length > 0,
 					applyIds: eligible.map((row) => row.id),
+					extraCheck: depCheck(eligible),
 					run: (included) =>
 						void applyGlobal(
 							eligible.map((row) => row.id).filter((id) => included.includes(id)),
 							versions,
+							{ updateDeps: host.confirmUpdateDeps() },
 						),
 				});
 			},
@@ -546,9 +560,10 @@ export function createFleetWrites(host: DashboardJobHost) {
 	async function applyGlobal(
 		ids: string[],
 		versions?: Record<string, string>,
-		opts?: { wait?: boolean },
+		opts?: { wait?: boolean; updateDeps?: boolean },
 	): Promise<void> {
 		const wait = Boolean(opts?.wait);
+		const updateDeps = Boolean(opts?.updateDeps);
 		const verb = wait ? 'Waiting for npm' : 'installing global';
 		await host.run(
 			wait && ids.length === 1 ? 'Waiting for npm…' : bulkProgressLabel(verb, 1, ids.length, ids[0]),
@@ -582,11 +597,26 @@ export function createFleetWrites(host: DashboardJobHost) {
 				);
 				await host.reloadAfterWrite(ids, 'ready');
 				if (waiting.length) {
-					offerNpmWait(waiting, versions);
+					offerNpmWait(waiting, versions, updateDeps);
 					return;
 				}
 				if (failed.length) {
 					host.setError(failed.map((r) => `${r.id}: ${r.reason ?? 'install failed'}`).join(' · '));
+				}
+				const installed = eligible.filter((row) => row.reason?.startsWith('installed global ') && row.version);
+				if (updateDeps && installed.length) {
+					const problems: string[] = [];
+					for (const row of installed) {
+						try {
+							await updateDependents(row.id, row.version as string);
+						} catch (err) {
+							problems.push(`${row.npm ?? row.id}: ${err instanceof Error ? err.message : String(err)}`);
+						}
+					}
+					if (problems.length) {
+						const prior = failed.length ? host.error() : '';
+						host.setError([prior, problems.join(' · ')].filter(Boolean).join(' · '));
+					}
 				}
 				host.setConfirmOpen(false);
 			},
@@ -659,7 +689,8 @@ export function createFleetWrites(host: DashboardJobHost) {
 						: `Install ${installable.length} globally`,
 				canApply: true,
 				applyIds: installable.map((row) => row.id),
-				run: (included) => void applyGlobal(included, versions),
+				extraCheck: depCheck(installable),
+				run: (included) => void applyGlobal(included, versions, { updateDeps: host.confirmUpdateDeps() }),
 			});
 			return;
 		}
@@ -694,6 +725,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 					: `Install ${installable.length} globally`
 				: 'OK',
 			canApply: offerInstall,
+			extraCheck: offerInstall ? depCheck(installable) : undefined,
 			oncancel: () => host.clearPublishBatch(),
 			run: offerInstall
 				? () => {
@@ -701,6 +733,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 						void applyGlobal(
 							installable.map((row) => row.id),
 							versions,
+							{ updateDeps: host.confirmUpdateDeps() },
 						);
 					}
 				: undefined,
@@ -868,6 +901,27 @@ export function createFleetWrites(host: DashboardJobHost) {
 			},
 			planOpts('Cascade', [id]),
 		);
+	}
+
+	async function updateDependents(id: string, to: string): Promise<void> {
+		host.setBusy(`updating dependents of ${id}`);
+		const data = (await host.call('/api/cascade', {
+			method: 'POST',
+			body: JSON.stringify({ id, to, apply: true, refresh: true }),
+		})) as {
+			npm: string;
+			to: string;
+			rows: { action: string; writes?: boolean; fromId: string; reason?: string }[];
+		};
+		const wrote = data.rows.filter((row) => row.writes);
+		const skipped = data.rows.length - wrote.length;
+		host.note(
+			wrote.length
+				? `updated ${wrote.length} dependent${wrote.length === 1 ? '' : 's'} of ${data.npm}@${data.to}${skipped ? `, ${skipped} skipped` : ''}`
+				: `no pin updates for ${data.npm}@${data.to}`,
+			data,
+		);
+		await host.reloadAfterWrite([...new Set([id, ...wrote.map((row) => row.fromId)])], 'ready');
 	}
 
 	async function applyCascade(id: string): Promise<void> {

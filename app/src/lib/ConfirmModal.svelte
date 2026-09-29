@@ -39,6 +39,9 @@
 		ondraft?: (id: string) => void;
 		onmessagechange?: (id: string, text: string) => void;
 		altLabel?: string;
+		extraLabel?: string;
+		extraHint?: string;
+		extraChecked?: boolean;
 		/** Multi-id apply is running; Stop finishes the current item and skips the rest. */
 		canStop?: boolean;
 		stopping?: boolean;
@@ -74,6 +77,9 @@
 		ondraft,
 		onmessagechange,
 		altLabel = '',
+		extraLabel = '',
+		extraHint = '',
+		extraChecked = $bindable(false),
 		canStop = false,
 		stopping = false,
 	}: Props = $props();
@@ -428,6 +434,15 @@
 					ondraft?.(draftId);
 				}}
 			></textarea>
+		{/if}
+		{#if extraLabel}
+			<label class="extra-check">
+				<input type="checkbox" bind:checked={extraChecked} disabled={busy} />
+				<span>
+					<span class="extra-label">{extraLabel}</span>
+					{#if extraHint}<span class="extra-hint">{extraHint}</span>{/if}
+				</span>
+			</label>
 		{/if}
 		<div class="actions">
 			<button
@@ -829,6 +844,30 @@
 		margin-top: 0.75rem;
 		min-width: 0;
 		overflow-wrap: anywhere;
+	}
+
+	.extra-check {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.55rem;
+		margin-top: 0.85rem;
+		cursor: pointer;
+	}
+
+	.extra-check input {
+		margin-top: 0.2rem;
+	}
+
+	.extra-label {
+		display: block;
+		font-size: 0.92rem;
+	}
+
+	.extra-hint {
+		display: block;
+		margin-top: 0.15rem;
+		color: var(--dim);
+		font-size: 0.78rem;
 	}
 
 	.draft {
