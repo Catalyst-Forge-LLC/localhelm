@@ -126,6 +126,8 @@ describe('pluginJobHint', () => {
 		assert.equal(pluginJobHint('filepress', 'push', ['a'], ['a']), 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.');
 		assert.match(pluginJobHint('xfacts', 'ship', ['a'], ['a']), /Not FilePress Land/);
 		assert.match(pluginJobHint('xfacts', 'check', ['a'], null), /app, feature, skill, tool, agent, and model/);
+		assert.match(pluginJobHint('localslip', 'stop', ['coldeye-site'], null), /stops the process tree/);
+		assert.doesNotMatch(pluginJobHint('localslip', 'stop', ['coldeye-site'], null), /Nothing is written/);
 	});
 });
 
@@ -138,5 +140,13 @@ describe('firstPlanReason / planOpts', () => {
 			openConfirm: { title: 'Push', itemKeys: ['helm'] },
 		});
 		assert.deepEqual(planOpts('Pull'), { closeConfirm: false, openConfirm: { title: 'Pull' } });
+		assert.deepEqual(planOpts('Stop', ['coldeye-site'], 'LocalSlip stops the process tree on this lease.'), {
+			closeConfirm: false,
+			openConfirm: {
+				title: 'Stop',
+				hint: 'LocalSlip stops the process tree on this lease.',
+				itemKeys: ['coldeye-site'],
+			},
+		});
 	});
 });

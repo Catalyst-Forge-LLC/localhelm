@@ -34,11 +34,19 @@ export type JobRunOpts = {
 export function planOpts(
 	title: string,
 	itemKeys?: string[],
+	hint?: string,
 ): {
 	closeConfirm: false;
-	openConfirm: { title: string; itemKeys?: string[] };
+	openConfirm: { title: string; hint?: string; itemKeys?: string[] };
 } {
-	return { closeConfirm: false, openConfirm: { title, ...(itemKeys?.length ? { itemKeys } : {}) } };
+	return {
+		closeConfirm: false,
+		openConfirm: {
+			title,
+			...(hint ? { hint } : {}),
+			...(itemKeys?.length ? { itemKeys } : {}),
+		},
+	};
 }
 
 export type CommitPlanFile = { path: string; from?: string; code: string; skip?: string };
