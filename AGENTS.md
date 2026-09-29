@@ -6,14 +6,14 @@
 
 # Agent instructions for this repo
 
-This repository uses **ForgeTrail Lite**. Full protocol: `.forgetrail/FORGETRAIL_LITE.md`. Current phase: `.forgetrail/workflow_tracking.json → currentPhase`.
+This repository uses **ForgeTrail**. The record is `appledger/`: the phase in `profiles/forgetrail.yaml`, and decisions and the session in `records/`.
 
 ## Non-negotiables
 
 - **Phase gates:** wait for explicit user approval before advancing `currentPhase`.
 - **Phase 1 before code:** do not write project code until `docs/PHASE_1_BRIEF.md` is **locked** and the operator says to start the spine.
 - **Phase 2 = full runnable spine** in one pass (M1: scan folders → confirm enroll, status, deps, JSON).
-- **Log decisions** in `.forgetrail/workflow_tracking.json → decisions[]`.
+- **Log decisions** as decision records in `appledger/records/`.
 - **Git commits:** plain `-m` or `-F` only.
 - **Lists:** numbered = order; bullets = parallel; letters = pick-one.
 - **No interactive CLIs** without every flag.
@@ -30,5 +30,5 @@ This repository uses **ForgeTrail Lite**. Full protocol: `.forgetrail/FORGETRAIL
 
 ## Session start
 
-1. Read `.forgetrail/workflow_tracking.json`, `CONTEXT_PROMPT.md`, and `docs/PHASE_1_BRIEF.md`.
+1. Read `appledger/profiles/forgetrail.yaml`, the latest session record, `CONTEXT_PROMPT.md`, and `docs/PHASE_1_BRIEF.md`.
 2. If Phase 1 is not locked, do not scaffold.
