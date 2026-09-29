@@ -905,10 +905,21 @@ export function createFleetWrites(host: DashboardJobHost) {
 
 	async function updateDependents(id: string, to: string): Promise<void> {
 		host.setBusy(`updating dependents of ${id}`);
-		const data = (await host.call('/api/cascade', {
-			method: 'POST',
-			body: JSON.stringify({ id, to, apply: true, refresh: true }),
-		})) as {
+		const data = (await host.callNdjson(
+			'/api/cascade',
+			{
+				method: 'POST',
+				body: JSON.stringify({ id, to, apply: true, refresh: true, progress: true }),
+			},
+			(event) => {
+				if (event.type !== 'project' || event.status !== 'start') return;
+				const index = Number(event.index);
+				const total = Number(event.total);
+				const name = String(event.id ?? '');
+				if (!Number.isInteger(index) || !Number.isInteger(total) || total < 1) return;
+				host.setBusy(name ? `updating dependents ${index}/${total} · ${name}` : `updating dependents ${index}/${total}`);
+			},
+		)) as {
 			npm: string;
 			to: string;
 			rows: { action: string; writes?: boolean; fromId: string; reason?: string }[];

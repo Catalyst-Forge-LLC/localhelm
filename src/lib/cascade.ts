@@ -187,9 +187,36 @@ export async function planCascade(
 	return plan;
 }
 
-export async function applyCascade(plan: CascadePlan): Promise<CascadeApplyResult> {
+export type CascadeProjectProgress = {
+	index: number;
+	total: number;
+	id: string;
+	status: 'start' | 'done';
+};
+
+export async function applyCascade(
+	plan: CascadePlan,
+	opts: { onProject?: (event: CascadeProjectProgress) => void } = {},
+): Promise<CascadeApplyResult> {
 	const writable = plan.rows.filter((row) => row.action === 'retarget' || row.action === 'refresh');
 	if (writable.length === 0) return { ...plan, writes: false };
+
+	const ids = [...new Set(writable.map((row) => row.fromId))];
+	for (let i = 0; i < ids.length; i++) {
+		const id = ids[i] ?? '';
+		opts.onProject?.({ index: i + 1, total: ids.length, id, status: 'start' });
+		await applyCascadeRows(
+			plan,
+			writable.filter((row) => row.fromId === id),
+		);
+		opts.onProject?.({ index: i + 1, total: ids.length, id, status: 'done' });
+	}
+
+	return { ...plan, writes: writable.some((row) => row.writes) };
+}
+
+async function applyCascadeRows(plan: CascadePlan, writable: CascadeRow[]): Promise<void> {
+	if (writable.length === 0) return;
 
 	const byFile = new Map<string, CascadeRow[]>();
 	for (const row of writable) {
@@ -285,6 +312,4 @@ export async function applyCascade(plan: CascadePlan): Promise<CascadeApplyResul
 			}
 		}
 	}
-
-	return { ...plan, writes: writable.some((row) => row.writes) };
 }

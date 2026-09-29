@@ -173,7 +173,16 @@ describe('cascade plan/apply', () => {
 		assert.equal(refresh.rows.find((row) => row.fromId === 'site-clean')?.action, 'refresh');
 		assert.equal(refresh.rows.find((row) => row.fromId === 'site-dirty')?.action, 'skip');
 
-		const applied = await applyCascade({ ...plan, commit: false });
+		const seen: string[] = [];
+		const applied = await applyCascade(
+			{ ...plan, commit: false },
+			{
+				onProject: (event) => {
+					if (event.status === 'start') seen.push(`${event.index}/${event.total} ${event.id}`);
+				},
+			},
+		);
+		assert.deepEqual(seen, ['1/1 site-clean']);
 		assert.equal(applied.writes, true);
 		const { readFile } = await import('node:fs/promises');
 		const cleanPkg = await readFile(path.join(clean, 'package.json'), 'utf8');
