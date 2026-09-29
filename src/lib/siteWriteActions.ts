@@ -18,7 +18,17 @@ import {
 import { isJobCancelled } from './jobCancel.js';
 import { formatPluginPlanLines, pluginPlanLineKeys, pluginPlanWriteIds } from './pluginPlan.js';
 import { landPluginApplyOk } from './writeGate.js';
-import { planOpts, pluginJobHint } from './writeConfirm.js';
+import { checkResultFollowUp, planOpts, pluginJobHint } from './writeConfirm.js';
+
+function pluginApplyDetail(data: unknown, id: string): { ok: boolean; detail: string } {
+	const rows =
+		data && typeof data === 'object' && Array.isArray((data as { rows?: unknown }).rows)
+			? (data as { rows: { id?: string; ok?: boolean; detail?: string }[] }).rows
+			: [];
+	const row = rows.find((item) => item.id === id) ?? rows[0];
+	const detail = typeof row?.detail === 'string' && row.detail.trim() ? row.detail.trim() : 'checked';
+	return { ok: row?.ok !== false, detail };
+}
 
 type LandPlanBody = {
 	siteId: string;
@@ -92,6 +102,10 @@ export function createSiteWrites(host: DashboardJobHost) {
 	}
 
 	async function applyPluginJob(plugin: string, action: string, ids: string[]): Promise<void> {
+		if (plugin === 'xfacts' && action === 'check') {
+			await applyXfactsCheck(ids);
+			return;
+		}
 		await host.run(bulkProgressLabel(`${plugin} ${action}`, 1, ids.length, ids[0]), async () => {
 			try {
 				await applyPluginItems(plugin, action, ids);
@@ -99,6 +113,73 @@ export function createSiteWrites(host: DashboardJobHost) {
 				host.setBusy('reading Sites and Ports');
 				await host.loadPluginBoards();
 			}
+		});
+	}
+
+	async function applyXfactsCheck(ids: string[]): Promise<void> {
+		const results: { id: string; ok: boolean; detail: string }[] = [];
+		await host.run(
+			bulkProgressLabel('xfacts check', 1, ids.length, ids[0]),
+			async () => {
+				await host.eachNamed('xfacts check', ids, async (id) => {
+					const data = await host.call('/api/plugin', {
+						method: 'POST',
+						body: JSON.stringify({ id: 'xfacts', action: 'check', ids: [id], apply: true }),
+					});
+					host.note(`xfacts check --apply ${id}`, data);
+					const row = pluginApplyDetail(data, id);
+					results.push({ id, ok: row.ok, detail: row.detail });
+					if (!row.ok) throw new Error(row.detail);
+				});
+				host.setError('');
+				offerXfactsCheckResults(results);
+			},
+			{ closeConfirm: false },
+		);
+	}
+
+	function offerXfactsCheckResults(results: { id: string; ok: boolean; detail: string }[]): void {
+		const failed = results.filter((row) => !row.ok);
+		const addIds = failed.filter((row) => checkResultFollowUp(row.detail).add).map((row) => row.id);
+		const updateIds = failed.filter((row) => checkResultFollowUp(row.detail).update).map((row) => row.id);
+		const both = addIds.length > 0 && updateIds.length > 0;
+		const primary = addIds.length ? addIds : updateIds;
+		const pool = [...new Set([...addIds, ...updateIds])];
+		const primaryAction = addIds.length ? 'refresh' : 'update';
+		const primaryLabel = addIds.length
+			? addIds.length === 1
+				? `Add labels ${addIds[0]}`
+				: `Add labels ${addIds.length}`
+			: updateIds.length === 1
+				? `Update ${updateIds[0]}`
+				: `Update ${updateIds.length}`;
+		const okCount = results.length - failed.length;
+		host.offerConfirm({
+			title: failed.length
+				? `${failed.length} of ${results.length} need a label`
+				: `Checked ${results.length}`,
+			hint: failed.length
+				? 'Results stay here. Add labels fills missing files and leaves an existing label. Update rewrites a stale AppFacts file from the repo scan, without a model.'
+				: `${okCount} passed.`,
+			items: results.map((row) => `${row.id}  ${row.ok ? 'ok' : row.detail}`),
+			itemKeys: results.map((row) => row.id),
+			itemPhases: results.map((row) => (row.ok ? 'done' : 'fail')),
+			applyIds: pool,
+			confirmLabel: primaryLabel,
+			canApply: primary.length > 0,
+			altLabel: both ? (updateIds.length === 1 ? `Update ${updateIds[0]}` : `Update ${updateIds.length}`) : '',
+			run: primary.length
+				? (included) => {
+						const ids = included.filter((id) => primary.includes(id));
+						if (ids.length) void applyPluginJob('xfacts', primaryAction, ids);
+					}
+				: undefined,
+			alt: both
+				? (included) => {
+						const ids = included.filter((id) => updateIds.includes(id));
+						if (ids.length) void applyPluginJob('xfacts', 'update', ids);
+					}
+				: undefined,
 		});
 	}
 

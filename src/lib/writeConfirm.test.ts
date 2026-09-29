@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
+	checkResultFollowUp,
 	dirtPlanLine,
 	firstPlanReason,
 	githubPendingRows,
@@ -87,6 +88,17 @@ describe('slimPublishRows', () => {
 		assert.deepEqual(slimPublishRows([{ id: 'helm', action: 'publish', version: '0.1.20', reason: 'published 0.1.20' }]), [
 			{ id: 'helm', action: 'publish', version: '0.1.20', reason: 'published 0.1.20' },
 		]);
+	});
+});
+
+describe('checkResultFollowUp', () => {
+	it('splits a missing register from a stale AppFacts file', () => {
+		assert.deepEqual(checkResultFollowUp('no .featurefacts/features.yaml'), { add: true, update: false });
+		assert.deepEqual(checkResultFollowUp('APP_FACTS.md is stale (file=abc, scan=def)'), { add: false, update: true });
+		assert.deepEqual(
+			checkResultFollowUp('FeatureFacts register is empty · No generated.inputs_fingerprint in APP_FACTS.md'),
+			{ add: true, update: true },
+		);
 	});
 });
 

@@ -154,6 +154,13 @@ export function firstPlanReason(data: unknown): string {
 	return typeof reason === 'string' ? reason : '';
 }
 
+/** Which follow-up a check detail can take. A row can need both. */
+export function checkResultFollowUp(detail: string): { add: boolean; update: boolean } {
+	const update = /inputs_fingerprint|is stale \(file=/i.test(detail);
+	const add = /no APP_FACTS\.md|no \.featurefacts\/features\.yaml|FeatureFacts register is empty|SKILL_FACTS\.md/i.test(detail);
+	return { add, update };
+}
+
 export function pluginJobHint(
 	plugin: string,
 	action: string,
