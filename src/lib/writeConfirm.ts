@@ -205,6 +205,9 @@ export function pluginJobHint(
 	if (action === 'push') {
 		return 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.';
 	}
+	if (plugin === 'xfacts' && action === 'check') {
+		return 'Reads each repo. Does not write. Confirm runs the schema checks and the AppFacts fingerprint. A missing or empty label fails.';
+	}
 	if (plugin === 'xfacts' && action === 'ship') {
 		return 'Runs pnpm ship in that repo (wrangler / Pages). Confirm to deploy. Not FilePress Land. Never --force.';
 	}

@@ -103,6 +103,7 @@ describe('pluginJobHint', () => {
 		assert.equal(pluginJobHint('filepress', 'sync', [], ['a']), 'Already current — nothing to write.');
 		assert.equal(pluginJobHint('filepress', 'push', ['a'], ['a']), 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.');
 		assert.match(pluginJobHint('xfacts', 'ship', ['a'], ['a']), /Not FilePress Land/);
+		assert.match(pluginJobHint('xfacts', 'check', ['a'], null), /Does not write/);
 	});
 });
 

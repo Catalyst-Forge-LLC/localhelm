@@ -2189,7 +2189,7 @@
 		if (board.plugin === 'xfacts') {
 			bits.push(
 				'This is the enrolled fleet, not a short shelf list. Hidden archived rows stay off.',
-				'Check rows like Fleet. Add labels runs the AppFacts generator for repos with no APP_FACTS.md. Refresh rewrites an existing label. Confirm in the modal.',
+				'Check reads labels and does not write. Confirm runs it. Add labels fills a missing AppFacts file, an empty FeatureFacts register, and missing SkillFacts. It leaves an existing label in place.',
 				'Ship runs that repo’s pnpm ship script (wrangler / Pages). Same job as Fleet Ship. Not FilePress Land.',
 			);
 		}
