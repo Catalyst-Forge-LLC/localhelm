@@ -229,12 +229,12 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Dirty repos get **Commit** on Today and Fleet (and a checked-row toolbar). The confirm lists files plus an editable fallback immediately. **ollanet** finds Ollama (network host first, this machine last; LAN only if needed) and replaces the text; otherwise the fallback stays. Confirm is git add + git commit only — no push. CLI: `localhelm commit <id>... [--message TEXT] [--apply]`.
 - Add projects lists folders A–Z, ignoring case, with nested folders under their parent. Default string sort put `FocusFreely` above `acmegeek`.
 - Needs you head has bulk Commit dirty / Publish / Push with counts, not only Publish.
-- xFacts labels lists the enrolled fleet (not a 13-name shelf). Check rows like Fleet; Add labels / Refresh creates or rewrites APP_FACTS.md. Ship appears when that repo has `scripts.ship`.
+- xFacts labels lists the enrolled fleet (not a 13-name shelf). Check validates label files and the AppFacts fingerprint. Add labels writes missing AppFacts, FeatureFacts, and SkillFacts and leaves an existing label in place. Ship appears when that repo has `scripts.ship`.
 
 ### Session 28 — 2026-09-05
 
 - xFacts table always shows app / tool / skill / agent / model. App cell is the product name (with `/v` when present). Helm no longer hides the app column. Skill/tool/agent/model stay empty until those `*_FACTS.md` files exist. “no label” only when the repo has no facts files.
-- Add labels / Refresh writes AppFacts and missing SkillFacts next to `SKILL.md` packs. Tool, agent, and model are not invented (no generators; ModelFacts is catalog-only).
+- Add labels writes a missing APP_FACTS.md without a model, fills a missing or empty FeatureFacts register, and writes missing SkillFacts next to `SKILL.md` packs. Tool, agent, and model are not invented (no generators; ModelFacts is catalog-only).
 
 ### Session 29 — 2026-09-09
 

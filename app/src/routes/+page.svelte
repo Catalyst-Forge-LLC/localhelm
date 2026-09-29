@@ -2786,10 +2786,10 @@
 								{@const ready = checkedSiteIds(board, act.id)}
 								{#if ready.length}
 									{@const icon = actionIcon(act)}
-									{@const bulkLabel = board.plugin === 'xfacts' && act.id === 'refresh' ? 'Add / refresh labels' : act.label}
+									{@const bulkLabel = board.plugin === 'xfacts' && act.id === 'refresh' ? 'Add labels' : act.label}
 									<Tooltip
 										title={board.plugin === 'xfacts' && act.id === 'refresh'
-											? 'Creates APP_FACTS.md when missing, or refreshes an existing label. Confirm in the modal.'
+											? 'Writes missing AppFacts, FeatureFacts, and SkillFacts. Leaves an existing label in place. Confirm in the modal.'
 											: `Shows what ${act.label.toLowerCase()} would do for the checked sites. Confirm in the modal.`}
 									>
 										<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startPluginJob(board.plugin, act.id, ready, bulkLabel)}>
