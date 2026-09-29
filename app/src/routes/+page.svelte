@@ -2868,7 +2868,7 @@
 												{/if}
 											</td>
 										{/each}
-										<td>
+										<td class="jobs">
 											<div class="bump">
 												{#if localHref}
 													<Tooltip title={`Open ${localHref}`}>

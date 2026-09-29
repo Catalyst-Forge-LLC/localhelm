@@ -1555,6 +1555,17 @@
 		align-items: center;
 	}
 
+	/* Plugin job buttons stay on one line so a row is not as tall as the stack. */
+	td.jobs {
+		width: 1%;
+		white-space: nowrap;
+		vertical-align: middle;
+	}
+
+	td.jobs .bump {
+		flex-wrap: nowrap;
+	}
+
 	.need-actions {
 		margin-left: 0;
 	}
