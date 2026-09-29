@@ -82,11 +82,7 @@ export function createSiteWrites(host: DashboardJobHost) {
 					run: (included) => void applyPluginJob(plugin, action, applyIds.filter((id) => included.includes(id))),
 				});
 			},
-			planOpts(
-				label,
-				ids,
-				plugin === 'localslip' && action === 'stop' ? pluginJobHint(plugin, action, ids, null) : undefined,
-			),
+			planOpts(label, ids, pluginJobHint(plugin, action, ids, null)),
 		);
 	}
 

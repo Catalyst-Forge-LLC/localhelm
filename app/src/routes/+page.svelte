@@ -48,7 +48,7 @@
 	import { plainFetchError } from '$lib/fetchError';
 	import { isJobCancelled } from '$lib/jobCancel';
 	import { joinBatchFailures, runNamedBatch } from '$lib/batchApply';
-	import { createDashboardWrites, planOpts } from '$lib/dashboardWrites';
+	import { createDashboardWrites, planOpts, planningHint } from '$lib/dashboardWrites';
 	import {
 		clearPublishBatch,
 		loadPublishBatch,
@@ -761,7 +761,7 @@
 	function beginConfirm(spec: { title: string; hint?: string; itemKeys?: string[] }): void {
 		const keys = spec.itemKeys?.filter(Boolean) ?? [];
 		confirmTitle = spec.title;
-		confirmHint = spec.hint ?? 'Nothing is written until you confirm.';
+		confirmHint = spec.hint || planningHint(spec.title);
 		confirmItems = keys.slice();
 		confirmItemKeys = keys.slice();
 		confirmWriteIds = [];

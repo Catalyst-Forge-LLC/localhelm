@@ -31,19 +31,55 @@ export type JobRunOpts = {
 	openConfirm?: boolean | { title?: string; hint?: string; itemKeys?: string[] };
 };
 
+/** Shown while the plan is still running, before the confirm copy replaces it. */
+export function planningHint(title: string): string {
+	switch (title) {
+		case 'Bump':
+			return 'Writes package.json and commits that file. Other dirty files stay local. No tag, no push, no publish.';
+		case 'Commit':
+			return 'Confirm runs git add and git commit. Secrets stay out. No push.';
+		case 'Pull':
+			return 'git pull --ff-only. Dirty or diverged trees are skipped.';
+		case 'Push':
+			return 'git push origin only. Never --force. Never the IngotVault backup remote. Uncommitted files stay in the working tree.';
+		case 'Ship':
+			return 'Runs pnpm ship in each checkout (wrangler / Pages). Not FilePress Land. Never --force.';
+		case 'Install globally':
+			return 'Checks npm for that version, then runs pnpm add -g (npm if pnpm is missing). Never --force.';
+		case 'Publish':
+			return 'Bumps if local already matches npm, pushes if needed, then npm publish. GitHub Actions packages open a workflow link instead. Never --force.';
+		case 'Cascade':
+			return 'Writes pins and lockfiles in clean dependents, then commits those files.';
+		case 'Land':
+			return 'Syncs getfilepress on the site, then Push and Ship. Does not publish a fleet package.';
+		case 'Clear demo':
+			return 'Deletes localhelm.fleet.demo.json and .localhelm/demo/. The live fleet is not touched.';
+		case 'Restore on Today':
+			return 'Puts these rows back on Today. The folder was never moved.';
+		case 'Hide on Today':
+			return 'Hides on Today. The folder and port stay.';
+		case 'Remove from fleet':
+			return 'Rewrites localhelm.fleet.json without these rows. Never deletes a folder.';
+		case 'Export':
+			return 'Overwrites the inventory JSON file. Does not change any project.';
+		default:
+			return 'Checking what this would do.';
+	}
+}
+
 export function planOpts(
 	title: string,
 	itemKeys?: string[],
 	hint?: string,
 ): {
 	closeConfirm: false;
-	openConfirm: { title: string; hint?: string; itemKeys?: string[] };
+	openConfirm: { title: string; hint: string; itemKeys?: string[] };
 } {
 	return {
 		closeConfirm: false,
 		openConfirm: {
 			title,
-			...(hint ? { hint } : {}),
+			hint: hint || planningHint(title),
 			...(itemKeys?.length ? { itemKeys } : {}),
 		},
 	};

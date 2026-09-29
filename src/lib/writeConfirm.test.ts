@@ -7,6 +7,7 @@ import {
 	firstPlanReason,
 	githubPendingRows,
 	planOpts,
+	planningHint,
 	pluginJobHint,
 	publishItemKeys,
 	publishItems,
@@ -127,7 +128,9 @@ describe('pluginJobHint', () => {
 		assert.match(pluginJobHint('xfacts', 'ship', ['a'], ['a']), /Not FilePress Land/);
 		assert.match(pluginJobHint('xfacts', 'check', ['a'], null), /app, feature, skill, tool, agent, and model/);
 		assert.match(pluginJobHint('localslip', 'stop', ['coldeye-site'], null), /stops the process tree/);
+		assert.match(pluginJobHint('localslip', 'start', ['coldeye-site'], null), /starts the lease recipe/);
 		assert.doesNotMatch(pluginJobHint('localslip', 'stop', ['coldeye-site'], null), /Nothing is written/);
+		assert.doesNotMatch(pluginJobHint('localslip', 'start', ['coldeye-site'], null), /Nothing is written/);
 	});
 });
 
@@ -135,11 +138,10 @@ describe('firstPlanReason / planOpts', () => {
 	it('reads the first row reason and opens confirm without closing', () => {
 		assert.equal(firstPlanReason({ rows: [{ reason: 'dirty' }] }), 'dirty');
 		assert.equal(firstPlanReason({}), '');
-		assert.deepEqual(planOpts('Push', ['helm']), {
-			closeConfirm: false,
-			openConfirm: { title: 'Push', itemKeys: ['helm'] },
-		});
-		assert.deepEqual(planOpts('Pull'), { closeConfirm: false, openConfirm: { title: 'Pull' } });
+		assert.equal(planOpts('Push', ['helm']).openConfirm.hint, planningHint('Push'));
+		assert.match(planningHint('Start'), /Checking what this would do/);
+		assert.doesNotMatch(planningHint('Pull'), /Nothing is written/);
+		assert.doesNotMatch(planningHint('Land'), /Nothing is written/);
 		assert.deepEqual(planOpts('Stop', ['coldeye-site'], 'LocalSlip stops the process tree on this lease.'), {
 			closeConfirm: false,
 			openConfirm: {
