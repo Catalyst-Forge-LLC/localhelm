@@ -475,7 +475,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 	}
 
 	function depCheck(
-		rows: Array<{ id: string; npm?: string; version: string | null }>,
+		rows: Array<{ id: string; npm?: string; version?: string | null }>,
 	): { label: string; hint: string } | undefined {
 		const projects = host.inventory()?.projects ?? [];
 		return globalDepUpdateCheck(rows, projects) ?? undefined;

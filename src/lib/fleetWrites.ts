@@ -243,14 +243,14 @@ type CascadeConsumer = {
 	id: string;
 	missing: boolean;
 	git: { dirty: boolean; busy?: string };
-	pins: Array<{ targetId?: string; kind: string; onLatest?: boolean }>;
+	pins: Array<{ targetId?: string; kind: string; onLatest?: boolean; spec?: string }>;
 };
 
 /** Clean projects whose registry pin does not already allow `version`. Dirty trees are left out. */
 export function depUpdateProjectIds(
 	publisherId: string,
 	version: string,
-	projects: Array<CascadeConsumer & { pins: Array<{ targetId?: string; kind: string; spec?: string }> }>,
+	projects: CascadeConsumer[],
 ): string[] {
 	const ids: string[] = [];
 	for (const consumer of projects) {
@@ -265,8 +265,8 @@ export function depUpdateProjectIds(
 }
 
 export function globalDepUpdateCheck(
-	installs: Array<{ id: string; npm?: string; version: string | null }>,
-	projects: Array<CascadeConsumer & { pins: Array<{ targetId?: string; kind: string; spec?: string }> }>,
+	installs: Array<{ id: string; npm?: string; version?: string | null }>,
+	projects: CascadeConsumer[],
 ): { label: string; hint: string } | null {
 	const touched: { name: string; ids: string[] }[] = [];
 	for (const row of installs) {
