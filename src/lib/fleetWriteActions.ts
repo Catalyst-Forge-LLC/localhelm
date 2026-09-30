@@ -32,7 +32,7 @@ import {
 	planOpts,
 	publishItemKeys,
 	publishItems,
-	pushItems,
+	pushConfirmEntries,
 	shipItems,
 	slimPublishRows,
 } from './writeConfirm.js';
@@ -356,17 +356,20 @@ export function createFleetWrites(host: DashboardJobHost) {
 					named && listed.length > eligible.length
 						? `${eligible.length} of ${listed.length} checked can push. Click a name to see why the others stay local. `
 						: '';
+				const preview = pushConfirmEntries(listed);
 				host.offerConfirm({
 					title: eligible.length === 1 ? `Push ${eligible[0]?.id} to origin?` : eligible.length ? 'Push these branches to origin?' : 'Nothing to push',
 					hint: eligible.length
-						? `${skipNote}git push origin only. Never --force. Never the IngotVault backup remote. Uncommitted files stay in the working tree.`
+						? `${skipNote}git push origin only. Never --force. Never the IngotVault backup remote. Uncommitted files stay in the working tree. Click a commit for its diff. Click a file to see just that file.`
 						: onlyIds?.length === 1
 							? `${onlyIds[0]}: ${data.rows[0]?.reason ?? 'cannot push'}`
 							: named
 								? 'None of the checked repos can push: they must be ahead of origin and not diverged.'
 								: 'Nothing is eligible: repos must be ahead of origin and not diverged.',
-					items: listed.length ? pushItems(listed) : ['Nothing to push.'],
-					itemKeys: listed.map((row) => row.id),
+					items: preview.items.length ? preview.items : ['Nothing to push.'],
+					itemKeys: preview.itemKeys,
+					itemKinds: preview.itemKinds,
+					diffs: preview.diffs,
 					confirmLabel: eligible.length === 1 ? `Push ${eligible[0]?.id}` : `Push ${eligible.length} to origin`,
 					canApply: eligible.length > 0,
 					applyIds: eligible.map((row) => row.id),

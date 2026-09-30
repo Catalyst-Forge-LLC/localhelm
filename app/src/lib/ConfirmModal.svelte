@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { commitDraftProgressHint, commitDraftSubjectIds } from './confirmProgress';
-	import { buildConfirmRoster, confirmCountText, confirmRosterSelected } from './confirmRoster';
+	import { assignStepOwners, buildConfirmRoster, confirmCountText, confirmRosterSelected, type ConfirmRosterStep } from './confirmRoster';
 	import Icon from './Icon.svelte';
 	import { findNpmPackageLink } from './npmPage';
 	import KnightRiderBar from './KnightRiderBar.svelte';
@@ -21,6 +21,7 @@
 		items?: string[];
 		itemKeys?: string[];
 		itemPhases?: Phase[];
+		itemKinds?: ('commit' | 'file' | 'link' | undefined)[];
 		/** Subject ids this confirm would write (repos, sites, leases). Omit skips. */
 		applyIds?: string[];
 		excludedIds?: string[];
@@ -60,6 +61,7 @@
 		items = [],
 		itemKeys = [],
 		itemPhases = [],
+		itemKinds = [],
 		applyIds = [],
 		excludedIds = $bindable<string[]>([]),
 		failNote = '',
@@ -85,7 +87,7 @@
 	}: Props = $props();
 
 	const showPhases = $derived(itemPhases.some((phase) => phase !== 'pending'));
-	const groups = $derived(buildConfirmRoster(items, itemKeys, itemPhases));
+	const groups = $derived(buildConfirmRoster(items, itemKeys, itemPhases, itemKinds));
 	const liveId = $derived(
 		groups?.find((group) => group.phase === 'current')?.id ??
 			groups?.find((group) => group.phase === 'fail')?.id ??
@@ -133,6 +135,17 @@
 	const draftsReady = $derived(
 		draftIds.filter((id) => !excludedIds.includes(id)).every((id) => Boolean(messageById[id]?.trim())),
 	);
+	const loneSteps = $derived.by(() => {
+		if (groups) return null;
+		if (!itemKinds.some((kind) => kind === 'commit' || kind === 'file')) return null;
+		return assignStepOwners(
+			items.map((text, i) => ({
+				text,
+				phase: itemPhases[i] ?? 'pending',
+				kind: itemKinds[i],
+			})),
+		);
+	});
 	const fileKeys = $derived(
 		groups && selected
 			? selected.steps.map((_, i) => `${selected.id}:${i}`)
@@ -142,7 +155,31 @@
 	);
 	const showFilePick = $derived(Object.keys(diffs).length > 0);
 	const fileIndex = $derived(Math.min(filePick, Math.max(0, fileKeys.length - 1)));
-	const fileKey = $derived(fileKeys[fileIndex] ?? '');
+	function openedStep(steps: ConfirmRosterStep[], pick: number): number {
+		const at = Math.min(Math.max(0, pick), Math.max(0, steps.length - 1));
+		const step = steps[at];
+		if (step && step.kind !== 'link') return at;
+		const commitAt = steps.findIndex((row) => row.kind === 'commit');
+		return commitAt >= 0 ? commitAt : at;
+	}
+
+	function commitFocus(steps: ConfirmRosterStep[], pick: number): number {
+		const focus = openedStep(steps, pick);
+		const step = steps[focus];
+		if (step?.kind === 'file' && step.owner != null) return step.owner;
+		if (step?.kind === 'commit') return focus;
+		return steps.findIndex((row) => row.kind === 'commit');
+	}
+
+	function filesForCommit(steps: ConfirmRosterStep[], commitAt: number): ConfirmRosterStep[] {
+		return steps.filter((row) => row.kind === 'file' && (commitAt < 0 || row.owner === commitAt));
+	}
+
+	const fileKey = $derived.by(() => {
+		const steps = selected?.steps ?? loneSteps;
+		const at = steps?.some((step) => step.kind === 'commit') ? openedStep(steps, fileIndex) : fileIndex;
+		return fileKeys[at] ?? '';
+	});
 	const preview = $derived((fileKey && diffs[fileKey]?.trim()) || '');
 
 	$effect(() => {
@@ -319,13 +356,17 @@
 								{#if group.phase === 'current'}
 									<span class="now">now</span>
 								{/if}
-								{#if group.total > 1}
-									<span class="count">{group.phase === 'fail' && group.done === 0 ? group.total : `${group.done}/${group.total}`}</span>
-								{/if}
+							{#if group.total > 1}
+								{@const commitCount = group.steps.filter((step) => step.kind === 'commit').length}
+								<span class="count">{commitCount > 0 && group.phase === 'pending' ? commitCount : group.phase === 'fail' && group.done === 0 ? group.total : `${group.done}/${group.total}`}</span>
+							{/if}
 							</button>
 						</div>
 					{/each}
 				</div>
+				{#if selected.steps.some((step) => step.kind === 'commit')}
+					{@render pushLists(selected.steps)}
+				{:else}
 				<ol class="steps" class:tracked={showPhases} bind:this={stepListEl}>
 					{#each selected.steps as step, i (`${selected.id}:${i}:${step.text}`)}
 						{@const link = itemLink(step.text)}
@@ -365,6 +406,11 @@
 						</li>
 					{/each}
 				</ol>
+				{/if}
+			</div>
+		{:else if loneSteps}
+			<div class="push-pane">
+				{@render pushLists(loneSteps)}
 			</div>
 		{:else if items.length}
 			<ul class:tracked={showPhases} bind:this={stepListEl}>
@@ -472,6 +518,49 @@
 	</div>
 	</div>
 </dialog>
+
+{#snippet pushLists(steps: ConfirmRosterStep[])}
+	<div class="step-col" bind:this={stepListEl}>
+		{#each steps as step, i (`link:${i}:${step.text}`)}
+			{#if step.kind === 'link'}
+				{@const link = itemLink(step.text)}
+				<p class="step-link">
+					{#if link}
+						{link.before}<a href={link.href} target="_blank" rel="noopener noreferrer">{link.label}</a>{link.after}
+					{:else}
+						{step.text}
+					{/if}
+				</p>
+			{/if}
+		{/each}
+		<p class="step-label">Commits</p>
+		<ol class="steps">
+			{#each steps as step, i (`commit:${i}:${step.text}`)}
+				{#if step.kind === 'commit'}
+					<li
+						class:on={i === commitFocus(steps, fileIndex)}
+						class:current={step.phase === 'current'}
+						class:done={step.phase === 'done'}
+						class:fail={step.phase === 'fail'}
+					>
+						<button type="button" class="file-pick" onclick={() => pickFile(i)}>{step.text}</button>
+					</li>
+				{/if}
+			{/each}
+		</ol>
+		<p class="step-label">Files</p>
+		<ol class="steps">
+			{#each filesForCommit(steps, commitFocus(steps, fileIndex)) as step, n (`file:${n}:${step.text}`)}
+				{@const i = steps.indexOf(step)}
+				<li class:on={i === openedStep(steps, fileIndex) && steps[i]?.kind === 'file'}>
+					<button type="button" class="file-pick" onclick={() => pickFile(i)}>{step.text}</button>
+				</li>
+			{:else}
+				<li class="quiet">No files in this commit.</li>
+			{/each}
+		</ol>
+	</div>
+{/snippet}
 
 {#snippet diffPreview(text: string)}
 	{#if text}
@@ -583,9 +672,48 @@
 	}
 
 	.split > .roster,
-	.split > ol.steps {
+	.split > ol.steps,
+	.split > .step-col {
 		height: 100%;
 		max-height: 12rem;
+	}
+
+	.step-col {
+		min-width: 0;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		overflow: hidden;
+	}
+
+	.push-pane {
+		margin: 0.75rem 0 0;
+	}
+
+	.step-label {
+		margin: 0.1rem 0 0;
+		font-size: 0.68rem;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--dim);
+	}
+
+	.step-link {
+		margin: 0;
+		font-size: 0.72rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.step-col ol.steps {
+		max-height: 4.4rem;
+		flex: 1 1 auto;
+	}
+
+	.step-col li.quiet {
+		color: var(--dim);
 	}
 
 	.roster,

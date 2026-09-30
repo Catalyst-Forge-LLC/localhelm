@@ -16,11 +16,13 @@ export type ConfirmOffer = {
 	canApply: boolean;
 	showOtp?: boolean;
 	messages?: Record<string, string>;
-	/** Confirm item key (`id:index`) → text diff. Commit confirm only. */
+	/** Confirm item key (`id:index`) → text diff. */
 	diffs?: Record<string, string>;
 	draftHint?: string;
 	altLabel?: string;
 	itemPhases?: ConfirmPhase[];
+	/** Parallel to `items`. Push confirms use commit, then that commit's files. */
+	itemKinds?: ('commit' | 'file' | 'link' | undefined)[];
 	/** Optional confirm checkbox. Off unless the operator ticks it. */
 	extraCheck?: { label: string; hint: string };
 	run?: (includedIds: string[]) => void;
@@ -124,7 +126,66 @@ export type PushConfirmRow = {
 	ahead?: number | null;
 	branch?: string | null;
 	origin?: string | null;
+	commits?: { hash: string; subject: string; files?: { code: string; path: string; from?: string }[] }[];
+	files?: { code: string; path: string; from?: string }[];
+	diffs?: Record<string, string>;
 };
+
+export type PushConfirmEntries = {
+	items: string[];
+	itemKeys: string[];
+	itemKinds: ('commit' | 'file' | 'link' | undefined)[];
+	diffs: Record<string, string>;
+};
+
+/** Roster lines for a push confirm. Each commit is followed by that commit's files. */
+export function pushConfirmEntries(rows: PushConfirmRow[]): PushConfirmEntries {
+	const items: string[] = [];
+	const itemKeys: string[] = [];
+	const itemKinds: PushConfirmEntries['itemKinds'] = [];
+	const diffs: Record<string, string> = {};
+	const named = rows.length > 1;
+	for (const row of rows) {
+		const commits = row.commits ?? [];
+		const loose = commits.some((commit) => commit.files?.length) ? [] : (row.files ?? []);
+		if (row.action !== 'push' || (commits.length === 0 && loose.length === 0)) {
+			items.push(row.action === 'push' ? (pushItems([row])[0] ?? row.id) : `${row.id}  ${row.reason ?? 'skipped'}`);
+			itemKeys.push(row.id);
+			itemKinds.push(undefined);
+			continue;
+		}
+		const steps: { line: string; kind: 'commit' | 'file' | 'link'; diff?: string }[] = [];
+		if (row.origin) steps.push({ kind: 'link', line: `→  ${row.origin}` });
+		const listed = commits.length ? commits : [{ hash: '', subject: '', files: loose }];
+		for (let n = 0; n < listed.length; n += 1) {
+			const commit = listed[n]!;
+			if (commit.hash) {
+				steps.push({
+					kind: 'commit',
+					line: `${commit.hash}  ${commit.subject}`,
+					diff: row.diffs?.[`commit:${commit.hash}`],
+				});
+			}
+			const ownedFiles = commit.files?.length ? commit.files : n === 0 ? loose : [];
+			for (const file of ownedFiles) {
+				const line = file.from ? `${file.code}  ${file.from} → ${file.path}` : `${file.code}  ${file.path}`;
+				steps.push({
+					kind: 'file',
+					line,
+					diff: row.diffs?.[`file:${commit.hash}:${file.path}`] ?? row.diffs?.[`file:${file.path}`],
+				});
+			}
+		}
+		steps.forEach((step, index) => {
+			items.push(named ? `${row.id}  ${step.line}` : step.line);
+			const key = `${row.id}:${index}`;
+			itemKeys.push(key);
+			itemKinds.push(step.kind);
+			if (step.diff) diffs[key] = step.diff;
+		});
+	}
+	return { items, itemKeys, itemKinds, diffs };
+}
 
 export type PublishConfirmRow = {
 	id: string;

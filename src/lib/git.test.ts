@@ -10,6 +10,8 @@ import {
 	parseRemoteFetchUrls,
 	planFetch,
 	planPull,
+	parseNameStatus,
+	parsePushLog,
 	planPush,
 	readGit,
 	readGitAsync,
@@ -27,6 +29,18 @@ async function gitRepo(dir: string): Promise<void> {
 	assert.equal(runGit(dir, ['add', 'README.md']).ok, true);
 	assert.equal(runGit(dir, ['commit', '-m', 'init']).ok, true);
 }
+
+describe('push ahead preview', () => {
+	it('parses commit subjects and name-status lines', () => {
+		assert.deepEqual(parsePushLog('abc1234\tHelm: update getfilepress to 0.1.47.\n'), [
+			{ hash: 'abc1234', subject: 'Helm: update getfilepress to 0.1.47.' },
+		]);
+		assert.deepEqual(parseNameStatus('M\tsite/package.json\nR100\told.ts\tnew.ts\n'), [
+			{ code: 'M', path: 'site/package.json' },
+			{ code: 'R', from: 'old.ts', path: 'new.ts' },
+		]);
+	});
+});
 
 describe('git remotes from config', () => {
 	it('reads origin and backup fetch urls', () => {
@@ -152,6 +166,13 @@ describe('git jobs', () => {
 		assert.match(planned[0]?.reason ?? '', /on /);
 		assert.match(planned[0]?.reason ?? '', /uncommitted files stay local/);
 		assert.equal(planned[0]?.remote, 'origin');
+		assert.equal(planned[0]?.commits?.[0]?.subject, 'ahead');
+		assert.equal(planned[0]?.commits?.[0]?.files?.some((file) => file.path === 'README.md' && file.code === 'M'), true);
+		assert.equal(planned[0]?.files?.some((file) => file.path === 'README.md' && file.code === 'M'), true);
+		assert.equal(planned[0]?.files?.some((file) => file.path === 'scratch.txt'), false);
+		const aheadHash = planned[0]?.commits?.[0]?.hash;
+		assert.match(planned[0]?.diffs?.[`commit:${aheadHash}`] ?? '', /ahead/);
+		assert.match(planned[0]?.diffs?.[`file:${aheadHash}:README.md`] ?? '', /more/);
 
 		const unknown = await planPush(loaded, ['nope']);
 		assert.equal(unknown[0]?.reason, 'not enrolled');

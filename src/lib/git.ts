@@ -278,6 +278,9 @@ export async function countCommitsSinceVersion(cwd: string, version: string, bra
 	return Number.isFinite(n) ? n : null;
 }
 
+export type PushAheadCommit = { hash: string; subject: string; files?: PushAheadFile[] };
+export type PushAheadFile = { code: string; path: string; from?: string };
+
 export type GitJobRow = {
 	id: string;
 	path: string;
@@ -289,7 +292,82 @@ export type GitJobRow = {
 	origin?: string;
 	branch?: string;
 	ahead?: number | null;
+	/** Commits that would be pushed (`@{upstream}..HEAD`). */
+	commits?: PushAheadCommit[];
+	/** Files in that range. Uncommitted work is not included. */
+	files?: PushAheadFile[];
+	/** `commit:<hash>` and `file:<hash>:<path>` → clipped unified diff. */
+	diffs?: Record<string, string>;
 };
+
+const PUSH_PREVIEW_CAP = 40;
+const PUSH_PREVIEW_LINES = 80;
+
+function clipPreview(text: string): string {
+	const rows = text.split(/\r?\n/);
+	if (rows.length <= PUSH_PREVIEW_LINES) return text;
+	return `${rows.slice(0, PUSH_PREVIEW_LINES).join('\n')}\n… truncated`;
+}
+
+/** `git log --format=%h%x09%s` */
+export function parsePushLog(stdout: string): PushAheadCommit[] {
+	const out: PushAheadCommit[] = [];
+	for (const line of stdout.split(/\r?\n/)) {
+		if (!line.trim()) continue;
+		const tab = line.indexOf('\t');
+		if (tab < 1) continue;
+		const hash = line.slice(0, tab).trim();
+		const subject = line.slice(tab + 1).trim();
+		if (hash && subject) out.push({ hash, subject });
+	}
+	return out;
+}
+
+/** `git diff --name-status` lines, including renames. */
+export function parseNameStatus(stdout: string): PushAheadFile[] {
+	const out: PushAheadFile[] = [];
+	for (const line of stdout.split(/\r?\n/)) {
+		if (!line.trim()) continue;
+		const parts = line.split('\t');
+		const code = (parts[0] ?? '').trim().replace(/\d+$/, '') || 'M';
+		if (parts.length >= 3 && parts[1] && parts[2]) {
+			out.push({ code, from: parts[1], path: parts[2] });
+		} else if (parts[1]) {
+			out.push({ code, path: parts[1] });
+		}
+	}
+	return out;
+}
+
+async function pushAheadPreview(abs: string): Promise<Pick<GitJobRow, 'commits' | 'files' | 'diffs'>> {
+	const range = '@{upstream}..HEAD';
+	const [log, names] = await Promise.all([
+		runGitReadAsync(abs, ['log', '--reverse', '-n', String(PUSH_PREVIEW_CAP), '--format=%h%x09%s', range]),
+		runGitReadAsync(abs, ['diff', '--name-status', '--find-renames', range]),
+	]);
+	const commits = log.ok ? parsePushLog(log.stdout).slice(0, PUSH_PREVIEW_CAP) : [];
+	const diffs: Record<string, string> = {};
+	const files: PushAheadFile[] = [];
+	for (const commit of commits) {
+		const [show, listed] = await Promise.all([
+			runGitReadAsync(abs, ['show', '--no-color', '--format=medium', '--find-renames', commit.hash]),
+			runGitReadAsync(abs, ['diff-tree', '--no-commit-id', '--name-status', '--find-renames', '--root', '-r', commit.hash]),
+		]);
+		commit.files = listed.ok ? parseNameStatus(listed.stdout).slice(0, PUSH_PREVIEW_CAP) : [];
+		for (const file of commit.files) {
+			if (!files.some((row) => row.path === file.path && row.code === file.code)) files.push(file);
+		}
+		diffs[`commit:${commit.hash}`] = clipPreview((show.ok ? show.stdout : show.stderr).trim() || commit.subject);
+		for (const file of commit.files) {
+			const paths = file.from ? [file.from, file.path] : [file.path];
+			const one = await runGitReadAsync(abs, ['show', '--no-color', '--format=', '--find-renames', commit.hash, '--', ...paths]);
+			const body = one.ok ? one.stdout.trim() : '';
+			diffs[`file:${commit.hash}:${file.path}`] = clipPreview(body || `${file.code}  ${file.path}\n(no text diff)`);
+		}
+	}
+	const ranged = names.ok ? parseNameStatus(names.stdout) : [];
+	return { commits, files: files.length ? files.slice(0, PUSH_PREVIEW_CAP) : ranged.slice(0, PUSH_PREVIEW_CAP), diffs };
+}
 
 export function requirePushIds(ids: string[]): string[] {
 	const named = ids.map((id) => id.trim()).filter((id) => id.length > 0);
@@ -382,10 +460,12 @@ async function planPushOne(id: string, relPath: string, abs: string): Promise<Gi
 	const blocked = whyNotPush(git);
 	if (blocked) return { ...base, reason: blocked };
 	const dirt = git.dirty ? ' · uncommitted files stay local' : '';
+	const preview = await pushAheadPreview(abs);
 	return {
 		...base,
 		action: 'push',
 		reason: `${commitCountLabel(git.ahead) || git.ahead} on ${git.branch} → ${git.origin}${dirt}`,
+		...preview,
 	};
 }
 

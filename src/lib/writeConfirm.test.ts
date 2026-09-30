@@ -11,6 +11,7 @@ import {
 	pluginJobHint,
 	publishItemKeys,
 	publishItems,
+	pushConfirmEntries,
 	pushItems,
 	slimPublishRows,
 } from './writeConfirm.js';
@@ -36,6 +37,33 @@ describe('pushItems', () => {
 				'helm  main  2 commit(s)\n→  https://example.com/helm.git',
 			],
 		);
+	});
+
+	it('lists commits and files with diffs for the push roster', () => {
+		const view = pushConfirmEntries([
+			{ id: 'skip-me', action: 'skip', reason: 'not ahead' },
+			{
+				id: 'helm',
+				action: 'push',
+				origin: 'https://example.com/helm.git',
+				commits: [{ hash: 'abc1234', subject: 'Helm: update getfilepress to 0.1.47.' }],
+				files: [{ code: 'M', path: 'site/package.json' }],
+				diffs: {
+					'commit:abc1234': 'commit abc1234\n',
+					'file:site/package.json': 'diff --git a/site/package.json\n',
+				},
+			},
+		]);
+		assert.deepEqual(view.items, [
+			'skip-me  not ahead',
+			'helm  →  https://example.com/helm.git',
+			'helm  abc1234  Helm: update getfilepress to 0.1.47.',
+			'helm  M  site/package.json',
+		]);
+		assert.deepEqual(view.itemKinds, [undefined, 'link', 'commit', 'file']);
+		assert.equal(view.diffs['helm:1'], 'commit abc1234\n');
+		assert.equal(view.diffs['helm:2'], 'diff --git a/site/package.json\n');
+		assert.equal(view.diffs['helm:0'], undefined);
 	});
 });
 

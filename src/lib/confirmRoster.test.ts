@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
+	assignStepOwners,
 	buildConfirmRoster,
 	confirmGroupId,
 	confirmGroupPhase,
@@ -71,5 +72,17 @@ describe('confirmRoster', () => {
 			'dictawhisper',
 		]);
 		assert.equal(confirmCountText('Land 4 sites?', 2, 4), 'Land 2 sites?');
+	});
+
+	it('attaches each file to the commit above it', () => {
+		const groups = buildConfirmRoster(
+			['helm  abc  subject', 'helm  M  README.md', 'site  def  other'],
+			['helm:0', 'helm:1', 'site:0'],
+			[],
+			['commit', 'file', 'commit'],
+		);
+		assert.equal(groups?.[0]?.steps[1]?.owner, 0);
+		assert.equal(groups?.[0]?.steps[1]?.kind, 'file');
+		assert.equal(assignStepOwners([{ text: 'M README', phase: 'pending', kind: 'file' }])[0]?.owner, undefined);
 	});
 });

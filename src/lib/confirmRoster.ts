@@ -1,8 +1,13 @@
 import type { ConfirmPhase } from './confirmProgress.js';
 
+export type ConfirmStepKind = 'commit' | 'file' | 'link';
+
 export type ConfirmRosterStep = {
 	text: string;
 	phase: ConfirmPhase;
+	kind?: ConfirmStepKind;
+	/** Step index of the commit this file belongs to. */
+	owner?: number;
 };
 
 export type ConfirmRosterGroup = {
@@ -40,10 +45,23 @@ function looksLikeName(id: string): boolean {
  * Two or more named subjects become a roster. A single package, or a list of
  * anonymous index keys, stays a flat confirm list.
  */
+export function assignStepOwners(steps: ConfirmRosterStep[]): ConfirmRosterStep[] {
+	let owner = -1;
+	return steps.map((step, index) => {
+		if (step.kind === 'commit') {
+			owner = index;
+			return step;
+		}
+		if (step.kind === 'file' && owner >= 0) return { ...step, owner };
+		return step;
+	});
+}
+
 export function buildConfirmRoster(
 	items: readonly string[],
 	keys: readonly string[],
 	phases: readonly ConfirmPhase[] = [],
+	kinds: readonly (ConfirmStepKind | undefined)[] = [],
 ): ConfirmRosterGroup[] | null {
 	if (items.length < 2) return null;
 	const resolved = keys.length === items.length ? [...keys] : items.map((_, i) => String(i));
@@ -59,14 +77,16 @@ export function buildConfirmRoster(
 			steps.push({
 				text: confirmStepLabel(id, items[i] ?? ''),
 				phase: phases[i] ?? 'pending',
+				kind: kinds[i],
 			});
 		});
+		const owned = assignStepOwners(steps);
 		return {
 			id,
 			phase: confirmGroupPhase(steps.map((step) => step.phase)),
 			done: steps.filter((step) => step.phase === 'done').length,
-			total: steps.length,
-			steps,
+			total: owned.length,
+			steps: owned,
 		};
 	});
 }

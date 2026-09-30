@@ -155,6 +155,7 @@
 	let confirmItems = $state<string[]>([]);
 	let confirmItemKeys = $state<string[]>([]);
 	let confirmPhases = $state<ConfirmPhase[]>([]);
+	let confirmItemKinds = $state<('commit' | 'file' | 'link' | undefined)[]>([]);
 	let confirmCanApply = $state(true);
 	let confirmShowOtp = $state(false);
 	let confirmMessages = $state<Record<string, string>>({});
@@ -770,6 +771,7 @@
 		confirmWriteIds = [];
 		confirmExcluded = [];
 		confirmPhases = emptyConfirmPhases(keys.length);
+		confirmItemKinds = [];
 		confirmLabel = 'Confirm';
 		confirmVariant = 'write';
 		confirmCanApply = false;
@@ -1395,6 +1397,7 @@
 		altLabel?: string;
 		extraCheck?: { label: string; hint: string };
 		itemPhases?: ConfirmPhase[];
+		itemKinds?: ('commit' | 'file' | 'link' | undefined)[];
 		run?: (includedIds: string[]) => void;
 		alt?: (includedIds: string[]) => void;
 		oncancel?: () => void;
@@ -1411,6 +1414,7 @@
 			spec.itemPhases && spec.itemPhases.length === spec.items.length
 				? spec.itemPhases.slice()
 				: emptyConfirmPhases(spec.items.length);
+		confirmItemKinds = spec.itemKinds?.length === spec.items.length ? spec.itemKinds.slice() : [];
 		confirmLabel = spec.confirmLabel;
 		confirmVariant = spec.variant ?? 'write';
 		confirmCanApply = spec.canApply;
@@ -3599,6 +3603,7 @@
 	items={confirmItems}
 	itemKeys={confirmItemKeys}
 	itemPhases={confirmPhases}
+	itemKinds={confirmItemKinds}
 	failNote={error}
 	messageById={confirmMessages}
 	diffs={confirmDiffs}
