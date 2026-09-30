@@ -667,15 +667,20 @@
 		margin: 0.75rem 0 0;
 		flex: 0 0 auto;
 		min-height: 7.5rem;
-		max-height: 12rem;
+		max-height: 16rem;
 		overflow: hidden;
 	}
 
 	.split > .roster,
-	.split > ol.steps,
-	.split > .step-col {
+	.split > ol.steps {
 		height: 100%;
-		max-height: 12rem;
+		max-height: 16rem;
+	}
+
+	.split > .step-col {
+		height: auto;
+		max-height: 16rem;
+		align-self: start;
 	}
 
 	.step-col {
@@ -683,7 +688,7 @@
 		min-height: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
+		gap: 0.2rem;
 		overflow: hidden;
 	}
 
@@ -692,7 +697,8 @@
 	}
 
 	.step-label {
-		margin: 0.1rem 0 0;
+		flex: 0 0 auto;
+		margin: 0.15rem 0 0;
 		font-size: 0.68rem;
 		letter-spacing: 0.04em;
 		text-transform: uppercase;
@@ -700,16 +706,18 @@
 	}
 
 	.step-link {
+		flex: 0 0 auto;
 		margin: 0;
 		font-size: 0.72rem;
+		line-height: 1.35;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
 	.step-col ol.steps {
-		max-height: 4.4rem;
-		flex: 1 1 auto;
+		flex: 0 1 auto;
+		max-height: 5.25rem;
 	}
 
 	.step-col li.quiet {
