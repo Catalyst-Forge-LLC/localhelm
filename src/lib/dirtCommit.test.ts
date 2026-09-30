@@ -7,6 +7,7 @@ import type { ScannedServer } from 'ollanet';
 import {
 	applyDirtCommit,
 	cleanSuggestedMessage,
+	commitDraftDestination,
 	discoverOllanetServer,
 	fallbackCommitMessage,
 	ollamaCommitMessage,
@@ -133,7 +134,17 @@ describe('dirtCommit helpers', () => {
 		assert.deepEqual(seen, [{ lanScan: false, save: false }]);
 	});
 
-	it('sweeps the LAN only when live and last-scan find nothing', async () => {
+	it('does not sweep the LAN unless explicitly requested', async () => {
+		const seen: Array<{ lanScan?: boolean; save?: boolean }> = [];
+		const picked = await discoverOllanetServer({
+			scanNetwork: async (opts) => { seen.push(opts); return { servers: [] }; },
+			lastScan: async () => null,
+		});
+		assert.ok('error' in picked);
+		assert.deepEqual(seen, [{ lanScan: false, save: false }]);
+	});
+
+	it('sweeps the LAN only with explicit discovery opt-in', async () => {
 		const remote = fakeServer();
 		const seen: Array<{ lanScan?: boolean; save?: boolean }> = [];
 		const picked = await discoverOllanetServer({
@@ -142,7 +153,7 @@ describe('dirtCommit helpers', () => {
 				return opts.lanScan ? { servers: [remote] } : { servers: [] };
 			},
 			lastScan: async () => ({ servers: [localServer] }),
-		});
+		}, { lanScan: true });
 		assert.ok(!('error' in picked));
 		assert.equal(picked.ip, remote.ip);
 		assert.deepEqual(seen, [
@@ -151,29 +162,51 @@ describe('dirtCommit helpers', () => {
 		]);
 	});
 
-	it('uses Ollama text from the host ollanet picked', async () => {
+	it('drafts locally without discovery or cached remote selection', async () => {
 		await withoutOllamaEnv(async () => {
+			let destination = '';
 			const api: CommitDraftApi = {
-				scanNetwork: async () => ({ servers: [localServer] }),
-				lastScan: async () => null,
-				ollamaChat: async () => ({ content: 'Fix lease bind on Windows.', thinking: '', chunk: {} }),
+				scanNetwork: async () => { throw new Error('discovery must not run'); },
+				lastScan: async () => { throw new Error('cached remote must not be read'); },
+				ollamaTags: async (base) => { assert.equal(base, 'http://127.0.0.1:11434'); return [{ name: 'llama3.2:latest' }]; },
+				ollamaChat: async (opts) => { destination = opts.baseUrl; return { content: 'Fix lease bind on Windows.', thinking: '', chunk: {} }; },
 			};
 			const drafted = await ollamaCommitMessage('prompt', api);
 			assert.ok(!('error' in drafted));
 			assert.equal(drafted.message, 'Fix lease bind on Windows.');
 			assert.equal(drafted.model, 'llama3.2:latest');
-			assert.equal(drafted.host, 'localhost');
+			assert.equal(drafted.host, '127.0.0.1:11434');
+			assert.equal(destination, 'http://127.0.0.1:11434');
 		});
 	});
 
-	it('returns a plain error when ollanet finds no host', async () => {
+	it('retains explicit URL and machine destinations', async () => {
+		await withoutOllamaEnv(async () => {
+			process.env.LOCALHELM_OLLAMA_MODEL = 'chosen-model';
+			const seen: string[] = [];
+			const api: CommitDraftApi = {
+				scanNetwork: async () => { throw new Error('must not discover'); },
+				ollamaChat: async (opts) => { seen.push(opts.baseUrl); assert.equal(opts.model, 'chosen-model'); return { content: 'Chosen draft.', thinking: '', chunk: {} }; },
+				resolveTarget: async () => ({ hostname: 'chosen', dnsName: '', ip: '192.0.2.10', port: 11434, source: 'config', isSelf: false }),
+			};
+			process.env.LOCALHELM_OLLAMA_URL = 'http://user:password@192.0.2.20:11434';
+			assert.equal(commitDraftDestination(), '192.0.2.20:11434');
+			assert.ok(!('error' in await ollamaCommitMessage('fixture prompt', api)));
+			delete process.env.LOCALHELM_OLLAMA_URL;
+			process.env.LOCALHELM_OLLAMA_MACHINE = 'chosen';
+			assert.equal(commitDraftDestination(), 'chosen');
+			assert.ok(!('error' in await ollamaCommitMessage('fixture prompt', api)));
+			assert.deepEqual(seen, ['http://user:password@192.0.2.20:11434', 'http://192.0.2.10:11434']);
+		});
+	});
+
+	it('returns an actionable error when the selected local host is unavailable', async () => {
 		await withoutOllamaEnv(async () => {
 			const drafted = await ollamaCommitMessage('prompt', {
-				scanNetwork: async () => ({ servers: [] }),
-				lastScan: async () => null,
+				ollamaTags: async () => { throw new Error('ECONNREFUSED'); },
 			});
 			assert.ok('error' in drafted);
-			assert.match(drafted.error, /ollanet found no Ollama host/);
+			assert.match(drafted.error, /selected Ollama host/);
 		});
 	});
 });
@@ -191,6 +224,15 @@ describe('dirtCommit plan/apply', () => {
 			manifest: { workspaceRoot: '.', projects: [{ id: 'widget', path: 'widget' }] },
 		};
 		const plan = await planDirtCommit(loaded, ['widget'], { suggest: false });
+		await withoutOllamaEnv(async () => {
+			const unavailable = await planDirtCommit(loaded, ['widget'], {
+				suggest: true,
+				draft: { ollamaTags: async () => { throw new Error('ECONNREFUSED'); }, ollamaChat: async () => { throw new Error('no prompt may be sent'); } },
+			});
+			assert.equal(unavailable.rows[0]?.suggestSource, 'fallback');
+			assert.equal(unavailable.rows[0]?.message, plan.rows[0]?.message);
+			assert.match(unavailable.rows[0]?.suggestNote ?? '', /selected Ollama host/);
+		});
 		assert.equal(plan.rows[0]?.action, 'commit');
 		assert.equal(plan.rows[0]?.files.some((file) => file.path === 'src.ts'), true);
 		assert.match(plan.rows[0]?.diffs?.['src.ts'] ?? '', /export const n = 1/);

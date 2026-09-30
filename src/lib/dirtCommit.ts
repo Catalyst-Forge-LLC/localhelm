@@ -54,6 +54,7 @@ export type DirtCommitRow = {
 export type DirtCommitPlan = {
 	rows: DirtCommitRow[];
 	writes: boolean;
+	draftDestination?: string;
 };
 
 const SECRET_SKIP: Array<{ test: (rel: string) => boolean; reason: string }> = [
@@ -154,6 +155,7 @@ export function ollanetMachineLabel(server: ScannedServer): string {
 
 export async function discoverOllanetServer(
 	api: CommitDraftApi = {},
+	opts: { lanScan?: boolean } = {},
 ): Promise<ScannedServer | { error: string }> {
 	const scan = api.scanNetwork ?? scanNetwork;
 	const cachedFn = api.lastScan ?? lastScan;
@@ -168,9 +170,11 @@ export async function discoverOllanetServer(
 			: undefined;
 		if (cacheRemote) return cacheRemote;
 
-		const lan = await scan({ lanScan: true, save: false });
-		const lanPick = pickOllanetServer(lan.servers);
-		if (lanPick) return lanPick;
+		if (opts.lanScan === true) {
+			const lan = await scan({ lanScan: true, save: false });
+			const lanPick = pickOllanetServer(lan.servers);
+			if (lanPick) return lanPick;
+		}
 	} catch (err) {
 		return { error: err instanceof Error ? err.message : String(err) };
 	}
@@ -214,6 +218,15 @@ function firstModelName(names: readonly (string | undefined)[]): string {
 	return names.map((name) => name?.trim() ?? '').find(Boolean) ?? '';
 }
 
+/** Display the selected destination before any repository content is sent. */
+export function commitDraftDestination(): string {
+	const url = (process.env.LOCALHELM_OLLAMA_URL ?? '').trim();
+	if (url) {
+		try { return new URL(url).host; } catch { return 'invalid configured Ollama URL'; }
+	}
+	return (process.env.LOCALHELM_OLLAMA_MACHINE ?? '').trim() || '127.0.0.1:11434';
+}
+
 export async function ollamaCommitMessage(
 	prompt: string,
 	api: CommitDraftApi = {},
@@ -230,7 +243,7 @@ export async function ollamaCommitMessage(
 			if (!model) return { error: 'Ollama has no model. Run ollama pull llama3.2.' };
 			const drafted = await draftViaChat(urlEnv, model, prompt, api);
 			if ('error' in drafted) return drafted;
-			return { ...drafted, host: urlEnv.replace(/^https?:\/\//, '') };
+			return { ...drafted, host: commitDraftDestination() };
 		}
 
 		if (machineEnv) {
@@ -245,18 +258,20 @@ export async function ollamaCommitMessage(
 			return { ...drafted, host: label };
 		}
 
-		const picked = await discoverOllanetServer(api);
-		if ('error' in picked) return picked;
-		const model = modelEnv || firstModelName(picked.models.map((item) => item.name));
+		// Discovery lists possibilities; it does not authorize sending repository text.
+		// A remote destination must be selected explicitly with MACHINE or URL.
+		const base = 'http://127.0.0.1:11434';
+		const listed = modelEnv ? [] : await tags(base, TAGS_MS);
+		const model = modelEnv || firstModelName(listed.map((item) => item.name));
 		if (!model) return { error: 'Ollama has no model. Run ollama pull llama3.2.' };
-		const drafted = await draftViaChat(picked.endpoint, model, prompt, api);
+		const drafted = await draftViaChat(base, model, prompt, api);
 		if ('error' in drafted) return drafted;
-		return { ...drafted, host: ollanetMachineLabel(picked) };
+		return { ...drafted, host: '127.0.0.1:11434' };
 	} catch (err) {
 		const text = err instanceof Error ? err.message : String(err);
 		if (/abort|timeout/i.test(text)) return { error: 'Ollama timed out.' };
 		if (/fetch|ECONNREFUSED|ENOTFOUND|offline/i.test(text)) {
-			return { error: 'ollanet could not reach Ollama. Start it locally, or run ollanet scan.' };
+			return { error: 'Could not reach the selected Ollama host. Start Ollama locally or set LOCALHELM_OLLAMA_MACHINE / LOCALHELM_OLLAMA_URL. Fallback message retained.' };
 		}
 		return { error: text };
 	}
@@ -412,7 +427,7 @@ export async function planDirtCommit(
 			...suggestion,
 		});
 	}
-	return { rows, writes: false };
+	return { rows, writes: false, draftDestination: commitDraftDestination() };
 }
 
 export function applyDirtCommit(

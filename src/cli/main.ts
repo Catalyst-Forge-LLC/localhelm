@@ -9,7 +9,7 @@ import { fleetReady } from '../lib/ready.js';
 import { applyEnroll, applyUnenroll, planEnroll, planUnenroll } from '../lib/enroll.js';
 import { enrollFilepressFromFleet } from '../lib/filepressFromFleet.js';
 import { applyExport, planExport } from '../lib/export.js';
-import { applyDirtCommit, dirtFileLine, planDirtCommit, requireCommitIds } from '../lib/dirtCommit.js';
+import { applyDirtCommit, commitDraftDestination, dirtFileLine, planDirtCommit, requireCommitIds } from '../lib/dirtCommit.js';
 import { applyFetches, applyPull, applyPush, planFetch, planPull, planPush, requirePushIds, type GitJobRow } from '../lib/git.js';
 import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublishIds, type PublishRow } from '../lib/publish.js';
 import { publishApplyHadFailure } from '../lib/writeGate.js';
@@ -371,6 +371,7 @@ async function main(): Promise<void> {
 			fail(err instanceof Error ? err.message : String(err));
 		}
 		const loaded = await requireManifest();
+		if (!messageFlag) console.error(`Commit draft destination: ${commitDraftDestination()} (repository text is sent for the draft).`);
 		const plan = await planDirtCommit(loaded, ids, { suggest: !messageFlag });
 		let rows = plan.rows;
 		if (apply) {

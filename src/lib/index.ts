@@ -11,6 +11,7 @@ export type { CascadePlan, CascadeRow } from './cascade.js';
 export { helmBumpMessage, helmRetargetMessage, isGitIgnored } from './commit.js';
 export {
 	applyDirtCommit,
+	commitDraftDestination,
 	dirtFileLine,
 	discoverOllanetServer,
 	fallbackCommitMessage,

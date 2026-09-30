@@ -45,6 +45,8 @@ Menu **Main / Demo** (or `localhelm serve --demo`) is a sandbox fleet (`localhel
 
 Skip folders with `.localhelmignore` at the workspace, or `~/.localhelm/ignore`.
 
+Commit-message drafts send repository text to Ollama on `127.0.0.1:11434` by default. For a remote host, explicitly set `LOCALHELM_OLLAMA_MACHINE` or `LOCALHELM_OLLAMA_URL`; `LOCALHELM_OLLAMA_MODEL` selects the model. The CLI and commit dialog name the destination. Drafting never scans the LAN or selects a cached remote host. Use `ollanet scan --lan` separately if you want discovery, then select the host. When Ollama is unavailable, the editable fallback message remains.
+
 Requires Node 22+. License Apache-2.0. Site: [localhelm.dev](https://localhelm.dev).
 
 <!-- xfacts-label -->

@@ -30,6 +30,8 @@ The same product can appear on three tabs. **Also on** chips jump and check that
 
 ## Reads versus writes
 
+Commit-message drafts use Ollama on `127.0.0.1:11434` by default. To send repository text to another host, explicitly set `LOCALHELM_OLLAMA_MACHINE` or `LOCALHELM_OLLAMA_URL`; optionally select `LOCALHELM_OLLAMA_MODEL`. The dialog names the destination before requesting drafts. Drafting does not scan the LAN or select a cached remote. Discovery (`ollanet scan --lan`) is a separate opt-in operation; configure the chosen destination afterward. If drafting fails, the editable fallback remains.
+
 Header **Refresh** re-reads enrolled projects, Sites, and Ports. Row refresh is the same for one id. **Fetch remotes** runs `git fetch` and clears the five-minute npm cache. Those are observations plus a remote update. They do not publish.
 
 Start and stop on Ports ask LocalSlip. Commit, Push, Publish, Ship, Install global, Write pins, enroll, and plugin jobs (including start and stop) open a plan modal right away. A spinner and the current step show while the plan loads, then the list fills in. Confirm applies. Close leaves disk unchanged. Publish covers both an already-bumped version and a bump plus npm when origin has commits since the last published version. After a laptop npm publish, confirm can offer to install that CLI globally. If some of a batch fail, the confirm lists those first with a reason; click a name. Activity keeps the full npm log. Install checks that exact version on npm first; if a new publish is not visible yet, confirm offers Wait or Try again.

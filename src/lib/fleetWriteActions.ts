@@ -139,7 +139,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 				const data = (await host.call('/api/commit', {
 					method: 'POST',
 					body: JSON.stringify({ ids: [id], apply: false, suggest: true }),
-				})) as { rows: CommitPlanRow[] };
+				})) as { rows: CommitPlanRow[]; draftDestination?: string };
 				const row = data.rows[0];
 				if (!row || !host.confirmOpen()) continue;
 				const text = row.message?.trim();
@@ -189,7 +189,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 				const data = (await host.call('/api/commit', {
 					method: 'POST',
 					body: JSON.stringify({ ids, apply: false, suggest: false }),
-				})) as { rows: CommitPlanRow[] };
+				})) as { rows: CommitPlanRow[]; draftDestination?: string };
 				const can = data.rows.filter((row) => row.action === 'commit');
 				const items: string[] = [];
 				const itemKeys: string[] = [];
@@ -211,7 +211,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 				host.offerConfirm({
 					title: can.length === 1 ? `Commit ${can[0]?.id}?` : can.length ? `Commit ${can.length} repos?` : 'Nothing to commit',
 					hint: can.length
-						? 'Fallback messages are ready to edit. ollanet drafts on a network Ollama host when one is up (this machine is last). Confirm runs git add and git commit. Secrets stay out. No push.'
+						? `Fallback messages are ready to edit. Draft destination: ${data.draftDestination ?? '127.0.0.1:11434'}. Repository text is sent there for the draft; remote hosts require explicit configuration. Confirm runs git add and git commit. Secret-looking files are skipped. No push.`
 						: data.rows[0]?.reason ?? 'Nothing dirty to commit.',
 					items,
 					itemKeys,
