@@ -358,7 +358,7 @@
 								{/if}
 							{#if group.total > 1}
 								{@const commitCount = group.steps.filter((step) => step.kind === 'commit').length}
-								<span class="count">{commitCount > 0 && group.phase === 'pending' ? commitCount : group.phase === 'fail' && group.done === 0 ? group.total : `${group.done}/${group.total}`}</span>
+								<span class="count">{commitCount > 0 ? commitCount : group.phase === 'fail' && group.done === 0 ? group.total : `${group.done}/${group.total}`}</span>
 							{/if}
 							</button>
 						</div>

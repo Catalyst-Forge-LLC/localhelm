@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { applyConfirmStep, commitDraftProgressHint, emptyConfirmPhases, markConfirmKey } from './confirmProgress.js';
+import {
+	applyConfirmStep,
+	commitDraftProgressHint,
+	confirmHasSubject,
+	emptyConfirmPhases,
+	markConfirmKey,
+	markConfirmSubject,
+} from './confirmProgress.js';
 
 describe('confirmProgress', () => {
 	it('ticks pull/push rows by id', () => {
@@ -11,6 +18,18 @@ describe('confirmProgress', () => {
 		phases = markConfirmKey(keys, phases, 'aibreze', 'done');
 		phases = markConfirmKey(keys, phases, 'localslip', 'current');
 		assert.deepEqual(phases, ['done', 'current']);
+	});
+
+	it('marks every commit step of a push repo, then the next repo', () => {
+		const keys = ['appledger:0', 'appledger:1', 'appledger:2', 'detangler:0'];
+		let phases = emptyConfirmPhases(4);
+		assert.equal(confirmHasSubject(keys, 'appledger'), true);
+		assert.equal(confirmHasSubject(keys, 'missing'), false);
+		phases = markConfirmSubject(keys, phases, 'appledger', 'current');
+		assert.deepEqual(phases, ['current', 'pending', 'pending', 'pending']);
+		phases = markConfirmSubject(keys, phases, 'appledger', 'done');
+		phases = markConfirmSubject(keys, phases, 'detangler', 'current');
+		assert.deepEqual(phases, ['done', 'done', 'done', 'current']);
 	});
 
 	it('maps a publish step event onto id:index keys', () => {

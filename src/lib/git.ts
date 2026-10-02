@@ -446,7 +446,7 @@ export function applyPull(workspaceRoot: string, row: GitJobRow): GitJobRow {
 	};
 }
 
-async function planPushOne(id: string, relPath: string, abs: string): Promise<GitJobRow> {
+async function planPushOne(id: string, relPath: string, abs: string, preview: boolean): Promise<GitJobRow> {
 	const git = await readGitAsync(abs);
 	const base: GitJobRow = {
 		id,
@@ -460,17 +460,22 @@ async function planPushOne(id: string, relPath: string, abs: string): Promise<Gi
 	const blocked = whyNotPush(git);
 	if (blocked) return { ...base, reason: blocked };
 	const dirt = git.dirty ? ' · uncommitted files stay local' : '';
-	const preview = await pushAheadPreview(abs);
+	const ahead = preview ? await pushAheadPreview(abs) : {};
 	return {
 		...base,
 		action: 'push',
 		reason: `${commitCountLabel(git.ahead) || git.ahead} on ${git.branch} → ${git.origin}${dirt}`,
-		...preview,
+		...ahead,
 	};
 }
 
-export async function planPush(loaded: LoadedManifest, onlyIds?: string[]): Promise<GitJobRow[]> {
+export async function planPush(
+	loaded: LoadedManifest,
+	onlyIds?: string[],
+	opts?: { preview?: boolean },
+): Promise<GitJobRow[]> {
 	const ids = onlyIds?.length ? onlyIds : loaded.manifest.projects.map((project) => project.id);
+	const preview = opts?.preview !== false;
 	return mapPool(ids, GIT_POOL, async (id) => {
 		const project = loaded.manifest.projects.find((row) => row.id === id);
 		if (!project) return { id, path: '', action: 'skip' as const, reason: 'not enrolled' };
@@ -478,7 +483,7 @@ export async function planPush(loaded: LoadedManifest, onlyIds?: string[]): Prom
 		if (!(await pathExists(abs))) {
 			return { id: project.id, path: project.path, action: 'skip' as const, reason: 'missing' };
 		}
-		return planPushOne(project.id, project.path, abs);
+		return planPushOne(project.id, project.path, abs, preview);
 	});
 }
 

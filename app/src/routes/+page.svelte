@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import TodayBoard from '$lib/TodayBoard.svelte';
@@ -55,7 +55,13 @@
 		savePublishBatch,
 	} from '$lib/publishBatch';
 	import { clearLandBatch, loadLandBatch, persistLandSnap } from '$lib/landBatch';
-	import { emptyConfirmPhases, markConfirmKey, type ConfirmPhase } from '$lib/confirmProgress';
+	import {
+		confirmHasSubject,
+		confirmSubjectFailed,
+		emptyConfirmPhases,
+		markConfirmSubject,
+		type ConfirmPhase,
+	} from '$lib/confirmProgress';
 	import { applyWritePatches, digestFromProjects, writeReloadBusy, writeReloadPlan, type WritePatch, type WriteReloadMode } from '$lib/inventoryPatch';
 	import { bridgeServeHeading, fleetProjectMeta, fleetVersionLabel, headerNeedChips, type BridgeGauge } from '$lib/fleetDisplay';
 	import { npmPackageHref } from '$lib/npmPage';
@@ -832,28 +838,33 @@
 
 	async function eachNamed(verb: string, names: string[], fn: (name: string) => Promise<void>): Promise<void> {
 		jobCanStop = names.length >= 2;
-		const failed = await runNamedBatch(names, fn, {
-			shouldStop: () => jobCancel,
-			onStart: (name, i, total) => {
-				busy = bulkProgressLabel(verb, i + 1, total, name);
-				if (confirmItemKeys.includes(name)) {
-					confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'current');
-				}
+		const failed = await runNamedBatch(
+			names,
+			async (name) => {
+				await tick();
+				await fn(name);
 			},
-			onDone: (name) => {
-				if (confirmItemKeys.includes(name)) {
-					const at = confirmItemKeys.indexOf(name);
-					if (confirmPhases[at] !== 'fail') {
-						confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'done');
+			{
+				shouldStop: () => jobCancel,
+				onStart: (name, i, total) => {
+					busy = bulkProgressLabel(verb, i + 1, total, name);
+					if (confirmHasSubject(confirmItemKeys, name)) {
+						confirmPhases = markConfirmSubject(confirmItemKeys, confirmPhases, name, 'current');
 					}
-				}
+				},
+				onDone: (name) => {
+					if (!confirmHasSubject(confirmItemKeys, name)) return;
+					if (!confirmSubjectFailed(confirmItemKeys, confirmPhases, name)) {
+						confirmPhases = markConfirmSubject(confirmItemKeys, confirmPhases, name, 'done');
+					}
+				},
+				onFail: (name) => {
+					if (confirmHasSubject(confirmItemKeys, name)) {
+						confirmPhases = markConfirmSubject(confirmItemKeys, confirmPhases, name, 'fail');
+					}
+				},
 			},
-			onFail: (name) => {
-				if (confirmItemKeys.includes(name)) {
-					confirmPhases = markConfirmKey(confirmItemKeys, confirmPhases, name, 'fail');
-				}
-			},
-		});
+		);
 		if (failed.length) error = joinBatchFailures(failed);
 	}
 
@@ -1053,6 +1064,10 @@
 		}
 	}
 
+	function busyIsFleetRead(label: string): boolean {
+		return /^(reading |checking |fetching )/.test(label);
+	}
+
 	async function loadStatus(opts: {
 		fetchRemotes?: boolean;
 		ids?: string[];
@@ -1077,7 +1092,7 @@
 			if (ticket !== statusReads) return;
 			if (event.type === 'progress' && typeof event.label === 'string' && event.label.trim()) {
 				statusNote = event.label;
-				if (busy) busy = event.label;
+				if (busy && busyIsFleetRead(busy)) busy = event.label;
 			}
 		})) as {
 			inventory: Inventory | null;
@@ -1120,7 +1135,7 @@
 		statusReady = true;
 		if (opts.extras !== false && !scoped) {
 			statusNote = 'reading Sites and Ports';
-			if (busy) busy = 'reading Sites and Ports';
+			if (busy && busyIsFleetRead(busy)) busy = 'reading Sites and Ports';
 			await Promise.all([loadPluginBoards(), loadActivity(), loadArchive(), loadLocalOnly(), loadGroups()]);
 		}
 		} finally {
