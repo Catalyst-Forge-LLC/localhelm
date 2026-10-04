@@ -1,11 +1,2910 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-init",
+  "scan_id": "scan-5f5f40d02afa",
   "product": {
     "name": "LocalHelm",
-    "type": "unknown",
-    "status": "unknown"
+    "type": "typescript-node",
+    "status": "active"
   },
-  "features": [],
+  "features": [
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-archive"
+      ],
+      "implements": [
+        "route-api-archive"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-archive-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-archive. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 872,
+            "end_line": 872,
+            "symbol": "archive"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-archive",
+      "name": "Archive",
+      "description": "Observed implementation surfaces: cmd-archive. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-auth"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-auth-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-auth. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 548,
+            "end_line": 548,
+            "symbol": "auth"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-auth",
+      "name": "Auth",
+      "description": "Observed implementation surfaces: cmd-auth. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-brief"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-brief-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-brief. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 862,
+            "end_line": 862,
+            "symbol": "brief"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-brief",
+      "name": "Brief",
+      "description": "Observed implementation surfaces: cmd-brief. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-bump"
+      ],
+      "implements": [
+        "route-api-bump"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-bump-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-bump. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 325,
+            "end_line": 325,
+            "symbol": "bump"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-bump",
+      "name": "Bump",
+      "description": "Observed implementation surfaces: cmd-bump. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-cascade"
+      ],
+      "implements": [
+        "route-api-cascade"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-cascade-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-cascade. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 636,
+            "end_line": 636,
+            "symbol": "cascade"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-cascade",
+      "name": "Cascade",
+      "description": "Observed implementation surfaces: cmd-cascade. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-commit"
+      ],
+      "implements": [
+        "route-api-commit"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-commit-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-commit. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 361,
+            "end_line": 361,
+            "symbol": "commit"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-commit",
+      "name": "Commit",
+      "description": "Observed implementation surfaces: cmd-commit. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-deps"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-deps-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-deps. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 301,
+            "end_line": 301,
+            "symbol": "deps"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-deps",
+      "name": "Deps",
+      "description": "Observed implementation surfaces: cmd-deps. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-enroll"
+      ],
+      "implements": [
+        "route-api-enroll"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-enroll-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-enroll. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 232,
+            "end_line": 232,
+            "symbol": "enroll"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-enroll",
+      "name": "Enroll",
+      "description": "Observed implementation surfaces: cmd-enroll. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-export"
+      ],
+      "implements": [
+        "route-api-export"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-export-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-export. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 501,
+            "end_line": 501,
+            "symbol": "export"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-export",
+      "name": "Export",
+      "description": "Observed implementation surfaces: cmd-export. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-fetch"
+      ],
+      "implements": [
+        "route-api-fetch"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-fetch-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-fetch. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 420,
+            "end_line": 420,
+            "symbol": "fetch"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-fetch",
+      "name": "Fetch",
+      "description": "Observed implementation surfaces: cmd-fetch. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-global"
+      ],
+      "implements": [
+        "route-api-global"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-global-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-global. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 805,
+            "end_line": 805,
+            "symbol": "global"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-global",
+      "name": "Global",
+      "description": "Observed implementation surfaces: cmd-global. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-land"
+      ],
+      "implements": [
+        "route-api-land"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-land-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-land. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 683,
+            "end_line": 683,
+            "symbol": "land"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-land",
+      "name": "Land",
+      "description": "Observed implementation surfaces: cmd-land. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-plugin"
+      ],
+      "implements": [
+        "route-api-plugin"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-plugin-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-plugin. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 932,
+            "end_line": 932,
+            "symbol": "plugin"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-plugin",
+      "name": "Plugin",
+      "description": "Observed implementation surfaces: cmd-plugin. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-plugins"
+      ],
+      "implements": [
+        "route-api-plugins"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-plugins-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-plugins. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 911,
+            "end_line": 911,
+            "symbol": "plugins"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-plugins",
+      "name": "Plugins",
+      "description": "Observed implementation surfaces: cmd-plugins. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-publish"
+      ],
+      "implements": [
+        "route-api-publish"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-publish-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-publish. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 577,
+            "end_line": 577,
+            "symbol": "publish"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-publish",
+      "name": "Publish",
+      "description": "Observed implementation surfaces: cmd-publish. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-pull"
+      ],
+      "implements": [
+        "route-api-pull"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-pull-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-pull. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 437,
+            "end_line": 437,
+            "symbol": "pull"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-pull",
+      "name": "Pull",
+      "description": "Observed implementation surfaces: cmd-pull. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-push"
+      ],
+      "implements": [
+        "route-api-push"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-push-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-push. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 460,
+            "end_line": 460,
+            "symbol": "push"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-push",
+      "name": "Push",
+      "description": "Observed implementation surfaces: cmd-push. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-ready"
+      ],
+      "implements": [
+        "route-api-ready"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-ready-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-ready. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 525,
+            "end_line": 525,
+            "symbol": "ready"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-ready",
+      "name": "Ready",
+      "description": "Observed implementation surfaces: cmd-ready. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-scan"
+      ],
+      "implements": [
+        "route-api-scan"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-scan-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-scan. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 219,
+            "end_line": 219,
+            "symbol": "scan"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-scan",
+      "name": "Scan",
+      "description": "Observed implementation surfaces: cmd-scan. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-serve"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-serve-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-serve. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 990,
+            "end_line": 990,
+            "symbol": "serve"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-serve",
+      "name": "Serve",
+      "description": "Observed implementation surfaces: cmd-serve. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-ship"
+      ],
+      "implements": [
+        "route-api-ship"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-ship-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-ship. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 752,
+            "end_line": 752,
+            "symbol": "ship"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-ship",
+      "name": "Ship",
+      "description": "Observed implementation surfaces: cmd-ship. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-status"
+      ],
+      "implements": [
+        "route-api-status"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-status-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-status. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 285,
+            "end_line": 285,
+            "symbol": "status"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-status",
+      "name": "Status",
+      "description": "Observed implementation surfaces: cmd-status. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "cmd-unenroll"
+      ],
+      "implements": [
+        "route-api-unenroll"
+      ],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "cmd-unenroll-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: cmd-unenroll. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "src/cli/main.ts",
+            "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+            "start_line": 263,
+            "end_line": 263,
+            "symbol": "unenroll"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "cmd-unenroll",
+      "name": "Unenroll",
+      "description": "Observed implementation surfaces: cmd-unenroll. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "route-api-activity"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "route-activity-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: route-api-activity. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "app/src/routes/api/activity/+server.ts",
+            "content_sha256": "c39d98d07ccc9b11bc14f667e872778efe30fba30800e74902510a1f80813661"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "route-activity",
+      "name": "Activity",
+      "description": "Observed implementation surfaces: route-api-activity. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "route-deck"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "route-deck-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: route-deck. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "app/src/routes/deck/+page.server.ts",
+            "content_sha256": "f842225cfeba4752ef162f8db635b78d729ace7b4013a4a189a2713a1bdfca7f"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "route-deck",
+      "name": "Deck",
+      "description": "Observed implementation surfaces: route-deck. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "route-api-demo"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "route-demo-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: route-api-demo. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "app/src/routes/api/demo/+server.ts",
+            "content_sha256": "202ac25745a555974f16eca9f8c1a4640da4020bacc01606b2ca19e077a9b624"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "route-demo",
+      "name": "Demo",
+      "description": "Observed implementation surfaces: route-api-demo. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "route-api-groups"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "route-groups-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: route-api-groups. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "app/src/routes/api/groups/+server.ts",
+            "content_sha256": "fc6a9b5ff203290c38566a2dc3c43a0b3ef2d325d824611bdbd8a1c130c3c823"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "route-groups",
+      "name": "Groups",
+      "description": "Observed implementation surfaces: route-api-groups. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "route-home"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "route-home-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: route-home. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "app/src/routes/+page.server.ts",
+            "content_sha256": "ca0d3a37cd187227f9b98b20f501e82cab270243cf983677aca4d9719b539e17"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "route-home",
+      "name": "Home",
+      "description": "Observed implementation surfaces: route-home. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "route-api-local-only"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "route-local-only-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: route-api-local-only. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "app/src/routes/api/local-only/+server.ts",
+            "content_sha256": "e0f3b1bc559785c3b4c042352d15eb45e1d14952ab51ec67c0ec181404318a71"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "route-local-only",
+      "name": "Local Only",
+      "description": "Observed implementation surfaces: route-api-local-only. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "route-api-roster"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "route-roster-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: route-api-roster. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "app/src/routes/api/roster/+server.ts",
+            "content_sha256": "1c07a9f90e3e3f12b774bad1b19fd3b4ffb7126291b53bb48e89d704adefbda4"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "route-roster",
+      "name": "Roster",
+      "description": "Observed implementation surfaces: route-api-roster. Candidate only until a maintainer confirms the product meaning."
+    },
+    {
+      "type": "surface-cluster",
+      "recognition": "candidate",
+      "lifecycle": "unknown",
+      "availability": {
+        "state": "unknown",
+        "conditions": [],
+        "reason": "Availability is a declaration. Source presence is not a deployment check."
+      },
+      "maturity": "unknown",
+      "audiences": {
+        "state": "unknown",
+        "values": [],
+        "reason": "Audience was not declared."
+      },
+      "discovery": {
+        "state": "unassessed",
+        "surfaces": [],
+        "adapter_ids": [],
+        "reason": "Discovery surfaces were not assessed beyond extracted entry points."
+      },
+      "intent": "unknown",
+      "publication": {
+        "scope": "internal",
+        "reason": "Internal is the conservative default. Public permission requires an attributed declaration."
+      },
+      "entry_points": [
+        "route-api-visitor",
+        "route-visitor"
+      ],
+      "implements": [],
+      "dependencies": [],
+      "docs": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      },
+      "tests": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      },
+      "observation": {
+        "state": "current",
+        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "reason": "Current source evidence is available."
+      },
+      "evidence": [
+        {
+          "id": "route-visitor-capability",
+          "kind": "observed",
+          "state": "current",
+          "assertion": {
+            "field": "capability",
+            "value": "Observed implementation surfaces: route-api-visitor, route-visitor. Candidate only until a maintainer confirms the product meaning.",
+            "claim": "Static extraction found implementation surfaces. This is not confirmation."
+          },
+          "locator": {
+            "path": "app/src/routes/api/visitor/+server.ts",
+            "content_sha256": "595e386c74349d42acd2d44cbd00081b87ba21297d5ce670a50b65ec6a680ab3"
+          },
+          "provenance": {
+            "adapter_id": "typescript-node-surface",
+            "adapter_version": "0.2.1",
+            "origin": "deterministic",
+            "method": "surface-cluster"
+          }
+        }
+      ],
+      "editorial": {
+        "locked": [],
+        "aliases": [],
+        "notes": ""
+      },
+      "uncertainty_reasons": {
+        "lifecycle": "Source presence does not establish release status.",
+        "maturity": "No attributed maturity declaration.",
+        "intent": "Discovery intent was not declared."
+      },
+      "id": "route-visitor",
+      "name": "Visitor",
+      "description": "Observed implementation surfaces: route-api-visitor, route-visitor. Candidate only until a maintainer confirms the product meaning."
+    }
+  ],
   "redirects": []
 }

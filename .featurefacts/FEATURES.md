@@ -1,9 +1,38 @@
 # Feature register: LocalHelm
 
-Scan `scan-init`. Candidates are not confirmed capabilities.
+Scan `scan-5f5f40d02afa`. Candidates are not confirmed capabilities.
 
 | ID | Name | Recognition | Lifecycle | Availability | Docs | Tests | Observation |
 |---|---|---|---|---|---|---|---|
-
-No feature records yet. Run a scan, then review candidates before confirming anything.
+| `cmd-archive` | Archive | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-auth` | Auth | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-brief` | Brief | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-bump` | Bump | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-cascade` | Cascade | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-commit` | Commit | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-deps` | Deps | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-enroll` | Enroll | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-export` | Export | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-fetch` | Fetch | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-global` | Global | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-land` | Land | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-plugin` | Plugin | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-plugins` | Plugins | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-publish` | Publish | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-pull` | Pull | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-push` | Push | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-ready` | Ready | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-scan` | Scan | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-serve` | Serve | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-ship` | Ship | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-status` | Status | candidate | unknown | unknown | unknown | unknown | current |
+| `cmd-unenroll` | Unenroll | candidate | unknown | unknown | unknown | unknown | current |
+| `route-activity` | Activity | candidate | unknown | unknown | unknown | unknown | current |
+| `route-deck` | Deck | candidate | unknown | unknown | unknown | unknown | current |
+| `route-demo` | Demo | candidate | unknown | unknown | unknown | unknown | current |
+| `route-groups` | Groups | candidate | unknown | unknown | unknown | unknown | current |
+| `route-home` | Home | candidate | unknown | unknown | unknown | unknown | current |
+| `route-local-only` | Local Only | candidate | unknown | unknown | unknown | unknown | current |
+| `route-roster` | Roster | candidate | unknown | unknown | unknown | unknown | current |
+| `route-visitor` | Visitor | candidate | unknown | unknown | unknown | unknown | current |
 

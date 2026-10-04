@@ -1,0 +1,4619 @@
+{
+  "schemaVersion": "0.2.0",
+  "scan_id": "scan-5f5f40d02afa",
+  "tool": "featurefacts",
+  "tool_version": "0.2.0",
+  "generated_at": "2026-10-04T21:21:56.765Z",
+  "root": ".",
+  "status": "complete",
+  "scope": {
+    "include": [
+      "package.json",
+      "README.md",
+      "CHANGELOG.md",
+      "src/**",
+      "app/**",
+      "lib/**",
+      "bin/**",
+      "docs/**",
+      "tests/**",
+      "test/**"
+    ],
+    "exclude": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.git/**",
+      "**/.svelte-kit/**",
+      "**/.turbo/**",
+      "**/.vite/**",
+      "**/.next/**",
+      "**/coverage/**",
+      "**/.env",
+      "**/.env.*",
+      "**/*.pem",
+      "**/*.key",
+      ".featurefacts/**",
+      "FEATURE_FACTS.md",
+      "site/**",
+      "examples/**",
+      "skill/**",
+      "tests/fixtures/**",
+      "docs/featurefacts-spec-v0.2.0-with-review/**",
+      "docs/haulout-*.md"
+    ],
+    "supported_ecosystems": [
+      "typescript-node"
+    ],
+    "files": [
+      {
+        "path": "app/.gitignore",
+        "sha256": "d1aec8becdfa546cbb4ed193ffd576dd7f353c742cb9f361be4b2697ecefe992",
+        "bytes": 210,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/.npmrc",
+        "sha256": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+        "bytes": 19,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/.vscode/extensions.json",
+        "sha256": "ff50ac4d3117e0b6c67db12ef129de498d92b6ec016ad0ccfe9a03a70fb77090",
+        "bytes": 85,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/.vscode/settings.json",
+        "sha256": "1d2f8c3e8eb3bc068819718c603cf9bea3fb175c8c28296bf229f53815b2eb0a",
+        "bytes": 57,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/package.json",
+        "sha256": "15860d1dbe06b9b3e0bea851a4198c1d2a92a3562727eefb1e395e2c3e0bca91",
+        "bytes": 913,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/pnpm-lock.yaml",
+        "sha256": "eab7d1c6c323eb4ff9dddcd0993028013b08a552f369eec15e415091d80fa162",
+        "bytes": 53654,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/pnpm-workspace.yaml",
+        "sha256": "27b336209bd8b917cefb2a3f8c97fb893829ce96cd2ec58ddc952a26080b0672",
+        "bytes": 35,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/README.md",
+        "sha256": "3dc79dc97f57b93a77e7e303976a3d0e4efe2fb3d74ac21362170d57da37e922",
+        "bytes": 914,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "app/src/app.d.ts",
+        "sha256": "3d450fc2fc7b0f10b6a9493a682769aac34f8b612f0f5d1bc4845a7b0bfe9f0a",
+        "bytes": 274,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/app.html",
+        "sha256": "824aebe3df873b559437d5e9dbf97f09f35c3b006608950cb582bcfbeae85faa",
+        "bytes": 331,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/hooks.server.ts",
+        "sha256": "b3f89f16f7cb3e8389f755e416e86b5ecedecb4964170b953b7290993f9762e3",
+        "bytes": 766,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/ActivityDayNav.svelte",
+        "sha256": "1047cdb7b78e818a0caa19e86702261bc3d908a9b37705304f944211b7d2854e",
+        "bytes": 2486,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/activityDays.ts",
+        "sha256": "5735377f91f1e48128533754d56ba574d9bf68e9a0f665bc06731826d7181f7f",
+        "bytes": 240,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/activityLinks.ts",
+        "sha256": "3ebfa6ded96dc65f91165e6c163de7d11d4fa7c7aa6c40a5d7cfb708158b1b52",
+        "bytes": 71,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/AddProjectsModal.svelte",
+        "sha256": "283e49f9e05cbfbdaeb05083151621fcc7a9c6e40706b89233ed0ef386aa5fbf",
+        "bytes": 3818,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/archiveVis.ts",
+        "sha256": "bddee2413348580ed2f80a9e40b360711fe547a77b636b392809a5b0c1900643",
+        "bytes": 65,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/batchApply.ts",
+        "sha256": "70337d3e811b1e20bb968412bf5d3feda7ff4d3e62adc05a72f8b8c16c542169",
+        "bytes": 189,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/BridgeHeader.svelte",
+        "sha256": "17b16acb88b918e290f390a18a057172b6ede4dfdbaaa5837789c1eff57652e9",
+        "bytes": 7555,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/briefFormat.ts",
+        "sha256": "9d5934ee4a448e2edf60e16476facee5cc61d432d7adba10766c8558ecff93da",
+        "bytes": 144,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/bulkProgress.ts",
+        "sha256": "dc1b98312d53201901b2f28dc558b771aa05ffea40ed6b077ee38a33c5403e12",
+        "bytes": 70,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/CellWait.svelte",
+        "sha256": "ab9a0c80b10447b9a9e3f232ab870a161694c273bec87e7f551d462c1955c97a",
+        "bytes": 739,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/ConfirmModal.svelte",
+        "sha256": "e4babca95af3b4d249b87f4ec008247e50adad9e35c01275cab7b46f453315c8",
+        "bytes": 26551,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/confirmProgress.ts",
+        "sha256": "df275fb989aebba3fdf98159d1df61085cd40e8f81d28040bbbc4015e6a8e5b5",
+        "bytes": 407,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/confirmRoster.ts",
+        "sha256": "a593d9879a79da585380d7e748eb871f630f8fdd026bda3268b33e28db01a7b0",
+        "bytes": 267,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/CrossChips.svelte",
+        "sha256": "77607def526f8dc8aec7f868414612c075c61cdec363b6cd1ba1cd15f411a696",
+        "bytes": 1537,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/crosswalk.ts",
+        "sha256": "395474c42ffe276821071a17b905cba4ecf2d4e2ef1490ee7ad7cf1db47a7c58",
+        "bytes": 128,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/dashboard.css",
+        "sha256": "7952ef628f1287aa7c8f5e61c2083356c75deda678eac861e2ba1125b0b8bb9c",
+        "bytes": 31093,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/dashboardTabs.ts",
+        "sha256": "650553a398f23c283e67691ba9098e728bab1d4b99f8beb78bdd7eac62ee10ab",
+        "bytes": 266,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/dashboardTypes.ts",
+        "sha256": "ad37feea3ee16f876630a0df1e957cb257d97e053ba430982954d9b7e0a8843c",
+        "bytes": 299,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/dashboardWrites.ts",
+        "sha256": "be77c4f9e8deab2fe09a58b9eab28334db8c751bad0d31ab0a6d1822b85e7ef3",
+        "bytes": 311,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/family.ts",
+        "sha256": "021968ecb0bf8b801445a9a1058caf8fb3d8564bbb2d9ade288a82e8a40cf069",
+        "bytes": 142,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/fetchError.ts",
+        "sha256": "1e6ce4f15dca5cce42192af865858de8d5e183429767b066e156a4cc25f1347d",
+        "bytes": 66,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/fleetDisplay.ts",
+        "sha256": "ac8570272e3c54d336f94db18cb8cf4c7735b52b71588b3e277ba47b6d938b0a",
+        "bytes": 321,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/formatTime.ts",
+        "sha256": "f85697acd5b2ac63d74f583757a16e58b3d4776cc3f23ce052fda9be7676d62b",
+        "bytes": 67,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/groupSelect.ts",
+        "sha256": "7b2ace8435d355e3934c6f6a50cc87212d83f14ce63996a47ba497aef520a97a",
+        "bytes": 154,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/helm-hud.css",
+        "sha256": "be1d6ea2a828ba6f3fb4b0e188e4503555dc7802e62a41f42625916f0fe8ba32",
+        "bytes": 2314,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/HelmMenu.svelte",
+        "sha256": "3303608de71740a8ef1abc9944c0d31570d3cc5624ef694649c5be90381d01b3",
+        "bytes": 11002,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/helmTippy.ts",
+        "sha256": "98d2b55dbfe36c9c067a11342d7c7423675c7c733bbd07d6ddd9941896dc96be",
+        "bytes": 1589,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/Icon.svelte",
+        "sha256": "316e033ad173068f49e80e94f71a5fedd39dadc6d67e9c3e54654e6ac321ce50",
+        "bytes": 424,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/IconButton.svelte",
+        "sha256": "8bcc61f279b6097eef3ff1a8ac9d5c486cb7d59a6809f209f3c96f51d263fca9",
+        "bytes": 2348,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/icons.ts",
+        "sha256": "d1bdcca045f1e153f3f21a6881611f56cd466d2607e7f4c4ad24867211fd21ad",
+        "bytes": 141,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/index.ts",
+        "sha256": "4beec0ade3bea5be651939b305bccf69d48506c74eda0a1a50a0dd6c79c4e91a",
+        "bytes": 75,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/InfoHint.svelte",
+        "sha256": "c90d10b0ad5eb94ce41a18734c832d02a0f0be82dd06ce1032a2ee361cb46b5b",
+        "bytes": 972,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/inventoryPatch.ts",
+        "sha256": "5bf9e27550722687c942208658ce66a2a04f1bc2b68d7e3f7ea6ec533d7c0fa2",
+        "bytes": 275,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/jobCancel.ts",
+        "sha256": "872577332b9d3a95c766b6c373abf031d891b3f4fcb4ceb7a9349e2717453943",
+        "bytes": 102,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/KnightRiderBar.svelte",
+        "sha256": "6565a54ea4c1b7464f9eba38c83d51a4a6f50d462942e1b7517e224af0c97403",
+        "bytes": 2744,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/landBatch.ts",
+        "sha256": "219e322271dd924f2898de14a8e0e71c22162048d1668dcb1e09c1f525098910",
+        "bytes": 1088,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/landDisplay.ts",
+        "sha256": "cee744e6abcc365d6caa2be90d5b0ed671d210aab908269a293e74840b857147",
+        "bytes": 280,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/localOnlyVis.ts",
+        "sha256": "ed0c74446abe89bca7f0bd42d41db868faedc6b968883e7bfe1f462d3e885871",
+        "bytes": 70,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/looks.ts",
+        "sha256": "0317ca419a5c075f10673e5f47fb8a15733255926522a6442919594c4bf09d4f",
+        "bytes": 278,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/npmPage.ts",
+        "sha256": "cc7b7338466311519a2291dc3f62882f65a4f3ad517dfb0c968a5981b7a94412",
+        "bytes": 82,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/OverflowMenu.svelte",
+        "sha256": "b9010f0481b32b5bc02a7e5fd81cd7009311670a98cb2ea40e816b780ea14b56",
+        "bytes": 2205,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/pluginPlan.ts",
+        "sha256": "beb7bcf8c3ef395368a31e5f5df1189c79efe5b697ccf840442e583beb7dec1d",
+        "bytes": 112,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/portDisplay.ts",
+        "sha256": "424078f967bc15657c25636d5eb24bf7f6b18c60d7d39fbed052a0aca66686cc",
+        "bytes": 99,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/PortFilterBar.svelte",
+        "sha256": "8a1ba67b2e535e7b6c8aa05d8085f061d14421a4d918b4668ae9d976292f41e7",
+        "bytes": 4500,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/portFilters.ts",
+        "sha256": "80da25d353a6ddfe2b4654cf5ff29f11ddf9aa1b0e6429b1a75b43e6636acefb",
+        "bytes": 157,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/publishBatch.ts",
+        "sha256": "ecfe0051495e5af60ce5bca9861261041095b98c9f735f5d83b4f7ace037fc4d",
+        "bytes": 1005,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/scanPaths.ts",
+        "sha256": "2dff0f11c119c20e880834ef9f80a6abcd4f7f75f17a4739ac0ae495c0877597",
+        "bytes": 66,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/SelectionGroups.svelte",
+        "sha256": "7d96c7a5f14cef80df3e0f338e80b9c858c8956464f22a4287e59d8235bb005d",
+        "bytes": 4768,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/server/helm.ts",
+        "sha256": "4085fe8b9c922a79e7e129b7e31eb97350ba7a65c77d627df55115a84c4b8422",
+        "bytes": 1086,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/server/visitorPage.ts",
+        "sha256": "79faa7d2cad7ca5c9f18be81ff86ef6dc38a88afce023b15efdaa7f6b7a7c391",
+        "bytes": 1148,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/siteDisplay.ts",
+        "sha256": "60247a238df054d30632e70b6e45282965ab91fe8b0ea4e9a6c697549a75f284",
+        "bytes": 339,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/TodayBoard.svelte",
+        "sha256": "49db00d26e407a794724663082c24e8779dbf6968be85ffcdf4741ec5d6aa883",
+        "bytes": 19192,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/Tooltip.svelte",
+        "sha256": "ddf5652e884b341ea9484570dec87443a252190df611274e2c09565543603b91",
+        "bytes": 1711,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/urlListParam.test.ts",
+        "sha256": "f56ad87f9ac3dd02b6a9f1312e643b03e6fff8cb9266242406d9ac4410f85927",
+        "bytes": 775,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "app/src/lib/urlListParam.ts",
+        "sha256": "651792611455a70b11e32ab75d41d96f94e1e093b1c45bfbde000835a5b7de41",
+        "bytes": 1517,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/VisitorFace.svelte",
+        "sha256": "f7b8b29f329536d81cfe3d312eedbaeb2de70132c8bacbf65e65587387afd834",
+        "bytes": 3986,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/VisitorTile.svelte",
+        "sha256": "cf39357f954c4deaa321fb059e4b37fcd36508b0eba4b29c42ce1e13d142e797",
+        "bytes": 5673,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/writeConfirm.ts",
+        "sha256": "5ca3a6a8fc12a6276ff99c13a1102454fa408f42eb72577e0634efa1011356ca",
+        "bytes": 394,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/writeGate.ts",
+        "sha256": "3f352470b832caff6757bb60244f309f731f59964c8146702443401c05e39f09",
+        "bytes": 810,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/+layout.svelte",
+        "sha256": "9ff7529edc41ed5fbc837bc0515640986305922d57acecacc21280a126445073",
+        "bytes": 266,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/routes/+page.server.ts",
+        "sha256": "ca0d3a37cd187227f9b98b20f501e82cab270243cf983677aca4d9719b539e17",
+        "bytes": 374,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/+page.svelte",
+        "sha256": "fd681fe3e1cdf965346ea4bb0386f6fea1288949845e3f436c56fdb69b5f4de2",
+        "bytes": 139363,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/activity/+server.ts",
+        "sha256": "c39d98d07ccc9b11bc14f667e872778efe30fba30800e74902510a1f80813661",
+        "bytes": 1310,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/archive/+server.ts",
+        "sha256": "8f0bd15ff46ba51e3dfa0cdecaeeafa27496bb2340a33e3fd5dd6a1b857aca1b",
+        "bytes": 1259,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/bump/+server.ts",
+        "sha256": "c53e01c1ca3350fb75a6c7b15b293b25cee7d6e975ba8ad06cc97396055f1ae8",
+        "bytes": 987,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/cascade/+server.ts",
+        "sha256": "a96b6a3011c02cbefe36fb2e975937f8a7ebdc16500c346ae69a0a993014c689",
+        "bytes": 1840,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/commit/+server.ts",
+        "sha256": "4acaa8b13ec64e1eeae45ec39c91a73ae134e0f7ac0ff7d4bd8eb7380b7f3a18",
+        "bytes": 1488,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/demo/+server.ts",
+        "sha256": "202ac25745a555974f16eca9f8c1a4640da4020bacc01606b2ca19e077a9b624",
+        "bytes": 797,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/enroll/+server.ts",
+        "sha256": "268ab3465d7499aa216f00965b181bb136af1961af20b9bdb0f34297951b589b",
+        "bytes": 1325,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/export/+server.ts",
+        "sha256": "457a970c4371a480fcb11a151053e79440775d66814213fc14a6a6f14848788d",
+        "bytes": 697,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/fetch/+server.ts",
+        "sha256": "c882f41f3240f03af4e1ef0385bda9faccc0c5aec36c03ddc0ab387a97d9c486",
+        "bytes": 655,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/global/+server.ts",
+        "sha256": "e8f2a80f34f0810f9aa8c6974a6de042470684e0152e2edb1eede5030e272f60",
+        "bytes": 1090,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/groups/+server.ts",
+        "sha256": "fc6a9b5ff203290c38566a2dc3c43a0b3ef2d325d824611bdbd8a1c130c3c823",
+        "bytes": 1092,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/land/+server.ts",
+        "sha256": "5e588d7f6d6f0dbf33e25c34ece10c21fc5967beef98c457eb8eeb4dcf682f6e",
+        "bytes": 2081,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/local-only/+server.ts",
+        "sha256": "e0f3b1bc559785c3b4c042352d15eb45e1d14952ab51ec67c0ec181404318a71",
+        "bytes": 1088,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/plugin/+server.ts",
+        "sha256": "d7f63a3e1683ac3a3b49feacdacda5676bbfca5ef59ebb8ec185234690bf1539",
+        "bytes": 2355,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/plugins/+server.ts",
+        "sha256": "eede7da98e70b218d524f88f8a2e92967b6947cb3b11170a3af9340e31580189",
+        "bytes": 1296,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/publish/+server.ts",
+        "sha256": "ba03ef93e04355435da77857bbb0ecb89f1d5a0aa10c8b6fc36fe9d51ddeb214",
+        "bytes": 2022,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/pull/+server.ts",
+        "sha256": "21a1e1310f4bab9b9e201e5bc9c3d53ad589e1fbbdf770c91746deab41465056",
+        "bytes": 770,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/push/+server.ts",
+        "sha256": "da307cf93425c0839f6ee160c9df03184d4a1189312b6970377ec592ec36364a",
+        "bytes": 877,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/ready/+server.ts",
+        "sha256": "cf6ed9409ab3975f0e1158c84dfb107aca2f5b5f123917b2d3888a11313947e1",
+        "bytes": 446,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/roster/+server.ts",
+        "sha256": "1c07a9f90e3e3f12b774bad1b19fd3b4ffb7126291b53bb48e89d704adefbda4",
+        "bytes": 1049,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/scan/+server.ts",
+        "sha256": "5081a2bae1ae939b59d80c40d320cfaecb067e1a3aac9b562e6ca6335ad0e9ef",
+        "bytes": 860,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/ship/+server.ts",
+        "sha256": "8475bcae75e8af9a05cd2032ce27ecb7827b2141013f53e906077030a7436258",
+        "bytes": 949,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/status/+server.ts",
+        "sha256": "4d117d23f1e6149790ad95ba0a96ecb64616449a1dccdd7201e50f615ed2b84b",
+        "bytes": 4298,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/unenroll/+server.ts",
+        "sha256": "bb3953c6ea774c0b7924b30d75469e18ecddedaa16e1dd37d977e57cac1c0531",
+        "bytes": 792,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/visitor/+server.ts",
+        "sha256": "595e386c74349d42acd2d44cbd00081b87ba21297d5ce670a50b65ec6a680ab3",
+        "bytes": 340,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/deck/+page.server.ts",
+        "sha256": "f842225cfeba4752ef162f8db635b78d729ace7b4013a4a189a2713a1bdfca7f",
+        "bytes": 226,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/deck/+page.svelte",
+        "sha256": "c1819c297c3aa608135b629a9a06a30956572fa4ff6ffc1bf5ca224ca1540c22",
+        "bytes": 263,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/routes/layout.css",
+        "sha256": "0238ca792d6f0a4b9cb6424306d5060d2639aab9bac69beb680014cd4a6c0cbb",
+        "bytes": 1068,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/routes/visitor/+page.server.ts",
+        "sha256": "230e653b69ef1c33a8079d55924993b9a1d49ff8a6d368059e23ef05352fbc8f",
+        "bytes": 169,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/visitor/+page.svelte",
+        "sha256": "f11ce11099e83f10507adb5a20dd5c12fc5a284a8e9177f768e1e1ad88a809a2",
+        "bytes": 88,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/static/logo.png",
+        "sha256": "d23a106f8e3e6ddaef5c6593819bf285e03b97313559f372e37624e433da3887",
+        "bytes": 665026,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/static/robots.txt",
+        "sha256": "b033243267bcbdab84cb01e940811d6d77a894d78f0470faaf0eb43f8e4efcc9",
+        "bytes": 63,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "app/tsconfig.json",
+        "sha256": "7a19bf2d57ef51ed3d7ddb0ed6ac3c4aa89025ab1cc2b0271132477905763134",
+        "bytes": 692,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/vite.config.ts",
+        "sha256": "fa8cabed0b828e57fc3904f116a0d08ac94e36f87b5e405ea791f808586e4e95",
+        "bytes": 1996,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "bin/localhelm.mjs",
+        "sha256": "2ce655edb28a7cbda2ffa4a907a226b2a35b6c2b26e107b99b814dda6d58eda8",
+        "bytes": 52,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "docs/GENESIS.md",
+        "sha256": "eb54b37f7e07e603ed0642943eac7ba26afd4c3fc069c0363e5062e25a497f2e",
+        "bytes": 34413,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/PHASE_1_BRIEF.md",
+        "sha256": "abd619d1a12bc5bf8d8a142efcecb466c2c50b48a0c54da0efb515f7c5fb6bf6",
+        "bytes": 13818,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/specs/bridge-header.md",
+        "sha256": "4a69478731cb13a21023719084791c084fc60567f5538852b3f6a33d6884c04a",
+        "bytes": 23285,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/specs/cheap-surfaces.md",
+        "sha256": "2cfa0fb9b5c56def06ccf005791dc4bca0498f2c28305f9f26630cc7e7a0cc52",
+        "bytes": 12997,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "package.json",
+        "sha256": "339c43283559a371d448e64991410002d31e651bd3b4b43e2ab93606b8455197",
+        "bytes": 1727,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "README.md",
+        "sha256": "e69606ff503d0c379759ed162a1f304db8f40d8a61beb92a7ea045bb1220f603",
+        "bytes": 4001,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "src/cli/main.ts",
+        "sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "bytes": 37471,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/activity.test.ts",
+        "sha256": "134f8a846bb3fb4d328b5ff050ea8458d1ec7ec5778e0465e250fcfd7ed0dc1c",
+        "bytes": 2060,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/activity.ts",
+        "sha256": "c1e3e08a524f613425ce73a5b3ddacf518a1352617c5c67eb743fd91d821b55e",
+        "bytes": 3052,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/activityDays.test.ts",
+        "sha256": "415dd2234197857b03907ef63fbb1cafd4fc693747b322eb824bc8771e357685",
+        "bytes": 2070,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/activityDays.ts",
+        "sha256": "4962506a0be0cc65d0d33af598967558544e2d221f867f4507423038ef40489e",
+        "bytes": 3442,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/activityLinks.test.ts",
+        "sha256": "eb8203ed2fd664a0d78aa95d307b5e2f045c812f1c84f51fd5361306b942474d",
+        "bytes": 799,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/activityLinks.ts",
+        "sha256": "6ccd6b1bbf06c6618be2d2a0a3e0816fdc8c90ddc84884a945fc35d3cdb663d3",
+        "bytes": 586,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/archive.test.ts",
+        "sha256": "8de9a51e434e5eb0ddb2e0cc90b16de2d43a676d8a0a054f84b5bb88f25ab774",
+        "bytes": 2220,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/archive.ts",
+        "sha256": "5552ef8cbbc70b964bf4fd8adcd39f3e259494649f7286661927c3cc1e3d6392",
+        "bytes": 3660,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/archiveVis.ts",
+        "sha256": "9ad80775b5b08e073df77ff31da68265e7e27458bd8c04dfda5f6d54d3f68a42",
+        "bytes": 420,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/batchApply.test.ts",
+        "sha256": "dee653633c30fc00815fef6536a0d5318e87ec63c2eb980280c7e6e7c49cf09e",
+        "bytes": 1513,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/batchApply.ts",
+        "sha256": "0bc1a1f1bff7df9052b06fbac444a1a476584a5b0248e523a3dbee6192e0c67a",
+        "bytes": 1620,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/brief.test.ts",
+        "sha256": "82f48dbc421e1cc245cb439bfee23c2c888d97fa18887aef7d370765864ec9e6",
+        "bytes": 1311,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/brief.ts",
+        "sha256": "bbef276fc8405cdccd88bd5fb82f7e011648429d5bfe04aa46924a66682cf7b8",
+        "bytes": 1196,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/briefFormat.ts",
+        "sha256": "a041162257d71f7153ad931e04072a75f675c064eefc4e43c4126c85c64ae65b",
+        "bytes": 3038,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/bulkProgress.test.ts",
+        "sha256": "7fa15c13fc0baa0e6c2c5df705f6045e14ca01cd3022ca95f89d72a60d02a56b",
+        "bytes": 624,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/bulkProgress.ts",
+        "sha256": "b851abce9da85c838892352b1c21e313aab4a80b0c1c34891a19483de7b8d647",
+        "bytes": 461,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/bump.test.ts",
+        "sha256": "fd6cc7b8e3be2b76705d02ad3a8afb5861cd5dbd6c13f54d82012cb3774d7b8f",
+        "bytes": 6787,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/bump.ts",
+        "sha256": "4bb0e3377e81d62e68022ca8384cedbe9932552a6f147323e0ae7c9f06194deb",
+        "bytes": 3524,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/cascade.test.ts",
+        "sha256": "0ae04d995b32cdf27e671e81a6b48cb86d9998cd3042b02637767be6080417b2",
+        "bytes": 8130,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/cascade.ts",
+        "sha256": "ffef1ce38b93a91e970ada4f5284cfc6191877c468853c53212498eb79a29cad",
+        "bytes": 11775,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/commit.ts",
+        "sha256": "dc20dbaf66c428c611ee92e6c4eb9ce57aa20e33294d8715a03e8d726ef9e4ff",
+        "bytes": 1772,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/confirmProgress.test.ts",
+        "sha256": "e7731aac0a266f7fecc31ac1e222b2726b613aa28e2b95ef4f2c18289b70f62c",
+        "bytes": 4122,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/confirmProgress.ts",
+        "sha256": "7f233a21a2dd8067925aaa33089f1ada7fcfa301995694b7742d3e7caf29a8de",
+        "bytes": 4918,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/confirmRoster.test.ts",
+        "sha256": "1c41c185a0a27e600f421a6be153f8042f9b012ed55c0c895cfd9cc0066993d7",
+        "bytes": 3285,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/confirmRoster.ts",
+        "sha256": "1a93d31691e5170af1b59623ef53e73d89ce1116830c88a3e2854bd0a26bf975",
+        "bytes": 4296,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/crosswalk.test.ts",
+        "sha256": "653ce1fff0435b9627ddf7b04a5107936a5daea393a9d744b3d0aa096285fcbb",
+        "bytes": 552,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/crosswalk.ts",
+        "sha256": "fde8011695f957edb13c362dc8d78df450230d051e790f0cb29b0e3081824475",
+        "bytes": 764,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/dashboardBundle.test.ts",
+        "sha256": "fdb566f0034dc931e01fb975b98007bd06cb285fbe343fad29b339ff2414475f",
+        "bytes": 1594,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/dashboardBundle.ts",
+        "sha256": "a830e6192f811d6a8126a371a87e5e4b19f8159f2e939615b78e09e411deea7b",
+        "bytes": 1476,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/dashboardJob.ts",
+        "sha256": "11f33d6eaeefefb94d5856be1e186de584cd77774c03925b8bb8b25467fd253d",
+        "bytes": 2918,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/dashboardTabs.test.ts",
+        "sha256": "7142d8f76d6f8395200dbcde105cef43b8e418dd20dce8d57cc3f2dcbd6de993",
+        "bytes": 2228,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/dashboardTabs.ts",
+        "sha256": "67b6ad7d89bb485e5db49e15e76634e03d8f5542b6c1c0a80fc9b453c3ddbe83",
+        "bytes": 2564,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/dashboardTypes.ts",
+        "sha256": "08fc99127bbe2f81f2f8b36ad7702121f9765f0db6eda3713879be4453a23c1c",
+        "bytes": 1203,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/dashboardWrites.ts",
+        "sha256": "d852cecb7bc12a13009b4d5c0c78c691f932f3734154a82d0ab060298ddab0ef",
+        "bytes": 541,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/demoMode.test.ts",
+        "sha256": "264d79cf9b3f7c4e5b5101fa8a5a8ec72a865ae452aa45016b975ca2c6eaf4b7",
+        "bytes": 4161,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/demoMode.ts",
+        "sha256": "c1e5ac3dfc640e6bcc468a8a0061b580d0991780ba92ac554a3a847f4e9d0feb",
+        "bytes": 3315,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/deps.ts",
+        "sha256": "ef243eb574693bdff214f4fcc72c03783659ddaf498fed3f5c302030e61d8171",
+        "bytes": 1570,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/dirtCommit.test.ts",
+        "sha256": "aa9521d64044dea60f669896b7288fee0a021d6cdc35e62af4860369bb4a27a1",
+        "bytes": 11436,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/dirtCommit.ts",
+        "sha256": "4e9e387bce743b73e33730ca2480e543445874009578bc7ac7384259899857c8",
+        "bytes": 16892,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/enroll.ts",
+        "sha256": "e8f020601bf0cbdab71a0fcd5f820ebd314c5dabc49c4fa4035c1eb795c1cb18",
+        "bytes": 5086,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/export.ts",
+        "sha256": "e15ecbdd459826767e235f990e047016fea120e87110411f0a823740a8250292",
+        "bytes": 1002,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/factsVersion.test.ts",
+        "sha256": "6ea1b7ede2f74159fe0061335882bb32c7f4f281bcc1f3255f242ac547611b29",
+        "bytes": 1694,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/factsVersion.ts",
+        "sha256": "f2f31321287cd70f55a68c47f1ba23168f6e5d5c3cc9a9220237934bcd0054ed",
+        "bytes": 1527,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/family.test.ts",
+        "sha256": "b4e626511ec362cf9efb82f029b3153fb93f9db918072989eae0dc42bd27aedd",
+        "bytes": 1634,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/family.ts",
+        "sha256": "621502e74a38392fa17e17cfcd4167bdaee766ae9c403857cfc6fe2b5a62e00b",
+        "bytes": 1761,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/fetchError.test.ts",
+        "sha256": "ab3ac7be00f22c28142858ae965fb0bf1442e838c9f867b3c28f27a0c958cf4d",
+        "bytes": 495,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/fetchError.ts",
+        "sha256": "d427525f38c5eafd951d521f088bfb631e9affc2879793020c9338b4dc1f0b4c",
+        "bytes": 568,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/filepressFromFleet.test.ts",
+        "sha256": "5b2e7c77dc6e890489841974c2d1f84b29cd68128737363d0d52112f5a3dc713",
+        "bytes": 834,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/filepressFromFleet.ts",
+        "sha256": "e73e9a03a0a1087ae89f74797f6fd2dc70159ae5444fb7cb9d734b0851ff8acf",
+        "bytes": 1370,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/fleetDisplay.test.ts",
+        "sha256": "60bea2e4749c31c54e6eb1f1a8e1a127475ae988c2a3f95fb51ce08630d47f12",
+        "bytes": 4203,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/fleetDisplay.ts",
+        "sha256": "4d8772f2a8f1768fb475a63fbcbded2b6dbdd1b839946af76e053a522f27858e",
+        "bytes": 4641,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/fleetWriteActions.ts",
+        "sha256": "b4d922483bb46878985f5129d5f1a2a7d96ca060edc7017c778810d95684ea2d",
+        "bytes": 38153,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/fleetWrites.ts",
+        "sha256": "3ade21be05c1ff3300acc897ceded24e458a4eb7943d338ddb53eaf96a4ebe33",
+        "bytes": 11615,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/formatTime.test.ts",
+        "sha256": "f4449c7473f88af9c67158a5ffb9517ff9657b86c58804fb4e8fe55489eff72e",
+        "bytes": 806,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/formatTime.ts",
+        "sha256": "8cce155ab4b1ed47124fdb67816f84ce800d19ac2d9bf52f8a71f96d4dfc73c3",
+        "bytes": 485,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/git.test.ts",
+        "sha256": "cbeba47b07bc7ec41a146176367d33ffd3fe6a3156dddebc3fa7239e4d10804e",
+        "bytes": 8721,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/git.ts",
+        "sha256": "988152508473778e9ec7b20f184c3aa5e9cdaf99c647a751219c42f81a883782",
+        "bytes": 19462,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/githubPublish.test.ts",
+        "sha256": "f0c34b9a392ac8117dfe9bbca9df4a4d2e9d37319b3f131aec541a20a0758a32",
+        "bytes": 2094,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/githubPublish.ts",
+        "sha256": "8c457b6af41c8aa39df4b47a94c013c165452a9db2a6e531ae6258e7183e6022",
+        "bytes": 2702,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/globalInstall.test.ts",
+        "sha256": "247386be87740831c3c279a09c47552f017b1ba7ba26b083935227801e57edff",
+        "bytes": 5761,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/globalInstall.ts",
+        "sha256": "8ddfecb4b9aa44c5e06dea8d44e1b88d5887235577931b51e0b23975bb97a161",
+        "bytes": 8798,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/groups.test.ts",
+        "sha256": "b3a4b8350eb53aed43cf58f0db4352e899344c96079fd6a8a592ae1685b47ea5",
+        "bytes": 2955,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/groups.ts",
+        "sha256": "542dec8c25a452df10c83ffb572b3422214eaffcb5a88125169a616307c11c88",
+        "bytes": 4139,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/groupSelect.ts",
+        "sha256": "8d21449d13a62c8e3d782f9345ae2a2310e1cc2e05f3915919e15e035fa808d8",
+        "bytes": 690,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/ignorefile.ts",
+        "sha256": "439c3155ec61cf9d71fe1bba8613203f9977bb0fcd949db8b877cbcaf7804b95",
+        "bytes": 1446,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/index.ts",
+        "sha256": "aade66178ae0ecb8aa050261f5f34d7d3371c7d1a21329802124b8e78f4acd34",
+        "bytes": 10727,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/inventoryPatch.test.ts",
+        "sha256": "f0e96c0cf342c0aade0f9f36f2f3c92f4c01ef35e7a5bbd68c58f18239b4d89a",
+        "bytes": 2624,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/inventoryPatch.ts",
+        "sha256": "47e93e1e685985470befdbcc83187e4fa60e919904b5d5c4ec356ce51a7301ce",
+        "bytes": 3872,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/jobCancel.test.ts",
+        "sha256": "63118951cae6fb4e590e64afd00197e27a5a2a7a72005e99b65fe775504abc70",
+        "bytes": 737,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/jobCancel.ts",
+        "sha256": "254428240f709d68d8406dedf63049269dd22f84c8910dfe6bdcd867015c1696",
+        "bytes": 763,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/land.test.ts",
+        "sha256": "a3008bbc4d0926473a554fc3ab210f914cfb2b04aa6523c475b34de1d05ff11c",
+        "bytes": 6457,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/land.ts",
+        "sha256": "6c077d7f72dd61f6dd8fa9f7670c7d575319118257ed37eed112255a30b1fff2",
+        "bytes": 8511,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/landDisplay.test.ts",
+        "sha256": "2297c0088e2f2e1616eb7a16ef2aba36195bdc107a168d386797e1e93ce37f36",
+        "bytes": 1659,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/landDisplay.ts",
+        "sha256": "c7bfb2eb0389da61bda378a491e92334aba636749134aec6d0f288067e657107",
+        "bytes": 3188,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/landShips.test.ts",
+        "sha256": "ff22a341e6d1de17238f4bd5b4f91accc3651c84a3acbf81bddbb4e8536d641c",
+        "bytes": 1533,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/landShips.ts",
+        "sha256": "152dfb74943b65c6c96763ceefbf7cd4cbb97cc408671eb512053e2c648f1754",
+        "bytes": 5944,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/localOnly.test.ts",
+        "sha256": "b7eacfe8e3ce29779c74cac0b71bb263c00f8c92c293c57cefe7735aa5beee3b",
+        "bytes": 1585,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/localOnly.ts",
+        "sha256": "fd31782f6e2b64db62bd485728a428472d4cf5aa556fa3b9d12686722e5d4cf6",
+        "bytes": 2871,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/localOnlyVis.ts",
+        "sha256": "3906144c4e6e9c71bec60574d1117d7ed8934233adb7360dad5ac8ce3e9f46f6",
+        "bytes": 413,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/lock.test.ts",
+        "sha256": "a98f11c6c7aeb80d873c4264d1681e34a8fea89bf72f373e15d3eaeac9176974",
+        "bytes": 2318,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/lock.ts",
+        "sha256": "4b6b781b9638805d042911964019a4e1297d425afce02bd7ac6758edf376c3da",
+        "bytes": 3286,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/looks.test.ts",
+        "sha256": "de7a49deed782d5d3b89a60c1a4bfc770f4930c4f1aa55953817d33d5a67ba47",
+        "bytes": 4823,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/looks.ts",
+        "sha256": "f2de32d6f2746daeec10594d37c80f540c7a468a82c95e132fa1212fce0d02a0",
+        "bytes": 7743,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/loopback.test.ts",
+        "sha256": "25eb938fad6684e309df1a9b46ababa58079746d77d4001d6875ee14a6cefa9d",
+        "bytes": 2374,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/loopback.ts",
+        "sha256": "6c82fa7e7e0f0cf27e36b7d562a5e0f035cb1bb4f2be12398d03bb3ee5eca588",
+        "bytes": 4302,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/manifest.test.ts",
+        "sha256": "76d1e6d70251a82290dc976bd304011cfcf1cedb1e14423ce3908e5fdeaac94a",
+        "bytes": 4278,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/manifest.ts",
+        "sha256": "7bbfd0a8299a60cc2195d2693230cf8d303c516edcb2ee7eb0021dd684a3db85",
+        "bytes": 4773,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/npm.test.ts",
+        "sha256": "45640be7a95f1ae755399a26183af15db93799e5c7e1d9dcbe4d647405c9515a",
+        "bytes": 6496,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/npm.ts",
+        "sha256": "0e16f4a715eb8a03ed04675d8a07e34e61dd5b37876855a5c6d036cc4ca91a24",
+        "bytes": 14556,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/npmPage.test.ts",
+        "sha256": "00d039d455c865a7a8d8fa95f244bf131e13f5e91f0b8cf3cd23bf966991f7c0",
+        "bytes": 805,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/npmPage.ts",
+        "sha256": "3359d727c235065fad0d0db5c35241d92dde9b922306e9206b15388816ec14f8",
+        "bytes": 869,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/paths.test.ts",
+        "sha256": "8ebbcc9eac6b3c39d0f9c92d588ed3b330428c8245c19c2dd84c49c85c6968d7",
+        "bytes": 1215,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/paths.ts",
+        "sha256": "943e403e925ba63ebfa5c7fe906639a4b5efb8be732d4281f15b5d8b92cc3658",
+        "bytes": 2399,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/pins.test.ts",
+        "sha256": "ff565deda7f27b1245decb38b4364be5412da5ea8e93c07c63ef2f7c91c20093",
+        "bytes": 799,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/pins.ts",
+        "sha256": "d3b89b8682302569a5a5bb7ecde88270325d1286bbc0535fa6b36c8d6a332b8b",
+        "bytes": 1539,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/pinwrite.ts",
+        "sha256": "32c59cfc9c1689bb08a095493f317fd25e87793606b845c235f4ac930864a982",
+        "bytes": 1571,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/pkg.ts",
+        "sha256": "a5baed205827ba3e30475788b373b651952555631674102df91ac600c768915b",
+        "bytes": 2899,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/plainError.ts",
+        "sha256": "c70e9d7a1634c9d55d84abb9dad92540bf4a9524d7c8098fd923c9d0ca4e5a43",
+        "bytes": 8291,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/plugin.test.ts",
+        "sha256": "4b554d32172bb1a0748b9c095f788b57e7b97cc843d050300acc4c22f38b2043",
+        "bytes": 9645,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/plugin.ts",
+        "sha256": "5c53083a43ef9bb4fcedca84d82c8866fe1fd1e3f75b589ab6ecbf40b35238b3",
+        "bytes": 6327,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/pluginPlan.ts",
+        "sha256": "dfde6e1d2601c6d74d7baba52c062894083bf15bb71c0c0e22e6e0c2ab6b5a62",
+        "bytes": 5765,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/pluginPrefs.test.ts",
+        "sha256": "5077aaf3dc5edc0028b1d4a356ba8bc121c7ac3a1ea9395fe08bed63507968f9",
+        "bytes": 1162,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/pluginPrefs.ts",
+        "sha256": "d2d5ff59c625f4c4e03206bc3605d44649cbf4931f55b625e6cc07c0a34b310a",
+        "bytes": 2157,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/portDisplay.test.ts",
+        "sha256": "e2b118eb89ea42d947ba1837449bd383ba542a08f50562c0958626ba8bebc391",
+        "bytes": 1755,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/portDisplay.ts",
+        "sha256": "c3e47094768036b21a5856a76b0aac7849a9291feebe0cec19909c0ce1ebc1b5",
+        "bytes": 1515,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/portFilters.test.ts",
+        "sha256": "81cf2eb636c5b5a1e7e5487273a3a77f65df52789c5177c30b7e0e3d9e9efc6b",
+        "bytes": 2274,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/portFilters.ts",
+        "sha256": "13cb1f6aebb744a66d455f774d97895d97fd774f43e927c290018670d5c8a3ee",
+        "bytes": 1482,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/publish.test.ts",
+        "sha256": "dc11f6aa98b6e850a453490aa97f1b9f1cf0a0784bd6ae0d28155cef5d3e54da",
+        "bytes": 13729,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/publish.ts",
+        "sha256": "5e13d6157816efca1dfdf0310608d08170cd07f901c5a39c005457a6a652131b",
+        "bytes": 10420,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/publishBatch.test.ts",
+        "sha256": "5b90ae673bf03db45c0aa80784da4baf728aed98ca1f95519242edabef251c5a",
+        "bytes": 395,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/publishDisplay.ts",
+        "sha256": "fa1edebcad832064ec0bbf11edf2092a04d129fe023d117a10ace4ff97a6016f",
+        "bytes": 781,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/publishResults.ts",
+        "sha256": "fbabf674131cd8cfd12fdaad84c6900a20b6135ada1c437671c597f050593ae5",
+        "bytes": 4058,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/publishTypes.ts",
+        "sha256": "c1d22dc6a265cd8bbd87e6e6effde6d12c87acf65a6f9d65e44294f5904bba22",
+        "bytes": 368,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/ready.ts",
+        "sha256": "3c93def718da2e65de2ba6f52ea43f1fa166f5ad09c505d331ea6c2f0f090937",
+        "bytes": 1153,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/roster.test.ts",
+        "sha256": "fb0f885e34d9b78fcb4e22a10eb56b805090abca3ff40d083e088951168569a4",
+        "bytes": 511,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/roster.ts",
+        "sha256": "8d95701fdb8662f52436a5dcb2b01229a4b14aee0b1960aa410300467f480a5a",
+        "bytes": 506,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/scan.test.ts",
+        "sha256": "a2cd2ab160f1fac5efc8bd5da682149da129fd0c8f6378248992fc1169004d31",
+        "bytes": 922,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/scan.ts",
+        "sha256": "3664db2c466259ff23648faf83c088d33bbc81807686c2c4297eca9acfb029f2",
+        "bytes": 3828,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/scanPaths.ts",
+        "sha256": "6791155f3958345ee1311142f07c11ba64956065bf88e10030c3b14649d4b660",
+        "bytes": 327,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/scriptShip.test.ts",
+        "sha256": "e9028d3e7d7f9c9e7bd0ca702c7cc8f9c755f3c3ceac5f7a7489371c9777ff34",
+        "bytes": 4512,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/scriptShip.ts",
+        "sha256": "b903e90a36a5d70f9ac4054588bd58459770e88ac2449021243f06ed833a1b46",
+        "bytes": 4420,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/semver.test.ts",
+        "sha256": "1d3f1540cae6f29e22187a62a14118557e749b2696dae61a41d416eb680de325",
+        "bytes": 929,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/semver.ts",
+        "sha256": "cdb51468ceac09497b0b91735a2c67b59806bfc01e2003f29c2e9edc7b7d0865",
+        "bytes": 2507,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/serve.test.ts",
+        "sha256": "1df170e1fc5b78a49b10c183eef8045745f747ea8a2d26f6302423abd4f7d296",
+        "bytes": 2135,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/serve.ts",
+        "sha256": "bd7ab41b5f5b2ed8846bfe5edf1070a35e5839197b4b64c0b72400f1c89286f0",
+        "bytes": 5648,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/servePort.test.ts",
+        "sha256": "b3a6cb5f2d1400ea5c3daf7c62404a45d0acd84b1ce2e830459a87116f84facc",
+        "bytes": 2529,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/servePort.ts",
+        "sha256": "7ba344e1b5f483e7956ea7b5e1ac48b1011002bc99c4013d687c1d1805d49719",
+        "bytes": 5641,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/siteDisplay.test.ts",
+        "sha256": "875766885f2cc3042f494f28646045a5618226888b15a295bf411b450789f1f0",
+        "bytes": 6403,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/siteDisplay.ts",
+        "sha256": "3e343ac645c28173df98657250561c008304d2df7a7f6cf2ba012a243c402d78",
+        "bytes": 7566,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/siteWriteActions.ts",
+        "sha256": "1394c44312022b05eb910c5e31eac324b263ff8dd407c7d7920085c3b03adae8",
+        "bytes": 14201,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/status.test.ts",
+        "sha256": "37476856beba6ff2373a0f26244f1ac2938f50d8594ca6718cc0c6a7d75efb97",
+        "bytes": 6487,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/status.ts",
+        "sha256": "f6d5ea28ba858330a795277a9e7d58e87e30b3bcc47d6ec9fc39a46af2d8d803",
+        "bytes": 11583,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/types.ts",
+        "sha256": "56a32297a60ded5ce991e83b61b6c7d1bf93b77bad791f50f7a0fc50ec0d7ca8",
+        "bytes": 2744,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/visitorMachine.ts",
+        "sha256": "d456c732fa0efc6cc4b4f28d0387515b39d46ad68e046f3f48f05c9ce60ac0aa",
+        "bytes": 1259,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/visitorTiles.test.ts",
+        "sha256": "21a28bba07b4a53599b453acb3b06aacbd1635f3bf27948b29f141e5755d49d2",
+        "bytes": 1852,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/visitorTiles.ts",
+        "sha256": "4a89fe2a6c4386a25dc4ef19ae1f53f9e5f5617f24fa1360a6b09e602470e6b0",
+        "bytes": 1899,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/workspace.ts",
+        "sha256": "b1ef5ed62f52d7b673496ba581a00687b6395dd38a9111d5105578287efc0a67",
+        "bytes": 163,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/writeConfirm.test.ts",
+        "sha256": "708ef8cec9d8c89642dbd3863b4cdbe254542e439351f2631b328c15a35ccd86",
+        "bytes": 6529,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/writeConfirm.ts",
+        "sha256": "b211a277e5c6bba08fd2522883156190b7f338ce8122f14864cf41ac914af24a",
+        "bytes": 13311,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/writeGate.test.ts",
+        "sha256": "8449e514cae2ac65825c8634f04448ba066bc8a64ced8a93e78eb274cc21e095",
+        "bytes": 16603,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/writeGate.ts",
+        "sha256": "e772beeee4e79559efdb6146288c44abb6f103cd3f8e0df438b62e1ab587cc20",
+        "bytes": 1176,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      }
+    ],
+    "exclusions": [
+      {
+        "path": ".env.example",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": ".featurefacts",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": ".git",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": "app/.svelte-kit",
+        "reason": "generated-output"
+      },
+      {
+        "path": "app/node_modules",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": "dist",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": "node_modules",
+        "reason": "exclude-pattern"
+      },
+      {
+        "path": "site",
+        "reason": "exclude-pattern"
+      }
+    ]
+  },
+  "adapters": [
+    {
+      "id": "typescript-tree",
+      "version": "0.2.0",
+      "kind": "tree",
+      "state": "completed",
+      "eligible_files": [
+        "app/.gitignore",
+        "app/.npmrc",
+        "app/.vscode/extensions.json",
+        "app/.vscode/settings.json",
+        "app/package.json",
+        "app/pnpm-lock.yaml",
+        "app/pnpm-workspace.yaml",
+        "app/README.md",
+        "app/src/app.d.ts",
+        "app/src/app.html",
+        "app/src/hooks.server.ts",
+        "app/src/lib/ActivityDayNav.svelte",
+        "app/src/lib/activityDays.ts",
+        "app/src/lib/activityLinks.ts",
+        "app/src/lib/AddProjectsModal.svelte",
+        "app/src/lib/archiveVis.ts",
+        "app/src/lib/batchApply.ts",
+        "app/src/lib/BridgeHeader.svelte",
+        "app/src/lib/briefFormat.ts",
+        "app/src/lib/bulkProgress.ts",
+        "app/src/lib/CellWait.svelte",
+        "app/src/lib/ConfirmModal.svelte",
+        "app/src/lib/confirmProgress.ts",
+        "app/src/lib/confirmRoster.ts",
+        "app/src/lib/CrossChips.svelte",
+        "app/src/lib/crosswalk.ts",
+        "app/src/lib/dashboard.css",
+        "app/src/lib/dashboardTabs.ts",
+        "app/src/lib/dashboardTypes.ts",
+        "app/src/lib/dashboardWrites.ts",
+        "app/src/lib/family.ts",
+        "app/src/lib/fetchError.ts",
+        "app/src/lib/fleetDisplay.ts",
+        "app/src/lib/formatTime.ts",
+        "app/src/lib/groupSelect.ts",
+        "app/src/lib/helm-hud.css",
+        "app/src/lib/HelmMenu.svelte",
+        "app/src/lib/helmTippy.ts",
+        "app/src/lib/Icon.svelte",
+        "app/src/lib/IconButton.svelte",
+        "app/src/lib/icons.ts",
+        "app/src/lib/index.ts",
+        "app/src/lib/InfoHint.svelte",
+        "app/src/lib/inventoryPatch.ts",
+        "app/src/lib/jobCancel.ts",
+        "app/src/lib/KnightRiderBar.svelte",
+        "app/src/lib/landBatch.ts",
+        "app/src/lib/landDisplay.ts",
+        "app/src/lib/localOnlyVis.ts",
+        "app/src/lib/looks.ts",
+        "app/src/lib/npmPage.ts",
+        "app/src/lib/OverflowMenu.svelte",
+        "app/src/lib/pluginPlan.ts",
+        "app/src/lib/portDisplay.ts",
+        "app/src/lib/PortFilterBar.svelte",
+        "app/src/lib/portFilters.ts",
+        "app/src/lib/publishBatch.ts",
+        "app/src/lib/scanPaths.ts",
+        "app/src/lib/SelectionGroups.svelte",
+        "app/src/lib/server/helm.ts",
+        "app/src/lib/server/visitorPage.ts",
+        "app/src/lib/siteDisplay.ts",
+        "app/src/lib/TodayBoard.svelte",
+        "app/src/lib/Tooltip.svelte",
+        "app/src/lib/urlListParam.test.ts",
+        "app/src/lib/urlListParam.ts",
+        "app/src/lib/VisitorFace.svelte",
+        "app/src/lib/VisitorTile.svelte",
+        "app/src/lib/writeConfirm.ts",
+        "app/src/lib/writeGate.ts",
+        "app/src/routes/+layout.svelte",
+        "app/src/routes/+page.server.ts",
+        "app/src/routes/+page.svelte",
+        "app/src/routes/api/activity/+server.ts",
+        "app/src/routes/api/archive/+server.ts",
+        "app/src/routes/api/bump/+server.ts",
+        "app/src/routes/api/cascade/+server.ts",
+        "app/src/routes/api/commit/+server.ts",
+        "app/src/routes/api/demo/+server.ts",
+        "app/src/routes/api/enroll/+server.ts",
+        "app/src/routes/api/export/+server.ts",
+        "app/src/routes/api/fetch/+server.ts",
+        "app/src/routes/api/global/+server.ts",
+        "app/src/routes/api/groups/+server.ts",
+        "app/src/routes/api/land/+server.ts",
+        "app/src/routes/api/local-only/+server.ts",
+        "app/src/routes/api/plugin/+server.ts",
+        "app/src/routes/api/plugins/+server.ts",
+        "app/src/routes/api/publish/+server.ts",
+        "app/src/routes/api/pull/+server.ts",
+        "app/src/routes/api/push/+server.ts",
+        "app/src/routes/api/ready/+server.ts",
+        "app/src/routes/api/roster/+server.ts",
+        "app/src/routes/api/scan/+server.ts",
+        "app/src/routes/api/ship/+server.ts",
+        "app/src/routes/api/status/+server.ts",
+        "app/src/routes/api/unenroll/+server.ts",
+        "app/src/routes/api/visitor/+server.ts",
+        "app/src/routes/deck/+page.server.ts",
+        "app/src/routes/deck/+page.svelte",
+        "app/src/routes/layout.css",
+        "app/src/routes/visitor/+page.server.ts",
+        "app/src/routes/visitor/+page.svelte",
+        "app/static/logo.png",
+        "app/static/robots.txt",
+        "app/tsconfig.json",
+        "app/vite.config.ts",
+        "bin/localhelm.mjs",
+        "docs/GENESIS.md",
+        "docs/PHASE_1_BRIEF.md",
+        "docs/specs/bridge-header.md",
+        "docs/specs/cheap-surfaces.md",
+        "package.json",
+        "README.md",
+        "src/cli/main.ts",
+        "src/lib/activity.test.ts",
+        "src/lib/activity.ts",
+        "src/lib/activityDays.test.ts",
+        "src/lib/activityDays.ts",
+        "src/lib/activityLinks.test.ts",
+        "src/lib/activityLinks.ts",
+        "src/lib/archive.test.ts",
+        "src/lib/archive.ts",
+        "src/lib/archiveVis.ts",
+        "src/lib/batchApply.test.ts",
+        "src/lib/batchApply.ts",
+        "src/lib/brief.test.ts",
+        "src/lib/brief.ts",
+        "src/lib/briefFormat.ts",
+        "src/lib/bulkProgress.test.ts",
+        "src/lib/bulkProgress.ts",
+        "src/lib/bump.test.ts",
+        "src/lib/bump.ts",
+        "src/lib/cascade.test.ts",
+        "src/lib/cascade.ts",
+        "src/lib/commit.ts",
+        "src/lib/confirmProgress.test.ts",
+        "src/lib/confirmProgress.ts",
+        "src/lib/confirmRoster.test.ts",
+        "src/lib/confirmRoster.ts",
+        "src/lib/crosswalk.test.ts",
+        "src/lib/crosswalk.ts",
+        "src/lib/dashboardBundle.test.ts",
+        "src/lib/dashboardBundle.ts",
+        "src/lib/dashboardJob.ts",
+        "src/lib/dashboardTabs.test.ts",
+        "src/lib/dashboardTabs.ts",
+        "src/lib/dashboardTypes.ts",
+        "src/lib/dashboardWrites.ts",
+        "src/lib/demoMode.test.ts",
+        "src/lib/demoMode.ts",
+        "src/lib/deps.ts",
+        "src/lib/dirtCommit.test.ts",
+        "src/lib/dirtCommit.ts",
+        "src/lib/enroll.ts",
+        "src/lib/export.ts",
+        "src/lib/factsVersion.test.ts",
+        "src/lib/factsVersion.ts",
+        "src/lib/family.test.ts",
+        "src/lib/family.ts",
+        "src/lib/fetchError.test.ts",
+        "src/lib/fetchError.ts",
+        "src/lib/filepressFromFleet.test.ts",
+        "src/lib/filepressFromFleet.ts",
+        "src/lib/fleetDisplay.test.ts",
+        "src/lib/fleetDisplay.ts",
+        "src/lib/fleetWriteActions.ts",
+        "src/lib/fleetWrites.ts",
+        "src/lib/formatTime.test.ts",
+        "src/lib/formatTime.ts",
+        "src/lib/git.test.ts",
+        "src/lib/git.ts",
+        "src/lib/githubPublish.test.ts",
+        "src/lib/githubPublish.ts",
+        "src/lib/globalInstall.test.ts",
+        "src/lib/globalInstall.ts",
+        "src/lib/groups.test.ts",
+        "src/lib/groups.ts",
+        "src/lib/groupSelect.ts",
+        "src/lib/ignorefile.ts",
+        "src/lib/index.ts",
+        "src/lib/inventoryPatch.test.ts",
+        "src/lib/inventoryPatch.ts",
+        "src/lib/jobCancel.test.ts",
+        "src/lib/jobCancel.ts",
+        "src/lib/land.test.ts",
+        "src/lib/land.ts",
+        "src/lib/landDisplay.test.ts",
+        "src/lib/landDisplay.ts",
+        "src/lib/landShips.test.ts",
+        "src/lib/landShips.ts",
+        "src/lib/localOnly.test.ts",
+        "src/lib/localOnly.ts",
+        "src/lib/localOnlyVis.ts",
+        "src/lib/lock.test.ts",
+        "src/lib/lock.ts",
+        "src/lib/looks.test.ts",
+        "src/lib/looks.ts",
+        "src/lib/loopback.test.ts",
+        "src/lib/loopback.ts",
+        "src/lib/manifest.test.ts",
+        "src/lib/manifest.ts",
+        "src/lib/npm.test.ts",
+        "src/lib/npm.ts",
+        "src/lib/npmPage.test.ts",
+        "src/lib/npmPage.ts",
+        "src/lib/paths.test.ts",
+        "src/lib/paths.ts",
+        "src/lib/pins.test.ts",
+        "src/lib/pins.ts",
+        "src/lib/pinwrite.ts",
+        "src/lib/pkg.ts",
+        "src/lib/plainError.ts",
+        "src/lib/plugin.test.ts",
+        "src/lib/plugin.ts",
+        "src/lib/pluginPlan.ts",
+        "src/lib/pluginPrefs.test.ts",
+        "src/lib/pluginPrefs.ts",
+        "src/lib/portDisplay.test.ts",
+        "src/lib/portDisplay.ts",
+        "src/lib/portFilters.test.ts",
+        "src/lib/portFilters.ts",
+        "src/lib/publish.test.ts",
+        "src/lib/publish.ts",
+        "src/lib/publishBatch.test.ts",
+        "src/lib/publishDisplay.ts",
+        "src/lib/publishResults.ts",
+        "src/lib/publishTypes.ts",
+        "src/lib/ready.ts",
+        "src/lib/roster.test.ts",
+        "src/lib/roster.ts",
+        "src/lib/scan.test.ts",
+        "src/lib/scan.ts",
+        "src/lib/scanPaths.ts",
+        "src/lib/scriptShip.test.ts",
+        "src/lib/scriptShip.ts",
+        "src/lib/semver.test.ts",
+        "src/lib/semver.ts",
+        "src/lib/serve.test.ts",
+        "src/lib/serve.ts",
+        "src/lib/servePort.test.ts",
+        "src/lib/servePort.ts",
+        "src/lib/siteDisplay.test.ts",
+        "src/lib/siteDisplay.ts",
+        "src/lib/siteWriteActions.ts",
+        "src/lib/status.test.ts",
+        "src/lib/status.ts",
+        "src/lib/types.ts",
+        "src/lib/visitorMachine.ts",
+        "src/lib/visitorTiles.test.ts",
+        "src/lib/visitorTiles.ts",
+        "src/lib/workspace.ts",
+        "src/lib/writeConfirm.test.ts",
+        "src/lib/writeConfirm.ts",
+        "src/lib/writeGate.test.ts",
+        "src/lib/writeGate.ts"
+      ],
+      "inspected_files": [
+        "app/.gitignore",
+        "app/.npmrc",
+        "app/.vscode/extensions.json",
+        "app/.vscode/settings.json",
+        "app/package.json",
+        "app/pnpm-lock.yaml",
+        "app/pnpm-workspace.yaml",
+        "app/README.md",
+        "app/src/app.d.ts",
+        "app/src/app.html",
+        "app/src/hooks.server.ts",
+        "app/src/lib/ActivityDayNav.svelte",
+        "app/src/lib/activityDays.ts",
+        "app/src/lib/activityLinks.ts",
+        "app/src/lib/AddProjectsModal.svelte",
+        "app/src/lib/archiveVis.ts",
+        "app/src/lib/batchApply.ts",
+        "app/src/lib/BridgeHeader.svelte",
+        "app/src/lib/briefFormat.ts",
+        "app/src/lib/bulkProgress.ts",
+        "app/src/lib/CellWait.svelte",
+        "app/src/lib/ConfirmModal.svelte",
+        "app/src/lib/confirmProgress.ts",
+        "app/src/lib/confirmRoster.ts",
+        "app/src/lib/CrossChips.svelte",
+        "app/src/lib/crosswalk.ts",
+        "app/src/lib/dashboard.css",
+        "app/src/lib/dashboardTabs.ts",
+        "app/src/lib/dashboardTypes.ts",
+        "app/src/lib/dashboardWrites.ts",
+        "app/src/lib/family.ts",
+        "app/src/lib/fetchError.ts",
+        "app/src/lib/fleetDisplay.ts",
+        "app/src/lib/formatTime.ts",
+        "app/src/lib/groupSelect.ts",
+        "app/src/lib/helm-hud.css",
+        "app/src/lib/HelmMenu.svelte",
+        "app/src/lib/helmTippy.ts",
+        "app/src/lib/Icon.svelte",
+        "app/src/lib/IconButton.svelte",
+        "app/src/lib/icons.ts",
+        "app/src/lib/index.ts",
+        "app/src/lib/InfoHint.svelte",
+        "app/src/lib/inventoryPatch.ts",
+        "app/src/lib/jobCancel.ts",
+        "app/src/lib/KnightRiderBar.svelte",
+        "app/src/lib/landBatch.ts",
+        "app/src/lib/landDisplay.ts",
+        "app/src/lib/localOnlyVis.ts",
+        "app/src/lib/looks.ts",
+        "app/src/lib/npmPage.ts",
+        "app/src/lib/OverflowMenu.svelte",
+        "app/src/lib/pluginPlan.ts",
+        "app/src/lib/portDisplay.ts",
+        "app/src/lib/PortFilterBar.svelte",
+        "app/src/lib/portFilters.ts",
+        "app/src/lib/publishBatch.ts",
+        "app/src/lib/scanPaths.ts",
+        "app/src/lib/SelectionGroups.svelte",
+        "app/src/lib/server/helm.ts",
+        "app/src/lib/server/visitorPage.ts",
+        "app/src/lib/siteDisplay.ts",
+        "app/src/lib/TodayBoard.svelte",
+        "app/src/lib/Tooltip.svelte",
+        "app/src/lib/urlListParam.test.ts",
+        "app/src/lib/urlListParam.ts",
+        "app/src/lib/VisitorFace.svelte",
+        "app/src/lib/VisitorTile.svelte",
+        "app/src/lib/writeConfirm.ts",
+        "app/src/lib/writeGate.ts",
+        "app/src/routes/+layout.svelte",
+        "app/src/routes/+page.server.ts",
+        "app/src/routes/+page.svelte",
+        "app/src/routes/api/activity/+server.ts",
+        "app/src/routes/api/archive/+server.ts",
+        "app/src/routes/api/bump/+server.ts",
+        "app/src/routes/api/cascade/+server.ts",
+        "app/src/routes/api/commit/+server.ts",
+        "app/src/routes/api/demo/+server.ts",
+        "app/src/routes/api/enroll/+server.ts",
+        "app/src/routes/api/export/+server.ts",
+        "app/src/routes/api/fetch/+server.ts",
+        "app/src/routes/api/global/+server.ts",
+        "app/src/routes/api/groups/+server.ts",
+        "app/src/routes/api/land/+server.ts",
+        "app/src/routes/api/local-only/+server.ts",
+        "app/src/routes/api/plugin/+server.ts",
+        "app/src/routes/api/plugins/+server.ts",
+        "app/src/routes/api/publish/+server.ts",
+        "app/src/routes/api/pull/+server.ts",
+        "app/src/routes/api/push/+server.ts",
+        "app/src/routes/api/ready/+server.ts",
+        "app/src/routes/api/roster/+server.ts",
+        "app/src/routes/api/scan/+server.ts",
+        "app/src/routes/api/ship/+server.ts",
+        "app/src/routes/api/status/+server.ts",
+        "app/src/routes/api/unenroll/+server.ts",
+        "app/src/routes/api/visitor/+server.ts",
+        "app/src/routes/deck/+page.server.ts",
+        "app/src/routes/deck/+page.svelte",
+        "app/src/routes/layout.css",
+        "app/src/routes/visitor/+page.server.ts",
+        "app/src/routes/visitor/+page.svelte",
+        "app/static/logo.png",
+        "app/static/robots.txt",
+        "app/tsconfig.json",
+        "app/vite.config.ts",
+        "bin/localhelm.mjs",
+        "docs/GENESIS.md",
+        "docs/PHASE_1_BRIEF.md",
+        "docs/specs/bridge-header.md",
+        "docs/specs/cheap-surfaces.md",
+        "package.json",
+        "README.md",
+        "src/cli/main.ts",
+        "src/lib/activity.test.ts",
+        "src/lib/activity.ts",
+        "src/lib/activityDays.test.ts",
+        "src/lib/activityDays.ts",
+        "src/lib/activityLinks.test.ts",
+        "src/lib/activityLinks.ts",
+        "src/lib/archive.test.ts",
+        "src/lib/archive.ts",
+        "src/lib/archiveVis.ts",
+        "src/lib/batchApply.test.ts",
+        "src/lib/batchApply.ts",
+        "src/lib/brief.test.ts",
+        "src/lib/brief.ts",
+        "src/lib/briefFormat.ts",
+        "src/lib/bulkProgress.test.ts",
+        "src/lib/bulkProgress.ts",
+        "src/lib/bump.test.ts",
+        "src/lib/bump.ts",
+        "src/lib/cascade.test.ts",
+        "src/lib/cascade.ts",
+        "src/lib/commit.ts",
+        "src/lib/confirmProgress.test.ts",
+        "src/lib/confirmProgress.ts",
+        "src/lib/confirmRoster.test.ts",
+        "src/lib/confirmRoster.ts",
+        "src/lib/crosswalk.test.ts",
+        "src/lib/crosswalk.ts",
+        "src/lib/dashboardBundle.test.ts",
+        "src/lib/dashboardBundle.ts",
+        "src/lib/dashboardJob.ts",
+        "src/lib/dashboardTabs.test.ts",
+        "src/lib/dashboardTabs.ts",
+        "src/lib/dashboardTypes.ts",
+        "src/lib/dashboardWrites.ts",
+        "src/lib/demoMode.test.ts",
+        "src/lib/demoMode.ts",
+        "src/lib/deps.ts",
+        "src/lib/dirtCommit.test.ts",
+        "src/lib/dirtCommit.ts",
+        "src/lib/enroll.ts",
+        "src/lib/export.ts",
+        "src/lib/factsVersion.test.ts",
+        "src/lib/factsVersion.ts",
+        "src/lib/family.test.ts",
+        "src/lib/family.ts",
+        "src/lib/fetchError.test.ts",
+        "src/lib/fetchError.ts",
+        "src/lib/filepressFromFleet.test.ts",
+        "src/lib/filepressFromFleet.ts",
+        "src/lib/fleetDisplay.test.ts",
+        "src/lib/fleetDisplay.ts",
+        "src/lib/fleetWriteActions.ts",
+        "src/lib/fleetWrites.ts",
+        "src/lib/formatTime.test.ts",
+        "src/lib/formatTime.ts",
+        "src/lib/git.test.ts",
+        "src/lib/git.ts",
+        "src/lib/githubPublish.test.ts",
+        "src/lib/githubPublish.ts",
+        "src/lib/globalInstall.test.ts",
+        "src/lib/globalInstall.ts",
+        "src/lib/groups.test.ts",
+        "src/lib/groups.ts",
+        "src/lib/groupSelect.ts",
+        "src/lib/ignorefile.ts",
+        "src/lib/index.ts",
+        "src/lib/inventoryPatch.test.ts",
+        "src/lib/inventoryPatch.ts",
+        "src/lib/jobCancel.test.ts",
+        "src/lib/jobCancel.ts",
+        "src/lib/land.test.ts",
+        "src/lib/land.ts",
+        "src/lib/landDisplay.test.ts",
+        "src/lib/landDisplay.ts",
+        "src/lib/landShips.test.ts",
+        "src/lib/landShips.ts",
+        "src/lib/localOnly.test.ts",
+        "src/lib/localOnly.ts",
+        "src/lib/localOnlyVis.ts",
+        "src/lib/lock.test.ts",
+        "src/lib/lock.ts",
+        "src/lib/looks.test.ts",
+        "src/lib/looks.ts",
+        "src/lib/loopback.test.ts",
+        "src/lib/loopback.ts",
+        "src/lib/manifest.test.ts",
+        "src/lib/manifest.ts",
+        "src/lib/npm.test.ts",
+        "src/lib/npm.ts",
+        "src/lib/npmPage.test.ts",
+        "src/lib/npmPage.ts",
+        "src/lib/paths.test.ts",
+        "src/lib/paths.ts",
+        "src/lib/pins.test.ts",
+        "src/lib/pins.ts",
+        "src/lib/pinwrite.ts",
+        "src/lib/pkg.ts",
+        "src/lib/plainError.ts",
+        "src/lib/plugin.test.ts",
+        "src/lib/plugin.ts",
+        "src/lib/pluginPlan.ts",
+        "src/lib/pluginPrefs.test.ts",
+        "src/lib/pluginPrefs.ts",
+        "src/lib/portDisplay.test.ts",
+        "src/lib/portDisplay.ts",
+        "src/lib/portFilters.test.ts",
+        "src/lib/portFilters.ts",
+        "src/lib/publish.test.ts",
+        "src/lib/publish.ts",
+        "src/lib/publishBatch.test.ts",
+        "src/lib/publishDisplay.ts",
+        "src/lib/publishResults.ts",
+        "src/lib/publishTypes.ts",
+        "src/lib/ready.ts",
+        "src/lib/roster.test.ts",
+        "src/lib/roster.ts",
+        "src/lib/scan.test.ts",
+        "src/lib/scan.ts",
+        "src/lib/scanPaths.ts",
+        "src/lib/scriptShip.test.ts",
+        "src/lib/scriptShip.ts",
+        "src/lib/semver.test.ts",
+        "src/lib/semver.ts",
+        "src/lib/serve.test.ts",
+        "src/lib/serve.ts",
+        "src/lib/servePort.test.ts",
+        "src/lib/servePort.ts",
+        "src/lib/siteDisplay.test.ts",
+        "src/lib/siteDisplay.ts",
+        "src/lib/siteWriteActions.ts",
+        "src/lib/status.test.ts",
+        "src/lib/status.ts",
+        "src/lib/types.ts",
+        "src/lib/visitorMachine.ts",
+        "src/lib/visitorTiles.test.ts",
+        "src/lib/visitorTiles.ts",
+        "src/lib/workspace.ts",
+        "src/lib/writeConfirm.test.ts",
+        "src/lib/writeConfirm.ts",
+        "src/lib/writeGate.test.ts",
+        "src/lib/writeGate.ts"
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "typescript-node-surface",
+      "version": "0.2.1",
+      "kind": "surface",
+      "state": "completed",
+      "eligible_files": [
+        "app/src/app.d.ts",
+        "app/src/hooks.server.ts",
+        "app/src/lib/activityDays.ts",
+        "app/src/lib/activityLinks.ts",
+        "app/src/lib/archiveVis.ts",
+        "app/src/lib/batchApply.ts",
+        "app/src/lib/briefFormat.ts",
+        "app/src/lib/bulkProgress.ts",
+        "app/src/lib/confirmProgress.ts",
+        "app/src/lib/confirmRoster.ts",
+        "app/src/lib/crosswalk.ts",
+        "app/src/lib/dashboardTabs.ts",
+        "app/src/lib/dashboardTypes.ts",
+        "app/src/lib/dashboardWrites.ts",
+        "app/src/lib/family.ts",
+        "app/src/lib/fetchError.ts",
+        "app/src/lib/fleetDisplay.ts",
+        "app/src/lib/formatTime.ts",
+        "app/src/lib/groupSelect.ts",
+        "app/src/lib/helmTippy.ts",
+        "app/src/lib/icons.ts",
+        "app/src/lib/index.ts",
+        "app/src/lib/inventoryPatch.ts",
+        "app/src/lib/jobCancel.ts",
+        "app/src/lib/landBatch.ts",
+        "app/src/lib/landDisplay.ts",
+        "app/src/lib/localOnlyVis.ts",
+        "app/src/lib/looks.ts",
+        "app/src/lib/npmPage.ts",
+        "app/src/lib/pluginPlan.ts",
+        "app/src/lib/portDisplay.ts",
+        "app/src/lib/portFilters.ts",
+        "app/src/lib/publishBatch.ts",
+        "app/src/lib/scanPaths.ts",
+        "app/src/lib/server/helm.ts",
+        "app/src/lib/server/visitorPage.ts",
+        "app/src/lib/siteDisplay.ts",
+        "app/src/lib/urlListParam.test.ts",
+        "app/src/lib/urlListParam.ts",
+        "app/src/lib/writeConfirm.ts",
+        "app/src/lib/writeGate.ts",
+        "app/src/routes/+page.server.ts",
+        "app/src/routes/api/activity/+server.ts",
+        "app/src/routes/api/archive/+server.ts",
+        "app/src/routes/api/bump/+server.ts",
+        "app/src/routes/api/cascade/+server.ts",
+        "app/src/routes/api/commit/+server.ts",
+        "app/src/routes/api/demo/+server.ts",
+        "app/src/routes/api/enroll/+server.ts",
+        "app/src/routes/api/export/+server.ts",
+        "app/src/routes/api/fetch/+server.ts",
+        "app/src/routes/api/global/+server.ts",
+        "app/src/routes/api/groups/+server.ts",
+        "app/src/routes/api/land/+server.ts",
+        "app/src/routes/api/local-only/+server.ts",
+        "app/src/routes/api/plugin/+server.ts",
+        "app/src/routes/api/plugins/+server.ts",
+        "app/src/routes/api/publish/+server.ts",
+        "app/src/routes/api/pull/+server.ts",
+        "app/src/routes/api/push/+server.ts",
+        "app/src/routes/api/ready/+server.ts",
+        "app/src/routes/api/roster/+server.ts",
+        "app/src/routes/api/scan/+server.ts",
+        "app/src/routes/api/ship/+server.ts",
+        "app/src/routes/api/status/+server.ts",
+        "app/src/routes/api/unenroll/+server.ts",
+        "app/src/routes/api/visitor/+server.ts",
+        "app/src/routes/deck/+page.server.ts",
+        "app/src/routes/visitor/+page.server.ts",
+        "app/vite.config.ts",
+        "bin/localhelm.mjs",
+        "package.json",
+        "src/cli/main.ts",
+        "src/lib/activity.test.ts",
+        "src/lib/activity.ts",
+        "src/lib/activityDays.test.ts",
+        "src/lib/activityDays.ts",
+        "src/lib/activityLinks.test.ts",
+        "src/lib/activityLinks.ts",
+        "src/lib/archive.test.ts",
+        "src/lib/archive.ts",
+        "src/lib/archiveVis.ts",
+        "src/lib/batchApply.test.ts",
+        "src/lib/batchApply.ts",
+        "src/lib/brief.test.ts",
+        "src/lib/brief.ts",
+        "src/lib/briefFormat.ts",
+        "src/lib/bulkProgress.test.ts",
+        "src/lib/bulkProgress.ts",
+        "src/lib/bump.test.ts",
+        "src/lib/bump.ts",
+        "src/lib/cascade.test.ts",
+        "src/lib/cascade.ts",
+        "src/lib/commit.ts",
+        "src/lib/confirmProgress.test.ts",
+        "src/lib/confirmProgress.ts",
+        "src/lib/confirmRoster.test.ts",
+        "src/lib/confirmRoster.ts",
+        "src/lib/crosswalk.test.ts",
+        "src/lib/crosswalk.ts",
+        "src/lib/dashboardBundle.test.ts",
+        "src/lib/dashboardBundle.ts",
+        "src/lib/dashboardJob.ts",
+        "src/lib/dashboardTabs.test.ts",
+        "src/lib/dashboardTabs.ts",
+        "src/lib/dashboardTypes.ts",
+        "src/lib/dashboardWrites.ts",
+        "src/lib/demoMode.test.ts",
+        "src/lib/demoMode.ts",
+        "src/lib/deps.ts",
+        "src/lib/dirtCommit.test.ts",
+        "src/lib/dirtCommit.ts",
+        "src/lib/enroll.ts",
+        "src/lib/export.ts",
+        "src/lib/factsVersion.test.ts",
+        "src/lib/factsVersion.ts",
+        "src/lib/family.test.ts",
+        "src/lib/family.ts",
+        "src/lib/fetchError.test.ts",
+        "src/lib/fetchError.ts",
+        "src/lib/filepressFromFleet.test.ts",
+        "src/lib/filepressFromFleet.ts",
+        "src/lib/fleetDisplay.test.ts",
+        "src/lib/fleetDisplay.ts",
+        "src/lib/fleetWriteActions.ts",
+        "src/lib/fleetWrites.ts",
+        "src/lib/formatTime.test.ts",
+        "src/lib/formatTime.ts",
+        "src/lib/git.test.ts",
+        "src/lib/git.ts",
+        "src/lib/githubPublish.test.ts",
+        "src/lib/githubPublish.ts",
+        "src/lib/globalInstall.test.ts",
+        "src/lib/globalInstall.ts",
+        "src/lib/groups.test.ts",
+        "src/lib/groups.ts",
+        "src/lib/groupSelect.ts",
+        "src/lib/ignorefile.ts",
+        "src/lib/index.ts",
+        "src/lib/inventoryPatch.test.ts",
+        "src/lib/inventoryPatch.ts",
+        "src/lib/jobCancel.test.ts",
+        "src/lib/jobCancel.ts",
+        "src/lib/land.test.ts",
+        "src/lib/land.ts",
+        "src/lib/landDisplay.test.ts",
+        "src/lib/landDisplay.ts",
+        "src/lib/landShips.test.ts",
+        "src/lib/landShips.ts",
+        "src/lib/localOnly.test.ts",
+        "src/lib/localOnly.ts",
+        "src/lib/localOnlyVis.ts",
+        "src/lib/lock.test.ts",
+        "src/lib/lock.ts",
+        "src/lib/looks.test.ts",
+        "src/lib/looks.ts",
+        "src/lib/loopback.test.ts",
+        "src/lib/loopback.ts",
+        "src/lib/manifest.test.ts",
+        "src/lib/manifest.ts",
+        "src/lib/npm.test.ts",
+        "src/lib/npm.ts",
+        "src/lib/npmPage.test.ts",
+        "src/lib/npmPage.ts",
+        "src/lib/paths.test.ts",
+        "src/lib/paths.ts",
+        "src/lib/pins.test.ts",
+        "src/lib/pins.ts",
+        "src/lib/pinwrite.ts",
+        "src/lib/pkg.ts",
+        "src/lib/plainError.ts",
+        "src/lib/plugin.test.ts",
+        "src/lib/plugin.ts",
+        "src/lib/pluginPlan.ts",
+        "src/lib/pluginPrefs.test.ts",
+        "src/lib/pluginPrefs.ts",
+        "src/lib/portDisplay.test.ts",
+        "src/lib/portDisplay.ts",
+        "src/lib/portFilters.test.ts",
+        "src/lib/portFilters.ts",
+        "src/lib/publish.test.ts",
+        "src/lib/publish.ts",
+        "src/lib/publishBatch.test.ts",
+        "src/lib/publishDisplay.ts",
+        "src/lib/publishResults.ts",
+        "src/lib/publishTypes.ts",
+        "src/lib/ready.ts",
+        "src/lib/roster.test.ts",
+        "src/lib/roster.ts",
+        "src/lib/scan.test.ts",
+        "src/lib/scan.ts",
+        "src/lib/scanPaths.ts",
+        "src/lib/scriptShip.test.ts",
+        "src/lib/scriptShip.ts",
+        "src/lib/semver.test.ts",
+        "src/lib/semver.ts",
+        "src/lib/serve.test.ts",
+        "src/lib/serve.ts",
+        "src/lib/servePort.test.ts",
+        "src/lib/servePort.ts",
+        "src/lib/siteDisplay.test.ts",
+        "src/lib/siteDisplay.ts",
+        "src/lib/siteWriteActions.ts",
+        "src/lib/status.test.ts",
+        "src/lib/status.ts",
+        "src/lib/types.ts",
+        "src/lib/visitorMachine.ts",
+        "src/lib/visitorTiles.test.ts",
+        "src/lib/visitorTiles.ts",
+        "src/lib/workspace.ts",
+        "src/lib/writeConfirm.test.ts",
+        "src/lib/writeConfirm.ts",
+        "src/lib/writeGate.test.ts",
+        "src/lib/writeGate.ts"
+      ],
+      "inspected_files": [
+        "app/src/app.d.ts",
+        "app/src/hooks.server.ts",
+        "app/src/lib/activityDays.ts",
+        "app/src/lib/activityLinks.ts",
+        "app/src/lib/archiveVis.ts",
+        "app/src/lib/batchApply.ts",
+        "app/src/lib/briefFormat.ts",
+        "app/src/lib/bulkProgress.ts",
+        "app/src/lib/confirmProgress.ts",
+        "app/src/lib/confirmRoster.ts",
+        "app/src/lib/crosswalk.ts",
+        "app/src/lib/dashboardTabs.ts",
+        "app/src/lib/dashboardTypes.ts",
+        "app/src/lib/dashboardWrites.ts",
+        "app/src/lib/family.ts",
+        "app/src/lib/fetchError.ts",
+        "app/src/lib/fleetDisplay.ts",
+        "app/src/lib/formatTime.ts",
+        "app/src/lib/groupSelect.ts",
+        "app/src/lib/helmTippy.ts",
+        "app/src/lib/icons.ts",
+        "app/src/lib/index.ts",
+        "app/src/lib/inventoryPatch.ts",
+        "app/src/lib/jobCancel.ts",
+        "app/src/lib/landBatch.ts",
+        "app/src/lib/landDisplay.ts",
+        "app/src/lib/localOnlyVis.ts",
+        "app/src/lib/looks.ts",
+        "app/src/lib/npmPage.ts",
+        "app/src/lib/pluginPlan.ts",
+        "app/src/lib/portDisplay.ts",
+        "app/src/lib/portFilters.ts",
+        "app/src/lib/publishBatch.ts",
+        "app/src/lib/scanPaths.ts",
+        "app/src/lib/server/helm.ts",
+        "app/src/lib/server/visitorPage.ts",
+        "app/src/lib/siteDisplay.ts",
+        "app/src/lib/urlListParam.test.ts",
+        "app/src/lib/urlListParam.ts",
+        "app/src/lib/writeConfirm.ts",
+        "app/src/lib/writeGate.ts",
+        "app/src/routes/+page.server.ts",
+        "app/src/routes/api/activity/+server.ts",
+        "app/src/routes/api/archive/+server.ts",
+        "app/src/routes/api/bump/+server.ts",
+        "app/src/routes/api/cascade/+server.ts",
+        "app/src/routes/api/commit/+server.ts",
+        "app/src/routes/api/demo/+server.ts",
+        "app/src/routes/api/enroll/+server.ts",
+        "app/src/routes/api/export/+server.ts",
+        "app/src/routes/api/fetch/+server.ts",
+        "app/src/routes/api/global/+server.ts",
+        "app/src/routes/api/groups/+server.ts",
+        "app/src/routes/api/land/+server.ts",
+        "app/src/routes/api/local-only/+server.ts",
+        "app/src/routes/api/plugin/+server.ts",
+        "app/src/routes/api/plugins/+server.ts",
+        "app/src/routes/api/publish/+server.ts",
+        "app/src/routes/api/pull/+server.ts",
+        "app/src/routes/api/push/+server.ts",
+        "app/src/routes/api/ready/+server.ts",
+        "app/src/routes/api/roster/+server.ts",
+        "app/src/routes/api/scan/+server.ts",
+        "app/src/routes/api/ship/+server.ts",
+        "app/src/routes/api/status/+server.ts",
+        "app/src/routes/api/unenroll/+server.ts",
+        "app/src/routes/api/visitor/+server.ts",
+        "app/src/routes/deck/+page.server.ts",
+        "app/src/routes/visitor/+page.server.ts",
+        "app/vite.config.ts",
+        "bin/localhelm.mjs",
+        "package.json",
+        "src/cli/main.ts",
+        "src/lib/activity.test.ts",
+        "src/lib/activity.ts",
+        "src/lib/activityDays.test.ts",
+        "src/lib/activityDays.ts",
+        "src/lib/activityLinks.test.ts",
+        "src/lib/activityLinks.ts",
+        "src/lib/archive.test.ts",
+        "src/lib/archive.ts",
+        "src/lib/archiveVis.ts",
+        "src/lib/batchApply.test.ts",
+        "src/lib/batchApply.ts",
+        "src/lib/brief.test.ts",
+        "src/lib/brief.ts",
+        "src/lib/briefFormat.ts",
+        "src/lib/bulkProgress.test.ts",
+        "src/lib/bulkProgress.ts",
+        "src/lib/bump.test.ts",
+        "src/lib/bump.ts",
+        "src/lib/cascade.test.ts",
+        "src/lib/cascade.ts",
+        "src/lib/commit.ts",
+        "src/lib/confirmProgress.test.ts",
+        "src/lib/confirmProgress.ts",
+        "src/lib/confirmRoster.test.ts",
+        "src/lib/confirmRoster.ts",
+        "src/lib/crosswalk.test.ts",
+        "src/lib/crosswalk.ts",
+        "src/lib/dashboardBundle.test.ts",
+        "src/lib/dashboardBundle.ts",
+        "src/lib/dashboardJob.ts",
+        "src/lib/dashboardTabs.test.ts",
+        "src/lib/dashboardTabs.ts",
+        "src/lib/dashboardTypes.ts",
+        "src/lib/dashboardWrites.ts",
+        "src/lib/demoMode.test.ts",
+        "src/lib/demoMode.ts",
+        "src/lib/deps.ts",
+        "src/lib/dirtCommit.test.ts",
+        "src/lib/dirtCommit.ts",
+        "src/lib/enroll.ts",
+        "src/lib/export.ts",
+        "src/lib/factsVersion.test.ts",
+        "src/lib/factsVersion.ts",
+        "src/lib/family.test.ts",
+        "src/lib/family.ts",
+        "src/lib/fetchError.test.ts",
+        "src/lib/fetchError.ts",
+        "src/lib/filepressFromFleet.test.ts",
+        "src/lib/filepressFromFleet.ts",
+        "src/lib/fleetDisplay.test.ts",
+        "src/lib/fleetDisplay.ts",
+        "src/lib/fleetWriteActions.ts",
+        "src/lib/fleetWrites.ts",
+        "src/lib/formatTime.test.ts",
+        "src/lib/formatTime.ts",
+        "src/lib/git.test.ts",
+        "src/lib/git.ts",
+        "src/lib/githubPublish.test.ts",
+        "src/lib/githubPublish.ts",
+        "src/lib/globalInstall.test.ts",
+        "src/lib/globalInstall.ts",
+        "src/lib/groups.test.ts",
+        "src/lib/groups.ts",
+        "src/lib/groupSelect.ts",
+        "src/lib/ignorefile.ts",
+        "src/lib/index.ts",
+        "src/lib/inventoryPatch.test.ts",
+        "src/lib/inventoryPatch.ts",
+        "src/lib/jobCancel.test.ts",
+        "src/lib/jobCancel.ts",
+        "src/lib/land.test.ts",
+        "src/lib/land.ts",
+        "src/lib/landDisplay.test.ts",
+        "src/lib/landDisplay.ts",
+        "src/lib/landShips.test.ts",
+        "src/lib/landShips.ts",
+        "src/lib/localOnly.test.ts",
+        "src/lib/localOnly.ts",
+        "src/lib/localOnlyVis.ts",
+        "src/lib/lock.test.ts",
+        "src/lib/lock.ts",
+        "src/lib/looks.test.ts",
+        "src/lib/looks.ts",
+        "src/lib/loopback.test.ts",
+        "src/lib/loopback.ts",
+        "src/lib/manifest.test.ts",
+        "src/lib/manifest.ts",
+        "src/lib/npm.test.ts",
+        "src/lib/npm.ts",
+        "src/lib/npmPage.test.ts",
+        "src/lib/npmPage.ts",
+        "src/lib/paths.test.ts",
+        "src/lib/paths.ts",
+        "src/lib/pins.test.ts",
+        "src/lib/pins.ts",
+        "src/lib/pinwrite.ts",
+        "src/lib/pkg.ts",
+        "src/lib/plainError.ts",
+        "src/lib/plugin.test.ts",
+        "src/lib/plugin.ts",
+        "src/lib/pluginPlan.ts",
+        "src/lib/pluginPrefs.test.ts",
+        "src/lib/pluginPrefs.ts",
+        "src/lib/portDisplay.test.ts",
+        "src/lib/portDisplay.ts",
+        "src/lib/portFilters.test.ts",
+        "src/lib/portFilters.ts",
+        "src/lib/publish.test.ts",
+        "src/lib/publish.ts",
+        "src/lib/publishBatch.test.ts",
+        "src/lib/publishDisplay.ts",
+        "src/lib/publishResults.ts",
+        "src/lib/publishTypes.ts",
+        "src/lib/ready.ts",
+        "src/lib/roster.test.ts",
+        "src/lib/roster.ts",
+        "src/lib/scan.test.ts",
+        "src/lib/scan.ts",
+        "src/lib/scanPaths.ts",
+        "src/lib/scriptShip.test.ts",
+        "src/lib/scriptShip.ts",
+        "src/lib/semver.test.ts",
+        "src/lib/semver.ts",
+        "src/lib/serve.test.ts",
+        "src/lib/serve.ts",
+        "src/lib/servePort.test.ts",
+        "src/lib/servePort.ts",
+        "src/lib/siteDisplay.test.ts",
+        "src/lib/siteDisplay.ts",
+        "src/lib/siteWriteActions.ts",
+        "src/lib/status.test.ts",
+        "src/lib/status.ts",
+        "src/lib/types.ts",
+        "src/lib/visitorMachine.ts",
+        "src/lib/visitorTiles.test.ts",
+        "src/lib/visitorTiles.ts",
+        "src/lib/workspace.ts",
+        "src/lib/writeConfirm.test.ts",
+        "src/lib/writeConfirm.ts",
+        "src/lib/writeGate.test.ts",
+        "src/lib/writeGate.ts"
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "markdown-document",
+      "version": "0.2.0",
+      "kind": "document",
+      "state": "completed",
+      "eligible_files": [
+        "app/README.md",
+        "app/static/robots.txt",
+        "docs/GENESIS.md",
+        "docs/PHASE_1_BRIEF.md",
+        "docs/specs/bridge-header.md",
+        "docs/specs/cheap-surfaces.md",
+        "README.md"
+      ],
+      "inspected_files": [
+        "app/README.md",
+        "app/static/robots.txt",
+        "docs/GENESIS.md",
+        "docs/PHASE_1_BRIEF.md",
+        "docs/specs/bridge-header.md",
+        "docs/specs/cheap-surfaces.md",
+        "README.md"
+      ],
+      "diagnostics": []
+    },
+    {
+      "id": "typescript-test",
+      "version": "0.2.0",
+      "kind": "test",
+      "state": "completed",
+      "eligible_files": [
+        "app/src/lib/urlListParam.test.ts",
+        "src/lib/activity.test.ts",
+        "src/lib/activityDays.test.ts",
+        "src/lib/activityLinks.test.ts",
+        "src/lib/archive.test.ts",
+        "src/lib/batchApply.test.ts",
+        "src/lib/brief.test.ts",
+        "src/lib/bulkProgress.test.ts",
+        "src/lib/bump.test.ts",
+        "src/lib/cascade.test.ts",
+        "src/lib/confirmProgress.test.ts",
+        "src/lib/confirmRoster.test.ts",
+        "src/lib/crosswalk.test.ts",
+        "src/lib/dashboardBundle.test.ts",
+        "src/lib/dashboardTabs.test.ts",
+        "src/lib/demoMode.test.ts",
+        "src/lib/dirtCommit.test.ts",
+        "src/lib/factsVersion.test.ts",
+        "src/lib/family.test.ts",
+        "src/lib/fetchError.test.ts",
+        "src/lib/filepressFromFleet.test.ts",
+        "src/lib/fleetDisplay.test.ts",
+        "src/lib/formatTime.test.ts",
+        "src/lib/git.test.ts",
+        "src/lib/githubPublish.test.ts",
+        "src/lib/globalInstall.test.ts",
+        "src/lib/groups.test.ts",
+        "src/lib/inventoryPatch.test.ts",
+        "src/lib/jobCancel.test.ts",
+        "src/lib/land.test.ts",
+        "src/lib/landDisplay.test.ts",
+        "src/lib/landShips.test.ts",
+        "src/lib/localOnly.test.ts",
+        "src/lib/lock.test.ts",
+        "src/lib/looks.test.ts",
+        "src/lib/loopback.test.ts",
+        "src/lib/manifest.test.ts",
+        "src/lib/npm.test.ts",
+        "src/lib/npmPage.test.ts",
+        "src/lib/paths.test.ts",
+        "src/lib/pins.test.ts",
+        "src/lib/plugin.test.ts",
+        "src/lib/pluginPrefs.test.ts",
+        "src/lib/portDisplay.test.ts",
+        "src/lib/portFilters.test.ts",
+        "src/lib/publish.test.ts",
+        "src/lib/publishBatch.test.ts",
+        "src/lib/roster.test.ts",
+        "src/lib/scan.test.ts",
+        "src/lib/scriptShip.test.ts",
+        "src/lib/semver.test.ts",
+        "src/lib/serve.test.ts",
+        "src/lib/servePort.test.ts",
+        "src/lib/siteDisplay.test.ts",
+        "src/lib/status.test.ts",
+        "src/lib/visitorTiles.test.ts",
+        "src/lib/writeConfirm.test.ts",
+        "src/lib/writeGate.test.ts"
+      ],
+      "inspected_files": [
+        "app/src/lib/urlListParam.test.ts",
+        "src/lib/activity.test.ts",
+        "src/lib/activityDays.test.ts",
+        "src/lib/activityLinks.test.ts",
+        "src/lib/archive.test.ts",
+        "src/lib/batchApply.test.ts",
+        "src/lib/brief.test.ts",
+        "src/lib/bulkProgress.test.ts",
+        "src/lib/bump.test.ts",
+        "src/lib/cascade.test.ts",
+        "src/lib/confirmProgress.test.ts",
+        "src/lib/confirmRoster.test.ts",
+        "src/lib/crosswalk.test.ts",
+        "src/lib/dashboardBundle.test.ts",
+        "src/lib/dashboardTabs.test.ts",
+        "src/lib/demoMode.test.ts",
+        "src/lib/dirtCommit.test.ts",
+        "src/lib/factsVersion.test.ts",
+        "src/lib/family.test.ts",
+        "src/lib/fetchError.test.ts",
+        "src/lib/filepressFromFleet.test.ts",
+        "src/lib/fleetDisplay.test.ts",
+        "src/lib/formatTime.test.ts",
+        "src/lib/git.test.ts",
+        "src/lib/githubPublish.test.ts",
+        "src/lib/globalInstall.test.ts",
+        "src/lib/groups.test.ts",
+        "src/lib/inventoryPatch.test.ts",
+        "src/lib/jobCancel.test.ts",
+        "src/lib/land.test.ts",
+        "src/lib/landDisplay.test.ts",
+        "src/lib/landShips.test.ts",
+        "src/lib/localOnly.test.ts",
+        "src/lib/lock.test.ts",
+        "src/lib/looks.test.ts",
+        "src/lib/loopback.test.ts",
+        "src/lib/manifest.test.ts",
+        "src/lib/npm.test.ts",
+        "src/lib/npmPage.test.ts",
+        "src/lib/paths.test.ts",
+        "src/lib/pins.test.ts",
+        "src/lib/plugin.test.ts",
+        "src/lib/pluginPrefs.test.ts",
+        "src/lib/portDisplay.test.ts",
+        "src/lib/portFilters.test.ts",
+        "src/lib/publish.test.ts",
+        "src/lib/publishBatch.test.ts",
+        "src/lib/roster.test.ts",
+        "src/lib/scan.test.ts",
+        "src/lib/scriptShip.test.ts",
+        "src/lib/semver.test.ts",
+        "src/lib/serve.test.ts",
+        "src/lib/servePort.test.ts",
+        "src/lib/siteDisplay.test.ts",
+        "src/lib/status.test.ts",
+        "src/lib/visitorTiles.test.ts",
+        "src/lib/writeConfirm.test.ts",
+        "src/lib/writeGate.test.ts"
+      ],
+      "diagnostics": []
+    }
+  ],
+  "rules_version": "featurefacts-core@0.2.0",
+  "fingerprints": {
+    "source": "3674764e6520742ccb83d2467848f43736ba5c6cfa4d400f6d1214397e0f66fa",
+    "config": "e86aac91018044abf39784d68e698da5a774b319a14feb497036d1ed5d5abf40",
+    "adapters": "4abbb8741b08bcd3aa308ef9c93d4a55fd7feb6d4a98f89297831ab85b15b1eb",
+    "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
+    "registry": "2287433639bb4142750d32a323b5da696a096a4709f9c8112f4d6ec0f24f0e82",
+    "projection": "ad8f5483019a174b92bbf39d4928ab32050f8144d50d8db4b62d09f91564df8c"
+  },
+  "artifacts": [
+    {
+      "path": ".featurefacts/config.yaml",
+      "sha256": "1ca98933c7b5ed5a1c06aa5a1f94039e22c468bdf07755291357d7a6803e92e2"
+    },
+    {
+      "path": ".featurefacts/docs-index.json",
+      "sha256": "44305aef6810ff7436af0595d7c9847c3818e759efefc787db4fd664246d38a5"
+    },
+    {
+      "path": ".featurefacts/features.json",
+      "sha256": "336207afccd1c37df0d9ce243900439491531690808b16415a1e7317271ac38c"
+    },
+    {
+      "path": ".featurefacts/FEATURES.md",
+      "sha256": "ce44e70d07b20a8a324d3d00c64bdb5d576d772af46a0ca8bdb5b539bccacf92"
+    },
+    {
+      "path": ".featurefacts/features.yaml",
+      "sha256": "c1c401261463eb357e8b022b2958ac52647c294d309711dcb7887ced91dd04f8"
+    },
+    {
+      "path": ".featurefacts/gaps.yaml",
+      "sha256": "ebdc701f2dacbeb62750960d3eee84a10fb1c27fc4ce64b6a038da77c6a42e39"
+    },
+    {
+      "path": ".featurefacts/surfaces.json",
+      "sha256": "efdc739c4d948f8fb590dd0d867b7c3bd7de6e13d7f8b47a2508404b6474f925"
+    },
+    {
+      "path": ".featurefacts/test-index.json",
+      "sha256": "217069cca27afc26a3064b86b6d5e6ea7722048ed82924cbf7592f1f6c20662e"
+    }
+  ],
+  "diagnostics": []
+}

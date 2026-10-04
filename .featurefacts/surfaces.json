@@ -1,5 +1,2065 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-init",
-  "surfaces": []
+  "scan_id": "scan-5f5f40d02afa",
+  "surfaces": [
+    {
+      "id": "cmd-archive",
+      "kind": "command",
+      "ref": "archive",
+      "title": "archive",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 872,
+        "end_line": 872,
+        "symbol": "archive"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-auth",
+      "kind": "command",
+      "ref": "auth",
+      "title": "auth",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 548,
+        "end_line": 548,
+        "symbol": "auth"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-brief",
+      "kind": "command",
+      "ref": "brief",
+      "title": "brief",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 862,
+        "end_line": 862,
+        "symbol": "brief"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-bump",
+      "kind": "command",
+      "ref": "bump",
+      "title": "bump",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 325,
+        "end_line": 325,
+        "symbol": "bump"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-cascade",
+      "kind": "command",
+      "ref": "cascade",
+      "title": "cascade",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 636,
+        "end_line": 636,
+        "symbol": "cascade"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-commit",
+      "kind": "command",
+      "ref": "commit",
+      "title": "commit",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 361,
+        "end_line": 361,
+        "symbol": "commit"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-deps",
+      "kind": "command",
+      "ref": "deps",
+      "title": "deps",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 301,
+        "end_line": 301,
+        "symbol": "deps"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-enroll",
+      "kind": "command",
+      "ref": "enroll",
+      "title": "enroll",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 232,
+        "end_line": 232,
+        "symbol": "enroll"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-export",
+      "kind": "command",
+      "ref": "export",
+      "title": "export",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 501,
+        "end_line": 501,
+        "symbol": "export"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-fetch",
+      "kind": "command",
+      "ref": "fetch",
+      "title": "fetch",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 420,
+        "end_line": 420,
+        "symbol": "fetch"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-global",
+      "kind": "command",
+      "ref": "global",
+      "title": "global",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 805,
+        "end_line": 805,
+        "symbol": "global"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-land",
+      "kind": "command",
+      "ref": "land",
+      "title": "land",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 683,
+        "end_line": 683,
+        "symbol": "land"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-localhelm",
+      "kind": "command",
+      "ref": "bin localhelm",
+      "title": "localhelm",
+      "locator": {
+        "path": "package.json",
+        "content_sha256": "339c43283559a371d448e64991410002d31e651bd3b4b43e2ab93606b8455197",
+        "symbol": "bin.localhelm"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "package-json-bin"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-plugin",
+      "kind": "command",
+      "ref": "plugin",
+      "title": "plugin",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 932,
+        "end_line": 932,
+        "symbol": "plugin"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-plugins",
+      "kind": "command",
+      "ref": "plugins",
+      "title": "plugins",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 911,
+        "end_line": 911,
+        "symbol": "plugins"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-publish",
+      "kind": "command",
+      "ref": "publish",
+      "title": "publish",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 577,
+        "end_line": 577,
+        "symbol": "publish"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-pull",
+      "kind": "command",
+      "ref": "pull",
+      "title": "pull",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 437,
+        "end_line": 437,
+        "symbol": "pull"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-push",
+      "kind": "command",
+      "ref": "push",
+      "title": "push",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 460,
+        "end_line": 460,
+        "symbol": "push"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-ready",
+      "kind": "command",
+      "ref": "ready",
+      "title": "ready",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 525,
+        "end_line": 525,
+        "symbol": "ready"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-scan",
+      "kind": "command",
+      "ref": "scan",
+      "title": "scan",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 219,
+        "end_line": 219,
+        "symbol": "scan"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-serve",
+      "kind": "command",
+      "ref": "serve",
+      "title": "serve",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 990,
+        "end_line": 990,
+        "symbol": "serve"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-ship",
+      "kind": "command",
+      "ref": "ship",
+      "title": "ship",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 752,
+        "end_line": 752,
+        "symbol": "ship"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-status",
+      "kind": "command",
+      "ref": "status",
+      "title": "status",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 285,
+        "end_line": 285,
+        "symbol": "status"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "cmd-unenroll",
+      "kind": "command",
+      "ref": "unenroll",
+      "title": "unenroll",
+      "locator": {
+        "path": "src/cli/main.ts",
+        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
+        "start_line": 263,
+        "end_line": 263,
+        "symbol": "unenroll"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "argv-command"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-app-readme",
+      "kind": "document",
+      "ref": "app/README.md",
+      "title": "app/README.md",
+      "locator": {
+        "path": "app/README.md",
+        "content_sha256": "3dc79dc97f57b93a77e7e303976a3d0e4efe2fb3d74ac21362170d57da37e922"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-app-static-robots",
+      "kind": "document",
+      "ref": "app/static/robots.txt",
+      "title": "app/static/robots.txt",
+      "locator": {
+        "path": "app/static/robots.txt",
+        "content_sha256": "b033243267bcbdab84cb01e940811d6d77a894d78f0470faaf0eb43f8e4efcc9"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-genesis",
+      "kind": "document",
+      "ref": "docs/GENESIS.md",
+      "title": "docs/GENESIS.md",
+      "locator": {
+        "path": "docs/GENESIS.md",
+        "content_sha256": "eb54b37f7e07e603ed0642943eac7ba26afd4c3fc069c0363e5062e25a497f2e"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-phase-1-brief",
+      "kind": "document",
+      "ref": "docs/PHASE_1_BRIEF.md",
+      "title": "docs/PHASE_1_BRIEF.md",
+      "locator": {
+        "path": "docs/PHASE_1_BRIEF.md",
+        "content_sha256": "abd619d1a12bc5bf8d8a142efcecb466c2c50b48a0c54da0efb515f7c5fb6bf6"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-specs-bridge-header",
+      "kind": "document",
+      "ref": "docs/specs/bridge-header.md",
+      "title": "docs/specs/bridge-header.md",
+      "locator": {
+        "path": "docs/specs/bridge-header.md",
+        "content_sha256": "4a69478731cb13a21023719084791c084fc60567f5538852b3f6a33d6884c04a"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-specs-cheap-surfaces",
+      "kind": "document",
+      "ref": "docs/specs/cheap-surfaces.md",
+      "title": "docs/specs/cheap-surfaces.md",
+      "locator": {
+        "path": "docs/specs/cheap-surfaces.md",
+        "content_sha256": "2cfa0fb9b5c56def06ccf005791dc4bca0498f2c28305f9f26630cc7e7a0cc52"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-readme",
+      "kind": "document",
+      "ref": "README.md",
+      "title": "README.md",
+      "locator": {
+        "path": "README.md",
+        "content_sha256": "e69606ff503d0c379759ed162a1f304db8f40d8a61beb92a7ea045bb1220f603"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-activity",
+      "kind": "route",
+      "ref": "/api/activity",
+      "title": "Activity",
+      "locator": {
+        "path": "app/src/routes/api/activity/+server.ts",
+        "content_sha256": "c39d98d07ccc9b11bc14f667e872778efe30fba30800e74902510a1f80813661"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-archive",
+      "kind": "route",
+      "ref": "/api/archive",
+      "title": "Archive",
+      "locator": {
+        "path": "app/src/routes/api/archive/+server.ts",
+        "content_sha256": "8f0bd15ff46ba51e3dfa0cdecaeeafa27496bb2340a33e3fd5dd6a1b857aca1b"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-bump",
+      "kind": "route",
+      "ref": "/api/bump",
+      "title": "Bump",
+      "locator": {
+        "path": "app/src/routes/api/bump/+server.ts",
+        "content_sha256": "c53e01c1ca3350fb75a6c7b15b293b25cee7d6e975ba8ad06cc97396055f1ae8"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-cascade",
+      "kind": "route",
+      "ref": "/api/cascade",
+      "title": "Cascade",
+      "locator": {
+        "path": "app/src/routes/api/cascade/+server.ts",
+        "content_sha256": "a96b6a3011c02cbefe36fb2e975937f8a7ebdc16500c346ae69a0a993014c689"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-commit",
+      "kind": "route",
+      "ref": "/api/commit",
+      "title": "Commit",
+      "locator": {
+        "path": "app/src/routes/api/commit/+server.ts",
+        "content_sha256": "4acaa8b13ec64e1eeae45ec39c91a73ae134e0f7ac0ff7d4bd8eb7380b7f3a18"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-demo",
+      "kind": "route",
+      "ref": "/api/demo",
+      "title": "Demo",
+      "locator": {
+        "path": "app/src/routes/api/demo/+server.ts",
+        "content_sha256": "202ac25745a555974f16eca9f8c1a4640da4020bacc01606b2ca19e077a9b624"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-enroll",
+      "kind": "route",
+      "ref": "/api/enroll",
+      "title": "Enroll",
+      "locator": {
+        "path": "app/src/routes/api/enroll/+server.ts",
+        "content_sha256": "268ab3465d7499aa216f00965b181bb136af1961af20b9bdb0f34297951b589b"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-export",
+      "kind": "route",
+      "ref": "/api/export",
+      "title": "Export",
+      "locator": {
+        "path": "app/src/routes/api/export/+server.ts",
+        "content_sha256": "457a970c4371a480fcb11a151053e79440775d66814213fc14a6a6f14848788d"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-fetch",
+      "kind": "route",
+      "ref": "/api/fetch",
+      "title": "Fetch",
+      "locator": {
+        "path": "app/src/routes/api/fetch/+server.ts",
+        "content_sha256": "c882f41f3240f03af4e1ef0385bda9faccc0c5aec36c03ddc0ab387a97d9c486"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-global",
+      "kind": "route",
+      "ref": "/api/global",
+      "title": "Global",
+      "locator": {
+        "path": "app/src/routes/api/global/+server.ts",
+        "content_sha256": "e8f2a80f34f0810f9aa8c6974a6de042470684e0152e2edb1eede5030e272f60"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-groups",
+      "kind": "route",
+      "ref": "/api/groups",
+      "title": "Groups",
+      "locator": {
+        "path": "app/src/routes/api/groups/+server.ts",
+        "content_sha256": "fc6a9b5ff203290c38566a2dc3c43a0b3ef2d325d824611bdbd8a1c130c3c823"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-land",
+      "kind": "route",
+      "ref": "/api/land",
+      "title": "Land",
+      "locator": {
+        "path": "app/src/routes/api/land/+server.ts",
+        "content_sha256": "5e588d7f6d6f0dbf33e25c34ece10c21fc5967beef98c457eb8eeb4dcf682f6e"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-local-only",
+      "kind": "route",
+      "ref": "/api/local-only",
+      "title": "Local Only",
+      "locator": {
+        "path": "app/src/routes/api/local-only/+server.ts",
+        "content_sha256": "e0f3b1bc559785c3b4c042352d15eb45e1d14952ab51ec67c0ec181404318a71"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-plugin",
+      "kind": "route",
+      "ref": "/api/plugin",
+      "title": "Plugin",
+      "locator": {
+        "path": "app/src/routes/api/plugin/+server.ts",
+        "content_sha256": "d7f63a3e1683ac3a3b49feacdacda5676bbfca5ef59ebb8ec185234690bf1539"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-plugins",
+      "kind": "route",
+      "ref": "/api/plugins",
+      "title": "Plugins",
+      "locator": {
+        "path": "app/src/routes/api/plugins/+server.ts",
+        "content_sha256": "eede7da98e70b218d524f88f8a2e92967b6947cb3b11170a3af9340e31580189"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-publish",
+      "kind": "route",
+      "ref": "/api/publish",
+      "title": "Publish",
+      "locator": {
+        "path": "app/src/routes/api/publish/+server.ts",
+        "content_sha256": "ba03ef93e04355435da77857bbb0ecb89f1d5a0aa10c8b6fc36fe9d51ddeb214"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-pull",
+      "kind": "route",
+      "ref": "/api/pull",
+      "title": "Pull",
+      "locator": {
+        "path": "app/src/routes/api/pull/+server.ts",
+        "content_sha256": "21a1e1310f4bab9b9e201e5bc9c3d53ad589e1fbbdf770c91746deab41465056"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-push",
+      "kind": "route",
+      "ref": "/api/push",
+      "title": "Push",
+      "locator": {
+        "path": "app/src/routes/api/push/+server.ts",
+        "content_sha256": "da307cf93425c0839f6ee160c9df03184d4a1189312b6970377ec592ec36364a"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-ready",
+      "kind": "route",
+      "ref": "/api/ready",
+      "title": "Ready",
+      "locator": {
+        "path": "app/src/routes/api/ready/+server.ts",
+        "content_sha256": "cf6ed9409ab3975f0e1158c84dfb107aca2f5b5f123917b2d3888a11313947e1"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-roster",
+      "kind": "route",
+      "ref": "/api/roster",
+      "title": "Roster",
+      "locator": {
+        "path": "app/src/routes/api/roster/+server.ts",
+        "content_sha256": "1c07a9f90e3e3f12b774bad1b19fd3b4ffb7126291b53bb48e89d704adefbda4"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-scan",
+      "kind": "route",
+      "ref": "/api/scan",
+      "title": "Scan",
+      "locator": {
+        "path": "app/src/routes/api/scan/+server.ts",
+        "content_sha256": "5081a2bae1ae939b59d80c40d320cfaecb067e1a3aac9b562e6ca6335ad0e9ef"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-ship",
+      "kind": "route",
+      "ref": "/api/ship",
+      "title": "Ship",
+      "locator": {
+        "path": "app/src/routes/api/ship/+server.ts",
+        "content_sha256": "8475bcae75e8af9a05cd2032ce27ecb7827b2141013f53e906077030a7436258"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-status",
+      "kind": "route",
+      "ref": "/api/status",
+      "title": "Status",
+      "locator": {
+        "path": "app/src/routes/api/status/+server.ts",
+        "content_sha256": "4d117d23f1e6149790ad95ba0a96ecb64616449a1dccdd7201e50f615ed2b84b"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-unenroll",
+      "kind": "route",
+      "ref": "/api/unenroll",
+      "title": "Unenroll",
+      "locator": {
+        "path": "app/src/routes/api/unenroll/+server.ts",
+        "content_sha256": "bb3953c6ea774c0b7924b30d75469e18ecddedaa16e1dd37d977e57cac1c0531"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-visitor",
+      "kind": "route",
+      "ref": "/api/visitor",
+      "title": "Visitor",
+      "locator": {
+        "path": "app/src/routes/api/visitor/+server.ts",
+        "content_sha256": "595e386c74349d42acd2d44cbd00081b87ba21297d5ce670a50b65ec6a680ab3"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-deck",
+      "kind": "route",
+      "ref": "/deck",
+      "title": "Deck",
+      "locator": {
+        "path": "app/src/routes/deck/+page.server.ts",
+        "content_sha256": "f842225cfeba4752ef162f8db635b78d729ace7b4013a4a189a2713a1bdfca7f"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-home",
+      "kind": "route",
+      "ref": "/",
+      "title": "Home",
+      "locator": {
+        "path": "app/src/routes/+page.server.ts",
+        "content_sha256": "ca0d3a37cd187227f9b98b20f501e82cab270243cf983677aca4d9719b539e17"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-visitor",
+      "kind": "route",
+      "ref": "/visitor",
+      "title": "Visitor",
+      "locator": {
+        "path": "app/src/routes/visitor/+page.server.ts",
+        "content_sha256": "230e653b69ef1c33a8079d55924993b9a1d49ff8a6d368059e23ef05352fbc8f"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.1",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-app-src-lib-urllistparam-test",
+      "kind": "test",
+      "ref": "app/src/lib/urlListParam.test.ts",
+      "title": "app/src/lib/urlListParam.test.ts",
+      "locator": {
+        "path": "app/src/lib/urlListParam.test.ts",
+        "content_sha256": "f56ad87f9ac3dd02b6a9f1312e643b03e6fff8cb9266242406d9ac4410f85927"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-activity-test",
+      "kind": "test",
+      "ref": "src/lib/activity.test.ts",
+      "title": "src/lib/activity.test.ts",
+      "locator": {
+        "path": "src/lib/activity.test.ts",
+        "content_sha256": "134f8a846bb3fb4d328b5ff050ea8458d1ec7ec5778e0465e250fcfd7ed0dc1c"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-activitydays-test",
+      "kind": "test",
+      "ref": "src/lib/activityDays.test.ts",
+      "title": "src/lib/activityDays.test.ts",
+      "locator": {
+        "path": "src/lib/activityDays.test.ts",
+        "content_sha256": "415dd2234197857b03907ef63fbb1cafd4fc693747b322eb824bc8771e357685"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-activitylinks-test",
+      "kind": "test",
+      "ref": "src/lib/activityLinks.test.ts",
+      "title": "src/lib/activityLinks.test.ts",
+      "locator": {
+        "path": "src/lib/activityLinks.test.ts",
+        "content_sha256": "eb8203ed2fd664a0d78aa95d307b5e2f045c812f1c84f51fd5361306b942474d"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-archive-test",
+      "kind": "test",
+      "ref": "src/lib/archive.test.ts",
+      "title": "src/lib/archive.test.ts",
+      "locator": {
+        "path": "src/lib/archive.test.ts",
+        "content_sha256": "8de9a51e434e5eb0ddb2e0cc90b16de2d43a676d8a0a054f84b5bb88f25ab774"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-batchapply-test",
+      "kind": "test",
+      "ref": "src/lib/batchApply.test.ts",
+      "title": "src/lib/batchApply.test.ts",
+      "locator": {
+        "path": "src/lib/batchApply.test.ts",
+        "content_sha256": "dee653633c30fc00815fef6536a0d5318e87ec63c2eb980280c7e6e7c49cf09e"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-brief-test",
+      "kind": "test",
+      "ref": "src/lib/brief.test.ts",
+      "title": "src/lib/brief.test.ts",
+      "locator": {
+        "path": "src/lib/brief.test.ts",
+        "content_sha256": "82f48dbc421e1cc245cb439bfee23c2c888d97fa18887aef7d370765864ec9e6"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-bulkprogress-test",
+      "kind": "test",
+      "ref": "src/lib/bulkProgress.test.ts",
+      "title": "src/lib/bulkProgress.test.ts",
+      "locator": {
+        "path": "src/lib/bulkProgress.test.ts",
+        "content_sha256": "7fa15c13fc0baa0e6c2c5df705f6045e14ca01cd3022ca95f89d72a60d02a56b"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-bump-test",
+      "kind": "test",
+      "ref": "src/lib/bump.test.ts",
+      "title": "src/lib/bump.test.ts",
+      "locator": {
+        "path": "src/lib/bump.test.ts",
+        "content_sha256": "fd6cc7b8e3be2b76705d02ad3a8afb5861cd5dbd6c13f54d82012cb3774d7b8f"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-cascade-test",
+      "kind": "test",
+      "ref": "src/lib/cascade.test.ts",
+      "title": "src/lib/cascade.test.ts",
+      "locator": {
+        "path": "src/lib/cascade.test.ts",
+        "content_sha256": "0ae04d995b32cdf27e671e81a6b48cb86d9998cd3042b02637767be6080417b2"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-confirmprogress-test",
+      "kind": "test",
+      "ref": "src/lib/confirmProgress.test.ts",
+      "title": "src/lib/confirmProgress.test.ts",
+      "locator": {
+        "path": "src/lib/confirmProgress.test.ts",
+        "content_sha256": "e7731aac0a266f7fecc31ac1e222b2726b613aa28e2b95ef4f2c18289b70f62c"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-confirmroster-test",
+      "kind": "test",
+      "ref": "src/lib/confirmRoster.test.ts",
+      "title": "src/lib/confirmRoster.test.ts",
+      "locator": {
+        "path": "src/lib/confirmRoster.test.ts",
+        "content_sha256": "1c41c185a0a27e600f421a6be153f8042f9b012ed55c0c895cfd9cc0066993d7"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-crosswalk-test",
+      "kind": "test",
+      "ref": "src/lib/crosswalk.test.ts",
+      "title": "src/lib/crosswalk.test.ts",
+      "locator": {
+        "path": "src/lib/crosswalk.test.ts",
+        "content_sha256": "653ce1fff0435b9627ddf7b04a5107936a5daea393a9d744b3d0aa096285fcbb"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-dashboardbundle-test",
+      "kind": "test",
+      "ref": "src/lib/dashboardBundle.test.ts",
+      "title": "src/lib/dashboardBundle.test.ts",
+      "locator": {
+        "path": "src/lib/dashboardBundle.test.ts",
+        "content_sha256": "fdb566f0034dc931e01fb975b98007bd06cb285fbe343fad29b339ff2414475f"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-dashboardtabs-test",
+      "kind": "test",
+      "ref": "src/lib/dashboardTabs.test.ts",
+      "title": "src/lib/dashboardTabs.test.ts",
+      "locator": {
+        "path": "src/lib/dashboardTabs.test.ts",
+        "content_sha256": "7142d8f76d6f8395200dbcde105cef43b8e418dd20dce8d57cc3f2dcbd6de993"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-demomode-test",
+      "kind": "test",
+      "ref": "src/lib/demoMode.test.ts",
+      "title": "src/lib/demoMode.test.ts",
+      "locator": {
+        "path": "src/lib/demoMode.test.ts",
+        "content_sha256": "264d79cf9b3f7c4e5b5101fa8a5a8ec72a865ae452aa45016b975ca2c6eaf4b7"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-dirtcommit-test",
+      "kind": "test",
+      "ref": "src/lib/dirtCommit.test.ts",
+      "title": "src/lib/dirtCommit.test.ts",
+      "locator": {
+        "path": "src/lib/dirtCommit.test.ts",
+        "content_sha256": "aa9521d64044dea60f669896b7288fee0a021d6cdc35e62af4860369bb4a27a1"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-factsversion-test",
+      "kind": "test",
+      "ref": "src/lib/factsVersion.test.ts",
+      "title": "src/lib/factsVersion.test.ts",
+      "locator": {
+        "path": "src/lib/factsVersion.test.ts",
+        "content_sha256": "6ea1b7ede2f74159fe0061335882bb32c7f4f281bcc1f3255f242ac547611b29"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-family-test",
+      "kind": "test",
+      "ref": "src/lib/family.test.ts",
+      "title": "src/lib/family.test.ts",
+      "locator": {
+        "path": "src/lib/family.test.ts",
+        "content_sha256": "b4e626511ec362cf9efb82f029b3153fb93f9db918072989eae0dc42bd27aedd"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-fetcherror-test",
+      "kind": "test",
+      "ref": "src/lib/fetchError.test.ts",
+      "title": "src/lib/fetchError.test.ts",
+      "locator": {
+        "path": "src/lib/fetchError.test.ts",
+        "content_sha256": "ab3ac7be00f22c28142858ae965fb0bf1442e838c9f867b3c28f27a0c958cf4d"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-filepressfromfleet-test",
+      "kind": "test",
+      "ref": "src/lib/filepressFromFleet.test.ts",
+      "title": "src/lib/filepressFromFleet.test.ts",
+      "locator": {
+        "path": "src/lib/filepressFromFleet.test.ts",
+        "content_sha256": "5b2e7c77dc6e890489841974c2d1f84b29cd68128737363d0d52112f5a3dc713"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-fleetdisplay-test",
+      "kind": "test",
+      "ref": "src/lib/fleetDisplay.test.ts",
+      "title": "src/lib/fleetDisplay.test.ts",
+      "locator": {
+        "path": "src/lib/fleetDisplay.test.ts",
+        "content_sha256": "60bea2e4749c31c54e6eb1f1a8e1a127475ae988c2a3f95fb51ce08630d47f12"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-formattime-test",
+      "kind": "test",
+      "ref": "src/lib/formatTime.test.ts",
+      "title": "src/lib/formatTime.test.ts",
+      "locator": {
+        "path": "src/lib/formatTime.test.ts",
+        "content_sha256": "f4449c7473f88af9c67158a5ffb9517ff9657b86c58804fb4e8fe55489eff72e"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-git-test",
+      "kind": "test",
+      "ref": "src/lib/git.test.ts",
+      "title": "src/lib/git.test.ts",
+      "locator": {
+        "path": "src/lib/git.test.ts",
+        "content_sha256": "cbeba47b07bc7ec41a146176367d33ffd3fe6a3156dddebc3fa7239e4d10804e"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-githubpublish-test",
+      "kind": "test",
+      "ref": "src/lib/githubPublish.test.ts",
+      "title": "src/lib/githubPublish.test.ts",
+      "locator": {
+        "path": "src/lib/githubPublish.test.ts",
+        "content_sha256": "f0c34b9a392ac8117dfe9bbca9df4a4d2e9d37319b3f131aec541a20a0758a32"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-globalinstall-test",
+      "kind": "test",
+      "ref": "src/lib/globalInstall.test.ts",
+      "title": "src/lib/globalInstall.test.ts",
+      "locator": {
+        "path": "src/lib/globalInstall.test.ts",
+        "content_sha256": "247386be87740831c3c279a09c47552f017b1ba7ba26b083935227801e57edff"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-groups-test",
+      "kind": "test",
+      "ref": "src/lib/groups.test.ts",
+      "title": "src/lib/groups.test.ts",
+      "locator": {
+        "path": "src/lib/groups.test.ts",
+        "content_sha256": "b3a4b8350eb53aed43cf58f0db4352e899344c96079fd6a8a592ae1685b47ea5"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-inventorypatch-test",
+      "kind": "test",
+      "ref": "src/lib/inventoryPatch.test.ts",
+      "title": "src/lib/inventoryPatch.test.ts",
+      "locator": {
+        "path": "src/lib/inventoryPatch.test.ts",
+        "content_sha256": "f0e96c0cf342c0aade0f9f36f2f3c92f4c01ef35e7a5bbd68c58f18239b4d89a"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-jobcancel-test",
+      "kind": "test",
+      "ref": "src/lib/jobCancel.test.ts",
+      "title": "src/lib/jobCancel.test.ts",
+      "locator": {
+        "path": "src/lib/jobCancel.test.ts",
+        "content_sha256": "63118951cae6fb4e590e64afd00197e27a5a2a7a72005e99b65fe775504abc70"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-land-test",
+      "kind": "test",
+      "ref": "src/lib/land.test.ts",
+      "title": "src/lib/land.test.ts",
+      "locator": {
+        "path": "src/lib/land.test.ts",
+        "content_sha256": "a3008bbc4d0926473a554fc3ab210f914cfb2b04aa6523c475b34de1d05ff11c"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-landdisplay-test",
+      "kind": "test",
+      "ref": "src/lib/landDisplay.test.ts",
+      "title": "src/lib/landDisplay.test.ts",
+      "locator": {
+        "path": "src/lib/landDisplay.test.ts",
+        "content_sha256": "2297c0088e2f2e1616eb7a16ef2aba36195bdc107a168d386797e1e93ce37f36"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-landships-test",
+      "kind": "test",
+      "ref": "src/lib/landShips.test.ts",
+      "title": "src/lib/landShips.test.ts",
+      "locator": {
+        "path": "src/lib/landShips.test.ts",
+        "content_sha256": "ff22a341e6d1de17238f4bd5b4f91accc3651c84a3acbf81bddbb4e8536d641c"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-localonly-test",
+      "kind": "test",
+      "ref": "src/lib/localOnly.test.ts",
+      "title": "src/lib/localOnly.test.ts",
+      "locator": {
+        "path": "src/lib/localOnly.test.ts",
+        "content_sha256": "b7eacfe8e3ce29779c74cac0b71bb263c00f8c92c293c57cefe7735aa5beee3b"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-lock-test",
+      "kind": "test",
+      "ref": "src/lib/lock.test.ts",
+      "title": "src/lib/lock.test.ts",
+      "locator": {
+        "path": "src/lib/lock.test.ts",
+        "content_sha256": "a98f11c6c7aeb80d873c4264d1681e34a8fea89bf72f373e15d3eaeac9176974"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-looks-test",
+      "kind": "test",
+      "ref": "src/lib/looks.test.ts",
+      "title": "src/lib/looks.test.ts",
+      "locator": {
+        "path": "src/lib/looks.test.ts",
+        "content_sha256": "de7a49deed782d5d3b89a60c1a4bfc770f4930c4f1aa55953817d33d5a67ba47"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-loopback-test",
+      "kind": "test",
+      "ref": "src/lib/loopback.test.ts",
+      "title": "src/lib/loopback.test.ts",
+      "locator": {
+        "path": "src/lib/loopback.test.ts",
+        "content_sha256": "25eb938fad6684e309df1a9b46ababa58079746d77d4001d6875ee14a6cefa9d"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-manifest-test",
+      "kind": "test",
+      "ref": "src/lib/manifest.test.ts",
+      "title": "src/lib/manifest.test.ts",
+      "locator": {
+        "path": "src/lib/manifest.test.ts",
+        "content_sha256": "76d1e6d70251a82290dc976bd304011cfcf1cedb1e14423ce3908e5fdeaac94a"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-npm-test",
+      "kind": "test",
+      "ref": "src/lib/npm.test.ts",
+      "title": "src/lib/npm.test.ts",
+      "locator": {
+        "path": "src/lib/npm.test.ts",
+        "content_sha256": "45640be7a95f1ae755399a26183af15db93799e5c7e1d9dcbe4d647405c9515a"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-npmpage-test",
+      "kind": "test",
+      "ref": "src/lib/npmPage.test.ts",
+      "title": "src/lib/npmPage.test.ts",
+      "locator": {
+        "path": "src/lib/npmPage.test.ts",
+        "content_sha256": "00d039d455c865a7a8d8fa95f244bf131e13f5e91f0b8cf3cd23bf966991f7c0"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-paths-test",
+      "kind": "test",
+      "ref": "src/lib/paths.test.ts",
+      "title": "src/lib/paths.test.ts",
+      "locator": {
+        "path": "src/lib/paths.test.ts",
+        "content_sha256": "8ebbcc9eac6b3c39d0f9c92d588ed3b330428c8245c19c2dd84c49c85c6968d7"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-pins-test",
+      "kind": "test",
+      "ref": "src/lib/pins.test.ts",
+      "title": "src/lib/pins.test.ts",
+      "locator": {
+        "path": "src/lib/pins.test.ts",
+        "content_sha256": "ff565deda7f27b1245decb38b4364be5412da5ea8e93c07c63ef2f7c91c20093"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-plugin-test",
+      "kind": "test",
+      "ref": "src/lib/plugin.test.ts",
+      "title": "src/lib/plugin.test.ts",
+      "locator": {
+        "path": "src/lib/plugin.test.ts",
+        "content_sha256": "4b554d32172bb1a0748b9c095f788b57e7b97cc843d050300acc4c22f38b2043"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-pluginprefs-test",
+      "kind": "test",
+      "ref": "src/lib/pluginPrefs.test.ts",
+      "title": "src/lib/pluginPrefs.test.ts",
+      "locator": {
+        "path": "src/lib/pluginPrefs.test.ts",
+        "content_sha256": "5077aaf3dc5edc0028b1d4a356ba8bc121c7ac3a1ea9395fe08bed63507968f9"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-portdisplay-test",
+      "kind": "test",
+      "ref": "src/lib/portDisplay.test.ts",
+      "title": "src/lib/portDisplay.test.ts",
+      "locator": {
+        "path": "src/lib/portDisplay.test.ts",
+        "content_sha256": "e2b118eb89ea42d947ba1837449bd383ba542a08f50562c0958626ba8bebc391"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-portfilters-test",
+      "kind": "test",
+      "ref": "src/lib/portFilters.test.ts",
+      "title": "src/lib/portFilters.test.ts",
+      "locator": {
+        "path": "src/lib/portFilters.test.ts",
+        "content_sha256": "81cf2eb636c5b5a1e7e5487273a3a77f65df52789c5177c30b7e0e3d9e9efc6b"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-publish-test",
+      "kind": "test",
+      "ref": "src/lib/publish.test.ts",
+      "title": "src/lib/publish.test.ts",
+      "locator": {
+        "path": "src/lib/publish.test.ts",
+        "content_sha256": "dc11f6aa98b6e850a453490aa97f1b9f1cf0a0784bd6ae0d28155cef5d3e54da"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-publishbatch-test",
+      "kind": "test",
+      "ref": "src/lib/publishBatch.test.ts",
+      "title": "src/lib/publishBatch.test.ts",
+      "locator": {
+        "path": "src/lib/publishBatch.test.ts",
+        "content_sha256": "5b90ae673bf03db45c0aa80784da4baf728aed98ca1f95519242edabef251c5a"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-roster-test",
+      "kind": "test",
+      "ref": "src/lib/roster.test.ts",
+      "title": "src/lib/roster.test.ts",
+      "locator": {
+        "path": "src/lib/roster.test.ts",
+        "content_sha256": "fb0f885e34d9b78fcb4e22a10eb56b805090abca3ff40d083e088951168569a4"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-scan-test",
+      "kind": "test",
+      "ref": "src/lib/scan.test.ts",
+      "title": "src/lib/scan.test.ts",
+      "locator": {
+        "path": "src/lib/scan.test.ts",
+        "content_sha256": "a2cd2ab160f1fac5efc8bd5da682149da129fd0c8f6378248992fc1169004d31"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-scriptship-test",
+      "kind": "test",
+      "ref": "src/lib/scriptShip.test.ts",
+      "title": "src/lib/scriptShip.test.ts",
+      "locator": {
+        "path": "src/lib/scriptShip.test.ts",
+        "content_sha256": "e9028d3e7d7f9c9e7bd0ca702c7cc8f9c755f3c3ceac5f7a7489371c9777ff34"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-semver-test",
+      "kind": "test",
+      "ref": "src/lib/semver.test.ts",
+      "title": "src/lib/semver.test.ts",
+      "locator": {
+        "path": "src/lib/semver.test.ts",
+        "content_sha256": "1d3f1540cae6f29e22187a62a14118557e749b2696dae61a41d416eb680de325"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-serve-test",
+      "kind": "test",
+      "ref": "src/lib/serve.test.ts",
+      "title": "src/lib/serve.test.ts",
+      "locator": {
+        "path": "src/lib/serve.test.ts",
+        "content_sha256": "1df170e1fc5b78a49b10c183eef8045745f747ea8a2d26f6302423abd4f7d296"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-serveport-test",
+      "kind": "test",
+      "ref": "src/lib/servePort.test.ts",
+      "title": "src/lib/servePort.test.ts",
+      "locator": {
+        "path": "src/lib/servePort.test.ts",
+        "content_sha256": "b3a6cb5f2d1400ea5c3daf7c62404a45d0acd84b1ce2e830459a87116f84facc"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-sitedisplay-test",
+      "kind": "test",
+      "ref": "src/lib/siteDisplay.test.ts",
+      "title": "src/lib/siteDisplay.test.ts",
+      "locator": {
+        "path": "src/lib/siteDisplay.test.ts",
+        "content_sha256": "875766885f2cc3042f494f28646045a5618226888b15a295bf411b450789f1f0"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-status-test",
+      "kind": "test",
+      "ref": "src/lib/status.test.ts",
+      "title": "src/lib/status.test.ts",
+      "locator": {
+        "path": "src/lib/status.test.ts",
+        "content_sha256": "37476856beba6ff2373a0f26244f1ac2938f50d8594ca6718cc0c6a7d75efb97"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-visitortiles-test",
+      "kind": "test",
+      "ref": "src/lib/visitorTiles.test.ts",
+      "title": "src/lib/visitorTiles.test.ts",
+      "locator": {
+        "path": "src/lib/visitorTiles.test.ts",
+        "content_sha256": "21a28bba07b4a53599b453acb3b06aacbd1635f3bf27948b29f141e5755d49d2"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-writeconfirm-test",
+      "kind": "test",
+      "ref": "src/lib/writeConfirm.test.ts",
+      "title": "src/lib/writeConfirm.test.ts",
+      "locator": {
+        "path": "src/lib/writeConfirm.test.ts",
+        "content_sha256": "708ef8cec9d8c89642dbd3863b4cdbe254542e439351f2631b328c15a35ccd86"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-writegate-test",
+      "kind": "test",
+      "ref": "src/lib/writeGate.test.ts",
+      "title": "src/lib/writeGate.test.ts",
+      "locator": {
+        "path": "src/lib/writeGate.test.ts",
+        "content_sha256": "8449e514cae2ac65825c8634f04448ba066bc8a64ced8a93e78eb274cc21e095"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    }
+  ]
 }
