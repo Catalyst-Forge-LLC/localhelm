@@ -56,11 +56,12 @@ curation:
     - cmd-push
     - cmd-serve
     - cmd-ship
+    - route-deck
   overrides: {}
   approval:
     actor: acmegeek
     source: LocalHelm FeatureFacts review
-    recorded_at: 2026-10-04T21:55:07.415Z
+    recorded_at: 2026-10-04T22:54:19.065Z
 publication:
   target: internal
   include_counts: true

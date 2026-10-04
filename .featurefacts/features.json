@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-5f5f40d02afa",
+  "scan_id": "scan-64b8d2101308",
   "product": {
     "name": "LocalHelm",
     "type": "typescript-node",
@@ -50,17 +50,22 @@
         "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-archive-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -182,7 +187,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -256,26 +261,36 @@
       "implements": [],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-specs-cheap-surfaces",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-brief-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -351,26 +366,40 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-bump-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -484,17 +513,22 @@
         "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-cascade-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -570,13 +604,18 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -589,7 +628,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -692,13 +731,26 @@
       "implements": [],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -711,7 +763,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -787,13 +839,18 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -806,7 +863,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -901,7 +958,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -977,13 +1034,22 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -996,7 +1062,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1072,13 +1138,18 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -1091,7 +1162,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1176,17 +1247,22 @@
         "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-land-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1300,17 +1376,22 @@
         "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-plugin-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1405,7 +1486,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1481,26 +1562,52 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-app-readme",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-specs-bridge-header",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-publish-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1605,13 +1712,22 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -1624,7 +1740,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1700,13 +1816,26 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-specs-bridge-header",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -1719,7 +1848,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1824,13 +1953,22 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -1843,7 +1981,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1919,26 +2057,36 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-scan-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2012,26 +2160,44 @@
       "implements": [],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-serve-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2136,13 +2302,26 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -2155,7 +2334,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2260,26 +2439,48 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-specs-cheap-surfaces",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-status-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2355,13 +2556,18 @@
       ],
       "dependencies": [],
       "docs": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-specs-cheap-surfaces",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       },
       "tests": {
         "state": "unassessed",
@@ -2374,7 +2580,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2457,17 +2663,22 @@
         "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-activity-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2507,9 +2718,9 @@
       "description": "Observed implementation surfaces: route-api-activity. Candidate only until a maintainer confirms the product meaning."
     },
     {
-      "type": "surface-cluster",
-      "recognition": "candidate",
-      "lifecycle": "unknown",
+      "type": "feature",
+      "recognition": "confirmed",
+      "lifecycle": "implemented",
       "availability": {
         "state": "unknown",
         "conditions": [],
@@ -2557,7 +2768,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2580,6 +2791,36 @@
             "origin": "deterministic",
             "method": "surface-cluster"
           }
+        },
+        {
+          "id": "route-deck-recognition",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "recognition",
+            "value": "confirmed",
+            "claim": "Confirmed in LocalHelm as confirmed."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T22:25:03.536Z"
+          }
+        },
+        {
+          "id": "route-deck-lifecycle",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "lifecycle",
+            "value": "implemented",
+            "claim": "Confirmed in LocalHelm as implemented."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T22:25:03.536Z"
+          }
         }
       ],
       "editorial": {
@@ -2588,7 +2829,6 @@
         "notes": ""
       },
       "uncertainty_reasons": {
-        "lifecycle": "Source presence does not establish release status.",
         "maturity": "No attributed maturity declaration.",
         "intent": "Discovery intent was not declared."
       },
@@ -2647,7 +2887,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2727,17 +2967,22 @@
         "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-groups-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2827,7 +3072,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2917,7 +3162,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2997,17 +3242,22 @@
         "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
       },
       "tests": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "typescript-test"
         ],
-        "links": [],
-        "reason": "No explicit test association. A similar test filename is only a proposal."
+        "links": [
+          {
+            "surface_id": "test-src-lib-roster-test",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link."
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -3098,7 +3348,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-5f5f40d02afa",
+        "last_seen_scan_id": "scan-64b8d2101308",
         "reason": "Current source evidence is available."
       },
       "evidence": [

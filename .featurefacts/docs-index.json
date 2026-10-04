@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-5f5f40d02afa",
+  "scan_id": "scan-64b8d2101308",
   "kind": "docs",
   "assessments": [
     {
@@ -30,25 +30,39 @@
     {
       "feature_id": "cmd-brief",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-specs-cheap-surfaces",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-bump",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
@@ -66,37 +80,60 @@
     {
       "feature_id": "cmd-commit",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-deps",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-enroll",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
@@ -114,25 +151,39 @@
     {
       "feature_id": "cmd-fetch",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-global",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
@@ -174,109 +225,214 @@
     {
       "feature_id": "cmd-publish",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-app-readme",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-specs-bridge-header",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-pull",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-push",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-specs-bridge-header",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-ready",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-scan",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-serve",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-ship",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-status",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-genesis",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-phase-1-brief",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-docs-specs-cheap-surfaces",
+            "association": "static-reference"
+          },
+          {
+            "surface_id": "doc-readme",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {
       "feature_id": "cmd-unenroll",
       "assessment": {
-        "state": "unassessed",
-        "result": "unknown",
+        "state": "partial",
+        "result": "linked-evidence",
         "adapter_ids": [
           "markdown-document"
         ],
-        "links": [],
-        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+        "links": [
+          {
+            "surface_id": "doc-docs-specs-cheap-surfaces",
+            "association": "static-reference"
+          }
+        ],
+        "reason": "A document names this capability in a heading or code span. That is a sign. It does not mean the documentation is adequate."
       }
     },
     {

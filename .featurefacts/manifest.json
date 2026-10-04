@@ -1,9 +1,9 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-5f5f40d02afa",
+  "scan_id": "scan-64b8d2101308",
   "tool": "featurefacts",
   "tool_version": "0.2.0",
-  "generated_at": "2026-10-04T21:21:56.765Z",
+  "generated_at": "2026-10-04T22:56:52.819Z",
   "root": ".",
   "status": "complete",
   "scope": {
@@ -162,8 +162,8 @@
       },
       {
         "path": "app/src/hooks.server.ts",
-        "sha256": "b3f89f16f7cb3e8389f755e416e86b5ecedecb4964170b953b7290993f9762e3",
-        "bytes": 766,
+        "sha256": "eec5c0e21c1d7ee540f5718df1ebe1f6e68d4f8b0c8fae73459ef2654e369d53",
+        "bytes": 1014,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -297,8 +297,8 @@
       },
       {
         "path": "app/src/lib/ConfirmModal.svelte",
-        "sha256": "e4babca95af3b4d249b87f4ec008247e50adad9e35c01275cab7b46f453315c8",
-        "bytes": 26551,
+        "sha256": "e503f5c7d15a41ba59c1328beff379c835e8576522f3dcc6028c014393b53a8d",
+        "bytes": 27073,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
@@ -321,8 +321,8 @@
       },
       {
         "path": "app/src/lib/confirmRoster.ts",
-        "sha256": "a593d9879a79da585380d7e748eb871f630f8fdd026bda3268b33e28db01a7b0",
-        "bytes": 267,
+        "sha256": "4781135137a116461e7a18413cb0b14df3905fd096e5542259d23c697db62667",
+        "bytes": 284,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -417,6 +417,30 @@
         "inspected_by": [
           "typescript-tree",
           "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/featureLabel.ts",
+        "sha256": "ccfc77e727abe28ca01d37d30bb29637a661884351a5a20eb514cd200d2e3126",
+        "bytes": 230,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/FeatureLabelDialog.svelte",
+        "sha256": "a9bb98d8b6009baec94ff23637230f126f11be5036c707ad0ea2194dbb1bd344",
+        "bytes": 7624,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
         ]
       },
       {
@@ -928,8 +952,8 @@
       },
       {
         "path": "app/src/routes/+page.svelte",
-        "sha256": "fd681fe3e1cdf965346ea4bb0386f6fea1288949845e3f436c56fdb69b5f4de2",
-        "bytes": 139363,
+        "sha256": "83a7bdbcfc3c1e7b4a2b9b3fa6682af7519758df52f31d9d6266cfacec298a3b",
+        "bytes": 143387,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
@@ -1878,8 +1902,8 @@
       },
       {
         "path": "src/lib/dashboardJob.ts",
-        "sha256": "11f33d6eaeefefb94d5856be1e186de584cd77774c03925b8bb8b25467fd253d",
-        "bytes": 2918,
+        "sha256": "e2447a6b58d5d45925219a9700a3c281cfcb12d0564edc4fff169a30b37b5ebf",
+        "bytes": 3038,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2085,6 +2109,62 @@
         "path": "src/lib/family.ts",
         "sha256": "621502e74a38392fa17e17cfcd4167bdaee766ae9c403857cfc6fe2b5a62e00b",
         "bytes": 1761,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/featureLabel.test.ts",
+        "sha256": "6cb61062957fa836358974ae63f9994a504aff5c8f71c51756beb87df2bdfefb",
+        "bytes": 2965,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/featureLabel.ts",
+        "sha256": "1a1157a197e3594226755e471b3d6cb7af14617b02a7757506d73bd084e7ceda",
+        "bytes": 4910,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/featureReview.test.ts",
+        "sha256": "5b47837bf8a2563d8da531a7ae660b68503b4a425dbe8759b571022152f6cf9d",
+        "bytes": 1919,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/featureReview.ts",
+        "sha256": "61789ac1b6a23612d803d85008bb565243d8726b28d1c95bd96700b69b00fdc1",
+        "bytes": 4454,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3258,8 +3338,49 @@
       },
       {
         "path": "src/lib/siteWriteActions.ts",
-        "sha256": "1394c44312022b05eb910c5e31eac324b263ff8dd407c7d7920085c3b03adae8",
-        "bytes": 14201,
+        "sha256": "a9815358a0121c68549d03f178d8eb05a704e31b7d7acecbbddc608fc1c40ffc",
+        "bytes": 16759,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/slipDoor.test.ts",
+        "sha256": "c4081e8b200d2f8fff57e2478169c934f9f2be6fa9270afe7dd6330755fbbbb4",
+        "bytes": 1454,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/slipDoor.ts",
+        "sha256": "625eb074552677de639a0ada7d716a794559147e1ed8f954216e2d8f02be7523",
+        "bytes": 1608,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/slipDoorPage.ts",
+        "sha256": "f8a1a79e6bc35f6a8c24128c4f7c9192e1a9caefad5ce45409e293f14c315944",
+        "bytes": 2768,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3381,8 +3502,8 @@
       },
       {
         "path": "src/lib/writeConfirm.ts",
-        "sha256": "b211a277e5c6bba08fd2522883156190b7f338ce8122f14864cf41ac914af24a",
-        "bytes": 13311,
+        "sha256": "b5029a6ee0792ded220f303a2e49a0b7a6a1be232bba6572fee53d2ddc9a8975",
+        "bytes": 13771,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3447,6 +3568,10 @@
         "reason": "exclude-pattern"
       },
       {
+        "path": "FEATURE_FACTS.md",
+        "reason": "exclude-pattern"
+      },
+      {
         "path": "node_modules",
         "reason": "exclude-pattern"
       },
@@ -3494,6 +3619,8 @@
         "app/src/lib/dashboardTypes.ts",
         "app/src/lib/dashboardWrites.ts",
         "app/src/lib/family.ts",
+        "app/src/lib/featureLabel.ts",
+        "app/src/lib/FeatureLabelDialog.svelte",
         "app/src/lib/fetchError.ts",
         "app/src/lib/fleetDisplay.ts",
         "app/src/lib/formatTime.ts",
@@ -3623,6 +3750,10 @@
         "src/lib/factsVersion.ts",
         "src/lib/family.test.ts",
         "src/lib/family.ts",
+        "src/lib/featureLabel.test.ts",
+        "src/lib/featureLabel.ts",
+        "src/lib/featureReview.test.ts",
+        "src/lib/featureReview.ts",
         "src/lib/fetchError.test.ts",
         "src/lib/fetchError.ts",
         "src/lib/filepressFromFleet.test.ts",
@@ -3708,6 +3839,9 @@
         "src/lib/siteDisplay.test.ts",
         "src/lib/siteDisplay.ts",
         "src/lib/siteWriteActions.ts",
+        "src/lib/slipDoor.test.ts",
+        "src/lib/slipDoor.ts",
+        "src/lib/slipDoorPage.ts",
         "src/lib/status.test.ts",
         "src/lib/status.ts",
         "src/lib/types.ts",
@@ -3752,6 +3886,8 @@
         "app/src/lib/dashboardTypes.ts",
         "app/src/lib/dashboardWrites.ts",
         "app/src/lib/family.ts",
+        "app/src/lib/featureLabel.ts",
+        "app/src/lib/FeatureLabelDialog.svelte",
         "app/src/lib/fetchError.ts",
         "app/src/lib/fleetDisplay.ts",
         "app/src/lib/formatTime.ts",
@@ -3881,6 +4017,10 @@
         "src/lib/factsVersion.ts",
         "src/lib/family.test.ts",
         "src/lib/family.ts",
+        "src/lib/featureLabel.test.ts",
+        "src/lib/featureLabel.ts",
+        "src/lib/featureReview.test.ts",
+        "src/lib/featureReview.ts",
         "src/lib/fetchError.test.ts",
         "src/lib/fetchError.ts",
         "src/lib/filepressFromFleet.test.ts",
@@ -3966,6 +4106,9 @@
         "src/lib/siteDisplay.test.ts",
         "src/lib/siteDisplay.ts",
         "src/lib/siteWriteActions.ts",
+        "src/lib/slipDoor.test.ts",
+        "src/lib/slipDoor.ts",
+        "src/lib/slipDoorPage.ts",
         "src/lib/status.test.ts",
         "src/lib/status.ts",
         "src/lib/types.ts",
@@ -4001,6 +4144,7 @@
         "app/src/lib/dashboardTypes.ts",
         "app/src/lib/dashboardWrites.ts",
         "app/src/lib/family.ts",
+        "app/src/lib/featureLabel.ts",
         "app/src/lib/fetchError.ts",
         "app/src/lib/fleetDisplay.ts",
         "app/src/lib/formatTime.ts",
@@ -4104,6 +4248,10 @@
         "src/lib/factsVersion.ts",
         "src/lib/family.test.ts",
         "src/lib/family.ts",
+        "src/lib/featureLabel.test.ts",
+        "src/lib/featureLabel.ts",
+        "src/lib/featureReview.test.ts",
+        "src/lib/featureReview.ts",
         "src/lib/fetchError.test.ts",
         "src/lib/fetchError.ts",
         "src/lib/filepressFromFleet.test.ts",
@@ -4189,6 +4337,9 @@
         "src/lib/siteDisplay.test.ts",
         "src/lib/siteDisplay.ts",
         "src/lib/siteWriteActions.ts",
+        "src/lib/slipDoor.test.ts",
+        "src/lib/slipDoor.ts",
+        "src/lib/slipDoorPage.ts",
         "src/lib/status.test.ts",
         "src/lib/status.ts",
         "src/lib/types.ts",
@@ -4217,6 +4368,7 @@
         "app/src/lib/dashboardTypes.ts",
         "app/src/lib/dashboardWrites.ts",
         "app/src/lib/family.ts",
+        "app/src/lib/featureLabel.ts",
         "app/src/lib/fetchError.ts",
         "app/src/lib/fleetDisplay.ts",
         "app/src/lib/formatTime.ts",
@@ -4320,6 +4472,10 @@
         "src/lib/factsVersion.ts",
         "src/lib/family.test.ts",
         "src/lib/family.ts",
+        "src/lib/featureLabel.test.ts",
+        "src/lib/featureLabel.ts",
+        "src/lib/featureReview.test.ts",
+        "src/lib/featureReview.ts",
         "src/lib/fetchError.test.ts",
         "src/lib/fetchError.ts",
         "src/lib/filepressFromFleet.test.ts",
@@ -4405,6 +4561,9 @@
         "src/lib/siteDisplay.test.ts",
         "src/lib/siteDisplay.ts",
         "src/lib/siteWriteActions.ts",
+        "src/lib/slipDoor.test.ts",
+        "src/lib/slipDoor.ts",
+        "src/lib/slipDoorPage.ts",
         "src/lib/status.test.ts",
         "src/lib/status.ts",
         "src/lib/types.ts",
@@ -4469,6 +4628,8 @@
         "src/lib/dirtCommit.test.ts",
         "src/lib/factsVersion.test.ts",
         "src/lib/family.test.ts",
+        "src/lib/featureLabel.test.ts",
+        "src/lib/featureReview.test.ts",
         "src/lib/fetchError.test.ts",
         "src/lib/filepressFromFleet.test.ts",
         "src/lib/fleetDisplay.test.ts",
@@ -4504,6 +4665,7 @@
         "src/lib/serve.test.ts",
         "src/lib/servePort.test.ts",
         "src/lib/siteDisplay.test.ts",
+        "src/lib/slipDoor.test.ts",
         "src/lib/status.test.ts",
         "src/lib/visitorTiles.test.ts",
         "src/lib/writeConfirm.test.ts",
@@ -4529,6 +4691,8 @@
         "src/lib/dirtCommit.test.ts",
         "src/lib/factsVersion.test.ts",
         "src/lib/family.test.ts",
+        "src/lib/featureLabel.test.ts",
+        "src/lib/featureReview.test.ts",
         "src/lib/fetchError.test.ts",
         "src/lib/filepressFromFleet.test.ts",
         "src/lib/fleetDisplay.test.ts",
@@ -4564,6 +4728,7 @@
         "src/lib/serve.test.ts",
         "src/lib/servePort.test.ts",
         "src/lib/siteDisplay.test.ts",
+        "src/lib/slipDoor.test.ts",
         "src/lib/status.test.ts",
         "src/lib/visitorTiles.test.ts",
         "src/lib/writeConfirm.test.ts",
@@ -4574,49 +4739,49 @@
   ],
   "rules_version": "featurefacts-core@0.2.0",
   "fingerprints": {
-    "source": "3674764e6520742ccb83d2467848f43736ba5c6cfa4d400f6d1214397e0f66fa",
+    "source": "c05aa0e0706f284c8d27b9d15b06ed5980080ed625685b928f1a00113449d8f8",
     "config": "e86aac91018044abf39784d68e698da5a774b319a14feb497036d1ed5d5abf40",
     "adapters": "4abbb8741b08bcd3aa308ef9c93d4a55fd7feb6d4a98f89297831ab85b15b1eb",
     "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
-    "registry": "2287433639bb4142750d32a323b5da696a096a4709f9c8112f4d6ec0f24f0e82",
-    "projection": "b8343463ef7de4aabe35a562b042ba717b36d9fed135dd3a676dc842a7343021"
+    "registry": "1bbdc16d28a91116580c94e0ab52bc9b16c7a2a52a4e64ed16f4dfe30fe44f81",
+    "projection": "430e104a42b2a3ee563284a667022152493035bda576619219df756eb66b3ff4"
   },
   "artifacts": [
     {
       "path": ".featurefacts/config.yaml",
-      "sha256": "bd5066726884c8131a496abf22d816362446d4622ab653ece143ce0688b91418"
+      "sha256": "f8a845710c4442a689ca6cad9c5c10b36aba02146392efbf8d1eb43e0af84d93"
     },
     {
       "path": ".featurefacts/docs-index.json",
-      "sha256": "44305aef6810ff7436af0595d7c9847c3818e759efefc787db4fd664246d38a5"
+      "sha256": "10968d8296adaadfe9d267cd212f01c3a539a4c55b638686718156d9b58fc9cf"
     },
     {
       "path": ".featurefacts/features.json",
-      "sha256": "27c2319c4fa2a981aab652f0674e7b0e2e7aa872cc6fbd81923dcdd4534e8edc"
+      "sha256": "3662c5ceb1c784cdafbe2437f3f2d1c68286e311706687a61980d71bf707e340"
     },
     {
       "path": ".featurefacts/FEATURES.md",
-      "sha256": "bdeadb1d20fb1b1e9578dcf47cd91ef4679a015f4802ecc71ea070b985b4a66f"
+      "sha256": "418b3f16ccfe05ab24e0c9426cc7f7e969f84e2151417cfa1c4effad0461ac75"
     },
     {
       "path": ".featurefacts/features.yaml",
-      "sha256": "809b6e7f78f60a6fa569d03b79ccd48dbf0341244eec378565deaca89027535b"
+      "sha256": "c8034eba1c63362df49f80898a99a7ba790f06e95d67c01d2a32b0b17b33573c"
     },
     {
       "path": ".featurefacts/gaps.yaml",
-      "sha256": "ebdc701f2dacbeb62750960d3eee84a10fb1c27fc4ce64b6a038da77c6a42e39"
+      "sha256": "888a9f865335d1bbdc5e59b1a2f3c35df8426c49a42cf7a45eb8da71d25bf147"
     },
     {
       "path": ".featurefacts/surfaces.json",
-      "sha256": "efdc739c4d948f8fb590dd0d867b7c3bd7de6e13d7f8b47a2508404b6474f925"
+      "sha256": "110c973c74ffd14deb7b59f693d1601f3280a9739b81d76dd09e481347973f8e"
     },
     {
       "path": ".featurefacts/test-index.json",
-      "sha256": "217069cca27afc26a3064b86b6d5e6ea7722048ed82924cbf7592f1f6c20662e"
+      "sha256": "4647d183098b8718908c8a2fd091dbd64d793880b710778e24b5114e128353c2"
     },
     {
       "path": "FEATURE_FACTS.md",
-      "sha256": "6504493d96fe7818b4528847db6a284e31a1b551a228b3cfcb4a2a0a93ab2075"
+      "sha256": "a6b8cb0706bd3f45c3009b93af1c2df74c1017303427aea9833425e917fa4982"
     }
   ],
   "diagnostics": []

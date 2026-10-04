@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-5f5f40d02afa",
+  "scan_id": "scan-64b8d2101308",
   "surfaces": [
     {
       "id": "cmd-archive",
@@ -1399,6 +1399,40 @@
       "state": "current"
     },
     {
+      "id": "test-src-lib-featurelabel-test",
+      "kind": "test",
+      "ref": "src/lib/featureLabel.test.ts",
+      "title": "src/lib/featureLabel.test.ts",
+      "locator": {
+        "path": "src/lib/featureLabel.test.ts",
+        "content_sha256": "6cb61062957fa836358974ae63f9994a504aff5c8f71c51756beb87df2bdfefb"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-featurereview-test",
+      "kind": "test",
+      "ref": "src/lib/featureReview.test.ts",
+      "title": "src/lib/featureReview.test.ts",
+      "locator": {
+        "path": "src/lib/featureReview.test.ts",
+        "content_sha256": "5b47837bf8a2563d8da531a7ae660b68503b4a425dbe8759b571022152f6cf9d"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
       "id": "test-src-lib-fetcherror-test",
       "kind": "test",
       "ref": "src/lib/fetchError.test.ts",
@@ -1984,6 +2018,23 @@
       "locator": {
         "path": "src/lib/siteDisplay.test.ts",
         "content_sha256": "875766885f2cc3042f494f28646045a5618226888b15a295bf411b450789f1f0"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-slipdoor-test",
+      "kind": "test",
+      "ref": "src/lib/slipDoor.test.ts",
+      "title": "src/lib/slipDoor.test.ts",
+      "locator": {
+        "path": "src/lib/slipDoor.test.ts",
+        "content_sha256": "c4081e8b200d2f8fff57e2478169c934f9f2be6fa9270afe7dd6330755fbbbb4"
       },
       "provenance": {
         "adapter_id": "typescript-test",
