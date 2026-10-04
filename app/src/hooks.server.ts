@@ -2,11 +2,20 @@ import { json } from '@sveltejs/kit';
 import type { Handle } from '@sveltejs/kit';
 import { requestWantsDemo, runWithDemo } from '../../src/lib/demoMode.js';
 import { isOperatorFace, readClientAddress } from '../../src/lib/loopback.js';
+import { proxySlipOpen } from '../../src/lib/slipDoor.js';
 
 const OPEN_API = new Set(['/api/visitor']);
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const path = event.url.pathname;
+	if (path.startsWith('/s/')) {
+		return proxySlipOpen({
+			pathname: path,
+			search: event.url.search,
+			host: event.request.headers.get('host'),
+			method: event.request.method
+		});
+	}
 	if (path.startsWith('/api/') && !OPEN_API.has(path)) {
 		if (!isOperatorFace(readClientAddress(() => event.getClientAddress()), event.request.headers.get('host'))) {
 			return json({ error: 'This API is for the operator board on loopback.' }, { status: 403 });
