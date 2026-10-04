@@ -7,8 +7,62 @@ export type FeatureLabelCardRow = {
 	lifecycle: string;
 	availability: string;
 	maturity: string;
+	documentation: string;
+	tests: string;
 	evidence: string;
 };
+
+export type LabelPaperPair = { label: string; value: string };
+
+function knownValue(value: string | undefined): string {
+	const text = (value ?? '').trim();
+	return !text || text.toLowerCase() === 'unknown' ? '' : text;
+}
+
+/** Same rows FilePress draws for a FeatureFacts label. Unknown fields stay off the card. */
+export function labelPaperRows(
+	rows: Array<{
+		name: string;
+		lifecycle?: string;
+		availability?: string;
+		maturity?: string;
+		documentation?: string;
+		tests?: string;
+		evidence?: string;
+	}>,
+): LabelPaperPair[] {
+	const names = rows.map((row) => row.name.trim()).filter(Boolean);
+	const pairs: LabelPaperPair[] = [];
+	if (names.length) pairs.push({ label: 'Selected', value: names.join(' · ') });
+	const shared = (pick: (row: (typeof rows)[number]) => string | undefined): string => {
+		const present = rows.map((row) => knownValue(pick(row)));
+		if (!present.length || present.some((value) => !value)) return '';
+		const unique = [...new Set(present)];
+		return unique.length === 1 ? unique[0] : 'mixed';
+	};
+	const fields: Array<[string, (row: (typeof rows)[number]) => string | undefined]> = [
+		['Lifecycle', (row) => row.lifecycle],
+		['Availability', (row) => row.availability],
+		['Maturity', (row) => row.maturity],
+		['Documentation', (row) => row.documentation],
+		['Tests', (row) => row.tests],
+		['Evidence', (row) => row.evidence],
+	];
+	for (const [label, pick] of fields) {
+		const value = shared(pick);
+		if (value) pairs.push({ label, value });
+	}
+	return pairs;
+}
+
+export function labelPaperMeta(card: { type?: string; status?: string } | null): LabelPaperPair[] {
+	const pairs: LabelPaperPair[] = [];
+	const type = knownValue(card?.type);
+	const status = knownValue(card?.status);
+	if (type) pairs.push({ label: 'Type', value: type });
+	if (status) pairs.push({ label: 'Status', value: status });
+	return pairs;
+}
 
 export type FeatureLabelCard = {
 	name: string;
@@ -45,6 +99,8 @@ function parseCard(data: unknown): FeatureLabelCard | null {
 			lifecycle: text(row.lifecycle),
 			availability: text(row.availability),
 			maturity: text(row.maturity),
+			documentation: text(row.documentation),
+			tests: text(row.tests),
 			evidence: text(row.evidence),
 		});
 	}

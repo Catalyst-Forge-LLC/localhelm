@@ -4,6 +4,12 @@ export type FeatureReviewRow = {
 	recognition: string;
 	selected: boolean;
 	summary: string;
+	lifecycle?: string;
+	availability?: string;
+	maturity?: string;
+	documentation?: string;
+	tests?: string;
+	evidence?: string;
 };
 
 export type FeatureReviewConfirm = {
@@ -59,12 +65,19 @@ export function reviewFeatureRows(data: unknown): FeatureReviewRow[] | null {
 		if (!item || typeof item !== 'object') return null;
 		const row = item as Record<string, unknown>;
 		if (typeof row.id !== 'string' || typeof row.name !== 'string') return null;
+		const optional = (key: string) => (typeof row[key] === 'string' ? row[key].trim() : '');
 		rows.push({
 			id: row.id,
 			name: row.name,
 			recognition: typeof row.recognition === 'string' ? row.recognition : 'candidate',
 			selected: row.selected === true,
 			summary: typeof row.summary === 'string' ? row.summary : '',
+			lifecycle: optional('lifecycle'),
+			availability: optional('availability'),
+			maturity: optional('maturity'),
+			documentation: optional('documentation'),
+			tests: optional('tests'),
+			evidence: optional('evidence'),
 		});
 	}
 	return rows;

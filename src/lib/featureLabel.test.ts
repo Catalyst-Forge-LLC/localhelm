@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { featureLabelModel, labelTickSeed } from './featureLabel.js';
+import { featureLabelModel, labelPaperMeta, labelPaperRows, labelTickSeed } from './featureLabel.js';
 
 const payload = {
 	features: [
@@ -33,6 +33,40 @@ describe('featureLabelModel', () => {
 		});
 		assert.equal(model.card, null);
 		assert.deepEqual(model.notes, []);
+	});
+});
+
+describe('labelPaperRows', () => {
+	it('keeps shared known fields and drops unknown ones', () => {
+		assert.deepEqual(
+			labelPaperRows([
+				{
+					name: 'Push',
+					lifecycle: 'implemented',
+					availability: 'unknown',
+					maturity: 'unknown',
+					documentation: 'partial',
+					tests: 'partial',
+					evidence: 'current',
+				},
+				{
+					name: 'Scan',
+					lifecycle: 'implemented',
+					availability: 'unknown',
+					maturity: 'experimental',
+					documentation: 'partial',
+					tests: 'unknown',
+					evidence: 'current',
+				},
+			]),
+			[
+				{ label: 'Selected', value: 'Push · Scan' },
+				{ label: 'Lifecycle', value: 'implemented' },
+				{ label: 'Documentation', value: 'partial' },
+				{ label: 'Evidence', value: 'current' },
+			],
+		);
+		assert.deepEqual(labelPaperMeta({ type: 'unknown', status: 'active' }), [{ label: 'Status', value: 'active' }]);
 	});
 });
 

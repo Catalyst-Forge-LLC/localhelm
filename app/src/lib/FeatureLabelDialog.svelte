@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FEATURE_LABEL_LIMIT, type FeatureLabelModel } from './featureLabel';
+	import { FEATURE_LABEL_LIMIT, labelPaperMeta, labelPaperRows, type FeatureLabelModel } from './featureLabel';
 
 	type Props = {
 		open: boolean;
@@ -31,6 +31,8 @@
 		model ? [...model.features].sort((a, b) => Number(b.selected) - Number(a.selected)) : [],
 	);
 	const picked = $derived(ordered.filter((row) => ticked.includes(row.id)));
+	const paper = $derived(labelPaperRows(picked));
+	const meta = $derived(labelPaperMeta(model?.card ?? null));
 
 	$effect(() => {
 		if (!dialogEl) return;
@@ -68,15 +70,30 @@
 				<p class="working">{busyLabel || 'Working…'}</p>
 			{/if}
 			{#if model}
-				<section class="paper" aria-label="FeatureFacts label">
-					<h3>{model.card?.name || model.repoId}</h3>
-					<p class="serving">
-						{[model.card?.type, model.card?.status].filter(Boolean).join(' · ') || 'FeatureFacts label'}
-					</p>
-					<p class="question">What can this product do?</p>
-					<p class="names">{picked.length ? picked.map((row) => row.name).join(' · ') : 'Nothing selected.'}</p>
-				</section>
-			{/if}
+				<div class="stage">
+					<section class="xfacts-label" aria-label="FeatureFacts label">
+						<p class="mark"><span class="mark-lead">Feature</span><span class="mark-rest">Facts</span></p>
+						<h3>{model.card?.name || model.repoId}</h3>
+						<div class="serving">Serving size: one product</div>
+						{#if meta.length}
+							<div class="meta">
+								{#each meta as item (item.label)}
+									<span><strong>{item.label}</strong> {item.value}</span>
+								{/each}
+							</div>
+						{/if}
+						{#if paper.length}
+							{#each paper as row, i (row.label)}
+								<div class="row" class:stack={row.value.length > 32} class:thick={i === paper.length - 1}>
+									<strong>{row.label}</strong>
+									<span>{row.value}</span>
+								</div>
+							{/each}
+						{:else}
+							<div class="row thick"><strong>Selected</strong><span>Nothing selected.</span></div>
+						{/if}
+					</section>
+					<div class="picker">
 			{#if model && model.notes.length}
 				<ul class="notes">
 					{#each model.notes as note (note)}
@@ -109,6 +126,9 @@
 				</ul>
 			{:else if model}
 				<p class="hint">Scan this repo to find capabilities.</p>
+			{/if}
+				</div>
+				</div>
 			{/if}
 		</div>
 		<div class="actions">
@@ -144,7 +164,7 @@
 	.panel {
 		display: flex;
 		flex-direction: column;
-		width: min(40rem, calc(100vw - 2rem));
+		width: min(52rem, calc(100vw - 2rem));
 		max-height: calc(100dvh - 2rem);
 		overflow: hidden;
 		border: 1px solid var(--steel);
@@ -174,37 +194,106 @@
 		line-height: 1.4;
 	}
 
-	.paper {
+	.stage {
+		display: grid;
+		gap: 1rem;
 		margin-top: 0.85rem;
-		padding: 0.85rem 0.95rem 0.35rem;
-		background: #f8fafc;
-		color: #101418;
-		border-top: 4px solid #101418;
+		align-items: start;
 	}
 
-	.paper h3 {
-		margin: 0;
-		font-size: 1.15rem;
-		letter-spacing: -0.03em;
+	@media (min-width: 760px) {
+		.stage {
+			grid-template-columns: 20rem minmax(0, 1fr);
+		}
+	}
+
+	.xfacts-label {
+		box-sizing: border-box;
+		background: #f8fafc;
+		color: #101418;
+		border: 4px solid #101418;
+		padding: 1rem 1.05rem 1.15rem;
+		font-family: 'IBM Plex Mono', ui-monospace, monospace;
+		font-weight: 400;
+	}
+
+	.mark {
+		margin: 0 0 0.4rem;
+		font-family: Sora, sans-serif;
+		font-weight: 800;
+		font-size: 0.85rem;
+		letter-spacing: 0.06em;
+		line-height: 1;
 		text-transform: uppercase;
 	}
 
+	.mark-lead {
+		color: #818cf8;
+	}
+
+	.mark-rest {
+		color: #101418;
+	}
+
+	.xfacts-label h3 {
+		margin: 0;
+		font-family: Sora, sans-serif;
+		font-weight: 800;
+		font-size: 1.55rem;
+		letter-spacing: -0.03em;
+		line-height: 1.1;
+		color: #101418;
+	}
+
 	.serving {
-		margin: 0.35rem 0 0;
-		padding-bottom: 0.45rem;
-		border-bottom: 6px solid #101418;
-		font-size: 0.75rem;
+		font-size: 0.72rem;
+		line-height: 1.35;
+		color: #5c6b7a;
+		border-bottom: 10px solid #101418;
+		padding: 0.4rem 0 0.5rem;
+		margin-bottom: 0.35rem;
 	}
 
-	.question,
-	.names {
-		margin: 0.45rem 0 0.65rem;
-		font-size: 0.82rem;
+	.meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem 0.75rem;
+		border-bottom: 5px solid #101418;
+		padding: 0.45rem 0 0.55rem;
+		margin-bottom: 0.35rem;
+		font-size: 0.78rem;
 	}
 
-	.names {
-		margin-top: 0.15rem;
-		font-weight: 600;
+	.meta strong,
+	.row strong {
+		font-weight: 700;
+	}
+
+	.row {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		border-bottom: 1px solid #101418;
+		padding: 0.32rem 0;
+		font-size: 0.8rem;
+	}
+
+	.row.thick {
+		border-bottom-width: 5px;
+	}
+
+	.row span {
+		text-align: right;
+	}
+
+	.row.stack {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.15rem;
+	}
+
+	.row.stack span {
+		text-align: left;
 	}
 
 	.notes,
