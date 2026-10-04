@@ -27,6 +27,10 @@
 
 	const overLimit = $derived(ticked.length > FEATURE_LABEL_LIMIT);
 	const canUpdate = $derived(Boolean(model && model.features.length > 0 && !overLimit && !busy));
+	const ordered = $derived(
+		model ? [...model.features].sort((a, b) => Number(b.selected) - Number(a.selected)) : [],
+	);
+	const picked = $derived(ordered.filter((row) => ticked.includes(row.id)));
 
 	$effect(() => {
 		if (!dialogEl) return;
@@ -39,10 +43,6 @@
 		ticked = on ? [...new Set([...ticked, id])] : ticked.filter((item) => item !== id);
 	}
 
-	function detail(row: { lifecycle: string; availability: string; maturity: string; evidence: string }): string {
-		const bits = [row.lifecycle, row.availability && `availability ${row.availability}`, row.maturity && `maturity ${row.maturity}`, row.evidence && `evidence ${row.evidence}`].filter(Boolean);
-		return bits.join(' · ');
-	}
 </script>
 
 <dialog
@@ -63,28 +63,18 @@
 	<div class="panel">
 		<div class="body">
 			<h2 id="feature-label-title">Label for {model?.repoId ?? 'repo'}</h2>
-			<p class="hint">Tick up to 12. Update label writes the file. Close leaves it unchanged. Scan refreshes the list and does not write the label.</p>
+			<p class="hint">Tick up to 12. Update label writes the file. Scan refreshes the list.</p>
 			{#if busy}
 				<p class="working">{busyLabel || 'Working…'}</p>
 			{/if}
-			{#if model?.card}
+			{#if model}
 				<section class="paper" aria-label="FeatureFacts label">
-					<h3>{model.card.name || model.repoId}</h3>
+					<h3>{model.card?.name || model.repoId}</h3>
 					<p class="serving">
-						{[model.card.type, model.card.status].filter(Boolean).join(' · ') || 'FeatureFacts label'}
+						{[model.card?.type, model.card?.status].filter(Boolean).join(' · ') || 'FeatureFacts label'}
 					</p>
 					<p class="question">What can this product do?</p>
-					{#each model.card.rows as row (row.name)}
-						<div class="fact">
-							<strong>{row.name}</strong>
-							<span>{detail(row)}</span>
-						</div>
-					{/each}
-				</section>
-			{:else}
-				<section class="paper empty" aria-label="FeatureFacts label">
-					<h3>No label yet</h3>
-					<p>Tick up to 12 capabilities, then Update label.</p>
+					<p class="names">{picked.length ? picked.map((row) => row.name).join(' · ') : 'Nothing selected.'}</p>
 				</section>
 			{/if}
 			{#if model && model.notes.length}
@@ -100,22 +90,19 @@
 			{#if overLimit}
 				<p class="fail">A label holds at most 12 capabilities. Untick down to 12.</p>
 			{/if}
-			{#if model && model.features.length}
-				<p class="count">{ticked.length} of {model.features.length} ticked</p>
+			{#if model && ordered.length}
+				<p class="count">{ticked.length} of {ordered.length} ticked</p>
 				<ul class="caps">
-					{#each model.features as row (row.id)}
+					{#each ordered as row (row.id)}
 						<li>
-							<label>
+							<label title={row.summary}>
 								<input
 									type="checkbox"
 									checked={ticked.includes(row.id)}
 									disabled={busy}
 									onchange={(event) => toggle(row.id, event.currentTarget.checked)}
 								/>
-								<span>
-									<strong>{row.name}</strong>
-									{#if row.summary}<span class="sum">{row.summary}</span>{/if}
-								</span>
+								<span>{row.name}</span>
 							</label>
 						</li>
 					{/each}
@@ -169,9 +156,7 @@
 
 	.body {
 		min-height: 0;
-		flex: 1;
-		overflow: auto;
-		padding: 1.15rem 1.25rem 0.6rem;
+		padding: 1.15rem 1.25rem 0.4rem;
 	}
 
 	h2 {
@@ -211,28 +196,15 @@
 		font-size: 0.75rem;
 	}
 
-	.question {
-		margin: 0.55rem 0 0.15rem;
+	.question,
+	.names {
+		margin: 0.45rem 0 0.65rem;
 		font-size: 0.82rem;
 	}
 
-	.fact {
-		display: flex;
-		justify-content: space-between;
-		gap: 1rem;
-		padding: 0.32rem 0;
-		border-bottom: 1px solid #101418;
-		font-size: 0.78rem;
-	}
-
-	.fact span {
-		text-align: right;
-		color: #44505c;
-	}
-
-	.paper.empty p {
-		margin: 0.45rem 0 0.7rem;
-		font-size: 0.82rem;
+	.names {
+		margin-top: 0.15rem;
+		font-weight: 600;
 	}
 
 	.notes,
@@ -252,6 +224,8 @@
 		list-style: none;
 		margin: 0.35rem 0 0;
 		padding: 0;
+		max-height: 14rem;
+		overflow: auto;
 	}
 
 	.caps li {
@@ -261,20 +235,9 @@
 	.caps label {
 		display: flex;
 		gap: 0.55rem;
-		align-items: flex-start;
-		padding: 0.4rem 0;
+		align-items: center;
+		padding: 0.28rem 0.15rem;
 		cursor: pointer;
-	}
-
-	.caps strong {
-		display: block;
-		font-weight: 600;
-	}
-
-	.sum {
-		display: block;
-		color: var(--dim);
-		font-size: 0.75rem;
 	}
 
 	.actions {
