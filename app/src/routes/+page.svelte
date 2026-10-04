@@ -2,6 +2,8 @@
 	import { onMount, tick } from 'svelte';
 	import { replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
+	import FeatureLabelDialog from '$lib/FeatureLabelDialog.svelte';
+	import { featureLabelModel, labelTickSeed, type FeatureLabelModel } from '$lib/featureLabel';
 	import TodayBoard from '$lib/TodayBoard.svelte';
 	import BridgeHeader from '$lib/BridgeHeader.svelte';
 	import '$lib/dashboard.css';
@@ -154,6 +156,10 @@
 	let npmUser = $state<string | null>(null);
 	let publishAuthHint = $state('');
 	let confirmOpen = $state(false);
+	let labelOpen = $state(false);
+	let labelModel = $state<FeatureLabelModel | null>(null);
+	let labelTicked = $state<string[]>([]);
+	let labelError = $state('');
 	let confirmTitle = $state('');
 	let confirmHint = $state('');
 	let confirmLabel = $state('Confirm');
@@ -1475,6 +1481,8 @@
 		startCascade,
 		startPluginJob,
 		applyPluginItems,
+		scanFeatureLabel,
+		updateFeatureLabel,
 		startLand,
 		offerLandOutcome,
 	} = createDashboardWrites({
@@ -1484,6 +1492,16 @@
 		run,
 		eachNamed,
 		offerConfirm,
+		offerFeatureLabel: (data, repoId, keep) => {
+			const model = featureLabelModel(repoId, data);
+			labelModel = model;
+			labelTicked = labelTickSeed(model.features, keep);
+			labelError = '';
+			labelOpen = true;
+		},
+		setFeatureLabelError: (message) => {
+			labelError = message;
+		},
 		loadStatus,
 		reloadAfterWrite,
 		patchWrite,
@@ -2217,12 +2235,8 @@
 	}
 
 	function pluginActionTip(plugin: string, act: { id: string; label: string }): string {
-		if (plugin === 'featurefacts') {
-			if (act.id === 'scan') return 'Reads the repo and refreshes the candidate list. Does not write the label.';
-			if (act.id === 'review') return 'Tick up to 12 capabilities. Update label writes FEATURE_FACTS.md.';
-			if (act.id === 'view') return 'Shows the label. Nothing is written.';
-			if (act.id === 'check') return 'Compares the register and the label to this repo. Nothing is written.';
-			if (act.id === 'report') return 'Rewrites the label from the capabilities already ticked in Review.';
+		if (plugin === 'featurefacts' && act.id === 'label') {
+			return 'Shows the label and the capability list. Scan refreshes the list. Update label is the only write.';
 		}
 		return `Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`;
 	}
@@ -2241,7 +2255,7 @@
 		if (board.plugin === 'featurefacts') {
 			bits.push(
 				'Add repos scans a folder for package.json or git checkouts. Init writes an empty register into each ticked repo. A repo that already has .featurefacts/ stays off that list.',
-				'Scan finds capabilities and does not write the label. Review ticks up to 12. View shows FEATURE_FACTS.md. Check compares the label to the repo and writes nothing. Report rewrites the label from the current ticks. Init does not scan code.',
+				'Label shows the rendered card and the capability list. Scan refreshes that list and does not write the label. Update label is the only write. Init does not scan code.',
 			);
 		}
 		if (board.plugin === 'xfacts') {
@@ -2741,7 +2755,7 @@
 								summary={board.plugin === 'filepress'
 									? 'Content sites. Add sites lists folders FilePress does not see as a sibling. Check rows, then Land, Sync, or Ship. Keep local drops Land until you Include; the site stays here to run and update. Archive hides a site from Today until you Restore. Git push is on Fleet.'
 									: board.plugin === 'featurefacts'
-										? 'Repos with a FeatureFacts register. Scan finds capabilities. Review ticks the label. View shows it. Check writes nothing.'
+										? 'Repos with a FeatureFacts register. Label shows the card and the list. Update label is the only write.'
 										: 'Check rows, then run a job on the selection.'}
 								detail={siteBoardHelp(board)}
 							/>
@@ -2840,7 +2854,7 @@
 									</Tooltip>
 								{/if}
 							{/if}
-							{#each boardActions(board) as act (act.id)}
+							{#each boardActions(board).filter((act) => act.id !== 'label') as act (act.id)}
 								{@const ready = checkedSiteIds(board, act.id)}
 								{#if ready.length}
 									{@const icon = actionIcon(act)}
@@ -3213,7 +3227,7 @@
 									{/if}
 								</div>
 								<div class="tool-band">
-									{#each boardActions(board) as act (act.id)}
+									{#each boardActions(board).filter((act) => act.id !== 'label') as act (act.id)}
 										{@const ready = checkedPortIds(board, act.id)}
 										{#if (act.id === 'start' || act.id === 'stop') && ready.length}
 											{@const icon = actionIcon(act)}
@@ -3257,7 +3271,7 @@
 													</button>
 												</Tooltip>
 											{/if}
-											{#each boardActions(board) as act (act.id)}
+											{#each boardActions(board).filter((act) => act.id !== 'label') as act (act.id)}
 												{@const ready = checkedPortIds(board, act.id)}
 												{#if act.id !== 'start' && act.id !== 'stop' && ready.length}
 													{@const icon = actionIcon(act)}
@@ -3690,5 +3704,20 @@
 		<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
 	{/if}
 </ConfirmModal>
+
+<FeatureLabelDialog
+	bind:open={labelOpen}
+	bind:ticked={labelTicked}
+	model={labelModel}
+	busy={Boolean(busy)}
+	busyLabel={busy}
+	error={labelError}
+	onscan={() => {
+		if (labelModel) void scanFeatureLabel(labelModel.repoId, labelTicked);
+	}}
+	onupdate={() => {
+		if (labelModel) void updateFeatureLabel(labelModel.repoId, labelTicked);
+	}}
+/>
 
 

@@ -26,6 +26,8 @@ export type DashboardJobHost = {
 	run(label: string, fn: () => Promise<void>, opts?: JobRunOpts): Promise<void>;
 	eachNamed(verb: string, names: string[], fn: (name: string) => Promise<void>): Promise<void>;
 	offerConfirm(spec: ConfirmOffer): void;
+	offerFeatureLabel(data: unknown, repoId: string, keep?: string[]): void;
+	setFeatureLabelError(message: string): void;
 	loadStatus(opts?: {
 		fetchRemotes?: boolean;
 		ids?: string[];

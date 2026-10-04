@@ -20,7 +20,7 @@ export type FeatureReviewConfirm = {
 
 /** Turn a FeatureFacts review plan into the confirm checklist. */
 export function featureReviewConfirm(repoId: string, data: unknown): FeatureReviewConfirm {
-	const features = reviewFeatures(data);
+	const features = reviewFeatureRows(data);
 	if (!features) {
 		throw new Error('Review did not return the capability list.');
 	}
@@ -50,7 +50,7 @@ export function featureReviewConfirm(repoId: string, data: unknown): FeatureRevi
 	};
 }
 
-function reviewFeatures(data: unknown): FeatureReviewRow[] | null {
+export function reviewFeatureRows(data: unknown): FeatureReviewRow[] | null {
 	if (!data || typeof data !== 'object') return null;
 	const features = (data as { features?: unknown }).features;
 	if (!Array.isArray(features)) return null;
@@ -83,7 +83,7 @@ export function featurefactsCheckLines(detail: string): string[] {
 	};
 	for (const part of raw) {
 		if (/must be equal to constant|must match "then" schema|must match a schema/.test(part)) {
-			push('Some confirmed capabilities are still marked as scan clusters. Open Review and update the label again.');
+			push('Some confirmed capabilities are still marked as scan clusters. Update the label again.');
 			continue;
 		}
 		if (part === 'Source fingerprint is stale.') {
@@ -103,11 +103,11 @@ export function featurefactsCheckLines(detail: string): string[] {
 			continue;
 		}
 		if (part.startsWith('FEATURE_FACTS.md is missing')) {
-			push('No label yet. Review ticks capabilities, then Update label writes FEATURE_FACTS.md.');
+			push('No label yet. Tick capabilities, then Update label.');
 			continue;
 		}
 		if (part.includes('has no selected capabilities')) {
-			push('The label file is empty. Review ticks capabilities, or Report removes the empty file.');
+			push('The label file is empty. Tick capabilities and update the label.');
 			continue;
 		}
 		if (part === 'Check passed.' || part === 'Projection check passed.') {

@@ -30,7 +30,7 @@ describe('featurefactsCheckLines', () => {
 			'features.yaml: /features/0/recognition must be equal to constant; /features/0 must match "then" schema\nSource fingerprint is stale.',
 		);
 		assert.deepEqual(lines, [
-			'Some confirmed capabilities are still marked as scan clusters. Open Review and update the label again.',
+			'Some confirmed capabilities are still marked as scan clusters. Update the label again.',
 			'The repo changed after the last Scan. Scan again to refresh.',
 		]);
 	});

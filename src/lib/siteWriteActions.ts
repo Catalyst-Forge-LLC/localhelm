@@ -16,20 +16,9 @@ import {
 	type LandBatchRow,
 } from './landDisplay.js';
 import { isJobCancelled } from './jobCancel.js';
-import { featureReviewConfirm, featurefactsCheckLines } from './featureReview.js';
 import { formatPluginPlanLines, pluginPlanLineKeys, pluginPlanWriteIds } from './pluginPlan.js';
 import { landPluginApplyOk } from './writeGate.js';
 import { checkResultFollowUp, checkResultLines, planOpts, pluginJobHint } from './writeConfirm.js';
-
-function featurefactsApplyDetail(data: unknown, id: string): { ok: boolean; detail: string } {
-	const results =
-		data && typeof data === 'object' && Array.isArray((data as { results?: unknown }).results)
-			? (data as { results: { id?: string; ok?: boolean; detail?: string }[] }).results
-			: [];
-	const row = results.find((item) => item.id === id) ?? results[0];
-	const detail = typeof row?.detail === 'string' && row.detail.trim() ? row.detail.trim() : 'checked';
-	return { ok: row?.ok !== false && (data as { ok?: boolean })?.ok !== false, detail };
-}
 
 function pluginApplyDetail(data: unknown, id: string): { ok: boolean; detail: string } {
 	const rows =
@@ -61,6 +50,19 @@ type LandPlanPayload = {
 export function createSiteWrites(host: DashboardJobHost) {
 	async function startPluginJob(plugin: string, action: string, ids: string[], label: string): Promise<void> {
 		if (ids.length === 0) return;
+		if (plugin === 'featurefacts' && action === 'label') {
+			const repoId = ids[0] ?? '';
+			if (!repoId || ids.length !== 1) return;
+			await host.run(`reading the label for ${repoId}`, async () => {
+				const data = await host.call('/api/plugin', {
+					method: 'POST',
+					body: JSON.stringify({ id: 'featurefacts', action: 'label', ids: [repoId], apply: false }),
+				});
+				host.note(`featurefacts label ${repoId}`, data);
+				host.offerFeatureLabel(data, repoId);
+			});
+			return;
+		}
 		const unit = plugin === 'localslip' ? 'lease' : 'site';
 		const scope = ids.length === 1 ? ids[0] : `${ids.length} ${unit}s`;
 		await host.run(
@@ -70,39 +72,6 @@ export function createSiteWrites(host: DashboardJobHost) {
 					method: 'POST',
 					body: JSON.stringify({ id: plugin, action, ids, apply: false }),
 				});
-				if (plugin === 'featurefacts' && action === 'view') {
-					const body = data && typeof data === 'object' ? (data as { hasLabel?: unknown; text?: unknown }) : {};
-					const hasLabel = body.hasLabel === true;
-					const text = typeof body.text === 'string' && body.text.trim() ? body.text : 'No label yet.';
-					host.note(`${plugin} view ${scope}`, data);
-					host.offerConfirm({
-						title: hasLabel ? `Label for ${ids[0]}` : `No label for ${ids[0]}`,
-						hint: hasLabel
-							? 'This is FEATURE_FACTS.md. Nothing is written.'
-							: 'Review ticks which capabilities go on the label.',
-						items: [text],
-						confirmLabel: 'Close',
-						canApply: false,
-					});
-					return;
-				}
-				if (plugin === 'featurefacts' && action === 'review') {
-					const spec = featureReviewConfirm(ids[0] ?? 'repo', data);
-					host.note(`${plugin} review plan ${scope}`, data);
-					host.offerConfirm({
-						title: spec.title,
-						hint: spec.hint,
-						items: spec.items,
-						itemKeys: spec.itemKeys,
-						itemLabels: spec.itemLabels,
-						excludedIds: spec.excludedIds,
-						applyIds: spec.applyIds,
-						confirmLabel: spec.confirmLabel,
-						canApply: spec.canApply,
-						run: (included) => void applyFeatureReview(ids[0] ?? '', included),
-					});
-					return;
-				}
 				const writeIds = pluginPlanWriteIds(data);
 				const applyIds = writeIds ?? [...ids];
 				const items = formatPluginPlanLines(data);
@@ -130,20 +99,58 @@ export function createSiteWrites(host: DashboardJobHost) {
 		);
 	}
 
-	async function applyFeatureReview(repoId: string, featureIds: string[]): Promise<void> {
+	function liftFeatureLabelError(): void {
+		const message = host.error();
+		if (!message) return;
+		host.setFeatureLabelError(message);
+		host.setError('');
+	}
+
+	async function reloadFeatureLabel(repoId: string, keep?: string[]): Promise<void> {
+		const data = await host.call('/api/plugin', {
+			method: 'POST',
+			body: JSON.stringify({ id: 'featurefacts', action: 'label', ids: [repoId], apply: false }),
+		});
+		host.note(`featurefacts label ${repoId}`, data);
+		host.offerFeatureLabel(data, repoId, keep);
+	}
+
+	async function scanFeatureLabel(repoId: string, keep: string[]): Promise<void> {
 		if (!repoId) return;
+		await host.run(`scanning ${repoId}`, async () => {
+			const data = await host.call('/api/plugin', {
+				method: 'POST',
+				body: JSON.stringify({ id: 'featurefacts', action: 'scan', ids: [repoId], apply: true }),
+			});
+			host.note(`featurefacts scan ${repoId}`, data);
+			const check = landPluginApplyOk(data);
+			if (!check.ok) throw new Error(check.reason);
+			await reloadFeatureLabel(repoId, keep);
+			host.setBusy('reading FeatureFacts');
+			await host.loadPluginBoards('featurefacts');
+		}, { closeConfirm: false });
+		liftFeatureLabelError();
+	}
+
+	async function updateFeatureLabel(repoId: string, featureIds: string[]): Promise<void> {
+		if (!repoId) return;
+		if (featureIds.length > 12) {
+			host.setFeatureLabelError('A label holds at most 12 capabilities. Untick down to 12.');
+			return;
+		}
 		await host.run(`updating the label for ${repoId}`, async () => {
-			if (featureIds.length > 12) {
-				throw new Error('A label holds at most 12 capabilities. Untick down to 12.');
-			}
 			const data = await host.call('/api/plugin', {
 				method: 'POST',
 				body: JSON.stringify({ id: 'featurefacts', action: 'review', ids: [repoId, ...featureIds], apply: true }),
 			});
-			host.note(`featurefacts review --apply ${repoId}`, data);
+			host.note(`featurefacts label --apply ${repoId}`, data);
 			const check = landPluginApplyOk(data);
 			if (!check.ok) throw new Error(check.reason);
-		});
+			await reloadFeatureLabel(repoId);
+			host.setBusy('reading FeatureFacts');
+			await host.loadPluginBoards('featurefacts');
+		}, { closeConfirm: false });
+		liftFeatureLabelError();
 	}
 
 	async function applyPluginItems(plugin: string, action: string, ids: string[]): Promise<void> {
@@ -172,10 +179,6 @@ export function createSiteWrites(host: DashboardJobHost) {
 			await applyXfactsCheck(ids);
 			return;
 		}
-		if (plugin === 'featurefacts' && action === 'check') {
-			await applyFeaturefactsCheck(ids);
-			return;
-		}
 		await host.run(bulkProgressLabel(`${plugin} ${action}`, 1, ids.length, ids[0]), async () => {
 			try {
 				await applyPluginItems(plugin, action, ids);
@@ -183,52 +186,6 @@ export function createSiteWrites(host: DashboardJobHost) {
 				host.setBusy(boardRefreshLabel(plugin));
 				await host.loadPluginBoards(plugin);
 			}
-		});
-	}
-
-	async function applyFeaturefactsCheck(ids: string[]): Promise<void> {
-		const results: { id: string; ok: boolean; detail: string }[] = [];
-		await host.run(
-			bulkProgressLabel('featurefacts check', 1, ids.length, ids[0]),
-			async () => {
-				for (const id of ids) {
-					const data = await host.call('/api/plugin', {
-						method: 'POST',
-						body: JSON.stringify({ id: 'featurefacts', action: 'check', ids: [id], apply: true }),
-					});
-					host.note(`featurefacts check ${id}`, data);
-					results.push({ id, ...featurefactsApplyDetail(data, id) });
-				}
-				host.setError('');
-				offerFeaturefactsCheck(results);
-			},
-			{ closeConfirm: false },
-		);
-	}
-
-	function offerFeaturefactsCheck(results: { id: string; ok: boolean; detail: string }[]): void {
-		const failed = results.filter((row) => !row.ok);
-		const items: string[] = [];
-		const itemKeys: string[] = [];
-		const itemPhases: Array<'done' | 'fail'> = [];
-		for (const row of results) {
-			const lines = featurefactsCheckLines(row.detail);
-			lines.forEach((line, index) => {
-				items.push(results.length > 1 ? `${row.id}  ${line}` : line);
-				itemKeys.push(`${row.id}:${index}`);
-				itemPhases.push(row.ok ? 'done' : 'fail');
-			});
-		}
-		const who = failed.length === 1 ? failed[0]?.id : `${failed.length} repos`;
-		host.offerConfirm({
-			title: failed.length ? `Check found problems for ${who}` : `Check passed`,
-			hint: 'Nothing was written. Scan refreshes the candidate list. Review writes the label.',
-			items,
-			itemKeys,
-			itemPhases,
-			applyIds: [],
-			confirmLabel: 'Close',
-			canApply: false,
 		});
 	}
 
@@ -495,6 +452,8 @@ export function createSiteWrites(host: DashboardJobHost) {
 	return {
 		startPluginJob,
 		applyPluginItems,
+		scanFeatureLabel,
+		updateFeatureLabel,
 		startLand,
 		offerLandOutcome,
 	};

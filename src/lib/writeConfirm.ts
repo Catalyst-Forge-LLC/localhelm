@@ -343,11 +343,8 @@ export function pluginJobHint(
 		return 'git push origin <branch> only. Never --force. Never the IngotVault backup remote.';
 	}
 	if (plugin === 'featurefacts') {
+		if (action === 'label') return 'Shows the label and the capability list. Update label is the only write.';
 		if (action === 'scan') return 'Reads the repo and refreshes the candidate list. Does not write the label.';
-		if (action === 'review') return 'Tick up to 12. Confirm writes FEATURE_FACTS.md. Unticked rows stay in the register.';
-		if (action === 'view') return 'Shows FEATURE_FACTS.md. Nothing is written.';
-		if (action === 'check') return 'Compares the register and the label to this repo. Nothing is written.';
-		if (action === 'report') return 'Rewrites FEATURE_FACTS.md from the capabilities already ticked in Review.';
 	}
 	if (plugin === 'xfacts' && action === 'check') {
 		return 'Reads each repo. Does not write. Confirm checks app, feature, skill, tool, agent, and model. AppFacts and a FeatureFacts register are required. SkillFacts is required next to SKILL.md. Tool, agent, and model are checked when those files exist.';
