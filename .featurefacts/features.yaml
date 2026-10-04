@@ -5,9 +5,9 @@ product:
   type: typescript-node
   status: active
 features:
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
+  - type: feature
+    recognition: confirmed
+    lifecycle: implemented
     availability:
       state: unknown
       conditions: []
@@ -68,12 +68,33 @@ features:
           adapter_version: 0.2.1
           origin: deterministic
           method: surface-cluster
+      - id: cmd-archive-recognition
+        kind: declared
+        state: current
+        assertion:
+          field: recognition
+          value: confirmed
+          claim: Confirmed in LocalHelm as confirmed.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
+      - id: cmd-archive-lifecycle
+        kind: declared
+        state: current
+        assertion:
+          field: lifecycle
+          value: implemented
+          claim: Confirmed in LocalHelm as implemented.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
     editorial:
       locked: []
       aliases: []
       notes: ""
     uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
       maturity: No attributed maturity declaration.
       intent: Discovery intent was not declared.
     id: cmd-archive
@@ -225,9 +246,9 @@ features:
     id: cmd-brief
     name: Brief
     description: "Observed implementation surfaces: cmd-brief. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
+  - type: feature
+    recognition: confirmed
+    lifecycle: implemented
     availability:
       state: unknown
       conditions: []
@@ -288,12 +309,33 @@ features:
           adapter_version: 0.2.1
           origin: deterministic
           method: surface-cluster
+      - id: cmd-bump-recognition
+        kind: declared
+        state: current
+        assertion:
+          field: recognition
+          value: confirmed
+          claim: Confirmed in LocalHelm as confirmed.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
+      - id: cmd-bump-lifecycle
+        kind: declared
+        state: current
+        assertion:
+          field: lifecycle
+          value: implemented
+          claim: Confirmed in LocalHelm as implemented.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
     editorial:
       locked: []
       aliases: []
       notes: ""
     uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
       maturity: No attributed maturity declaration.
       intent: Discovery intent was not declared.
     id: cmd-bump
@@ -373,9 +415,9 @@ features:
     id: cmd-cascade
     name: Cascade
     description: "Observed implementation surfaces: cmd-cascade. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
+  - type: feature
+    recognition: confirmed
+    lifecycle: implemented
     availability:
       state: unknown
       conditions: []
@@ -436,12 +478,33 @@ features:
           adapter_version: 0.2.1
           origin: deterministic
           method: surface-cluster
+      - id: cmd-commit-recognition
+        kind: declared
+        state: current
+        assertion:
+          field: recognition
+          value: confirmed
+          claim: Confirmed in LocalHelm as confirmed.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
+      - id: cmd-commit-lifecycle
+        kind: declared
+        state: current
+        assertion:
+          field: lifecycle
+          value: implemented
+          claim: Confirmed in LocalHelm as implemented.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
     editorial:
       locked: []
       aliases: []
       notes: ""
     uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
       maturity: No attributed maturity declaration.
       intent: Discovery intent was not declared.
     id: cmd-commit
@@ -816,9 +879,9 @@ features:
     id: cmd-global
     name: Global
     description: "Observed implementation surfaces: cmd-global. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
+  - type: feature
+    recognition: confirmed
+    lifecycle: implemented
     availability:
       state: unknown
       conditions: []
@@ -879,12 +942,33 @@ features:
           adapter_version: 0.2.1
           origin: deterministic
           method: surface-cluster
+      - id: cmd-land-recognition
+        kind: declared
+        state: current
+        assertion:
+          field: recognition
+          value: confirmed
+          claim: Confirmed in LocalHelm as confirmed.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
+      - id: cmd-land-lifecycle
+        kind: declared
+        state: current
+        assertion:
+          field: lifecycle
+          value: implemented
+          claim: Confirmed in LocalHelm as implemented.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
     editorial:
       locked: []
       aliases: []
       notes: ""
     uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
       maturity: No attributed maturity declaration.
       intent: Discovery intent was not declared.
     id: cmd-land
@@ -1038,9 +1122,9 @@ features:
     id: cmd-plugins
     name: Plugins
     description: "Observed implementation surfaces: cmd-plugins. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
+  - type: feature
+    recognition: confirmed
+    lifecycle: implemented
     availability:
       state: unknown
       conditions: []
@@ -1101,12 +1185,33 @@ features:
           adapter_version: 0.2.1
           origin: deterministic
           method: surface-cluster
+      - id: cmd-publish-recognition
+        kind: declared
+        state: current
+        assertion:
+          field: recognition
+          value: confirmed
+          claim: Confirmed in LocalHelm as confirmed.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
+      - id: cmd-publish-lifecycle
+        kind: declared
+        state: current
+        assertion:
+          field: lifecycle
+          value: implemented
+          claim: Confirmed in LocalHelm as implemented.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
     editorial:
       locked: []
       aliases: []
       notes: ""
     uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
       maturity: No attributed maturity declaration.
       intent: Discovery intent was not declared.
     id: cmd-publish
@@ -1186,9 +1291,9 @@ features:
     id: cmd-pull
     name: Pull
     description: "Observed implementation surfaces: cmd-pull. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
+  - type: feature
+    recognition: confirmed
+    lifecycle: implemented
     availability:
       state: unknown
       conditions: []
@@ -1249,12 +1354,33 @@ features:
           adapter_version: 0.2.1
           origin: deterministic
           method: surface-cluster
+      - id: cmd-push-recognition
+        kind: declared
+        state: current
+        assertion:
+          field: recognition
+          value: confirmed
+          claim: Confirmed in LocalHelm as confirmed.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
+      - id: cmd-push-lifecycle
+        kind: declared
+        state: current
+        assertion:
+          field: lifecycle
+          value: implemented
+          claim: Confirmed in LocalHelm as implemented.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
     editorial:
       locked: []
       aliases: []
       notes: ""
     uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
       maturity: No attributed maturity declaration.
       intent: Discovery intent was not declared.
     id: cmd-push
@@ -1408,9 +1534,9 @@ features:
     id: cmd-scan
     name: Scan
     description: "Observed implementation surfaces: cmd-scan. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
+  - type: feature
+    recognition: confirmed
+    lifecycle: implemented
     availability:
       state: unknown
       conditions: []
@@ -1470,20 +1596,41 @@ features:
           adapter_version: 0.2.1
           origin: deterministic
           method: surface-cluster
+      - id: cmd-serve-recognition
+        kind: declared
+        state: current
+        assertion:
+          field: recognition
+          value: confirmed
+          claim: Confirmed in LocalHelm as confirmed.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
+      - id: cmd-serve-lifecycle
+        kind: declared
+        state: current
+        assertion:
+          field: lifecycle
+          value: implemented
+          claim: Confirmed in LocalHelm as implemented.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
     editorial:
       locked: []
       aliases: []
       notes: ""
     uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
       maturity: No attributed maturity declaration.
       intent: Discovery intent was not declared.
     id: cmd-serve
     name: Serve
     description: "Observed implementation surfaces: cmd-serve. Candidate only until a maintainer confirms the product meaning."
-  - type: surface-cluster
-    recognition: candidate
-    lifecycle: unknown
+  - type: feature
+    recognition: confirmed
+    lifecycle: implemented
     availability:
       state: unknown
       conditions: []
@@ -1544,12 +1691,33 @@ features:
           adapter_version: 0.2.1
           origin: deterministic
           method: surface-cluster
+      - id: cmd-ship-recognition
+        kind: declared
+        state: current
+        assertion:
+          field: recognition
+          value: confirmed
+          claim: Confirmed in LocalHelm as confirmed.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
+      - id: cmd-ship-lifecycle
+        kind: declared
+        state: current
+        assertion:
+          field: lifecycle
+          value: implemented
+          claim: Confirmed in LocalHelm as implemented.
+        declaration:
+          actor: acmegeek
+          source: LocalHelm FeatureFacts review
+          recorded_at: 2026-10-04T21:48:45.954Z
     editorial:
       locked: []
       aliases: []
       notes: ""
     uncertainty_reasons:
-      lifecycle: Source presence does not establish release status.
       maturity: No attributed maturity declaration.
       intent: Discovery intent was not declared.
     id: cmd-ship

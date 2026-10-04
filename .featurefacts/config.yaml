@@ -47,8 +47,20 @@ adapters:
     enabled: true
 externals: []
 curation:
-  selected_ids: []
+  selected_ids:
+    - cmd-archive
+    - cmd-bump
+    - cmd-commit
+    - cmd-land
+    - cmd-publish
+    - cmd-push
+    - cmd-serve
+    - cmd-ship
   overrides: {}
+  approval:
+    actor: acmegeek
+    source: LocalHelm FeatureFacts review
+    recorded_at: 2026-10-04T21:55:07.415Z
 publication:
   target: internal
   include_counts: true

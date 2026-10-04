@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { featureReviewConfirm } from './featureReview.js';
+import { featurefactsCheckLines, featureReviewConfirm } from './featureReview.js';
 
 describe('featureReviewConfirm', () => {
 	it('starts candidates unchecked and names them', () => {
@@ -21,5 +21,17 @@ describe('featureReviewConfirm', () => {
 		const spec = featureReviewConfirm('localhelm', { features: [] });
 		assert.equal(spec.canApply, false);
 		assert.match(spec.hint, /Scan this repo first/);
+	});
+});
+
+describe('featurefactsCheckLines', () => {
+	it('turns a stale fingerprint and a schema dump into sentences', () => {
+		const lines = featurefactsCheckLines(
+			'features.yaml: /features/0/recognition must be equal to constant; /features/0 must match "then" schema\nSource fingerprint is stale.',
+		);
+		assert.deepEqual(lines, [
+			'Some confirmed capabilities are still marked as scan clusters. Open Review and update the label again.',
+			'The repo changed after the last Scan. Scan again to refresh.',
+		]);
 	});
 });

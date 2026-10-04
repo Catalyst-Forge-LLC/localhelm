@@ -2216,6 +2216,17 @@
 		});
 	}
 
+	function pluginActionTip(plugin: string, act: { id: string; label: string }): string {
+		if (plugin === 'featurefacts') {
+			if (act.id === 'scan') return 'Reads the repo and refreshes the candidate list. Does not write the label.';
+			if (act.id === 'review') return 'Tick up to 12 capabilities. Update label writes FEATURE_FACTS.md.';
+			if (act.id === 'view') return 'Shows the label. Nothing is written.';
+			if (act.id === 'check') return 'Compares the register and the label to this repo. Nothing is written.';
+			if (act.id === 'report') return 'Rewrites the label from the capabilities already ticked in Review.';
+		}
+		return `Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`;
+	}
+
 	function siteBoardHelp(board: PluginBoard): string {
 		const bits = [board.note ?? ''];
 		if (board.plugin === 'filepress') {
@@ -2230,7 +2241,7 @@
 		if (board.plugin === 'featurefacts') {
 			bits.push(
 				'Add repos scans a folder for package.json or git checkouts. Init writes an empty register into each ticked repo. A repo that already has .featurefacts/ stays off that list.',
-				'Scan finds capabilities. Review is the checklist that writes the label. Check and Report stay on the row. Init does not scan code.',
+				'Scan finds capabilities and does not write the label. Review ticks up to 12. View shows FEATURE_FACTS.md. Check compares the label to the repo and writes nothing. Report rewrites the label from the current ticks. Init does not scan code.',
 			);
 		}
 		if (board.plugin === 'xfacts') {
@@ -2730,7 +2741,7 @@
 								summary={board.plugin === 'filepress'
 									? 'Content sites. Add sites lists folders FilePress does not see as a sibling. Check rows, then Land, Sync, or Ship. Keep local drops Land until you Include; the site stays here to run and update. Archive hides a site from Today until you Restore. Git push is on Fleet.'
 									: board.plugin === 'featurefacts'
-										? 'Repos with a FeatureFacts register. Scan finds capabilities. Review ticks which ones go on the label.'
+										? 'Repos with a FeatureFacts register. Scan finds capabilities. Review ticks the label. View shows it. Check writes nothing.'
 										: 'Check rows, then run a job on the selection.'}
 								detail={siteBoardHelp(board)}
 							/>
@@ -2957,7 +2968,7 @@
 												{/if}
 												{#each row.actions.filter((act) => sitePluginJobVisible(board.plugin, act.id) && (act.id !== 'ship' || inShipQueue(row.id))) as act (act.id)}
 													{@const icon = actionIcon(act)}
-													<Tooltip title={`Shows what ${act.label.toLowerCase()} would do. Confirm in the modal.`}>
+													<Tooltip title={pluginActionTip(board.plugin, act)}>
 														<button
 															class="btn btn-sm"
 															disabled={Boolean(busy)}

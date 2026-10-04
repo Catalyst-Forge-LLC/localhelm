@@ -8,9 +8,9 @@
   },
   "features": [
     {
-      "type": "surface-cluster",
-      "recognition": "candidate",
-      "lifecycle": "unknown",
+      "type": "feature",
+      "recognition": "confirmed",
+      "lifecycle": "implemented",
       "availability": {
         "state": "unknown",
         "conditions": [],
@@ -86,6 +86,36 @@
             "origin": "deterministic",
             "method": "surface-cluster"
           }
+        },
+        {
+          "id": "cmd-archive-recognition",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "recognition",
+            "value": "confirmed",
+            "claim": "Confirmed in LocalHelm as confirmed."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
+        },
+        {
+          "id": "cmd-archive-lifecycle",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "lifecycle",
+            "value": "implemented",
+            "claim": "Confirmed in LocalHelm as implemented."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
         }
       ],
       "editorial": {
@@ -94,7 +124,6 @@
         "notes": ""
       },
       "uncertainty_reasons": {
-        "lifecycle": "Source presence does not establish release status.",
         "maturity": "No attributed maturity declaration.",
         "intent": "Discovery intent was not declared."
       },
@@ -289,9 +318,9 @@
       "description": "Observed implementation surfaces: cmd-brief. Candidate only until a maintainer confirms the product meaning."
     },
     {
-      "type": "surface-cluster",
-      "recognition": "candidate",
-      "lifecycle": "unknown",
+      "type": "feature",
+      "recognition": "confirmed",
+      "lifecycle": "implemented",
       "availability": {
         "state": "unknown",
         "conditions": [],
@@ -367,6 +396,36 @@
             "origin": "deterministic",
             "method": "surface-cluster"
           }
+        },
+        {
+          "id": "cmd-bump-recognition",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "recognition",
+            "value": "confirmed",
+            "claim": "Confirmed in LocalHelm as confirmed."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
+        },
+        {
+          "id": "cmd-bump-lifecycle",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "lifecycle",
+            "value": "implemented",
+            "claim": "Confirmed in LocalHelm as implemented."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
         }
       ],
       "editorial": {
@@ -375,7 +434,6 @@
         "notes": ""
       },
       "uncertainty_reasons": {
-        "lifecycle": "Source presence does not establish release status.",
         "maturity": "No attributed maturity declaration.",
         "intent": "Discovery intent was not declared."
       },
@@ -479,9 +537,9 @@
       "description": "Observed implementation surfaces: cmd-cascade. Candidate only until a maintainer confirms the product meaning."
     },
     {
-      "type": "surface-cluster",
-      "recognition": "candidate",
-      "lifecycle": "unknown",
+      "type": "feature",
+      "recognition": "confirmed",
+      "lifecycle": "implemented",
       "availability": {
         "state": "unknown",
         "conditions": [],
@@ -557,6 +615,36 @@
             "origin": "deterministic",
             "method": "surface-cluster"
           }
+        },
+        {
+          "id": "cmd-commit-recognition",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "recognition",
+            "value": "confirmed",
+            "claim": "Confirmed in LocalHelm as confirmed."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
+        },
+        {
+          "id": "cmd-commit-lifecycle",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "lifecycle",
+            "value": "implemented",
+            "claim": "Confirmed in LocalHelm as implemented."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
         }
       ],
       "editorial": {
@@ -565,7 +653,6 @@
         "notes": ""
       },
       "uncertainty_reasons": {
-        "lifecycle": "Source presence does not establish release status.",
         "maturity": "No attributed maturity declaration.",
         "intent": "Discovery intent was not declared."
       },
@@ -1047,9 +1134,9 @@
       "description": "Observed implementation surfaces: cmd-global. Candidate only until a maintainer confirms the product meaning."
     },
     {
-      "type": "surface-cluster",
-      "recognition": "candidate",
-      "lifecycle": "unknown",
+      "type": "feature",
+      "recognition": "confirmed",
+      "lifecycle": "implemented",
       "availability": {
         "state": "unknown",
         "conditions": [],
@@ -1125,6 +1212,36 @@
             "origin": "deterministic",
             "method": "surface-cluster"
           }
+        },
+        {
+          "id": "cmd-land-recognition",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "recognition",
+            "value": "confirmed",
+            "claim": "Confirmed in LocalHelm as confirmed."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
+        },
+        {
+          "id": "cmd-land-lifecycle",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "lifecycle",
+            "value": "implemented",
+            "claim": "Confirmed in LocalHelm as implemented."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
         }
       ],
       "editorial": {
@@ -1133,7 +1250,6 @@
         "notes": ""
       },
       "uncertainty_reasons": {
-        "lifecycle": "Source presence does not establish release status.",
         "maturity": "No attributed maturity declaration.",
         "intent": "Discovery intent was not declared."
       },
@@ -1332,9 +1448,9 @@
       "description": "Observed implementation surfaces: cmd-plugins. Candidate only until a maintainer confirms the product meaning."
     },
     {
-      "type": "surface-cluster",
-      "recognition": "candidate",
-      "lifecycle": "unknown",
+      "type": "feature",
+      "recognition": "confirmed",
+      "lifecycle": "implemented",
       "availability": {
         "state": "unknown",
         "conditions": [],
@@ -1410,6 +1526,36 @@
             "origin": "deterministic",
             "method": "surface-cluster"
           }
+        },
+        {
+          "id": "cmd-publish-recognition",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "recognition",
+            "value": "confirmed",
+            "claim": "Confirmed in LocalHelm as confirmed."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
+        },
+        {
+          "id": "cmd-publish-lifecycle",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "lifecycle",
+            "value": "implemented",
+            "claim": "Confirmed in LocalHelm as implemented."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
         }
       ],
       "editorial": {
@@ -1418,7 +1564,6 @@
         "notes": ""
       },
       "uncertainty_reasons": {
-        "lifecycle": "Source presence does not establish release status.",
         "maturity": "No attributed maturity declaration.",
         "intent": "Discovery intent was not declared."
       },
@@ -1522,9 +1667,9 @@
       "description": "Observed implementation surfaces: cmd-pull. Candidate only until a maintainer confirms the product meaning."
     },
     {
-      "type": "surface-cluster",
-      "recognition": "candidate",
-      "lifecycle": "unknown",
+      "type": "feature",
+      "recognition": "confirmed",
+      "lifecycle": "implemented",
       "availability": {
         "state": "unknown",
         "conditions": [],
@@ -1600,6 +1745,36 @@
             "origin": "deterministic",
             "method": "surface-cluster"
           }
+        },
+        {
+          "id": "cmd-push-recognition",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "recognition",
+            "value": "confirmed",
+            "claim": "Confirmed in LocalHelm as confirmed."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
+        },
+        {
+          "id": "cmd-push-lifecycle",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "lifecycle",
+            "value": "implemented",
+            "claim": "Confirmed in LocalHelm as implemented."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
         }
       ],
       "editorial": {
@@ -1608,7 +1783,6 @@
         "notes": ""
       },
       "uncertainty_reasons": {
-        "lifecycle": "Source presence does not establish release status.",
         "maturity": "No attributed maturity declaration.",
         "intent": "Discovery intent was not declared."
       },
@@ -1807,9 +1981,9 @@
       "description": "Observed implementation surfaces: cmd-scan. Candidate only until a maintainer confirms the product meaning."
     },
     {
-      "type": "surface-cluster",
-      "recognition": "candidate",
-      "lifecycle": "unknown",
+      "type": "feature",
+      "recognition": "confirmed",
+      "lifecycle": "implemented",
       "availability": {
         "state": "unknown",
         "conditions": [],
@@ -1883,6 +2057,36 @@
             "origin": "deterministic",
             "method": "surface-cluster"
           }
+        },
+        {
+          "id": "cmd-serve-recognition",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "recognition",
+            "value": "confirmed",
+            "claim": "Confirmed in LocalHelm as confirmed."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
+        },
+        {
+          "id": "cmd-serve-lifecycle",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "lifecycle",
+            "value": "implemented",
+            "claim": "Confirmed in LocalHelm as implemented."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
         }
       ],
       "editorial": {
@@ -1891,7 +2095,6 @@
         "notes": ""
       },
       "uncertainty_reasons": {
-        "lifecycle": "Source presence does not establish release status.",
         "maturity": "No attributed maturity declaration.",
         "intent": "Discovery intent was not declared."
       },
@@ -1900,9 +2103,9 @@
       "description": "Observed implementation surfaces: cmd-serve. Candidate only until a maintainer confirms the product meaning."
     },
     {
-      "type": "surface-cluster",
-      "recognition": "candidate",
-      "lifecycle": "unknown",
+      "type": "feature",
+      "recognition": "confirmed",
+      "lifecycle": "implemented",
       "availability": {
         "state": "unknown",
         "conditions": [],
@@ -1978,6 +2181,36 @@
             "origin": "deterministic",
             "method": "surface-cluster"
           }
+        },
+        {
+          "id": "cmd-ship-recognition",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "recognition",
+            "value": "confirmed",
+            "claim": "Confirmed in LocalHelm as confirmed."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
+        },
+        {
+          "id": "cmd-ship-lifecycle",
+          "kind": "declared",
+          "state": "current",
+          "assertion": {
+            "field": "lifecycle",
+            "value": "implemented",
+            "claim": "Confirmed in LocalHelm as implemented."
+          },
+          "declaration": {
+            "actor": "acmegeek",
+            "source": "LocalHelm FeatureFacts review",
+            "recorded_at": "2026-10-04T21:48:45.954Z"
+          }
         }
       ],
       "editorial": {
@@ -1986,7 +2219,6 @@
         "notes": ""
       },
       "uncertainty_reasons": {
-        "lifecycle": "Source presence does not establish release status.",
         "maturity": "No attributed maturity declaration.",
         "intent": "Discovery intent was not declared."
       },

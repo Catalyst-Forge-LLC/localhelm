@@ -69,3 +69,52 @@ function reviewFeatures(data: unknown): FeatureReviewRow[] | null {
 	}
 	return rows;
 }
+
+/** Plain sentences for a FeatureFacts check. The command prints schema paths and fingerprint names. */
+export function featurefactsCheckLines(detail: string): string[] {
+	const raw = detail
+		.split('\n')
+		.map((part) => part.trim())
+		.filter(Boolean);
+	if (!raw.length) return ['Check failed.'];
+	const lines: string[] = [];
+	const push = (line: string) => {
+		if (!lines.includes(line)) lines.push(line);
+	};
+	for (const part of raw) {
+		if (/must be equal to constant|must match "then" schema|must match a schema/.test(part)) {
+			push('Some confirmed capabilities are still marked as scan clusters. Open Review and update the label again.');
+			continue;
+		}
+		if (part === 'Source fingerprint is stale.') {
+			push('The repo changed after the last Scan. Scan again to refresh.');
+			continue;
+		}
+		if (part === 'Config fingerprint is stale.') {
+			push('FeatureFacts config changed after the last Scan. Scan again to refresh.');
+			continue;
+		}
+		if (part === 'Adapter fingerprint is stale.') {
+			push('The scanner changed since the last Scan. Scan again to refresh.');
+			continue;
+		}
+		if (part === 'Rules fingerprint is stale.') {
+			push('The rules changed since the last Scan. Scan again to refresh.');
+			continue;
+		}
+		if (part.startsWith('FEATURE_FACTS.md is missing')) {
+			push('No label yet. Review ticks capabilities, then Update label writes FEATURE_FACTS.md.');
+			continue;
+		}
+		if (part.includes('has no selected capabilities')) {
+			push('The label file is empty. Review ticks capabilities, or Report removes the empty file.');
+			continue;
+		}
+		if (part === 'Check passed.' || part === 'Projection check passed.') {
+			push('The register and the label match this repo.');
+			continue;
+		}
+		push(part);
+	}
+	return lines;
+}

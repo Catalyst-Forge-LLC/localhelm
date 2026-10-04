@@ -4579,12 +4579,12 @@
     "adapters": "4abbb8741b08bcd3aa308ef9c93d4a55fd7feb6d4a98f89297831ab85b15b1eb",
     "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
     "registry": "2287433639bb4142750d32a323b5da696a096a4709f9c8112f4d6ec0f24f0e82",
-    "projection": "ad8f5483019a174b92bbf39d4928ab32050f8144d50d8db4b62d09f91564df8c"
+    "projection": "b8343463ef7de4aabe35a562b042ba717b36d9fed135dd3a676dc842a7343021"
   },
   "artifacts": [
     {
       "path": ".featurefacts/config.yaml",
-      "sha256": "1ca98933c7b5ed5a1c06aa5a1f94039e22c468bdf07755291357d7a6803e92e2"
+      "sha256": "bd5066726884c8131a496abf22d816362446d4622ab653ece143ce0688b91418"
     },
     {
       "path": ".featurefacts/docs-index.json",
@@ -4592,15 +4592,15 @@
     },
     {
       "path": ".featurefacts/features.json",
-      "sha256": "336207afccd1c37df0d9ce243900439491531690808b16415a1e7317271ac38c"
+      "sha256": "27c2319c4fa2a981aab652f0674e7b0e2e7aa872cc6fbd81923dcdd4534e8edc"
     },
     {
       "path": ".featurefacts/FEATURES.md",
-      "sha256": "ce44e70d07b20a8a324d3d00c64bdb5d576d772af46a0ca8bdb5b539bccacf92"
+      "sha256": "bdeadb1d20fb1b1e9578dcf47cd91ef4679a015f4802ecc71ea070b985b4a66f"
     },
     {
       "path": ".featurefacts/features.yaml",
-      "sha256": "c1c401261463eb357e8b022b2958ac52647c294d309711dcb7887ced91dd04f8"
+      "sha256": "809b6e7f78f60a6fa569d03b79ccd48dbf0341244eec378565deaca89027535b"
     },
     {
       "path": ".featurefacts/gaps.yaml",
@@ -4613,6 +4613,10 @@
     {
       "path": ".featurefacts/test-index.json",
       "sha256": "217069cca27afc26a3064b86b6d5e6ea7722048ed82924cbf7592f1f6c20662e"
+    },
+    {
+      "path": "FEATURE_FACTS.md",
+      "sha256": "6504493d96fe7818b4528847db6a284e31a1b551a228b3cfcb4a2a0a93ab2075"
     }
   ],
   "diagnostics": []
