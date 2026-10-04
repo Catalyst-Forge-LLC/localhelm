@@ -34,4 +34,11 @@ describe('featurefactsCheckLines', () => {
 			'The repo changed after the last Scan. Scan again to refresh.',
 		]);
 	});
+
+	it('does not call a doc-sign schema error a scan cluster', () => {
+		const lines = featurefactsCheckLines(
+			'features.yaml: /features/0/tests/links must NOT have more than 0 items; /features/0/tests must match "then" schema',
+		);
+		assert.deepEqual(lines, ['A doc or test sign was saved in a form Check rejects. Scan again to refresh.']);
+	});
 });

@@ -95,8 +95,12 @@ export function featurefactsCheckLines(detail: string): string[] {
 		if (!lines.includes(line)) lines.push(line);
 	};
 	for (const part of raw) {
-		if (/must be equal to constant|must match "then" schema|must match a schema/.test(part)) {
+		if (/\/recognition must be equal to constant/.test(part)) {
 			push('Some confirmed capabilities are still marked as scan clusters. Update the label again.');
+			continue;
+		}
+		if (/links must NOT have more than 0 items/.test(part)) {
+			push('A doc or test sign was saved in a form Check rejects. Scan again to refresh.');
 			continue;
 		}
 		if (part === 'Source fingerprint is stale.') {
