@@ -16,6 +16,7 @@ import {
 	type LandBatchRow,
 } from './landDisplay.js';
 import { isJobCancelled } from './jobCancel.js';
+import { featureReviewConfirm } from './featureReview.js';
 import { formatPluginPlanLines, pluginPlanLineKeys, pluginPlanWriteIds } from './pluginPlan.js';
 import { landPluginApplyOk } from './writeGate.js';
 import { checkResultFollowUp, checkResultLines, planOpts, pluginJobHint } from './writeConfirm.js';
@@ -59,6 +60,23 @@ export function createSiteWrites(host: DashboardJobHost) {
 					method: 'POST',
 					body: JSON.stringify({ id: plugin, action, ids, apply: false }),
 				});
+				if (plugin === 'featurefacts' && action === 'review') {
+					const spec = featureReviewConfirm(ids[0] ?? 'repo', data);
+					host.note(`${plugin} review plan ${scope}`, data);
+					host.offerConfirm({
+						title: spec.title,
+						hint: spec.hint,
+						items: spec.items,
+						itemKeys: spec.itemKeys,
+						itemLabels: spec.itemLabels,
+						excludedIds: spec.excludedIds,
+						applyIds: spec.applyIds,
+						confirmLabel: spec.confirmLabel,
+						canApply: spec.canApply,
+						run: (included) => void applyFeatureReview(ids[0] ?? '', included),
+					});
+					return;
+				}
 				const writeIds = pluginPlanWriteIds(data);
 				const applyIds = writeIds ?? [...ids];
 				const items = formatPluginPlanLines(data);
@@ -84,6 +102,22 @@ export function createSiteWrites(host: DashboardJobHost) {
 			},
 			planOpts(label, ids, pluginJobHint(plugin, action, ids, null)),
 		);
+	}
+
+	async function applyFeatureReview(repoId: string, featureIds: string[]): Promise<void> {
+		if (!repoId) return;
+		await host.run(`updating the label for ${repoId}`, async () => {
+			if (featureIds.length > 12) {
+				throw new Error('A label holds at most 12 capabilities. Untick down to 12.');
+			}
+			const data = await host.call('/api/plugin', {
+				method: 'POST',
+				body: JSON.stringify({ id: 'featurefacts', action: 'review', ids: [repoId, ...featureIds], apply: true }),
+			});
+			host.note(`featurefacts review --apply ${repoId}`, data);
+			const check = landPluginApplyOk(data);
+			if (!check.ok) throw new Error(check.reason);
+		});
 	}
 
 	async function applyPluginItems(plugin: string, action: string, ids: string[]): Promise<void> {

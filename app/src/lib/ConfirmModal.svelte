@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { commitDraftProgressHint, commitDraftSubjectIds } from './confirmProgress';
-	import { assignStepOwners, buildConfirmRoster, confirmCountText, confirmRosterSelected, type ConfirmRosterStep } from './confirmRoster';
+	import { assignStepOwners, buildConfirmRoster, confirmCountText, confirmGroupId, confirmRosterSelected, type ConfirmRosterStep } from './confirmRoster';
 	import Icon from './Icon.svelte';
 	import { findNpmPackageLink } from './npmPage';
 	import KnightRiderBar from './KnightRiderBar.svelte';
@@ -20,6 +20,10 @@
 		canApply?: boolean;
 		items?: string[];
 		itemKeys?: string[];
+		/** Visible names, parallel to `items`. The roster shows these instead of the key. */
+		itemLabels?: string[];
+		/** Keys that start unchecked when this confirm opens. */
+		seedExcluded?: string[];
 		itemPhases?: Phase[];
 		itemKinds?: ('commit' | 'file' | 'link' | undefined)[];
 		/** Subject ids this confirm would write (repos, sites, leases). Omit skips. */
@@ -60,6 +64,8 @@
 		canApply = true,
 		items = [],
 		itemKeys = [],
+		itemLabels = [],
+		seedExcluded = [],
 		itemPhases = [],
 		itemKinds = [],
 		applyIds = [],
@@ -102,10 +108,17 @@
 
 	$effect(() => {
 		rosterSig;
+		const seed = seedExcluded;
 		pinned = null;
-		excludedIds = [];
+		excludedIds = seed.slice();
 		filePick = 0;
 	});
+
+	function rosterName(id: string): string {
+		const index = itemKeys.findIndex((key) => confirmGroupId(key) === id);
+		const label = index >= 0 ? itemLabels[index]?.trim() : '';
+		return label || id;
+	}
 
 	const selectedId = $derived(groups ? confirmRosterSelected(groups, pinned) : null);
 	const selected = $derived(groups?.find((group) => group.id === selectedId) ?? null);
@@ -336,7 +349,7 @@
 										type="checkbox"
 										checked={!excludedIds.includes(group.id)}
 										disabled={busy}
-										aria-label={`Include ${group.id}`}
+										aria-label={`Include ${rosterName(group.id)}`}
 										onchange={(event) => setIncluded(group.id, event.currentTarget.checked)}
 									/>
 								</label>
@@ -352,7 +365,7 @@
 										<span class="dot"></span>
 									{/if}
 								</span>
-								<span class="name">{group.id}</span>
+								<span class="name">{rosterName(group.id)}</span>
 								{#if group.phase === 'current'}
 									<span class="now">now</span>
 								{/if}

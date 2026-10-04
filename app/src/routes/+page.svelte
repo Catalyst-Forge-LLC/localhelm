@@ -173,6 +173,8 @@
 	let confirmMessageTouched = $state<Record<string, boolean>>({});
 	let confirmWriteIds = $state<string[]>([]);
 	let confirmExcluded = $state<string[]>([]);
+	let confirmItemLabels = $state<string[]>([]);
+	let confirmSeedExcluded = $state<string[]>([]);
 	let confirmRun = $state<((includedIds: string[]) => void) | null>(null);
 	let confirmAltLabel = $state('');
 	let confirmExtraLabel = $state('');
@@ -774,6 +776,8 @@
 		confirmHint = spec.hint || planningHint(spec.title);
 		confirmItems = keys.slice();
 		confirmItemKeys = keys.slice();
+		confirmItemLabels = [];
+		confirmSeedExcluded = [];
 		confirmWriteIds = [];
 		confirmExcluded = [];
 		confirmPhases = emptyConfirmPhases(keys.length);
@@ -1401,6 +1405,8 @@
 		hint: string;
 		items: string[];
 		itemKeys?: string[];
+		itemLabels?: string[];
+		excludedIds?: string[];
 		applyIds?: string[];
 		confirmLabel: string;
 		variant?: 'write' | 'danger';
@@ -1423,8 +1429,10 @@
 		confirmItemKeys =
 			spec.itemKeys ??
 			(spec.applyIds?.length === spec.items.length ? spec.applyIds : spec.items.map((_, i) => String(i)));
+		confirmItemLabels = spec.itemLabels?.length === spec.items.length ? spec.itemLabels.slice() : [];
+		confirmSeedExcluded = spec.excludedIds?.slice() ?? [];
 		confirmWriteIds = spec.applyIds ?? [];
-		confirmExcluded = [];
+		confirmExcluded = confirmSeedExcluded.slice();
 		confirmPhases =
 			spec.itemPhases && spec.itemPhases.length === spec.items.length
 				? spec.itemPhases.slice()
@@ -2222,7 +2230,7 @@
 		if (board.plugin === 'featurefacts') {
 			bits.push(
 				'Add repos scans a folder for package.json or git checkouts. Init writes an empty register into each ticked repo. A repo that already has .featurefacts/ stays off that list.',
-				'Scan, Check, and Report run in the checked repo. Init does not scan code.',
+				'Scan finds capabilities. Review is the checklist that writes the label. Check and Report stay on the row. Init does not scan code.',
 			);
 		}
 		if (board.plugin === 'xfacts') {
@@ -2722,7 +2730,7 @@
 								summary={board.plugin === 'filepress'
 									? 'Content sites. Add sites lists folders FilePress does not see as a sibling. Check rows, then Land, Sync, or Ship. Keep local drops Land until you Include; the site stays here to run and update. Archive hides a site from Today until you Restore. Git push is on Fleet.'
 									: board.plugin === 'featurefacts'
-										? 'Repos with a FeatureFacts register. Add repos inits an empty register in a checkout you tick. Scan, Check, and Report run there.'
+										? 'Repos with a FeatureFacts register. Scan finds capabilities. Review ticks which ones go on the label.'
 										: 'Check rows, then run a job on the selection.'}
 								detail={siteBoardHelp(board)}
 							/>
@@ -3584,7 +3592,7 @@
 			{/each}
 		</ul>
 		<div class="group-buttons">
-			<Tooltip title="Writes FEATURE_FACTS.md and .featurefacts/ into each ticked repo. Does not scan code. Skips a repo that already has a register.">
+			<Tooltip title="Writes an empty .featurefacts/ register into each ticked repo. Does not scan code and does not write a label. Skips a repo that already has a register.">
 				<button
 					class="btn btn-write"
 					disabled={Boolean(busy) || demoBoard || !checkedFactsScan.length}
@@ -3618,6 +3626,8 @@
 	}}
 	items={confirmItems}
 	itemKeys={confirmItemKeys}
+	itemLabels={confirmItemLabels}
+	seedExcluded={confirmSeedExcluded}
 	itemPhases={confirmPhases}
 	itemKinds={confirmItemKinds}
 	failNote={error}

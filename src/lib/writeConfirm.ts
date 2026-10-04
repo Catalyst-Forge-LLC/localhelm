@@ -10,6 +10,10 @@ export type ConfirmOffer = {
 	hint: string;
 	items: string[];
 	itemKeys?: string[];
+	/** Visible roster names, parallel to `items`. Falls back to the item key. */
+	itemLabels?: string[];
+	/** Item keys that start unchecked. */
+	excludedIds?: string[];
 	applyIds?: string[];
 	confirmLabel: string;
 	variant?: 'write' | 'danger';
