@@ -29,8 +29,21 @@ describe('portDisplay', () => {
 		assert.equal(portRecipeLabel({ recipe: 'pnpm serve', health: 'ok', firewall: 'skipped' }), 'pnpm serve');
 		assert.equal(portRecipeLabel({ recipe: '—', health: 'no-recipe', firewall: 'skipped' }), 'no recipe');
 		assert.equal(
-			portRecipeLabel({ recipe: '—', health: 'no-recipe', firewall: 'needs-elevation' }),
-			'no recipe · needs-elevation',
+			portRecipeLabel({
+				recipe: '—',
+				health: 'no-recipe',
+				firewall: 'needs-elevation',
+				firewallLabel: 'needs admin',
+			}),
+			'no recipe · needs admin',
+		);
+		assert.equal(
+			portRecipeLabel({ recipe: 'pnpm serve', health: 'ok', firewall: 'skipped', firewallLabel: 'private' }),
+			'pnpm serve',
+		);
+		assert.equal(
+			portRecipeLabel({ recipe: 'pnpm serve', health: 'ok', firewall: 'skipped', firewallLabel: 'no rule' }),
+			'pnpm serve · no rule',
 		);
 		assert.equal(portCellValue('port', { port: '7777' }), '7777');
 	});

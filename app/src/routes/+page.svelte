@@ -1630,6 +1630,7 @@
 			row.cells.healthDetail,
 			row.cells.recipe && row.cells.recipe !== '—' ? `Recipe: ${row.cells.recipe}` : '',
 			row.cells.kind && row.cells.kind !== '—' ? `Kind: ${row.cells.kind}` : '',
+			row.cells.firewallTip || '',
 			row.href ? row.href : '',
 		].filter(Boolean);
 		return lines.join('\n') || 'No recipe facts yet.';

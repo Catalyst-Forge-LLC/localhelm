@@ -536,7 +536,7 @@
 												<div class="id">{row.label ?? row.id}</div>
 												<div class="dim small">
 													{row.cells.port ?? '—'}
-													· {row.cells.listening === 'no' ? 'not listening' : row.cells.conflict === 'yes' ? 'conflict' : row.cells.firewall}
+													· {row.cells.listening === 'no' ? 'not listening' : row.cells.conflict === 'yes' ? 'conflict' : (row.cells.firewallLabel || row.cells.firewall)}
 												</div>
 											</div>
 										</li>

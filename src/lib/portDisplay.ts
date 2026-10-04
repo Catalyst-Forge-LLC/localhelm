@@ -12,15 +12,25 @@ export function portTableColumns(
 	return columns.filter((col) => !HIDDEN_LEASE_COLS.has(col.id));
 }
 
+function firewallWord(cells: Record<string, string>): string {
+	const label = (cells.firewallLabel ?? '').trim();
+	if (label && label !== '—') return label;
+	return (cells.firewall ?? '').trim();
+}
+
+function firewallIsQuiet(word: string): boolean {
+	return !word || word === '—' || word === 'skipped' || word === 'private';
+}
+
 export function portRecipeLabel(cells: Record<string, string>): string {
 	const recipe = (cells.recipe ?? '').trim();
 	const health = (cells.health ?? '').trim();
-	const firewall = (cells.firewall ?? '').trim();
+	const firewall = firewallWord(cells);
 	const parts: string[] = [];
 	if (recipe && recipe !== '—') parts.push(recipe);
 	else if (health && health !== 'ok' && health !== '—') parts.push(health.replace(/-/g, ' '));
 	else parts.push('—');
-	if (firewall && firewall !== '—' && firewall !== 'skipped') parts.push(firewall);
+	if (!firewallIsQuiet(firewall)) parts.push(firewall);
 	return parts.join(' · ');
 }
 
