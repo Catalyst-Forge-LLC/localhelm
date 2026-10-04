@@ -344,7 +344,7 @@ export function pluginJobHint(
 	}
 	if (plugin === 'featurefacts') {
 		if (action === 'label') return 'Shows the label and the capability list. Update label is the only write.';
-		if (action === 'scan') return 'Reads the repo and refreshes the candidate list. Does not write the label.';
+		if (action === 'scan') return 'Refreshes the candidate list in each checked repo. Does not write the label and does not confirm capabilities.';
 	}
 	if (plugin === 'xfacts' && action === 'check') {
 		return 'Reads each repo. Does not write. Confirm checks app, feature, skill, tool, agent, and model. AppFacts and a FeatureFacts register are required. SkillFacts is required next to SKILL.md. Tool, agent, and model are checked when those files exist.';

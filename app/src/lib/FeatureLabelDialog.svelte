@@ -5,26 +5,31 @@
 		open: boolean;
 		model: FeatureLabelModel | null;
 		ticked: string[];
+		queue?: { index: number; total: number } | null;
 		busy?: boolean;
 		busyLabel?: string;
 		error?: string;
 		onscan?: () => void;
 		onupdate?: () => void;
+		onnext?: () => void;
 	};
 
 	let {
 		open = $bindable(),
 		model,
 		ticked = $bindable([]),
+		queue = null,
 		busy = false,
 		busyLabel = '',
 		error = '',
 		onscan,
 		onupdate,
+		onnext,
 	}: Props = $props();
 
 	let dialogEl = $state<HTMLDialogElement | null>(null);
 
+	const hasNext = $derived(Boolean(queue && queue.index < queue.total));
 	const overLimit = $derived(ticked.length > FEATURE_LABEL_LIMIT);
 	const canUpdate = $derived(Boolean(model && model.features.length > 0 && !overLimit && !busy));
 	const ordered = $derived(
@@ -64,8 +69,12 @@
 >
 	<div class="panel">
 		<div class="body">
-			<h2 id="feature-label-title">Label for {model?.repoId ?? 'repo'}</h2>
-			<p class="hint">Tick up to 12. Update label writes the file. Scan refreshes the list.</p>
+			<h2 id="feature-label-title">
+				Label for {model?.repoId ?? 'repo'}{#if queue}&nbsp;· {queue.index} of {queue.total}{/if}
+			</h2>
+			<p class="hint">
+				Tick up to 12. Update label writes the file. Scan refreshes the list.{#if hasNext}&nbsp;Next leaves this file alone.{/if}
+			</p>
 			{#if busy}
 				<p class="working">{busyLabel || 'Working…'}</p>
 			{/if}
@@ -133,6 +142,9 @@
 		</div>
 		<div class="actions">
 			<button type="button" class="btn" disabled={busy} onclick={() => (open = false)}>Close</button>
+			{#if hasNext}
+				<button type="button" class="btn" disabled={busy} onclick={() => onnext?.()}>Next</button>
+			{/if}
 			<button type="button" class="btn" disabled={busy || !model} onclick={() => onscan?.()}>Scan</button>
 			<button type="button" class="btn btn-write" disabled={!canUpdate} onclick={() => onupdate?.()}>
 				{busy ? 'Working…' : 'Update label'}

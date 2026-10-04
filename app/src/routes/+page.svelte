@@ -3,7 +3,7 @@
 	import { replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import FeatureLabelDialog from '$lib/FeatureLabelDialog.svelte';
-	import { featureLabelModel, labelTickSeed, type FeatureLabelModel } from '$lib/featureLabel';
+	import { featureLabelModel, labelQueuePlace, labelTickSeed, type FeatureLabelModel } from '$lib/featureLabel';
 	import TodayBoard from '$lib/TodayBoard.svelte';
 	import BridgeHeader from '$lib/BridgeHeader.svelte';
 	import '$lib/dashboard.css';
@@ -160,6 +160,13 @@
 	let labelModel = $state<FeatureLabelModel | null>(null);
 	let labelTicked = $state<string[]>([]);
 	let labelError = $state('');
+	let labelQueue = $state<string[]>([]);
+	let labelWasOpen = false;
+
+	$effect(() => {
+		if (labelWasOpen && !labelOpen && labelQueue.length) labelQueue = [];
+		labelWasOpen = labelOpen;
+	});
 	let confirmTitle = $state('');
 	let confirmHint = $state('');
 	let confirmLabel = $state('Confirm');
@@ -1570,6 +1577,23 @@
 		},
 	});
 
+	function startFeatureLabelQueue(ids: string[]): void {
+		const unique = [...new Set(ids.filter(Boolean))];
+		labelQueue = unique.length > 1 ? unique : [];
+		if (!unique[0]) return;
+		void startPluginJob('featurefacts', 'label', [unique[0]], 'Label');
+	}
+
+	function nextFeatureLabel(): void {
+		const place = labelQueuePlace(labelQueue, labelModel?.repoId ?? '');
+		const next = place ? labelQueue[place.index] : '';
+		if (!next) {
+			labelOpen = false;
+			return;
+		}
+		void startPluginJob('featurefacts', 'label', [next], 'Label');
+	}
+
 	function rowLines(data: unknown): string[] {
 		return formatPluginPlanLines(data);
 	}
@@ -2256,6 +2280,7 @@
 			bits.push(
 				'Add repos scans a folder for package.json or git checkouts. Init writes an empty register into each ticked repo. A repo that already has .featurefacts/ stays off that list.',
 				'Label shows the rendered card and the capability list. Scan refreshes that list and does not write the label. Update label is the only write. Init does not scan code.',
+				'Check several repos, then Scan refreshes those lists together. Label opens them one at a time. Next leaves that file alone.',
 			);
 		}
 		if (board.plugin === 'xfacts') {
@@ -2854,6 +2879,20 @@
 									</Tooltip>
 								{/if}
 							{/if}
+							{#if board.plugin === 'featurefacts' && checkedOnBoard.length}
+								<Tooltip title="Refreshes the candidate list for each checked repo. Does not write the label and does not confirm capabilities. Confirm in the modal.">
+									<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startPluginJob(board.plugin, 'scan', checkedOnBoard, 'Scan')}>
+										<Icon icon="lucide:scan" />
+										Scan ({checkedOnBoard.length})
+									</button>
+								</Tooltip>
+								<Tooltip title="Opens the label for each checked repo, one at a time. Next leaves that file alone. Update label is the only write.">
+									<button class="btn" disabled={Boolean(busy)} onclick={() => startFeatureLabelQueue(checkedOnBoard)}>
+										<Icon icon="lucide:tag" />
+										Label ({checkedOnBoard.length})
+									</button>
+								</Tooltip>
+							{/if}
 							{#each boardActions(board).filter((act) => act.id !== 'label') as act (act.id)}
 								{@const ready = checkedSiteIds(board, act.id)}
 								{#if ready.length}
@@ -2986,7 +3025,10 @@
 														<button
 															class="btn btn-sm"
 															disabled={Boolean(busy)}
-															onclick={() => startPluginJob(board.plugin, act.id, [row.id], act.label)}
+															onclick={() => {
+																if (board.plugin === 'featurefacts' && act.id === 'label') labelQueue = [];
+																startPluginJob(board.plugin, act.id, [row.id], act.label);
+															}}
 														>
 															{#if icon}<Icon {icon} />{/if}
 															{act.label}
@@ -3709,6 +3751,7 @@
 	bind:open={labelOpen}
 	bind:ticked={labelTicked}
 	model={labelModel}
+	queue={labelQueuePlace(labelQueue, labelModel?.repoId ?? '')}
 	busy={Boolean(busy)}
 	busyLabel={busy}
 	error={labelError}
@@ -3718,6 +3761,7 @@
 	onupdate={() => {
 		if (labelModel) void updateFeatureLabel(labelModel.repoId, labelTicked);
 	}}
+	onnext={() => nextFeatureLabel()}
 />
 
 

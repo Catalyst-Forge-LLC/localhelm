@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { featureLabelModel, labelPaperMeta, labelPaperRows, labelTickSeed } from './featureLabel.js';
+import { featureLabelModel, labelPaperMeta, labelPaperRows, labelQueuePlace, labelTickSeed } from './featureLabel.js';
 
 const payload = {
 	features: [
@@ -67,6 +67,14 @@ describe('labelPaperRows', () => {
 			],
 		);
 		assert.deepEqual(labelPaperMeta({ type: 'unknown', status: 'active' }), [{ label: 'Status', value: 'active' }]);
+	});
+});
+
+describe('labelQueuePlace', () => {
+	it('numbers a walk of several repos and stays quiet for one', () => {
+		assert.deepEqual(labelQueuePlace(['aegis', 'localhelm'], 'localhelm'), { index: 2, total: 2 });
+		assert.equal(labelQueuePlace(['localhelm'], 'localhelm'), null);
+		assert.equal(labelQueuePlace(['aegis', 'localhelm'], 'missing'), null);
 	});
 });
 

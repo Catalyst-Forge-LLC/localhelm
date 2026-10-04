@@ -135,6 +135,14 @@ export function featureLabelModel(repoId: string, data: unknown): FeatureLabelMo
 	};
 }
 
+/** Repo place in a multi-label walk. One repo has no place. */
+export function labelQueuePlace(queue: string[], repoId: string): { index: number; total: number } | null {
+	if (queue.length < 2) return null;
+	const at = queue.indexOf(repoId);
+	if (at < 0) return null;
+	return { index: at + 1, total: queue.length };
+}
+
 /** Saved ticks, or the ids still present after a scan. */
 export function labelTickSeed(features: FeatureReviewRow[], keep?: string[]): string[] {
 	const known = new Set(features.map((row) => row.id));
