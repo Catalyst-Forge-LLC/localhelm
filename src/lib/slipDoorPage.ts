@@ -1,3 +1,17 @@
+/** Top-down empty berth. Cyan piers, a gold painter with nothing on the end. */
+function emptyBerth(): string {
+	return `<svg class="glyph" viewBox="0 0 168 104" aria-hidden="true">
+<path d="M16 26 H152" stroke="#3a5a70" stroke-width="3" fill="none"/>
+<path d="M34 26 V90" stroke="#7ef4ff" stroke-width="3" fill="none"/>
+<path d="M134 26 V90" stroke="#7ef4ff" stroke-width="3" fill="none"/>
+<rect x="42" y="34" width="84" height="52" fill="rgb(126 244 255 / 0.07)"/>
+<path d="M72 26 H96" stroke="#c9a227" stroke-width="2.5" fill="none"/>
+<path d="M84 26 V58" stroke="#c9a227" stroke-width="1.6" stroke-dasharray="3 3.5" fill="none"/>
+<circle cx="84" cy="66" r="3.2" fill="none" stroke="#fde68a" stroke-width="1.4"/>
+<path d="M46 92 H70 M98 92 H122" stroke="#3a5a70" stroke-width="1.6" fill="none"/>
+</svg>`;
+}
+
 function esc(value: string): string {
 	return value.replace(/[&<>"']/g, (ch) => {
 		if (ch === '&') return '&amp;';
@@ -37,6 +51,8 @@ main {
   padding: 1.25rem 1.35rem 1.4rem;
   box-shadow: 0 16px 36px rgb(0 0 0 / 0.45), 0 0 22px rgb(126 244 255 / 0.22);
 }
+.head { display: flex; gap: 0.9rem; align-items: center; }
+.glyph { flex: none; width: 5.75rem; height: auto; }
 .mark { margin: 0; color: #7ef4ff; letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.78rem; font-weight: 700; }
 h1 { margin: 0.55rem 0 0; font-size: 1.45rem; font-weight: 600; color: #fde68a; }
 p { margin: 0.7rem 0 0; color: #a8a8b0; }
@@ -46,8 +62,13 @@ a { color: #7ef4ff; }
 </head>
 <body>
 <main>
+<div class="head">
+${emptyBerth()}
+<div>
 <p class="mark">Slip</p>
 <h1>${esc(opts.heading)}</h1>
+</div>
+</div>
 <p>${esc(opts.detail)}</p>
 <p class="hint">${esc(opts.hint)}</p>
 <p><a href="/">Back to the board</a></p>
