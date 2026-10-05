@@ -1479,6 +1479,7 @@
 	const {
 		startBump,
 		startCommit,
+		retryCommitDraft,
 		startPull,
 		startPush,
 		startShip,
@@ -1537,6 +1538,9 @@
 			confirmOpen = open;
 		},
 		confirmMessageTouched: () => confirmMessageTouched,
+		setConfirmMessageTouched: (touched) => {
+			confirmMessageTouched = touched;
+		},
 		confirmExcluded: () => confirmExcluded,
 		confirmDraftIds: () => confirmDraftIds,
 		setConfirmDraftIds: (ids) => {
@@ -3709,6 +3713,9 @@
 	}}
 	ondraft={(id) => {
 		confirmMessageTouched = { ...confirmMessageTouched, [id]: true };
+	}}
+	onretry={(id) => {
+		void retryCommitDraft(id);
 	}}
 	applyIds={confirmWriteIds}
 	bind:excludedIds={confirmExcluded}

@@ -20,6 +20,7 @@ const UNTRACKED_PREVIEW = 40;
 const PREVIEW_FILE_LINES = 80;
 const TAGS_MS = 8_000;
 const OLLAMA_MS = 60_000;
+const OLLAMA_RETRY_MS = 180_000;
 
 export type CommitDraftApi = {
 	lastScan?: () => Promise<{ servers: ScannedServer[] } | null>;
@@ -198,6 +199,7 @@ async function draftViaChat(
 	model: string,
 	prompt: string,
 	api: CommitDraftApi,
+	timeoutMs: number,
 ): Promise<{ message: string; model: string } | { error: string }> {
 	const chat = api.ollamaChat ?? ollamaChat;
 	const result = await chat({
@@ -207,7 +209,7 @@ async function draftViaChat(
 		stream: false,
 		settings: { temperature: 0.2, num_predict: 160, think: false },
 		writeStdout: false,
-		timeoutMs: OLLAMA_MS,
+		timeoutMs,
 	});
 	const message = cleanSuggestedMessage(result.content);
 	if (!message) return { error: 'Ollama returned an empty message.' };
@@ -230,6 +232,7 @@ export function commitDraftDestination(): string {
 export async function ollamaCommitMessage(
 	prompt: string,
 	api: CommitDraftApi = {},
+	timeoutMs = OLLAMA_MS,
 ): Promise<{ message: string; model: string; host: string } | { error: string }> {
 	try {
 		const machineEnv = (process.env.LOCALHELM_OLLAMA_MACHINE ?? '').trim();
@@ -241,7 +244,7 @@ export async function ollamaCommitMessage(
 			const listed = modelEnv ? [] : await tags(urlEnv, TAGS_MS);
 			const model = modelEnv || firstModelName(listed.map((item) => item.name));
 			if (!model) return { error: 'Ollama has no model. Run ollama pull llama3.2.' };
-			const drafted = await draftViaChat(urlEnv, model, prompt, api);
+			const drafted = await draftViaChat(urlEnv, model, prompt, api, timeoutMs);
 			if ('error' in drafted) return drafted;
 			return { ...drafted, host: commitDraftDestination() };
 		}
@@ -252,7 +255,7 @@ export async function ollamaCommitMessage(
 			const listed = modelEnv ? [] : await tags(base, TAGS_MS);
 			const model = modelEnv || firstModelName(listed.map((item) => item.name));
 			if (!model) return { error: `Ollama on ${machineEnv} has no model.` };
-			const drafted = await draftViaChat(base, model, prompt, api);
+			const drafted = await draftViaChat(base, model, prompt, api, timeoutMs);
 			if ('error' in drafted) return drafted;
 			const label = host.isSelf || host.source === 'localhost' ? 'localhost' : host.dnsName || host.hostname || host.ip;
 			return { ...drafted, host: label };
@@ -264,12 +267,16 @@ export async function ollamaCommitMessage(
 		const listed = modelEnv ? [] : await tags(base, TAGS_MS);
 		const model = modelEnv || firstModelName(listed.map((item) => item.name));
 		if (!model) return { error: 'Ollama has no model. Run ollama pull llama3.2.' };
-		const drafted = await draftViaChat(base, model, prompt, api);
+		const drafted = await draftViaChat(base, model, prompt, api, timeoutMs);
 		if ('error' in drafted) return drafted;
 		return { ...drafted, host: '127.0.0.1:11434' };
 	} catch (err) {
 		const text = err instanceof Error ? err.message : String(err);
-		if (/abort|timeout/i.test(text)) return { error: 'Ollama timed out.' };
+		if (/abort|timeout|timed out/i.test(text)) {
+			const secs = Math.round(timeoutMs / 1000);
+			const retry = timeoutMs <= OLLAMA_MS ? ' Retry waits 3 minutes.' : '';
+			return { error: `Prompt timed out after ${secs}s.${retry}` };
+		}
 		if (/fetch|ECONNREFUSED|ENOTFOUND|offline/i.test(text)) {
 			return { error: 'Could not reach the selected Ollama host. Start Ollama locally or set LOCALHELM_OLLAMA_MACHINE / LOCALHELM_OLLAMA_URL. Fallback message retained.' };
 		}
@@ -357,13 +364,14 @@ async function suggestFor(
 	repoRoot: string,
 	files: DirtFile[],
 	api: CommitDraftApi,
+	timeoutMs: number,
 ): Promise<Pick<DirtCommitRow, 'message' | 'suggestSource' | 'suggestNote' | 'suggestModel' | 'suggestHost'>> {
 	const fallback = fallbackCommitMessage(files);
 	const included = files.filter((file) => !file.skip);
 	if (!included.length) {
 		return { message: fallback, suggestSource: 'fallback', suggestNote: 'Nothing safe to send to Ollama.' };
 	}
-	const drafted = await ollamaCommitMessage(await changePrompt(repoRoot, files), api);
+	const drafted = await ollamaCommitMessage(await changePrompt(repoRoot, files), api, timeoutMs);
 	if ('error' in drafted) {
 		return { message: fallback, suggestSource: 'fallback', suggestNote: drafted.error };
 	}
@@ -382,10 +390,11 @@ function projectAbs(loaded: LoadedManifest, rel: string): string {
 export async function planDirtCommit(
 	loaded: LoadedManifest,
 	ids: string[],
-	opts: { suggest?: boolean; draft?: CommitDraftApi } = {},
+	opts: { suggest?: boolean; longWait?: boolean; draft?: CommitDraftApi } = {},
 ): Promise<DirtCommitPlan> {
 	const named = requireCommitIds(ids);
 	const draft = opts.draft ?? {};
+	const timeoutMs = opts.longWait ? OLLAMA_RETRY_MS : OLLAMA_MS;
 	const rows: DirtCommitRow[] = [];
 	for (const id of named) {
 		const project = loaded.manifest.projects.find((row) => row.id === id);
@@ -416,7 +425,7 @@ export async function planDirtCommit(
 			continue;
 		}
 		const suggestion = opts.suggest
-			? await suggestFor(abs, listed.files, draft)
+			? await suggestFor(abs, listed.files, draft, timeoutMs)
 			: { message: fallbackCommitMessage(listed.files), suggestSource: 'fallback' as const };
 		rows.push({
 			id,

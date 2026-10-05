@@ -1,6 +1,7 @@
 export {
 	applyConfirmStep,
 	commitDraftProgressHint,
+	commitDraftTimedOut,
 	commitDraftSubjectIds,
 	confirmHasSubject,
 	confirmSubjectFailed,

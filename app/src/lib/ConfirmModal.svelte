@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { commitDraftProgressHint, commitDraftSubjectIds } from './confirmProgress';
+	import { commitDraftProgressHint, commitDraftSubjectIds, commitDraftTimedOut } from './confirmProgress';
 	import { assignStepOwners, buildConfirmRoster, confirmCountText, confirmGroupId, confirmRosterSelected, type ConfirmRosterStep } from './confirmRoster';
 	import Icon from './Icon.svelte';
 	import { findNpmPackageLink } from './npmPage';
@@ -42,6 +42,7 @@
 		oncancel?: () => void;
 		onstop?: () => void;
 		ondraft?: (id: string) => void;
+		onretry?: (id: string) => void;
 		onmessagechange?: (id: string, text: string) => void;
 		altLabel?: string;
 		extraLabel?: string;
@@ -83,6 +84,7 @@
 		oncancel,
 		onstop,
 		ondraft,
+		onretry,
 		onmessagechange,
 		altLabel = '',
 		extraLabel = '',
@@ -475,11 +477,17 @@
 			<div class="extra">{@render children()}</div>
 		{/if}
 		{#if draftId && draftIds.length}
-			<label class="draft" for="confirm-draft">
-				Commit message{#if draftIds.length > 1}
-					<span class="draft-id">{draftId}</span>
-				{/if}
-			</label>
+			<div class="draft">
+				<label for="confirm-draft">Commit message</label>
+				<span class="draft-side">
+					{#if draftIds.length > 1}
+						<span class="draft-id">{draftId}</span>
+					{/if}
+					{#if onretry && commitDraftTimedOut(draftNoteById[draftId]) && !draftingIds.includes(draftId)}
+						<button type="button" class="draft-retry" disabled={busy} onclick={() => onretry(draftId)}>Retry</button>
+					{/if}
+				</span>
+			</div>
 			{#if liveDraftHint}
 				<p class="draft-hint">{liveDraftHint}</p>
 			{/if}
@@ -1022,11 +1030,32 @@
 	.draft {
 		display: flex;
 		align-items: baseline;
-		justify-content: space-between;
 		gap: 0.6rem;
 		margin: 0.85rem 0 0.3rem;
 		font-size: 0.78rem;
 		color: var(--dim);
+	}
+
+	.draft-side {
+		margin-left: auto;
+		display: flex;
+		align-items: baseline;
+		gap: 0.55rem;
+	}
+
+	.draft-retry {
+		padding: 0.05rem 0.45rem;
+		border: 1px solid var(--steel);
+		border-radius: 0.3rem;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+	}
+
+	.draft-retry:disabled {
+		opacity: 0.45;
+		cursor: default;
 	}
 
 	.draft-id {

@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import {
 	applyConfirmStep,
 	commitDraftProgressHint,
+	commitDraftTimedOut,
 	confirmHasSubject,
 	emptyConfirmPhases,
 	markConfirmKey,
@@ -42,6 +43,11 @@ describe('confirmProgress', () => {
 		assert.deepEqual(phases, ['done', 'current', 'pending']);
 		phases = applyConfirmStep(keys, phases, { id: 'aibreze', index: 1, status: 'fail' });
 		assert.deepEqual(phases, ['done', 'fail', 'pending']);
+	});
+
+	it('recognizes an Ollama timeout note', () => {
+		assert.equal(commitDraftTimedOut('Prompt timed out after 60s. Retry waits 3 minutes.'), true);
+		assert.equal(commitDraftTimedOut('Ollama (gemma4:12b) drafted this. Edit if you want.'), false);
 	});
 
 	it('keeps Asking Ollama up until the last draft, then summarizes', () => {

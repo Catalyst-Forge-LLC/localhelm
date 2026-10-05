@@ -109,11 +109,16 @@ export function createFleetWrites(host: DashboardJobHost) {
 		);
 	}
 
-	async function suggestCommitDrafts(ids: string[]): Promise<void> {
-		host.setConfirmDraftIds(ids);
-		host.setConfirmDrafting([...ids]);
-		host.setConfirmDraftNotes({});
-		host.setConfirmDraftHint(commitDraftProgressHint({ ids, pending: host.confirmDrafting() }));
+	async function suggestCommitDrafts(ids: string[], opts: { longWait?: boolean } = {}): Promise<void> {
+		const longWait = opts.longWait === true;
+		if (!longWait) {
+			host.setConfirmDraftIds(ids);
+			host.setConfirmDrafting([...ids]);
+			host.setConfirmDraftNotes({});
+		} else {
+			host.setConfirmDrafting([...new Set([...host.confirmDrafting(), ...ids])]);
+		}
+		host.setConfirmDraftHint(commitDraftProgressHint({ ids: host.confirmDraftIds(), pending: host.confirmDrafting() }));
 		for (const id of ids) {
 			if (!host.confirmOpen()) break;
 			if (host.confirmMessageTouched()[id] || host.confirmExcluded().includes(id)) {
@@ -138,12 +143,12 @@ export function createFleetWrites(host: DashboardJobHost) {
 			try {
 				const data = (await host.call('/api/commit', {
 					method: 'POST',
-					body: JSON.stringify({ ids: [id], apply: false, suggest: true }),
+					body: JSON.stringify({ ids: [id], apply: false, suggest: true, longWait }),
 				})) as { rows: CommitPlanRow[]; draftDestination?: string };
 				const row = data.rows[0];
 				if (!row || !host.confirmOpen()) continue;
 				const text = row.message?.trim();
-				if (!host.confirmMessageTouched()[id] && text) {
+				if (text && !host.confirmMessageTouched()[id]) {
 					host.setConfirmMessages({ ...host.confirmMessages(), [id]: text });
 				}
 				const draftNote =
@@ -953,6 +958,10 @@ export function createFleetWrites(host: DashboardJobHost) {
 	return {
 		startBump,
 		startCommit,
+		retryCommitDraft: (id: string) => {
+			host.setConfirmMessageTouched({ ...host.confirmMessageTouched(), [id]: false });
+			return suggestCommitDrafts([id], { longWait: true });
+		},
 		startPull,
 		startPush,
 		startShip,

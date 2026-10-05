@@ -93,6 +93,11 @@ export function commitDraftSubjectIds(opts: {
 	return out;
 }
 
+/** The draft note is a timeout, so the commit dialog can offer a longer retry. */
+export function commitDraftTimedOut(note: string | undefined): boolean {
+	return Boolean(note && /timed out|timeout/i.test(note));
+}
+
 function isOllamaNote(note: string | undefined): boolean {
 	return Boolean(note && /^Ollama \(/.test(note));
 }

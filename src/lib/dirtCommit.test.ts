@@ -266,6 +266,58 @@ describe('dirtCommit plan/apply', () => {
 		assert.match(formatUntrackedPreview('notes.md', 'one\ntwo\n'), /\+one\n\+two/);
 	});
 
+	it('names a short timeout and waits 3 minutes on retry', async () => {
+		await withoutOllamaEnv(async () => {
+			let waited = 0;
+			const api: CommitDraftApi = {
+				ollamaTags: async () => [{ name: 'llama3.2:latest' }],
+				ollamaChat: async (opts) => {
+					waited = opts.timeoutMs ?? 0;
+					throw new Error('Prompt timed out after 60000ms (http://127.0.0.1:11434/api/chat)');
+				},
+			};
+			const first = await ollamaCommitMessage('prompt', api);
+			assert.ok('error' in first);
+			assert.equal(waited, 60_000);
+			assert.match(first.error, /Prompt timed out after 60s/);
+			assert.match(first.error, /Retry waits 3 minutes/);
+			const again = await ollamaCommitMessage('prompt', api, 180_000);
+			assert.ok('error' in again);
+			assert.equal(waited, 180_000);
+			assert.equal(again.error, 'Prompt timed out after 180s.');
+		});
+	});
+
+	it('asks Ollama to wait 3 minutes when the draft is retried', async () => {
+		await withoutOllamaEnv(async () => {
+			const root = await mkdtemp(path.join(tmpdir(), 'localhelm-commit-retry-'));
+			const pkgDir = path.join(root, 'widget');
+			await mkdir(pkgDir);
+			await gitRepo(pkgDir);
+			await writeFile(path.join(pkgDir, 'notes.txt'), 'hello\n');
+			let waited = 0;
+			const loaded: LoadedManifest = {
+				manifestPath: path.join(root, 'localhelm.fleet.json'),
+				workspaceRoot: root,
+				manifest: { workspaceRoot: '.', projects: [{ id: 'widget', path: 'widget' }] },
+			};
+			const plan = await planDirtCommit(loaded, ['widget'], {
+				suggest: true,
+				longWait: true,
+				draft: {
+					ollamaTags: async () => [{ name: 'llama3.2:latest' }],
+					ollamaChat: async (opts) => {
+						waited = opts.timeoutMs ?? 0;
+						return { content: 'Add notes.', thinking: '', chunk: {} };
+					},
+				},
+			});
+			assert.equal(waited, 180_000);
+			assert.equal(plan.rows[0]?.suggestSource, 'ollama');
+			assert.match(plan.rows[0]?.message ?? '', /Add notes/);
+		});
+	});
+
 	it('skips a clean tree', async () => {
 		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-commit-clean-'));
 		const pkgDir = path.join(root, 'widget');

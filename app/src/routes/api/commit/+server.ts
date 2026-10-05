@@ -9,13 +9,14 @@ export const POST: RequestHandler = async ({ request }) => {
 			ids?: unknown;
 			apply?: unknown;
 			suggest?: unknown;
+			longWait?: unknown;
 			messages?: unknown;
 		};
 		const ids = Array.isArray(body.ids) ? body.ids.filter((id): id is string => typeof id === 'string') : [];
 		const named = requireCommitIds(ids);
 		const loaded = await loadRequired();
 		const suggest = body.suggest !== false && body.apply !== true;
-		const plan = await planDirtCommit(loaded, named, { suggest });
+		const plan = await planDirtCommit(loaded, named, { suggest, longWait: body.longWait === true });
 		const messages =
 			body.messages && typeof body.messages === 'object' && !Array.isArray(body.messages)
 				? (body.messages as Record<string, unknown>)

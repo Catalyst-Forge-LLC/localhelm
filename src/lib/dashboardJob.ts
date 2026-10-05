@@ -56,6 +56,7 @@ export type DashboardJobHost = {
 	confirmOpen(): boolean;
 	setConfirmOpen(open: boolean): void;
 	confirmMessageTouched(): Record<string, boolean>;
+	setConfirmMessageTouched(touched: Record<string, boolean>): void;
 	confirmExcluded(): string[];
 	confirmDraftIds(): string[];
 	setConfirmDraftIds(ids: string[]): void;
