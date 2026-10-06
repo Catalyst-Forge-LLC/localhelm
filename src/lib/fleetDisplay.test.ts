@@ -101,6 +101,15 @@ describe('fleetDisplay', () => {
 		);
 	});
 
+	it('keeps the header out of the quiet state when Git status is unavailable', () => {
+		const counts = { publish: 0, push: 0, pins: 0, dirty: 0, missing: 0, npmErrors: 0 };
+		assert.deepEqual(headerNeedChips({ ...counts, gitErrors: 1 }), [
+			{ id: 'git', label: '1 Git error', count: 1, word: 'Git error', tone: 'bad', tab: 'today', need: 'all' },
+		]);
+		assert.equal(headerNeedChips({ ...counts, gitErrors: 2 })[0]?.label, '2 Git errors');
+		assert.deepEqual(headerNeedChips({ ...counts, gitErrors: 0 }), []);
+	});
+
 	it('builds the keel idle line in contract order', () => {
 		assert.equal(
 			bridgeIdleLine({ fleetCount: 43, fetchedAt: '9:41:07 PM', npmUser: 'acme' }),

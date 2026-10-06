@@ -40,4 +40,8 @@ Publish OTP lives in the confirm modal. Never `--force`.
 
 ## Stale and unavailable
 
+When Git refuses a checkout with “detected dubious ownership,” Today and Fleet offer **Trust this directory**. The modal shows the exact checkout root and explains that confirmation adds it to Git’s global trusted-directory list for the account running LocalHelm. Trust only a repository you control. Cancel makes no change; confirmation adds that one directory and refreshes its Git status. No wildcard or whole-workspace trust is added. Demo mode cannot apply it.
+
+An unreadable Git status is labeled **Git trust required** or **Git status unavailable**, rather than “nothing to do.” Other Git errors do not offer the trust action.
+
 If a remote cannot be read, the board says ahead and behind counts may be stale. Local dirty and version cells stay from this machine. An npm fetch error is an error, not a clean match. Empty Sites or Ports means that plugin or LocalSlip is not in play, not that those systems are healthy.

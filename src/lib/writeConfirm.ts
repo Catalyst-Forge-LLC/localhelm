@@ -4,6 +4,7 @@ import type { ConfirmPhase } from './confirmProgress.js';
 import { globalInstallLine, shipConfirmLine, type GlobalInstallLineRow } from './fleetWrites.js';
 import { publishNeedsGithub, publishStepLabel } from './publishDisplay.js';
 import type { PublishStep } from './publishTypes.js';
+import { GIT_TRUST_HINT } from './gitTrustDisplay.js';
 
 export type ConfirmOffer = {
 	title: string;
@@ -42,6 +43,8 @@ export type JobRunOpts = {
 /** Shown while the plan is still running, before the confirm copy replaces it. */
 export function planningHint(title: string): string {
 	switch (title) {
+		case 'Trust this directory':
+			return GIT_TRUST_HINT;
 		case 'Bump':
 			return 'Writes package.json and commits that file. Other dirty files stay local. No tag, no push, no publish.';
 		case 'Commit':

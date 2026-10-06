@@ -387,3 +387,9 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 ### Session 55 — 2026-09-28
 
 - IngotVault tab (d149): Check compares covered refs to the spare mirror. Backup runs `ingotvault --repo` only for repos that are behind or missing a mirror. Diverged repos are shown and skipped. Helm does not push `backup`.
+
+### Session 56 — 2026-10-06
+
+- Git ownership refusal offers **Trust this directory** on Today and Fleet. The existing modal plans first, shows the canonical checkout root, and confirms one `git config --global --add safe.directory <directory>` for the running account. Cancel writes nothing. Apply rechecks enrollment, checkout path, and the ownership error; nested packages resolve to their checkout root. No stderr-supplied paths or wildcard trust. Demo apply and non-loopback operator API calls are refused.
+- Git errors show **Git trust required** / **Git status unavailable**, appear in the header lamps, and prevent misleading “nothing to do” / “All quiet.” After trust, refresh only that row's Git status. The operator had already trusted UXcalibur manually; successful rows do not show the button.
+- Local candidate verified with 316 tests, runtime/dashboard builds, zero dashboard type errors, and isolated desktop/mobile browser recovery. Package remains 0.1.36, unpublished by this session. Restart the rebuilt checkout to load it; installed copies require a separate update. Build/in_progress remains unchanged. Decision and evidence: `git-directory-trust-20261006`.

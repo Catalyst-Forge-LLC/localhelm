@@ -288,6 +288,13 @@ describe('whyNotPublish', () => {
 });
 
 describe('fleetWriteIds', () => {
+	it('offers trust only for an ownership error, including private development packages', () => {
+		const error = "fatal: detected dubious ownership in repository at '/repo'";
+		const blocked = row({ private: true, git: git({ error, dirty: true, ahead: 3 }) });
+		assert.deepEqual(fleetWriteIds(blocked, 2), ['trust']);
+		assert.equal(fleetWriteLabel('trust', blocked), 'Trust this directory');
+		assert.deepEqual(fleetWriteIds(row({ git: git({ error: 'fatal: permission denied' }) })), []);
+	});
 	it('offers one Publish for a version bump with origin commits', () => {
 		const next = row({ commitsSinceNpm: 4 });
 		assert.equal(canPublish(next), true);

@@ -8,6 +8,8 @@ import type { BumpKind, BumpPlan, GitRow, GlobalInstallRow, PublishRow, ScriptSh
 import { globalDepUpdateCheck } from './fleetWrites.js';
 import { formatPluginPlanLines } from './pluginPlan.js';
 import { publishNeedsGithub, publishNeedsNpm } from './publishDisplay.js';
+import { GIT_TRUST_HINT } from './gitTrustDisplay.js';
+import type { GitTrustPlan } from './gitTrust.js';
 import {
 	canSkipPublishResultsForGlobalInstall,
 	globalInstallLine,
@@ -38,6 +40,37 @@ import {
 } from './writeConfirm.js';
 
 export function createFleetWrites(host: DashboardJobHost) {
+	async function startGitTrust(id: string): Promise<void> {
+		if (!host.readyNamed([id]).length) return;
+		await host.run(`planning Git trust for ${id}`, async () => {
+			const plan = (await host.call('/api/git-trust', {
+				method: 'POST', body: JSON.stringify({ id, apply: false }),
+			})) as GitTrustPlan;
+			host.note(`Git trust plan ${id}, nothing written`, plan);
+			const canApply = plan.action === 'trust' && Boolean(plan.directory);
+			host.offerConfirm({
+				title: canApply ? `Trust the directory for ${id}?` : 'Git trust is not needed',
+				hint: canApply ? GIT_TRUST_HINT : plan.reason ?? 'Directory cannot be trusted.',
+				items: [plan.directory ?? id], itemKeys: [id], applyIds: canApply ? [id] : [],
+				confirmLabel: 'Trust this directory', canApply,
+				run: (included) => {
+					if (included.includes(id) && plan.directory) void applyGitTrust(id, plan.directory);
+				},
+			});
+		}, planOpts('Trust this directory', [id]));
+	}
+
+	async function applyGitTrust(id: string, directory: string): Promise<void> {
+		await host.run(`trusting the directory for ${id}`, async () => {
+			const result = (await host.call('/api/git-trust', {
+				method: 'POST', body: JSON.stringify({ id, directory, apply: true }),
+			})) as GitTrustPlan & { writes: boolean; remainingError?: string };
+			host.note(result.writes ? `Added Git trust for ${id}` : `Git trust ${id}: ${result.reason ?? 'unchanged'}`, result);
+			await host.reloadAfterWrite([id], 'git');
+			if (result.remainingError) throw new Error(`The directory was added, but Git still reports: ${result.remainingError}`);
+		});
+	}
+
 	async function startBump(ids: string[]): Promise<void> {
 		ids = host.readyNamed(ids);
 		if (ids.length === 0) {
@@ -956,6 +989,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 	}
 
 	return {
+		startGitTrust,
 		startBump,
 		startCommit,
 		retryCommitDraft: (id: string) => {

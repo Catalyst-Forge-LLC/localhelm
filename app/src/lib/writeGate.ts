@@ -1,4 +1,7 @@
 export {
+	GIT_TRUST_HINT,
+	gitStatusBadge,
+	isGitOwnershipError,
 	canCommit,
 	canGlobal,
 	canPublish,

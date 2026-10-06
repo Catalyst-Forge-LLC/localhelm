@@ -1,6 +1,8 @@
 export { ACTIVITY_LIMIT, activityPath, appendActivity, clearActivity, readActivity } from './activity.js';
 export type { ActivityEntry } from './activity.js';
 export { fleetDeps } from './deps.js';
+export { applyGitTrust, planGitTrust } from './gitTrust.js';
+export type { GitTrustPlan } from './gitTrust.js';
 export { applyEnroll, applyUnenroll, enrollResolvePath, planEnroll, planUnenroll } from './enroll.js';
 export { enrollFilepressFromFleet } from './filepressFromFleet.js';
 export type { FilepressFromFleet } from './filepressFromFleet.js';

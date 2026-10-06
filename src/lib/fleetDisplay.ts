@@ -22,7 +22,7 @@ export function fleetVersionNote(row: FleetVersionRow): string | null {
 	return null;
 }
 
-/** Situation lamps: same lists as Today’s write buttons, plus broken-folder / npm errors. */
+/** Situation lamps: same lists as Today’s write buttons, plus unavailable status. */
 export type HeaderNeedCounts = {
 	publish: number;
 	push: number;
@@ -30,6 +30,7 @@ export type HeaderNeedCounts = {
 	dirty: number;
 	missing: number;
 	npmErrors: number;
+	gitErrors?: number;
 };
 
 export type HeaderNeedChip = {
@@ -74,6 +75,10 @@ export function headerNeedChips(counts: HeaderNeedCounts): HeaderNeedChip[] {
 	}
 	if (counts.npmErrors > 0) {
 		chips.push(needChip('npm', counts.npmErrors, 'npm errors', 'bad', 'all'));
+	}
+	const gitErrors = counts.gitErrors ?? 0;
+	if (gitErrors > 0) {
+		chips.push(needChip('git', gitErrors, gitErrors === 1 ? 'Git error' : 'Git errors', 'bad', 'all'));
 	}
 	return chips;
 }

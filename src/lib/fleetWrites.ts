@@ -1,4 +1,5 @@
 import { bumpTriple, compareSemver, type BumpKind } from './semver.js';
+import { isGitOwnershipError } from './gitTrustDisplay.js';
 
 /** Git fields the dashboard and plans both have. No Node imports — safe for the Svelte bundle. */
 export type GateGit = {
@@ -12,6 +13,7 @@ export type GateGit = {
 	branch?: string;
 	ahead: number | null;
 	behind: number | null;
+	error?: string;
 };
 
 export type PublishGateRow = {
@@ -29,6 +31,7 @@ export type PublishGateRow = {
 /** Same skips as planPushOne. Dirty is not a skip — uncommitted files stay local. */
 export function whyNotPush(git: GateGit): string | undefined {
 	if (!git.repo) return 'no git';
+	if (git.error) return git.error;
 	if (git.detached) return 'detached';
 	if (git.busy) return git.busy;
 	if (!git.origin) return git.backup ? 'backup only' : 'no origin';
@@ -49,6 +52,7 @@ export function whyNotPublish(row: PublishGateRow, kind: BumpKind = 'patch'): st
 	if (row.npm.status === 'error') return row.npm.error ?? 'npm lookup failed';
 	if (row.npm.status === 'private') return 'private';
 	if (!row.git.repo) return 'not a git repo';
+	if (row.git.error) return row.git.error;
 	if (row.git.busy) return `mid-${row.git.busy}`;
 	if (row.git.detached) return 'detached';
 	if (row.git.dirty) return 'dirty';
@@ -84,12 +88,13 @@ export function canPublish(row: PublishGateRow, kind: BumpKind = 'patch'): boole
 	return !whyNotPublish(row, kind);
 }
 
-export const FLEET_WRITE_ORDER = ['commit', 'publish', 'push', 'pins'] as const;
+export const FLEET_WRITE_ORDER = ['trust', 'commit', 'publish', 'push', 'pins'] as const;
 export type FleetWriteId = (typeof FLEET_WRITE_ORDER)[number];
 
 export function canCommit(row: { missing?: boolean; git: GateGit }): boolean {
 	if (row.missing) return false;
 	if (!row.git.repo) return false;
+	if (row.git.error) return false;
 	if (row.git.busy) return false;
 	return Boolean(row.git.dirty);
 }
@@ -190,6 +195,7 @@ export function npmNotReadyHint(): string {
 
 /** Writes Today and Fleet both offer. Order is the gold-write priority. */
 export function fleetWriteIds(row: PublishGateRow, writablePins = 0): FleetWriteId[] {
+	if (row.git.error) return !row.missing && row.git.repo && isGitOwnershipError(row.git.error) ? ['trust'] : [];
 	const ids: FleetWriteId[] = [];
 	if (canCommit(row)) ids.push('commit');
 	if (canPublish(row)) ids.push('publish');
@@ -219,6 +225,7 @@ export function fleetWriteLabel(
 	kind: BumpKind = 'patch',
 	writablePins = 0,
 ): string {
+	if (id === 'trust') return 'Trust this directory';
 	if (id === 'commit') return 'Commit';
 	if (id === 'publish') {
 		const version = row.unpublishedAhead

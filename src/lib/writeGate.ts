@@ -49,3 +49,4 @@ export {
 	writableCascadeCount,
 } from './fleetWrites.js';
 export type { FleetWriteId, GateGit, GlobalGateRow, GlobalInstallLineRow, PublishGateRow } from './fleetWrites.js';
+export { GIT_TRUST_HINT, gitStatusBadge, isGitOwnershipError } from './gitTrustDisplay.js';

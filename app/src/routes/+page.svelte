@@ -30,6 +30,8 @@
 	import { groupPortLooks, portFamilies, portLooks, type PortFamily } from '$lib/looks';
 	import { isNestedSitePath } from '$lib/scanPaths';
 	import {
+		GIT_TRUST_HINT,
+		gitStatusBadge,
 		canCommit,
 		canPublish,
 		canShip,
@@ -376,13 +378,6 @@
 		pins:
 			attentionRows.filter((row) => row.cascadeBehind > 0).length + cascadeOnlyRows.length,
 	});
-	const todayCount = $derived(
-		attentionRows.length +
-			cascadeOnlyRows.length +
-			sitesNeedingYou.length +
-			portsNeedingYou.length +
-			portLookCards.length,
-	);
 	const filepressSyncIds = $derived(sitesNeedingSync.map((row) => row.id));
 	const filepressLandIds = $derived(sitesNeedingLand.map((row) => row.id));
 	const checkedPublishIds = $derived(checkedIds.filter((id) => {
@@ -414,6 +409,7 @@
 		!demoBoard && needCommitIds.length + needPublishIds.length + needPushIds.length > 0,
 	);
 	const noFleet = $derived(statusReady && (!inventory || inventory.projects.length === 0));
+	const gitErrorCount = $derived(visibleProjects.filter((row) => Boolean(row.git.error)).length);
 	const needChips = $derived(
 		inventory
 			? headerNeedChips({
@@ -423,6 +419,7 @@
 					dirty: needCommitIds.length,
 					missing: inventory.digest.missing,
 					npmErrors: inventory.digest.npmErrors,
+					gitErrors: gitErrorCount,
 				})
 			: [],
 	);
@@ -431,7 +428,8 @@
 			needPushIds.length +
 			needCommitIds.length +
 			needFilterCounts.pins +
-			(inventory?.digest.missing ?? 0),
+			(inventory?.digest.missing ?? 0) +
+			gitErrorCount,
 	);
 	const bridgeGauges = $derived.by((): BridgeGauge[] => [
 		{ id: 'fleet', label: 'Fleet', count: fleetCount, need: fleetNeed },
@@ -452,6 +450,13 @@
 		),
 	);
 	const knownIds = $derived([...new Set([...fleetIds, ...siteIds, ...leaseIds])]);
+	const todayCount = $derived(
+		attentionRows.length +
+			cascadeOnlyRows.length +
+			sitesNeedingYou.length +
+			portsNeedingYou.length +
+			portLookCards.length,
+	);
 	const quietSiteIds = $derived(
 		(leaseBoard?.rows ?? [])
 			.filter((row) => row.id.endsWith('-site') && row.cells.listening === 'yes')
@@ -1477,6 +1482,7 @@
 	}
 
 	const {
+		startGitTrust,
 		startBump,
 		startCommit,
 		retryCommitDraft,
@@ -2069,6 +2075,8 @@
 
 	function badges(row: Project): Badge[] {
 		const out: Badge[] = [];
+		const gitBadge = gitStatusBadge(row.git.error);
+		if (gitBadge) out.push(gitBadge);
 		if (row.missing) out.push({ text: 'folder missing', tone: 'bad' });
 		if (row.unpublishedAhead) {
 			const blocked = whyNotPublish(row);
@@ -2133,6 +2141,7 @@
 	}
 
 	function needActionTitle(id: FleetWriteId, row: Project): string {
+		if (id === 'trust') return GIT_TRUST_HINT;
 		if (id === 'commit') {
 			return 'Reads the dirty files, asks Ollama for a message, then you confirm. git add + git commit only. No push.';
 		}
@@ -2180,7 +2189,8 @@
 			label: fleetWriteLabel(id, row, rowBumpKind(row), pins),
 			title: needActionTitle(id, row),
 			run: () => {
-				if (id === 'commit') void startCommit([row.id]);
+				if (id === 'trust') void startGitTrust(row.id);
+				else if (id === 'commit') void startCommit([row.id]);
 				else if (id === 'publish') startPublish([row.id]);
 				else if (id === 'push') startPush([row.id]);
 				else startCascade(row.id);
