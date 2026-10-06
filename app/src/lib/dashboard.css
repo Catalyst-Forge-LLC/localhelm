@@ -497,6 +497,7 @@
 	.group-buttons {
 		display: flex;
 		flex-wrap: wrap;
+		justify-content: flex-end;
 		gap: 0.4rem;
 		align-items: center;
 	}
@@ -1039,6 +1040,7 @@
 	.today-board,
 	.fleet-layout {
 		display: grid;
+		grid-template-columns: minmax(0, 1fr);
 		gap: 0.75rem;
 	}
 
@@ -1207,16 +1209,34 @@
 
 	.panel-tools {
 		display: flex;
-		flex-direction: column;
-		gap: 0.45rem;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 0.4rem;
+		min-width: 0;
 		margin-bottom: 0.7rem;
 	}
 
 	.tool-band {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.4rem;
+		display: contents;
+	}
+
+	.toolbar-primary {
+		display: contents;
+	}
+
+	.toolbar-compact {
+		display: none;
+	}
+
+	@media (max-width: 55rem) {
+		.toolbar-primary {
+			display: none;
+		}
+
+		.toolbar-compact {
+			display: contents;
+		}
 	}
 
 	.tool-band:not(:has(button)) {
@@ -1232,6 +1252,13 @@
 
 	.plugin-board {
 		margin-top: 0;
+	}
+
+	.panel-tools .btn,
+	.panel-tools .chip,
+	.group-buttons .btn {
+		min-height: 2rem;
+		white-space: nowrap;
 	}
 
 	.table-wrap {
@@ -1395,6 +1422,7 @@
 	}
 
 	.panel {
+		min-width: 0;
 		--tick: 0.65rem;
 		--hud-fill: var(--well);
 		border: 1px solid var(--steel);

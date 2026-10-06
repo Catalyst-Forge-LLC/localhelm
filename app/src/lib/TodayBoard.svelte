@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CellWait from '$lib/CellWait.svelte';
+	import CompactActions from '$lib/CompactActions.svelte';
 	import CrossChips from '$lib/CrossChips.svelte';
 	import Icon from '$lib/Icon.svelte';
 	import { npmPackageHref } from '$lib/npmPage';
@@ -181,30 +182,33 @@
 				</div>
 			{:else if needBulkWrites}
 				<div class="group-buttons">
-					{#if needCommitIds.length}
-						<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
-							<button class="btn btn-write" disabled={busy} onclick={() => onCommit(needCommitIds)}>
-								<Icon icon="lucide:git-commit-horizontal" />
-								Commit dirty{needCommitIds.length ? ` (${needCommitIds.length})` : ''}
-							</button>
-						</Tooltip>
-					{/if}
-					{#if needPublishIds.length}
-						<Tooltip title="Shows bump (when needed), push, and npm publish. Confirm in the modal.">
-							<button class="btn btn-write" disabled={busy} onclick={() => onPublish(needPublishIds)}>
-								<Icon icon="lucide:package-up" />
-								Publish{needPublishIds.length ? ` (${needPublishIds.length})` : ''}
-							</button>
-						</Tooltip>
-					{/if}
-					{#if needPushIds.length}
-						<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.">
-							<button class="btn btn-write" disabled={busy} onclick={() => onPush(needPushIds)}>
-								<Icon icon="lucide:upload" />
-								Push{needPushIds.length ? ` (${needPushIds.length})` : ''}
-							</button>
-						</Tooltip>
-					{/if}
+					<CompactActions>
+						{#if needCommitIds.length}
+							<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
+								<button class="btn btn-write" disabled={busy} onclick={() => onCommit(needCommitIds)}>
+									<Icon icon="lucide:git-commit-horizontal" />
+									Commit dirty{needCommitIds.length ? ` (${needCommitIds.length})` : ''}
+								</button>
+							</Tooltip>
+						{/if}
+						{#if needPublishIds.length}
+							<Tooltip title="Shows bump (when needed), push, and npm publish. Confirm in the modal.">
+								<button class="btn btn-write" disabled={busy} onclick={() => onPublish(needPublishIds)}>
+									<Icon icon="lucide:package-up" />
+									Publish{needPublishIds.length ? ` (${needPublishIds.length})` : ''}
+								</button>
+							</Tooltip>
+						{/if}
+						{#if needPushIds.length}
+							<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.">
+								<button class="btn btn-write" disabled={busy} onclick={() => onPush(needPushIds)}>
+									<Icon icon="lucide:upload" />
+									Push{needPushIds.length ? ` (${needPushIds.length})` : ''}
+								</button>
+							</Tooltip>
+						{/if}
+
+					</CompactActions>
 				</div>
 			{/if}
 		</div>
@@ -413,29 +417,32 @@
 					</p>
 				</div>
 				<div class="group-buttons">
-					{#if filepressLandIds.length}
-						<Tooltip title="Plans Land for sites whose engine is behind or whose tree changed since last Land. Confirm in the modal.">
-							<button class="btn btn-write btn-sm" disabled={busy} onclick={() => onLand(filepressLandIds)}>
-								<Icon icon="lucide:plane-landing" />
-								Land{filepressLandIds.length > 1 ? ` ${filepressLandIds.length}` : ''}
-							</button>
-						</Tooltip>
-					{/if}
-					{#if filepressBoard && filepressSyncIds.length}
-						<Tooltip title="Shows which FilePress sites need an engine sync. Confirm in the modal to write.">
-							<button
-								class="btn btn-write btn-sm"
-								disabled={busy}
-								onclick={() => onSyncEngine(filepressBoard.plugin, filepressSyncIds)}
-							>
-								<Icon icon="lucide:refresh-cw" />
-								Sync engine
-							</button>
-						</Tooltip>
-					{/if}
-					{#if !noFleet}
-					<button type="button" class="btn btn-sm" onclick={() => onSetTab('filepress')}><Icon icon="lucide:arrow-right" /> FilePress Sites</button>
-					{/if}
+					<CompactActions>
+						{#if filepressLandIds.length}
+							<Tooltip title="Plans Land for sites whose engine is behind or whose tree changed since last Land. Confirm in the modal.">
+								<button class="btn btn-write btn-sm" disabled={busy} onclick={() => onLand(filepressLandIds)}>
+									<Icon icon="lucide:plane-landing" />
+									Land{filepressLandIds.length > 1 ? ` ${filepressLandIds.length}` : ''}
+								</button>
+							</Tooltip>
+						{/if}
+						{#if filepressBoard && filepressSyncIds.length}
+							<Tooltip title="Shows which FilePress sites need an engine sync. Confirm in the modal to write.">
+								<button
+									class="btn btn-write btn-sm"
+									disabled={busy}
+									onclick={() => onSyncEngine(filepressBoard.plugin, filepressSyncIds)}
+								>
+									<Icon icon="lucide:refresh-cw" />
+									Sync engine
+								</button>
+							</Tooltip>
+						{/if}
+						{#if !noFleet}
+						<button type="button" class="btn btn-sm" onclick={() => onSetTab('filepress')}><Icon icon="lucide:arrow-right" /> FilePress Sites</button>
+						{/if}
+
+					</CompactActions>
 				</div>
 			</div>
 			<div class="panel-body">

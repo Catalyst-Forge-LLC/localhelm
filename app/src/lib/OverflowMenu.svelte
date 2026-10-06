@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import Icon from './Icon.svelte';
+	import { placeMenu } from './placeMenu';
 
 	let {
 		label = 'More',
@@ -54,7 +55,7 @@
 		<Icon icon="lucide:chevron-down" />
 	</button>
 	{#if open}
-		<div class="menu" class:end={align === 'end'}>
+		<div class="menu" use:placeMenu={{ anchor: rootEl, align }}>
 			{@render children()}
 		</div>
 	{/if}
@@ -81,13 +82,9 @@
 		box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
 	}
 
-	.menu.end {
-		right: 0;
-		left: auto;
-	}
-
 	.menu :global(.btn) {
 		width: 100%;
 		justify-content: flex-start;
+		white-space: normal;
 	}
 </style>

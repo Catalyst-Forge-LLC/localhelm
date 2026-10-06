@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { matchingGroupIds, type SelectionGroup } from '$lib/groupSelect';
 	import Icon from './Icon.svelte';
+	import { placeMenu } from './placeMenu';
 
 	let {
 		groups,
@@ -102,15 +103,16 @@
 		class="btn"
 		aria-haspopup="true"
 		aria-expanded={open}
+		title={picked || undefined}
 		disabled={busy}
 		onclick={() => (open = !open)}
 	>
 		<Icon icon="lucide:layers" />
-		{picked || 'Groups'}
+		<span class="group-label">{picked || 'Groups'}</span>
 	</button>
 	{#if note}<span class="miss">{note}</span>{/if}
 	{#if open}
-		<div class="menu" aria-label="Saved groups">
+		<div class="menu" aria-label="Saved groups" use:placeMenu={{ anchor: rootEl, align: 'end' }}>
 			{#if naming}
 				<input
 					class="name"
@@ -173,9 +175,17 @@
 		box-shadow: 0 8px 24px rgb(0 0 0 / 0.35);
 	}
 
+	.group-label {
+		max-width: 10rem;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
 	.menu :global(.btn) {
 		width: 100%;
 		justify-content: flex-start;
+		white-space: normal;
 	}
 
 	.menu :global(.btn.on) {
