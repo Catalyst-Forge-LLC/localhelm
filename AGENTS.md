@@ -14,10 +14,10 @@ This repository uses **ForgeTrail**. The record is `appledger/`: the phase in `p
 - **Phase 1 before code:** do not write project code until `docs/PHASE_1_BRIEF.md` is **locked** and the operator says to start the spine.
 - **Phase 2 = full runnable spine** in one pass (M1: scan folders → confirm enroll, status, deps, JSON).
 - **Log decisions** as decision records in `appledger/records/`.
-- **Git commits:** plain `-m` or `-F` only.
+- **Git commits:** Always commit changes after each completed batch of work or specific change, without waiting for a separate request. Use clear, descriptive commit messages that explain the change. Stage only files belonging to that work. Use plain `-m` or `-F` only.
 - **Lists:** numbered = order; bullets = parallel; letters = pick-one.
 - **No interactive CLIs** without every flag.
-- **Never** `git push --force`. Named `push` to `origin` is allowed after a plan.
+- **Git pushes:** The operator handles pushes by default. Agents push only when the operator explicitly requests it; named pushes to `origin` require a plan. **Never** `git push --force`.
 - **Agents** do not run `npm publish` / `pnpm publish` / `localhelm publish --apply` unless the operator explicitly asked to apply a named package. LocalHelm the tool may publish enrolled projects after a printed plan and `--apply`.
 
 ## Conventions
