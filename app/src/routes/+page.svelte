@@ -68,6 +68,7 @@
 	} from '$lib/confirmProgress';
 	import { applyWritePatches, digestFromProjects, writeReloadBusy, writeReloadPlan, type WritePatch, type WriteReloadMode } from '$lib/inventoryPatch';
 	import { bridgeServeHeading, fleetProjectMeta, fleetVersionLabel, headerNeedChips, type BridgeGauge } from '$lib/fleetDisplay';
+	import { packagePrivacyHint } from '../../../src/lib/packagePrivacyDisplay.js';
 	import { npmPackageHref } from '$lib/npmPage';
 	import { formatActivityAt } from '$lib/formatTime';
 	import PortFilterBar from '$lib/PortFilterBar.svelte';
@@ -1483,6 +1484,7 @@
 
 	const {
 		startGitTrust,
+		startPackagePrivacy,
 		startBump,
 		startCommit,
 		retryCommitDraft,
@@ -2684,7 +2686,15 @@
 											{#if row.pending}
 												<CellWait label={`Reading version for ${row.id}`} />
 											{:else}
-												{fleetVersionLabel(row)}
+												{#if row.private && !row.missing && !row.error}
+													{row.localVersion?.trim() || '—'} · <button type="button" class="private-link"
+														aria-label={`Remove npm private flag for ${row.id}`}
+														use:tip={packagePrivacyHint()}
+														disabled={Boolean(busy) || demoBoard}
+														onclick={() => void startPackagePrivacy(row.id)}>private</button>
+												{:else}
+													{fleetVersionLabel(row)}
+												{/if}
 												{#if row.npm.name && row.npm.status !== 'none'}
 													<a
 														class="live-link npm-page"

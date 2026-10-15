@@ -38,6 +38,21 @@ Start and stop on Ports ask LocalSlip. Commit, Push, Publish, Ship, Install glob
 
 Publish OTP lives in the confirm modal. Never `--force`.
 
+## npm private packages
+
+In Fleet, the existing **private** text beside a package's version is a link to
+remove its `private: true` flag. The confirmation names the package and exact
+`package.json` before writing. Cancel leaves the file unchanged. Confirm removes
+only that top-level property, preserves other fields, and refreshes the row's
+package/npm status. The edit stays local for review and commit; ordinary Publish
+checks and its separate confirmation still apply.
+
+This is npm publishability, separate from GitHub repository visibility. It does
+not publish, push, or change repository access. Public packages have no added
+control, and there is no action to add the flag. Demo mode cannot apply the edit.
+If the enrolled root is a development harness with a separate generated release,
+removing its flag does not configure that separate release target.
+
 ## Stale and unavailable
 
 When Git refuses a checkout with “detected dubious ownership,” Today and Fleet offer **Trust this directory**. The modal shows the exact checkout root and explains that confirmation adds it to Git’s global trusted-directory list for the account running LocalHelm. Trust only a repository you control. Cancel makes no change; confirmation adds that one directory and refreshes its Git status. No wildcard or whole-workspace trust is added. Demo mode cannot apply it.

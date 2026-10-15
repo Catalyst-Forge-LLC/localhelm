@@ -10,6 +10,8 @@ import { formatPluginPlanLines } from './pluginPlan.js';
 import { publishNeedsGithub, publishNeedsNpm } from './publishDisplay.js';
 import { GIT_TRUST_HINT } from './gitTrustDisplay.js';
 import type { GitTrustPlan } from './gitTrust.js';
+import type { PackagePrivacyPlan } from './packagePrivacy.js';
+import { packagePrivacyHint, packagePrivacyLabel } from './packagePrivacyDisplay.js';
 import {
 	canSkipPublishResultsForGlobalInstall,
 	globalInstallLine,
@@ -40,6 +42,37 @@ import {
 } from './writeConfirm.js';
 
 export function createFleetWrites(host: DashboardJobHost) {
+	async function startPackagePrivacy(id: string): Promise<void> {
+		if (!host.readyNamed([id]).length) return;
+		const label = packagePrivacyLabel();
+		await host.run(`planning npm publishing for ${id}`, async () => {
+			const plan = (await host.call('/api/package-privacy', {
+				method: 'POST', body: JSON.stringify({ id, apply: false }),
+			})) as PackagePrivacyPlan;
+			host.note(`npm publishing plan ${id}, nothing written`, plan);
+			const canApply = plan.action === 'remove' && Boolean(plan.file && plan.revision);
+			host.offerConfirm({
+				title: canApply ? `${label} for ${id}?` : 'No publishing change needed',
+				hint: canApply ? packagePrivacyHint() : plan.reason ?? 'Package cannot be changed.',
+				items: [plan.file ? `${plan.file}\n${plan.name ?? id}${plan.version ? ` @ ${plan.version}` : ''}\nRemove private: true` : id],
+				itemKeys: [id], applyIds: canApply ? [id] : [], confirmLabel: label, canApply,
+				run: (included) => {
+					if (included.includes(id) && plan.file && plan.revision) void applyPrivacy(id, plan.file, plan.revision);
+				},
+			});
+		}, { openConfirm: { title: `${label} for ${id}?`, hint: packagePrivacyHint(), itemKeys: [id] }, closeConfirm: false });
+	}
+
+	async function applyPrivacy(id: string, file: string, revision: string): Promise<void> {
+		await host.run(`changing npm publishing for ${id}`, async () => {
+			const result = await host.call('/api/package-privacy', {
+				method: 'POST', body: JSON.stringify({ id, file, revision, apply: true }),
+			});
+			host.note(`Removed npm private flag for ${id}`, result);
+			await host.reloadAfterWrite([id], 'ready');
+		});
+	}
+
 	async function startGitTrust(id: string): Promise<void> {
 		if (!host.readyNamed([id]).length) return;
 		await host.run(`planning Git trust for ${id}`, async () => {
@@ -990,6 +1023,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 
 	return {
 		startGitTrust,
+		startPackagePrivacy,
 		startBump,
 		startCommit,
 		retryCommitDraft: (id: string) => {
