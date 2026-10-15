@@ -12,6 +12,10 @@ export type ReleaseRunner = (cwd: string, args: string[]) => { ok: boolean; stdo
 
 export async function runReleaseCommand(run: ReleaseRunner, cwd: string, args: string[]): Promise<string> {
 	const result = await run(cwd, args);
+	if (!result.ok && /npm error code MODULE_NOT_FOUND/.test(result.stderr) && /[\\/]node_modules[\\/]npm[\\/]/i.test(result.stderr)) {
+		const missing = /Cannot find module ['"]([^'"]+)['"]/.exec(result.stderr)?.[1] ?? 'an npm dependency';
+		throw new Error(`The local npm installation is incomplete (missing ${missing}). Repair or switch the npm installation used by LocalHelm, then open a new Publish plan.`);
+	}
 	if (!result.ok) throw new Error([result.stderr.trim(), result.stdout.trim()].filter(Boolean).join('\n') || `npm ${args[0]} failed`);
 	return result.stdout;
 }

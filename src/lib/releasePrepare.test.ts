@@ -7,7 +7,7 @@ import { createHash } from 'node:crypto';
 import { runGit } from './git.js';
 import { defaultPublishRunner, applyPublish, planPublishFromInventory } from './publish.js';
 import { readReleaseTarget } from './releaseTarget.js';
-import { prepareRelease } from './releasePrepare.js';
+import { prepareRelease, runReleaseCommand } from './releasePrepare.js';
 import { archiveFiles } from './releaseArchive.js';
 import type { FleetInventory, ProjectStatus } from './types.js';
 
@@ -43,6 +43,7 @@ it('runs publish lifecycle once, verifies actual tar files, and sends identical 
 });
 
 it('blocks missing binaries and build failures before calling the publisher', async () => {
+	await assert.rejects(runReleaseCommand(() => ({ ok: false, stdout: '', stderr: "npm error code MODULE_NOT_FOUND\nnpm error Cannot find module 'promise-retry'\nnpm error Require stack: C:/node/node_modules/npm/lib/npm.js" }), '.', ['pack']), /npm installation is incomplete.*promise-retry.*Repair or switch/);
 	for (const pkg of [{ bin: { fixture: 'missing.js' } }, { scripts: { prepack: 'node -e "process.exit(7)"' } }]) {
 		const root = await fixture(pkg); const { row, loaded } = await plan(root); let calls = 0;
 		const result = await applyPublish(loaded, row, { run: () => { calls++; return { ok: true, stdout: '', stderr: '' }; } });

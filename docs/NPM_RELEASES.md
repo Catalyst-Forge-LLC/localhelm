@@ -23,3 +23,7 @@ Opening Publish only reads a plan. After confirmation, LocalHelm bumps and commi
 A GitHub Actions publish link hands release ownership to that workflow. It does not claim that LocalHelm verified its artifact. Fix the workflow's target/build/verification there. A quiet dashboard row does not establish that npm's README or files match the checkout; compare the published version and package contents when validating a release.
 
 Build/pack failures leave the package unpublished. Review the error and any build changes, refresh status, and open a new plan. A version bump committed before a failed build can be reused on that fresh plan. Never repeat an uncertain registry write before checking npm.
+
+LocalHelm itself uses the repository root as its public package: name `localhelm`, version source `package.json`, README source `README.md`, executable `bin/localhelm.mjs`. Build with `pnpm build` and `pnpm dashboard:build`; `prepublishOnly` performs both during verified preparation. Pack with `npm pack`; release through a reviewed LocalHelm Publish plan or the operator's explicit npm publication. The private `app/` is a development dashboard project, not a release target.
+
+If npm reports its own missing dependency, repair or switch the local npm installation before retrying. Builds and packs run locally; a broken tool installation is separate from package configuration. LocalHelm uses `npm_execpath` when it names an installed `npm-cli.js`, otherwise it locates npm beside Node or on PATH.

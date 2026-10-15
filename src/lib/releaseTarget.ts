@@ -11,7 +11,7 @@ export const RELEASE_CONFIG = 'localhelm.release.json';
 export async function releasePath(root: string, relative: string): Promise<string> {
 	if (!relative.trim() || path.isAbsolute(relative) || /^[A-Za-z]:|^[\\/]/.test(relative)) throw new Error('Release paths must be relative to the enrolled checkout.');
 	const target = path.resolve(root, relative.replace(/[\\/]/g, path.sep));
-	if (relative.replaceAll('\\', '/').split('/').includes('.git')) throw new Error('Release sources and output cannot be Git metadata.');
+	if (relative.replaceAll('\\', '/').split('/').some((part) => part.toLowerCase() === '.git')) throw new Error('Release sources and output cannot be Git metadata.');
 	const inside = (base: string, value: string): boolean => { const rel = path.relative(base, value); return !path.isAbsolute(rel) && rel !== '..' && !rel.startsWith(`..${path.sep}`); };
 	if (!inside(path.resolve(root), target)) throw new Error(`Release path escapes the enrolled checkout: ${relative}`);
 	let ancestor = target;

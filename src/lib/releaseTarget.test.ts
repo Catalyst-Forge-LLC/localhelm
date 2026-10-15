@@ -31,7 +31,7 @@ it('resolves a private harness to its public generated manifest and bumps that s
 it('rejects malformed contracts, escaping paths and symlink escapes without falling back to the harness', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'helm-target-path-')); const outside = await mkdtemp(path.join(tmpdir(), 'helm-target-outside-'));
 	await writeFile(path.join(root, 'package.json'), '{"name":"harness","private":true,"version":"1.0.0"}');
-	for (const config of [{ version: 1, manifest: '../outside.json' }, { version: 1, manifest: '.git/metadata.json' }, { version: 1, output: 'typo' }, { version: 1, kind: 'cli' }]) {
+	for (const config of [{ version: 1, manifest: '../outside.json' }, { version: 1, manifest: '.git/metadata.json' }, { version: 1, manifest: '.GIT/metadata.json' }, { version: 1, output: 'typo' }, { version: 1, kind: 'cli' }]) {
 		await writeFile(path.join(root, 'localhelm.release.json'), JSON.stringify(config));
 		await assert.rejects(readReleaseTarget(root));
 	}
