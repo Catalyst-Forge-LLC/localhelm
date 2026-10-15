@@ -531,6 +531,8 @@ export function createFleetWrites(host: DashboardJobHost) {
 					body: JSON.stringify({ apply: true, ids: [id] }),
 				})) as { rows: ScriptShipRow[] };
 				rows.push(...data.rows);
+				const failedRow = data.rows.find((row) => row.action === 'ship' && !row.reason?.startsWith('shipped '));
+				if (failedRow) throw new Error(failedRow.reason ?? 'pnpm ship failed');
 			});
 			const eligible = rows.filter((r) => r.action === 'ship');
 			const failed = eligible.filter((r) => !r.reason?.startsWith('shipped '));

@@ -123,7 +123,7 @@ export function plainGitError(raw: string): string {
 
 const ANSI = /\u001b\[[0-9;]*[A-Za-z]/g;
 const PLUGIN_NOISE =
-	/^(npm warn |vite |computing gzip|✓ |✔ |transforming|rendering chunks|Wrote site|Run npm run preview|ELIFECYCLE|Using @sveltejs|VITE_CONFIG|configLoader|PLUGIN_TIMINGS|DeprecationWarning|Set `VITE_CONFIG|Your Vite config|Your build spent|See https:\/\/rolldown|Not measurable|Profile with|Measured inside|Those rows are|docs: built|\.svelte-kit\/|\[404\] GET )/i;
+	/^(npm warn |vite |computing gzip|✓ |✔ |transforming|rendering chunks|Wrote site|Run npm run preview|ELIFECYCLE|> |Using @sveltejs|VITE_CONFIG|configLoader|PLUGIN_TIMINGS|DeprecationWarning|Set `VITE_CONFIG|Your Vite config|Your build spent|See https:\/\/rolldown|Not measurable|Profile with|Measured inside|Those rows are|docs: built|\.svelte-kit\/|\[404\] GET )/i;
 
 function stripAnsi(text: string): string {
 	return text.replace(ANSI, '').replace(/\r/g, '');

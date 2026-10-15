@@ -85,6 +85,19 @@ describe('plainPluginError', () => {
 		assert.equal(plainPluginError(raw), 'filepress: Genie leaked into the static build (dev-only).');
 	});
 
+	it('keeps a ship script sentence instead of the pnpm command echo', () => {
+		const raw = [
+			'Stop the Catalyst Forge dev server on port 6173 before building; it shares .svelte-kit with Ship. Then run this command again.',
+			'ELIFECYCLE  Command failed with exit code 1.',
+			'> catalyst-forge@0.0.0 ship Z:\\workspace\\catalyst-forge',
+			'> node scripts/ship.mjs',
+		].join('\n');
+		assert.equal(
+			plainPluginError(raw),
+			'Stop the Catalyst Forge dev server on port 6173 before building; it shares .svelte-kit with Ship. Then run this command again.',
+		);
+	});
+
 	it('keeps a short push failure', () => {
 		assert.equal(plainPluginError('aibreze-site push failed'), 'aibreze-site push failed');
 	});
