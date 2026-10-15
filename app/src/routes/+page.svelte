@@ -4,6 +4,9 @@
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import ActionHistory from '$lib/ActionHistory.svelte';
 	import FleetActions from '$lib/FleetActions.svelte';
+	import { ActivityQueue, activityQueueKey } from '../../../src/lib/activityQueue.js';
+	import type { ActivityEntry, ActivitySnapshot } from '../../../src/lib/activity.js';
+	import { PluginReads, type PluginSnapshot, type PluginReadState } from '../../../src/lib/pluginReads.js';
 	import FeatureLabelDialog from '$lib/FeatureLabelDialog.svelte';
 	import { featureLabelModel, labelQueuePlace, labelTickSeed, type FeatureLabelModel } from '$lib/featureLabel';
 	import TodayBoard from '$lib/TodayBoard.svelte';
@@ -87,7 +90,6 @@
 		isCoreTab,
 		isPortsPluginTab,
 		parseDashboardTab,
-		replacePluginBoards,
 		pluginTabCount,
 		pluginTabIcon,
 		pluginTabMetas,
@@ -156,7 +158,10 @@
 	let bumpKind = $state<Record<string, BumpKind>>({});
 
 	type PluginCatalogItem = PluginTabMeta & { source?: string; enabled: boolean };
-	type PluginFault = { source: string; message: string };
+	type PluginFault = { source: string; message: string; plugin?: string };
+	const pluginReads = new PluginReads();
+	let pluginStates = $state<Record<string, PluginReadState>>({});
+	let pluginReading = $state(false);
 	let pluginBoards = $state<PluginBoard[]>([]);
 	let pluginMetas = $state<PluginCatalogItem[]>([]);
 	let pluginFaults = $state<PluginFault[]>([]);
@@ -167,6 +172,15 @@
 	let confirmOpen = $state(false);
 	let confirmCloseLabel = $state('Close');
 	let activityError = $state('');
+	let activityBufferError = $state('');
+	let activityQueue: ActivityQueue | null = null;
+	let activityEpoch = 0;
+	let activityRead = 0;
+	let activityDurable = true;
+	let activityPending = $state(0);
+	let activityBlocked = $state(false);
+	let activityClearing = $state(false);
+	const activityFlushes = new Map<string, Promise<void>>();
 	let jobs = $state<DurableJob[]>([]);
 	let jobsOpen = $state(false);
 	let sessionResultAvailable = $state(false);
@@ -779,43 +793,93 @@
 		return formatActivityAt(at);
 	}
 
-	function toLog(row: { at: string; title: string; body: string }): LogEntry {
-		return { at: row.at, time: formatEntryTime(row.at), title: row.title, body: row.body };
+	function toLog(row: ActivityEntry): LogEntry {
+		return { ...row, time: formatEntryTime(row.at) };
 	}
-
-	async function loadActivity(): Promise<void> {
-		try {
-			const data = (await call('/api/activity')) as { entries: { at: string; title: string; body: string }[] };
-			entries = (data.entries ?? []).map(toLog);
-		} catch {
-			/* keep whatever is already on screen */
+	function ensureActivityQueue(): ActivityQueue {
+		const workspace = inventory?.workspaceRoot || cwd;
+		if (!workspace) throw new Error('Workspace is still loading.');
+		const key = activityQueueKey(workspace, demoBoard);
+		if (activityQueue?.key !== key) {
+			try { activityQueue = new ActivityQueue(localStorage, key); activityDurable = true; }
+			catch (err) {
+				activityQueue = new ActivityQueue({ getItem: () => null, setItem() {} }, key); activityDurable = false;
+				activityBufferError = `Activity cannot be buffered in this browser: ${String(err)}. Unsaved entries remain in memory until this page closes.`;
+			}
 		}
+		return activityQueue;
+	}
+	function showActivityQueue(): void {
+		if (!activityQueue) return;
+		entries = activityQueue.entries.map(toLog); activityPending = activityQueue.pending.length; activityBlocked = activityQueue.blocked;
+	}
+	function activitySnapshot(data: unknown): ActivitySnapshot {
+		const snapshot = data as ActivitySnapshot;
+		if (!Array.isArray(snapshot?.entries)) throw new Error('Activity response has no entries.');
+		return { generation: typeof snapshot.generation === 'string' ? snapshot.generation : '0', entries: snapshot.entries };
+	}
+	async function loadActivity(flush = true): Promise<void> {
+		const epoch = activityEpoch; const read = ++activityRead;
+		try {
+			const snapshot = activitySnapshot(await call('/api/activity'));
+			if (epoch !== activityEpoch || read !== activityRead) return;
+			const queue = ensureActivityQueue(); queue.load(snapshot); showActivityQueue();
+			if (activityDurable) activityBufferError = '';
+			if (queue.blocked) activityError = 'Activity was cleared in another session. Review the queued entries before keeping or discarding them.';
+			else if (flush) void flushActivity();
+		} catch (err) { if (epoch === activityEpoch && read === activityRead) { activityError = `Activity could not be read or buffered: ${String(err)}`; showActivityQueue(); } }
+	}
+	function flushActivity(): Promise<void> {
+		const queue = activityQueue; const epoch = activityEpoch;
+		if (!queue || !queue.generation || queue.blocked || activityClearing) return Promise.resolve();
+		const previous = activityFlushes.get(queue.key); if (previous) return previous;
+		const task = (async () => {
+			while (queue.pending.length && !queue.blocked && !activityClearing && epoch === activityEpoch) {
+				const entry = queue.pending[0]!;
+				let acknowledged = false;
+				try {
+					const snapshot = activitySnapshot(await call('/api/activity', { method: 'POST', body: JSON.stringify({ ...entry, generation: queue.generation }) }));
+					if (epoch !== activityEpoch || activityQueue !== queue) return;
+					acknowledged = true;
+					queue.ack(entry.id, snapshot); showActivityQueue();
+					if (activityDurable) activityBufferError = '';
+				} catch (err) {
+					if (acknowledged && epoch === activityEpoch) activityBufferError = 'Activity reached the server, but its browser receipt could not be saved. Retry is safe; entries keep their original IDs.';
+					if (epoch === activityEpoch) { activityError = `Activity could not be saved: ${err instanceof Error ? err.message : String(err)}`; activityUnseen = true; showActivityQueue(); if (/cleared|generation/i.test(activityError)) void loadActivity(false); }
+					return;
+				}
+			}
+			if (epoch === activityEpoch && !queue.pending.length && activityDurable) activityError = '';
+		})();
+		activityFlushes.set(queue.key, task);
+		void task.finally(() => { if (activityFlushes.get(queue.key) === task) activityFlushes.delete(queue.key); if (epoch !== activityEpoch && activityQueue?.key === queue.key && !activityClearing) void flushActivity(); });
+		return task;
 	}
 
 	function note(title: string, data: unknown): void {
 		const at = new Date().toISOString();
 		const body = JSON.stringify(data, null, 2);
-		entries = [{ at, time: formatEntryTime(at), title, body }, ...entries].slice(0, 200);
+		const entry = { id: crypto.randomUUID(), at, title, body };
+		try { ensureActivityQueue().enqueue(entry); showActivityQueue(); }
+		catch (err) { activityBufferError = `Activity could not be buffered: ${String(err)}. Unsaved entries remain in memory until this page closes.`; if (activityQueue) showActivityQueue(); else entries = [toLog(entry), ...entries].slice(0, 200); }
 		if (!activityOpen) activityUnseen = true;
-		void call('/api/activity', { method: 'POST', body: JSON.stringify({ title, data }) })
-			.then((res) => {
-				const saved = res as { entries: { at: string; title: string; body: string }[] };
-				if (Array.isArray(saved.entries)) entries = saved.entries.map(toLog);
-			})
-			.catch((err) => {
-				activityError = `Activity could not be saved: ${err instanceof Error ? err.message : String(err)}`;
-				activityUnseen = true;
-			});
+		if (activityQueue?.generation) void flushActivity(); else void loadActivity();
 	}
 
 	async function clearActivityLog(): Promise<void> {
 		await run(
 			'clearing activity',
 			async () => {
-				await call('/api/activity', { method: 'DELETE' });
-				entries = [];
-				activityError = '';
-				activityUnseen = false;
+				if (!activityQueue?.serverGeneration) await loadActivity(false);
+				const queue = ensureActivityQueue(); if (!queue.serverGeneration) throw new Error('Refresh Activity before clearing it.');
+				const capturedIds = queue.pending.map((entry) => entry.id); const epoch = ++activityEpoch; activityRead++; activityClearing = true;
+				try {
+					const snapshot = activitySnapshot(await call('/api/activity', { method: 'DELETE', body: JSON.stringify({ generation: queue.serverGeneration }) }));
+					if (epoch !== activityEpoch || activityQueue !== queue) return;
+					try { queue.cleared(snapshot, capturedIds); if (activityDurable) activityBufferError = ''; }
+					catch { activityBufferError = 'Activity was cleared on the server, but its browser queue could not be saved. A reload may require reviewing that old queue.'; }
+					showActivityQueue(); activityError = ''; activityUnseen = false;
+				} finally { if (epoch === activityEpoch) { activityClearing = false; void flushActivity(); } }
 			},
 			{ closeConfirm: false },
 		);
@@ -1002,43 +1066,35 @@
 		return { ...prev, projects, digest: inventoryDigest(projects) };
 	}
 
-	function applyPluginDashboard(plug: {
-		boards: PluginBoard[];
-		plugins?: { id: string; label: string; source?: string; enabled?: boolean }[];
-		faults?: PluginFault[];
-	}): void {
-		pluginMetas = (plug.plugins ?? []).map((item) => ({
-			id: item.id,
-			label: item.label,
-			source: item.source,
-			enabled: item.enabled !== false,
-		}));
-		pluginBoards = plug.boards;
-		pluginFaults = plug.faults ?? [];
+	function syncPlugins(): void {
+		pluginMetas = pluginReads.plugins.slice(); pluginBoards = pluginReads.boards.slice(); pluginFaults = pluginReads.faults.slice();
+		pluginStates = { ...pluginReads.states }; pluginsReady = pluginReads.ready; pluginReading = pluginReads.reads.pending;
 		if (!isCoreTab(tab) && pluginMetas.some((item) => item.id === canonicalizeTab(tab) && !item.enabled)) {
 			setTab('today');
 		}
 	}
 
 	async function loadPluginBoards(pluginId?: string): Promise<void> {
+		const ticket = pluginReads.begin(pluginId); syncPlugins();
 		const query = pluginId ? `?id=${encodeURIComponent(pluginId)}` : '';
 		try {
-			const data = (await call(`/api/plugins${query}`)) as {
-				boards: PluginBoard[];
-				plugins?: { id: string; label: string; source?: string; enabled?: boolean }[];
-				faults?: PluginFault[];
-			};
-			if (pluginId) {
-				pluginBoards = replacePluginBoards(pluginBoards, pluginId, data.boards ?? []);
-				return;
-			}
-			applyPluginDashboard(data);
+			pluginReads.apply(ticket, await call(`/api/plugins${query}`) as PluginSnapshot);
 		} catch (err) {
-			const fault = { source: pluginId ?? '', message: err instanceof Error ? err.message : String(err) };
-			pluginFaults = pluginId ? [...pluginFaults.filter((item) => item.source !== pluginId), fault] : [fault];
+			pluginReads.fail(ticket, err instanceof Error ? err.message : String(err));
 		} finally {
-			pluginsReady = true;
+			pluginReads.finish(ticket); syncPlugins();
 		}
+	}
+	function companionHint(id: string): string {
+		const state = pluginStates[id]; const meta = pluginMetas.find((meta) => meta.id === id);
+		if (state?.pending || (!pluginsReady && pluginReading)) return state?.readAt ? 'Refreshing companion status. Last known data remains visible.' : 'Reading companion status…';
+		if (state?.error) return `${state.readAt ? 'Showing last known data. ' : ''}${state.error} Retry this companion.`;
+		const fault = pluginFaults.find((fault) => fault.plugin === id || fault.source === id || fault.source === meta?.source || fault.source === '*');
+		if (fault) return `${pluginBoards.some((board) => board.plugin === id) ? 'Showing last known data. ' : ''}${fault.message} Retry this companion.`;
+		if (meta?.enabled === false) return 'This companion is off. Turn it on in the LocalHelm menu.';
+		if (!meta) return 'This companion is not configured. Enroll its checkout to connect it.';
+		if (!pluginBoards.some((board) => board.plugin === id && board.rows.length)) return 'Companion connected; no rows yet. Add projects or companion records, then refresh.';
+		return state?.readAt ? `Companion status read at ${new Date(state.readAt).toLocaleTimeString()}.` : 'Companion connected.';
 	}
 
 	async function loadArchive(): Promise<void> {
@@ -1122,21 +1178,21 @@
 	}
 
 	async function setPluginOn(id: string, enabled: boolean): Promise<void> {
-		pluginMetas = pluginMetas.map((item) => (item.id === id ? { ...item, enabled } : item));
-		if (!enabled && canonicalizeTab(tab) === id) setTab('today');
+		if (pluginStates[id]?.pending) return;
+		const ticket = pluginReads.begin(id); syncPlugins();
 		try {
-			applyPluginDashboard((await call('/api/plugins', {
+			const data = await call('/api/plugins', {
 				method: 'POST',
 				body: JSON.stringify({ id, enabled }),
-			})) as {
-				boards: PluginBoard[];
-				plugins?: { id: string; label: string; source?: string; enabled?: boolean }[];
-			});
+			}) as PluginSnapshot;
+			if (!pluginReads.reads.current(ticket)) return;
+			pluginReads.apply(ticket, data);
 			note(`${id} ${enabled ? 'on' : 'off'}`, { id, enabled });
 		} catch (err) {
-			error = err instanceof Error ? err.message : String(err);
-			await loadPluginBoards();
-		}
+			if (!pluginReads.reads.current(ticket)) return;
+			const message = `Companion change was not acknowledged: ${err instanceof Error ? err.message : String(err)}. Refresh its status before trying again.`;
+			pluginReads.fail(ticket, message); error = message;
+		} finally { pluginReads.finish(ticket); syncPlugins(); }
 	}
 
 	function busyIsFleetRead(label: string): boolean {
@@ -1199,6 +1255,7 @@
 		if (!statusReads.latest(ticket)) return;
 		cwd = data.cwd;
 		try { restoreJobs(); } catch (err) { jobStorageError = `Action history unavailable: ${err instanceof Error ? err.message : String(err)}`; }
+		if (!activityQueue) void loadActivity();
 		host = data.host ?? null;
 		port = data.port;
 		portSource = data.portSource;
@@ -1312,10 +1369,12 @@
 	async function setDemoBoard(next: boolean): Promise<void> {
 		if (demoBoard === next) return;
 		statusReads.reset();
+		pluginReads.reset(); syncPlugins();
 		confirmOpen = false;
 		confirmRun = null;
 		confirmAlt = null;
 		demoBoard = next;
+		activityEpoch++; activityRead++; activityQueue = null; entries = []; activityPending = 0; activityBlocked = false; activityClearing = false; activityError = ''; activityBufferError = '';
 		journal = null; jobs = []; activeJob = null; pendingJob = null; jobStorageError = ''; jobsOpen = false;
 		try {
 			if (next) sessionStorage.setItem('localhelm.demo', '1');
@@ -1669,6 +1728,7 @@
 		await run('reading current action status', async () => {
 			await loadStatus({ extras: false, freshNpm: true });
 			if (job.operation?.plugin || job.operation?.route === '/api/land') await loadPluginBoards(job.operation.plugin ?? 'filepress');
+			if ((job.operation?.plugin && pluginStates[job.operation.plugin]?.error) || (job.operation?.route === '/api/land' && pluginStates.filepress?.error)) throw new Error('Companion status is unavailable. Retry it before opening a new plan.');
 			restoreJobs().reconciled(job.id); syncJobs();
 		}, { closeConfirm: false });
 	}
@@ -2440,10 +2500,11 @@
 			/* ignore */
 		}
 		sessionResultAvailable = Boolean(loadPublishBatch() || loadLandBatch());
-		void loadActivity();
+		const online = () => void loadActivity(); window.addEventListener('online', online);
 		void loadRoster();
 		void loadPluginBoards();
 		void readQuiet('reading packages', () => loadStatus({ extras: false }));
+		return () => { window.removeEventListener('online', online); activityEpoch++; };
 	});
 </script>
 
@@ -2500,6 +2561,8 @@
 		<HelmMenu
 			plugins={pluginMetas}
 			faults={pluginFaults}
+			pendingPlugins={Object.keys(pluginStates).filter((id) => pluginStates[id]?.pending)}
+			onRetry={(id) => void loadPluginBoards(id)}
 			busy={Boolean(busy)}
 			fleetPath={inventory?.manifestPath ?? manifestPath}
 			{serveLine}
@@ -2556,6 +2619,13 @@
 
 	<div class="workspace">
 	<main class:fill-pane={tab === 'today'}>
+		{#if !isCoreTab(tab)}
+			{@const companion = canonicalizeTab(tab)}
+			<section class="panel hud-frame companion-status">
+				<p class="hint" role="status">{companionHint(companion)}</p>
+				<button class="btn btn-sm" disabled={Boolean(pluginStates[companion]?.pending)} onclick={() => void loadPluginBoards(companion)}>Refresh {pluginMetas.find((meta) => meta.id === companion)?.label ?? companion}</button>
+			</section>
+		{/if}
 		{#if tab === 'today'}
 			<TodayBoard
 				bind:needFilter
@@ -3180,7 +3250,7 @@
 							{#if !pluginsReady}
 								<p class="hint">Reading {plugMeta?.label ?? 'plugin'}…</p>
 							{:else}
-								<p class="hint">No {plugMeta?.label ?? canonicalizeTab(tab)} plugin loaded. Enroll the checkout that exposes <code>localhelm.plugin.mjs</code>.</p>
+								<p class="hint">{companionHint(canonicalizeTab(tab))}</p>
 							{/if}
 						</div>
 					</div>
@@ -3235,7 +3305,7 @@
 			{:else if !portBoards.length}
 				<section class="panel hud-frame">
 					<h2>LocalSlip Ports</h2>
-					<p class="hint">No LocalSlip plugin loaded. Enroll the localslip checkout to expose <code>localhelm.plugin.mjs</code>.</p>
+					<p class="hint">{companionHint('localslip')}</p>
 				</section>
 			{:else}
 				<div class="subtabs" role="tablist" aria-label="Port views">
@@ -3571,11 +3641,11 @@
 			<div class="section-head">
 				<div>
 					<h2><Icon icon="lucide:scroll-text" /> Activity</h2>
-					<p class="hint">Every plan and write, newest first. Kept in this workspace so a refresh does not wipe it.</p>
+					<p class="hint">Plans and results, newest first. Saved in this workspace; queued entries stay in this browser until saved.</p>
 				</div>
 				<div class="group-buttons">
 					{#if entries.length}
-						<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => void clearActivityLog()}>
+						<button class="btn btn-sm" disabled={Boolean(busy) || activityClearing} onclick={() => void clearActivityLog()}>
 							<Icon icon="lucide:trash-2" />
 							Clear
 						</button>
@@ -3584,15 +3654,23 @@
 					<IconButton icon="lucide:x" label="Close activity" onclick={() => setActivityOpen(false)} />
 				</div>
 			</div>
+			{#if activityPending || activityError || activityBufferError}
+				<p class="dim small" role="status">{activityPending ? `${activityPending} Activity ${activityPending === 1 ? 'entry' : 'entries'} waiting to save. ` : ''}{activityBufferError} {activityError}</p>
+				<div class="group-buttons">
+					<button class="btn btn-sm" disabled={activityClearing} onclick={() => void loadActivity()}>Retry saving Activity</button>
+					{#if activityBlocked}
+						<button class="btn btn-sm" disabled={activityClearing} onclick={() => { try { activityQueue?.rebase(); showActivityQueue(); void flushActivity(); } catch (err) { activityError = String(err); } }}>Keep queued Activity</button>
+						<button class="btn btn-sm" disabled={activityClearing} onclick={() => { try { activityQueue?.discard(); showActivityQueue(); activityError = ''; } catch (err) { activityError = String(err); } }}>Discard queued Activity</button>
+					{/if}
+				</div>
+			{/if}
 			{#if entries.length === 0}
-				{#if activityError}<p class="dim small" role="status">{activityError}</p>{/if}
 				<p class="dim small">Nothing yet.</p>
 			{:else}
-				{#if activityError}<p class="dim small" role="status">{activityError}</p>{/if}
 				<div class="drawer-body">
 					<ActivityDayNav days={activityDays} selected={activityDay} onpick={jumpActivityDay} />
 					<ul class="log" bind:this={activityLogEl}>
-					{#each entries as entry (entry.at + entry.title)}
+					{#each entries as entry (entry.id ?? entry.at + entry.title + entry.body)}
 						<li data-activity-day={activityDayKey(entry.at) ?? undefined}>
 							<details>
 								<summary>

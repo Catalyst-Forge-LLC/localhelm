@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { appendActivity, clearActivity, readActivity } from '../../../../../src/lib/index.js';
+import { appendActivitySnapshot, clearActivity, readActivitySnapshot } from '../../../../../src/lib/index.js';
 import { errJson, loadOptional, operatorCwd } from '$lib/server/helm';
 
 async function activityRoot(): Promise<string> {
@@ -10,8 +10,7 @@ async function activityRoot(): Promise<string> {
 
 export const GET: RequestHandler = async () => {
 	try {
-		const entries = await readActivity(await activityRoot());
-		return json({ entries });
+		return json(await readActivitySnapshot(await activityRoot()));
 	} catch (err) {
 		return errJson(err);
 	}
@@ -23,25 +22,31 @@ export const POST: RequestHandler = async ({ request }) => {
 			title?: unknown;
 			data?: unknown;
 			body?: unknown;
+			id?: unknown;
+			at?: unknown;
+			generation?: unknown;
 		};
 		if (typeof body.title !== 'string') {
 			return errJson(new Error('activity title is required'));
 		}
-		const entries = await appendActivity(await activityRoot(), {
+		const snapshot = await appendActivitySnapshot(await activityRoot(), {
+			id: typeof body.id === 'string' ? body.id : undefined,
+			at: typeof body.at === 'string' ? body.at : undefined,
+			generation: typeof body.generation === 'string' ? body.generation : undefined,
 			title: body.title,
 			body: typeof body.body === 'string' ? body.body : undefined,
 			data: body.data,
 		});
-		return json({ entries });
+		return json(snapshot);
 	} catch (err) {
 		return errJson(err);
 	}
 };
 
-export const DELETE: RequestHandler = async () => {
+export const DELETE: RequestHandler = async ({ request }) => {
 	try {
-		await clearActivity(await activityRoot());
-		return json({ entries: [] });
+		const body = await request.json().catch(() => ({})) as { generation?: unknown };
+		return json(await clearActivity(await activityRoot(), typeof body.generation === 'string' ? body.generation : undefined));
 	} catch (err) {
 		return errJson(err);
 	}

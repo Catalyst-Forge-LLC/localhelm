@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
-import { ACTIVITY_LIMIT, activityPath, appendActivity, clearActivity, readActivity } from './activity.js';
+import { ACTIVITY_LIMIT, activityPath, appendActivity, appendActivitySnapshot, clearActivity, readActivity, readActivitySnapshot } from './activity.js';
 
 describe('activity log', () => {
 	it('writes newest first under .localhelm', async () => {
@@ -24,6 +24,8 @@ describe('activity log', () => {
 		assert.deepEqual(await readActivity(root), []);
 		await writeFile(activityPath(root), '{not json', 'utf8');
 		assert.deepEqual(await readActivity(root), []);
+		await assert.rejects(appendActivity(root, { title: 'preserve broken file' }));
+		await clearActivity(root);
 		for (let i = 0; i < ACTIVITY_LIMIT + 5; i += 1) {
 			await appendActivity(root, { title: `row ${i}`, data: { i } });
 		}
@@ -40,4 +42,23 @@ describe('activity log', () => {
 		await mkdir(root, { recursive: true });
 		await assert.rejects(() => appendActivity(root, { title: '  ', data: {} }), /title is required/);
 	});
+});
+
+it('serializes concurrent appends and deduplicates an original receipt after a lost acknowledgement', async () => {
+	const root = path.join(tmpdir(), `localhelm-activity-concurrent-${Date.now()}`);
+	await Promise.all(Array.from({ length: 30 }, (_, i) => appendActivitySnapshot(root, { id: `entry-${i}`, generation: '0', at: new Date(1000 + i).toISOString(), title: `Entry ${i}`, body: 'original' })));
+	const before = await readActivitySnapshot(root); assert.equal(before.entries.length, 30);
+	const last = before.entries[0]!;
+	await appendActivitySnapshot(root, { ...last, generation: before.generation });
+	assert.equal((await readActivity(root)).length, 30);
+	await assert.rejects(appendActivitySnapshot(root, { ...last, generation: before.generation, body: 'different' }), /different content/);
+});
+
+it('rejects a queued pre-clear entry after Clear and accepts a deliberate new-generation save', async () => {
+	const root = path.join(tmpdir(), `localhelm-activity-clear-race-${Date.now()}`);
+	const entry = { id: 'queued', generation: '0', title: 'Original', body: 'retained', at: '2026-10-15T00:00:00Z' };
+	const results = await Promise.allSettled([appendActivitySnapshot(root, entry), clearActivity(root, '0'), appendActivitySnapshot(root, { ...entry, id: 'late' })]);
+	assert.equal(results[0]?.status, 'fulfilled'); assert.equal(results[1]?.status, 'fulfilled'); assert.equal(results[2]?.status, 'rejected');
+	const current = await readActivitySnapshot(root); assert.equal(current.entries.length, 0);
+	await appendActivitySnapshot(root, { ...entry, generation: current.generation }); assert.equal((await readActivity(root)).length, 1);
 });

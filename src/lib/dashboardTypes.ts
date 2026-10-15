@@ -30,7 +30,7 @@ export type CascadeTarget = {
 	writable: number;
 };
 
-export type LogEntry = { at: string; time: string; title: string; body: string };
+export type LogEntry = { id?: string; at: string; time: string; title: string; body: string };
 
 export type PortPane = 'leases' | 'stacks' | 'observed';
 

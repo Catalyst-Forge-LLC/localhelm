@@ -1,11 +1,22 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { describe, it } from 'node:test';
 import { isPluginEnabled, pluginPrefsPath, readPluginPrefs, setPluginEnabled } from './pluginPrefs.js';
 
 describe('pluginPrefs', () => {
+	it('reports unreadable preferences without silently enabling or overwriting companions', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-plugprefs-broken-'));
+		await setPluginEnabled(root, 'alpha', false); await writeFile(pluginPrefsPath(root), '{broken');
+		await assert.rejects(readPluginPrefs(root), /unreadable/); await assert.rejects(setPluginEnabled(root, 'beta', false), /unreadable/);
+		assert.equal(await readFile(pluginPrefsPath(root), 'utf8'), '{broken');
+	});
+	it('preserves independent concurrent companion toggles', async () => {
+		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-plugprefs-concurrent-'));
+		await Promise.all([setPluginEnabled(root, 'alpha', false), setPluginEnabled(root, 'beta', false)]);
+		assert.deepEqual((await readPluginPrefs(root)).disabled, ['alpha', 'beta']);
+	});
 	it('defaults every plugin on and persists an off switch', async () => {
 		const root = await mkdtemp(path.join(tmpdir(), 'localhelm-plugprefs-'));
 		const empty = await readPluginPrefs(root);

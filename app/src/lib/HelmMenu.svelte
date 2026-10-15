@@ -5,11 +5,13 @@
 	import Tooltip from './Tooltip.svelte';
 
 	type PluginItem = { id: string; label: string; source?: string; enabled: boolean };
-	type PluginFault = { source: string; message: string };
+	type PluginFault = { source: string; message: string; plugin?: string };
 
 	let {
 		plugins,
 		faults = [],
+		pendingPlugins = [],
+		onRetry,
 		busy = false,
 		fleetPath = '',
 		serveLine = '',
@@ -33,6 +35,8 @@
 	}: {
 		plugins: PluginItem[];
 		faults?: PluginFault[];
+		pendingPlugins?: string[];
+		onRetry?: (id?: string) => void;
 		busy?: boolean;
 		fleetPath?: string;
 		serveLine?: string;
@@ -235,12 +239,13 @@
 								<input
 									type="checkbox"
 									checked={plug.enabled}
-									disabled={busy}
-									onchange={(event) => onToggle(plug.id, event.currentTarget.checked)}
+									disabled={busy || pendingPlugins.includes(plug.id)}
+									onchange={(event) => { const enabled = event.currentTarget.checked; event.currentTarget.checked = plug.enabled; onToggle(plug.id, enabled); }}
 								/>
 								<span class="copy">
 									<span class="name">{plug.label}</span>
 									<span class="id">{plug.id}</span>
+									<span class="dim small" role="status">{pendingPlugins.includes(plug.id) ? 'Saving…' : plug.enabled ? 'On' : 'Off'}</span>
 								</span>
 							</label>
 						</li>
@@ -254,6 +259,7 @@
 								{#if fault.source && !fault.message.includes(fault.source)}
 									<span class="id">{fault.source}</span>
 								{/if}
+								{#if onRetry}<button type="button" class="btn btn-sm" disabled={busy} onclick={() => onRetry?.(fault.plugin ?? plugins.find((plug) => plug.id === fault.source || plug.source === fault.source)?.id)}>Retry companion</button>{/if}
 							</li>
 						{/each}
 					</ul>

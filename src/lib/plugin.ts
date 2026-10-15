@@ -69,6 +69,7 @@ export type LoadedPlugin = {
 export type PluginLoadFault = {
 	source: string;
 	message: string;
+	plugin?: string;
 };
 
 function faultMessage(err: unknown): string {
@@ -107,7 +108,7 @@ export async function readPluginModules(loaded: LoadedManifest): Promise<{
 				const plugin = await loadPluginFile(file);
 				plugins.push({ id: plugin.id, label: plugin.label, source: file, plugin });
 			} catch (err) {
-				faults.push({ source: file, message: faultMessage(err) });
+				faults.push({ source: file, plugin: project.id, message: faultMessage(err) });
 			}
 			break;
 		}
@@ -130,7 +131,7 @@ export async function boardsForPlugins(plugins: LoadedPlugin[]): Promise<{
 			} catch (err) {
 				return {
 					boards: [] as PluginBoard[],
-					fault: { source: plug.source, message: faultMessage(err) },
+					fault: { source: plug.source, plugin: plug.id, message: faultMessage(err) },
 				};
 			}
 		}),
@@ -179,7 +180,7 @@ export async function loadPluginDashboard(loaded: LoadedManifest): Promise<{
 export async function loadPluginBoard(
 	loaded: LoadedManifest,
 	id: string,
-): Promise<{ boards: PluginBoard[]; faults: PluginLoadFault[] }> {
+): Promise<{ boards: PluginBoard[]; faults: PluginLoadFault[]; plugins: PluginListing[] }> {
 	const { plugins: found, faults: loadFaults } = await readPluginModules(loaded);
 	const plug = found.find((row) => row.id === id);
 	if (!plug) {
@@ -187,7 +188,8 @@ export async function loadPluginBoard(
 		throw new Error(`plugin not loaded: ${id} (found ${have}). Enroll the project that has localhelm.plugin.mjs.`);
 	}
 	const prefs = await readPluginPrefs(loaded.workspaceRoot);
-	if (!isPluginEnabled(plug.id, prefs)) return { boards: [], faults: loadFaults };
+	const plugins = [{ id: plug.id, label: plug.label, source: plug.source, enabled: isPluginEnabled(plug.id, prefs) }];
+	if (!plugins[0]!.enabled) return { boards: [], faults: loadFaults.filter((fault) => fault.source === plug.source), plugins };
 	const { boards, faults: boardFaults } = await boardsForPlugins([plug]);
-	return { boards, faults: [...loadFaults, ...boardFaults] };
+	return { boards, faults: [...loadFaults.filter((fault) => fault.source === plug.source), ...boardFaults], plugins };
 }

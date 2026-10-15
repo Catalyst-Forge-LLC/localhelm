@@ -1,4 +1,4 @@
-export { ACTIVITY_LIMIT, activityPath, appendActivity, clearActivity, readActivity } from './activity.js';
+export { ACTIVITY_LIMIT, activityPath, appendActivity, appendActivitySnapshot, clearActivity, readActivity, readActivitySnapshot } from './activity.js';
 export type { ActivityEntry } from './activity.js';
 export { fleetDeps } from './deps.js';
 export { applyGitTrust, planGitTrust } from './gitTrust.js';

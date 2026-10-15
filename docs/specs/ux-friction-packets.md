@@ -9,7 +9,7 @@ Audience: people managing several local projects. Target: a compact control pane
 | A — verified npm archives | Verified | Existing named Publish flow | Root/generated CLI, library, lifecycle, stale source, missing bin, changed archive and fake publisher checks pass; desktop/mobile confirmations checked |
 | B — durable action recovery | Verified | Existing job runner; A for release results | 12 focused tests pass; rendered Stop/reload/fresh-plan and successful-write/failed-refresh checks pass; mobile result inspected |
 | C — shared action language and compact layout | Verified | B recovery entry points | 60-project desktop/mobile prototype and final layout checked; keyboard More, manual minor bump and Publish major replan pass; 25 focused tests and Svelte check pass |
-| D — companion and Activity durability | In progress | Existing plugin APIs; B storage patterns | Activity queue/server idempotency and companion read coordinator tested; integrating dashboard state and recovery |
+| D — companion and Activity durability | Verified | Existing plugin APIs; B storage patterns | 22 focused tests and full 359-test suite pass; combined browser checks cover offline/lost-ack/clear/quota Activity, independent reads, toggle failure/pending, and Main/Demo/Main epochs; malformed preference regression also passes |
 
 ## Shared contracts
 

@@ -1,5 +1,7 @@
 # LocalHelm — Project Context Prompt
 
+Latest delivery (2026-10-15): all four [UX friction packets](docs/specs/ux-friction-packets.md) are implemented. Publish resolves optional `localhelm.release.json`, builds/packs/verifies before a push, and publishes those bytes. Durable browser action receipts retain per-subject acknowledgements and require read-only reconciliation before a fresh plan. Fleet has one primary action plus More; mobile keeps actions under project identity; manual and Publish patch/minor/major controls remain. Companion reads use per-plugin order and Main/Demo epochs, retain marked stale data, and wait for toggle acknowledgement. Activity uses a durable browser queue, original IDs/timestamps, idempotent atomic server appends, and clear generations. Full suite, builds, Svelte diagnostics and combined synthetic desktop/mobile checks pass; no real publish, push, deployment, model, service or label writes. The existing Build phase remains active. See the latest session and evidence records for commands, counts, and limits.
+
 _Locked brief: `docs/PHASE_1_BRIEF.md`. Tracking: `.forgetrail/workflow_tracking.json`._
 
 ## Tech Stack
