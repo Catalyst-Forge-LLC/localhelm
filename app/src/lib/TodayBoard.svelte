@@ -1,5 +1,7 @@
 <script lang="ts">
 	import CellWait from '$lib/CellWait.svelte';
+	import InfoHint from '$lib/InfoHint.svelte';
+	import { ACTION_HELP } from '$lib/actionGuidance';
 	import CompactActions from '$lib/CompactActions.svelte';
 	import CrossChips from '$lib/CrossChips.svelte';
 	import Icon from '$lib/Icon.svelte';
@@ -142,6 +144,7 @@
 		<div class="section-head">
 			<div>
 				<h2>Needs you</h2>
+				<InfoHint summary="Choose the next action, then review its plan." detail={ACTION_HELP} />
 				<p class="hint">
 					{#if !statusReady}
 						Reading fleet…

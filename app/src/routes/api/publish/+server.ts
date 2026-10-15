@@ -11,10 +11,13 @@ export const POST: RequestHandler = async ({ request }) => {
 			apply?: boolean;
 			ids?: string[];
 			kind?: BumpKind;
+			kinds?: Record<string, BumpKind>;
 			otp?: string;
 			confirmed?: Record<string, string>;
 		};
-		const kind: BumpKind = body.kind === 'minor' || body.kind === 'major' ? body.kind : 'patch';
+		const kind: BumpKind | Record<string, BumpKind> = body.kinds && typeof body.kinds === 'object' && !Array.isArray(body.kinds)
+			? Object.fromEntries(Object.entries(body.kinds).map(([id, value]) => [id, value === 'minor' || value === 'major' ? value : 'patch']))
+			: body.kind === 'minor' || body.kind === 'major' ? body.kind : 'patch';
 		const loaded = await loadRequired();
 		const ids = body.apply ? requirePublishIds(body.ids ?? []) : body.ids?.length ? body.ids : undefined;
 		const planned = await planPublish(loaded, ids, kind);

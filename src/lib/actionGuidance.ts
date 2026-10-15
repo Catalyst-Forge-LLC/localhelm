@@ -1,4 +1,16 @@
 /** Visible recovery copy; disabled controls alone cannot teach the next step. */
+export const ACTION_HELP = 'Commit saves changes in Git. Push sends commits to origin. Publish releases an npm package. Ship deploys an app or site. Land updates and deploys a FilePress site.';
+
+export function pushRecoveryHint(reason: string | undefined): string {
+	if (!reason || reason === 'not ahead') return '';
+	if (reason === 'diverged') return 'Bring this branch up to date with origin and resolve conflicts before pushing.';
+	if (reason === 'no upstream') return 'Set this branch’s upstream, then refresh this project.';
+	if (reason === 'no origin' || reason === 'backup only') return 'Add an origin remote to push this branch. The backup remote is managed by IngotVault.';
+	if (reason === 'detached') return 'Switch to a branch before pushing.';
+	if (['merge', 'rebase', 'cherry-pick', 'revert', 'bisect'].includes(reason)) return `Finish or abort the current ${reason}, then refresh this project.`;
+	return `Resolve the push blocker (${reason}), then refresh this project.`;
+}
+
 export function publishRecoveryHint(reason: string | undefined): string {
 	if (!reason) return '';
 	if (reason === 'dirty') return 'Commit or stash the remaining changes before publishing.';

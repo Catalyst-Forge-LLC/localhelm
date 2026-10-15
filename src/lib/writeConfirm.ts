@@ -22,6 +22,7 @@ export type ConfirmOffer = {
 	variant?: 'write' | 'danger';
 	canApply: boolean;
 	showOtp?: boolean;
+	versionKinds?: string[];
 	messages?: Record<string, string>;
 	/** Confirm item key (`id:index`) → text diff. */
 	diffs?: Record<string, string>;
@@ -48,7 +49,7 @@ export function planningHint(title: string): string {
 		case 'Trust this directory':
 			return GIT_TRUST_HINT;
 		case 'Bump':
-			return 'Writes package.json and commits that file. Other dirty files stay local. No tag, no push, no publish.';
+			return 'Writes and commits the authoritative version source. Other dirty files stay local. No tag, no push, no publish.';
 		case 'Commit':
 			return 'Confirm runs git add and git commit. Secrets stay out. No push.';
 		case 'Pull':
@@ -60,7 +61,7 @@ export function planningHint(title: string): string {
 		case 'Install globally':
 			return 'Checks npm for that version, then runs pnpm add -g (npm if pnpm is missing). Never --force.';
 		case 'Publish':
-			return 'Bumps if local already matches npm, pushes if needed, then npm publish. GitHub Actions packages open a workflow link instead. Never --force.';
+			return 'Releases an npm package. Bumps if needed, builds and verifies an archive, then pushes and publishes those same bytes. GitHub Actions packages open a workflow link instead.';
 		case 'Cascade':
 			return 'Writes pins and lockfiles in clean dependents, then commits those files.';
 		case 'Land':

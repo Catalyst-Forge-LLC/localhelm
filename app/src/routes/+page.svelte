@@ -3,13 +3,14 @@
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import ActionHistory from '$lib/ActionHistory.svelte';
+	import FleetActions from '$lib/FleetActions.svelte';
 	import FeatureLabelDialog from '$lib/FeatureLabelDialog.svelte';
 	import { featureLabelModel, labelQueuePlace, labelTickSeed, type FeatureLabelModel } from '$lib/featureLabel';
 	import TodayBoard from '$lib/TodayBoard.svelte';
 	import { readProgressResponse } from '$lib/progressResponse';
 	import { StatusReads } from '$lib/statusReads';
 	import { JobJournal, jobStorageKey, jobRequest, jobAcknowledgement, unresolvedJob, type DurableJob } from '../../../src/lib/jobJournal.js';
-	import { publishRecoveryHint } from '$lib/actionGuidance';
+	import { ACTION_HELP, publishRecoveryHint, pushRecoveryHint } from '$lib/actionGuidance';
 	import BridgeHeader from '$lib/BridgeHeader.svelte';
 	import '$lib/dashboard.css';
 	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
@@ -174,6 +175,7 @@
 	let activeJob: string | null = null;
 	let pendingJob: { title: string; ids: string[]; operation?: import('../../../src/lib/jobJournal.js').JobOperation } | null = null;
 	let confirmRecovery: import('../../../src/lib/jobJournal.js').JobOperation | undefined;
+	let confirmVersionKinds = $state<string[]>([]);
 	const unfinishedJobs = $derived(jobs.filter(unresolvedJob).length);
 	let labelOpen = $state(false);
 	let labelModel = $state<FeatureLabelModel | null>(null);
@@ -821,6 +823,7 @@
 
 	function beginConfirm(spec: { title: string; hint?: string; itemKeys?: string[] }): void {
 		confirmRecovery = undefined;
+		confirmVersionKinds = [];
 		confirmCloseLabel = 'Close';
 		const keys = spec.itemKeys?.filter(Boolean) ?? [];
 		confirmTitle = spec.title;
@@ -1500,6 +1503,7 @@
 		variant?: 'write' | 'danger';
 		canApply: boolean;
 		showOtp?: boolean;
+		versionKinds?: string[];
 		messages?: Record<string, string>;
 		diffs?: Record<string, string>;
 		draftHint?: string;
@@ -1512,6 +1516,7 @@
 		oncancel?: () => void;
 	}): void {
 		confirmRecovery = spec.recovery;
+		confirmVersionKinds = spec.versionKinds ?? [];
 		confirmTitle = spec.title;
 		confirmHint = spec.hint;
 		confirmItems = spec.items;
@@ -2259,9 +2264,9 @@
 				const n = row.commitsSinceNpm ?? 0;
 				const next = nextCutVersion(row, rowBumpKind(row));
 				const current = row.npm.latest ?? row.localVersion ?? 'this version';
-				return `Origin has ${n} commit${n === 1 ? '' : 's'} since npm ${current}. Confirm publishes ${next ?? 'the next version'} (${rowBumpKind(row)}). Use Fleet to pick minor or major.`;
+				return `Origin has ${n} commit${n === 1 ? '' : 's'} since npm ${current}. The plan proposes ${next ?? 'the next version'} (${rowBumpKind(row)}). Choose patch, minor, or major in the Publish plan.`;
 			}
-			return 'Shows bump, push, and npm publish. Confirm in the modal. Never --force.';
+			return 'Releases an npm package. Builds and verifies the archive before any needed push and publication.';
 		}
 		if (id === 'push') {
 			const commits = commitCountLabel(row.git.ahead);
@@ -2292,6 +2297,7 @@
 
 	function rowRecoveryHint(row: Project): string {
 		if (row.unpublishedAhead && inShipQueue(row.id)) return publishRecoveryHint(whyNotPublish(row));
+		if ((row.git.ahead ?? 0) > 0) return pushRecoveryHint(whyNotPush(row.git));
 		return '';
 	}
 
@@ -2731,7 +2737,7 @@
 						</div>
 					</div>
 
-					<p class="table-scroll-hint">Scroll right for Git status and actions.</p>
+					<p class="table-scroll-hint">Next actions are below each project. Scroll right for versions, Git status, and pins.</p>
 					<!-- svelte-ignore a11y_no_noninteractive_tabindex (The named scroll region needs keyboard focus for horizontal scrolling.) -->
 					<div class="table-wrap" tabindex="0" role="region" aria-label="Fleet projects">
 						<table>
@@ -2750,8 +2756,7 @@
 									<th>version</th>
 									<th>git</th>
 									<th>fleet pins</th>
-									<th>needs you</th>
-									<th>version bump</th>
+									<th class="fleet-actions-cell">needs you</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -2760,7 +2765,7 @@
 									{@const bumpTo = nextCutVersion(row, rowBumpKind(row))}
 									<tr>
 										<td class="tick"><input type="checkbox" aria-label={`select ${row.id}`} bind:checked={selectedIds[row.id]} /></td>
-										<td>
+										<td class="fleet-identity">
 											<div class="project-cell">
 												<span class="id">{row.id}</span>
 												{#if localOnlyCoversId(row.id, localOnlySet)}
@@ -2785,6 +2790,9 @@
 													title={copiedKey === `path:${row.id}` ? 'Copied' : `Copy path\n${row.path}`}
 													onclick={() => void copyValue(`path:${row.id}`, row.path)}
 												/>
+											</div>
+											<div class="fleet-mobile-actions">
+												<FleetActions id={row.id} actions={needActions(row)} busy={Boolean(busy) || demoBoard || Boolean(row.pending)} kind={rowBumpKind(row)} nextVersion={bumpTo} canBump={!row.missing && !row.error && Boolean(row.localVersion)} hint={rowRecoveryHint(row)} onkind={(kind) => bumpKind = { ...bumpKind, [row.id]: kind }} onbump={() => void startBump([row.id])} />
 											</div>
 										</td>
 										<td class="mono" class:ahead={row.unpublishedAhead}>
@@ -2830,23 +2838,12 @@
 												<span class="dim">—</span>
 											{/if}
 										</td>
-										<td>
+										<td class="fleet-actions-cell">
 											{#if row.pending}
 												<CellWait label={`Reading needs for ${row.id}`} />
 											{:else}
 												<div class="need-cell">
-													{#each needActions(row) as act (act.id)}
-														<Tooltip title={act.title}>
-															<button
-																type="button"
-																class="btn btn-sm btn-write"
-																disabled={Boolean(busy) || Boolean(act.disabled)}
-																onclick={act.run}
-															>
-																{act.label}
-															</button>
-														</Tooltip>
-													{/each}
+													<FleetActions id={row.id} actions={needActions(row)} busy={Boolean(busy) || demoBoard} kind={rowBumpKind(row)} nextVersion={bumpTo} canBump={!row.missing && !row.error && Boolean(row.localVersion)} hint={rowRecoveryHint(row)} onkind={(kind) => bumpKind = { ...bumpKind, [row.id]: kind }} onbump={() => void startBump([row.id])} />
 													{#each leftoverBadges(row) as badge (badge.text)}
 														<Tooltip title={badge.title ?? badge.text}>
 															<span class={`badge ${badge.tone}`}>{badge.text}</span>
@@ -2855,31 +2852,13 @@
 												</div>
 											{/if}
 										</td>
-										<td>
-											<div class="bump">
-												<select aria-label={`bump kind for ${row.id}`} bind:value={bumpKind[row.id]} disabled={row.pending}>
-													<option value="patch">patch</option>
-													<option value="minor">minor</option>
-													<option value="major">major</option>
-												</select>
-												<Tooltip title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish.">
-													<button
-														class="btn btn-sm btn-write"
-														disabled={Boolean(busy) || demoBoard || Boolean(row.pending)}
-														onclick={() => startBump([row.id])}
-													>
-														{bumpTo ? `Bump ${bumpTo}` : 'Bump'}
-													</button>
-												</Tooltip>
-											</div>
-										</td>
 									</tr>
 								{/each}
 								{#if !rosterReady && !inventory}
-									<tr><td class="empty" colspan="7"><CellWait label="Reading fleet…" showLabel /></td></tr>
+									<tr><td class="empty" colspan="6"><CellWait label="Reading fleet…" showLabel /></td></tr>
 								{:else if !visibleProjects.length}
 									<tr>
-										<td class="empty" colspan="7">
+										<td class="empty" colspan="6">
 											{#if showLocalOnly}
 												No local-only projects. Check a row and Keep local, or choose Show all.
 											{:else if archivedIds.length && !showArchived}
@@ -2895,7 +2874,7 @@
 					</div>
 
 					<p class="legend">
-						Actions open a plan before writing. Publish includes any needed version bump and push; Ship deploys the app or site.
+						{ACTION_HELP} Every write opens a plan. Publish includes any needed version bump and push.
 					</p>
 				</section>
 			</div>
@@ -3877,6 +3856,18 @@
 		fn?.();
 	}}
 >
+	{#if confirmCanApply && confirmVersionKinds.length}
+		<div class="group-buttons">
+			{#each confirmVersionKinds as id (id)}
+				<label class="dim small">Version change for {id}
+					<select aria-label={`Publish version change for ${id}`} value={bumpKind[id] ?? 'patch'} disabled={Boolean(busy) || confirmExcluded.includes(id)} onchange={(event) => {
+						bumpKind = { ...bumpKind, [id]: event.currentTarget.value as BumpKind };
+						void startPublish(lastPublishPlan.map((row) => row.id).filter((id) => !confirmExcluded.includes(id)));
+					}}><option value="patch">patch</option><option value="minor">minor</option><option value="major">major</option></select>
+				</label>
+			{/each}
+		</div>
+	{/if}
 	{#if confirmShowOtp}
 		<p class="dim small">
 			{#if npmUser}

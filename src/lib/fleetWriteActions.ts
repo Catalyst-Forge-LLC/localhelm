@@ -828,6 +828,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 						apply: false,
 						ids,
 						kind: ids.length === 1 ? (kinds[ids[0] ?? ''] ?? 'patch') : 'patch',
+						kinds: Object.fromEntries(ids.map((id) => [id, kinds[id] ?? 'patch'])),
 					}),
 				})) as { rows: PublishRow[]; npmUser?: string | null; authHint?: string };
 				host.setPublishAuthHint(data.authHint ?? '');
@@ -877,6 +878,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 							: `Publish ${eligible.length}`,
 					canApply: eligible.length > 0,
 					showOtp: needsNpm,
+					versionKinds: eligible.filter((row) => row.steps.some((step) => step.kind === 'bump')).map((row) => row.id),
 					applyIds: eligible.map((row) => row.id),
 					run: (included) => void applyPublish(eligible.map((row) => row.id).filter((id) => included.includes(id))),
 				});
@@ -901,7 +903,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 								body: JSON.stringify({
 									apply: true,
 									ids: [id],
-									kind: host.bumpKind()[id] ?? 'patch',
+									kind: host.lastPublishPlan().find((row) => row.id === id)?.steps.find((step) => step.kind === 'bump')?.bumpKind ?? 'patch',
 									confirmed: { [id]: host.lastPublishPlan().find((row) => row.id === id)?.revision },
 									otp,
 								}),

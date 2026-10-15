@@ -225,22 +225,22 @@ function planPublishOne(row: ProjectStatus, kind: BumpKind): PublishRow {
 export function planPublishFromInventory(
 	inventory: FleetInventory,
 	onlyIds: string[] | undefined,
-	kind: BumpKind,
+	kind: BumpKind | Record<string, BumpKind>,
 ): PublishRow[] {
 	if (onlyIds?.length) {
 		return onlyIds.map((id) => {
 			const row = inventory.projects.find((p) => p.id === id);
 			if (!row) return { id, path: '', version: null, action: 'skip', reason: 'not enrolled', steps: [] };
-			return planPublishOne(row, kind);
+			return planPublishOne(row, typeof kind === 'string' ? kind : kind[row.id] ?? 'patch');
 		});
 	}
-	return inventory.projects.map((row) => planPublishOne(row, kind));
+	return inventory.projects.map((row) => planPublishOne(row, typeof kind === 'string' ? kind : kind[row.id] ?? 'patch'));
 }
 
 export async function planPublish(
 	loaded: LoadedManifest,
 	onlyIds: string[] | undefined,
-	kind: BumpKind = 'patch',
+	kind: BumpKind | Record<string, BumpKind> = 'patch',
 ): Promise<PublishRow[]> {
 	const inventory = await fleetStatus(loaded);
 	return planPublishFromInventory(inventory, onlyIds, kind);

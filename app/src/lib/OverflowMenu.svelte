@@ -1,15 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import type { Snippet } from 'svelte';
 	import Icon from './Icon.svelte';
 	import { placeMenu } from './placeMenu';
 
 	let {
 		label = 'More',
+		ariaLabel,
 		align = 'end',
 		children,
 	}: {
 		label?: string;
+		ariaLabel?: string;
 		align?: 'start' | 'end';
 		children: Snippet;
 	} = $props();
@@ -17,7 +19,8 @@
 	let open = $state(false);
 	let rootEl = $state<HTMLDivElement | null>(null);
 
-	function close(): void {
+	function close(restoreFocus = false): void {
+		if (restoreFocus && open) rootEl?.querySelector<HTMLButtonElement>(':scope > button')?.focus();
 		open = false;
 	}
 
@@ -33,10 +36,10 @@
 			if (!(target instanceof Element) || !rootEl.contains(target)) return;
 			const button = target.closest('button');
 			const trigger = rootEl.querySelector(':scope > button');
-			if (button && button !== trigger) close();
+			if (button && button !== trigger) close(true);
 		}
 		function onKey(event: KeyboardEvent): void {
-			if (event.key === 'Escape') close();
+			if (event.key === 'Escape' && open) { event.preventDefault(); close(true); }
 		}
 		document.addEventListener('pointerdown', onPointer);
 		document.addEventListener('click', onClick);
@@ -50,7 +53,7 @@
 </script>
 
 <div class="overflow" bind:this={rootEl}>
-	<button type="button" class="btn" aria-haspopup="true" aria-expanded={open} onclick={() => (open = !open)}>
+	<button type="button" class="btn" aria-label={ariaLabel} aria-expanded={open} onclick={() => (open = !open)} onkeydown={async (event) => { if (event.key === 'ArrowDown') { event.preventDefault(); open = true; await tick(); rootEl?.querySelector<HTMLElement>('.menu button:not(:disabled), .menu select:not(:disabled)')?.focus(); } }}>
 		{label}
 		<Icon icon="lucide:chevron-down" />
 	</button>

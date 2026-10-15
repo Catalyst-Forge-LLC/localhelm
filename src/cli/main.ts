@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { ACTION_HELP } from '../lib/actionGuidance.js';
 import { readFileSync } from 'node:fs';
 import { applyBump, planBump } from '../lib/bump.js';
 import { applyCascade, planCascade } from '../lib/cascade.js';
@@ -61,6 +62,8 @@ Usage:
                                  default 0.0.0.0 (all interfaces). --demo is a sandbox fleet.
 
 scan never writes. Mutating commands print a plan; pass --apply to write.
+${ACTION_HELP}
+Local Publish builds and verifies an archive before pushing and publishing those same bytes.
 Scan also reads .localhelmignore (and ~/.localhelm/ignore).
 `;
 }

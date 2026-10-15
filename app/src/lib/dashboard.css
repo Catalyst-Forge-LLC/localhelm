@@ -1284,8 +1284,14 @@
 
 	.table-wrap:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 	.table-scroll-hint { display: none; }
+	.fleet-mobile-actions { display: none; }
 	@media (max-width: 55rem) {
 		.table-scroll-hint { display: block; margin: 0.4rem 0; color: var(--dim); font-size: 0.76rem; }
+		.fleet-mobile-actions { display: block; margin-top: .5rem; }
+		.fleet-actions-cell { display: none; }
+		.fleet-identity .project-cell { flex-wrap: wrap; white-space: normal; width: 14rem; max-width: 14rem; overflow-wrap: anywhere; }
+		.fleet-identity .project-cell .id { width: 100%; }
+		.fleet-identity .fleet-mobile-actions { max-width: 14rem; }
 	}
 
 	table {

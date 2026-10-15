@@ -42,6 +42,11 @@ function inventory(projects: ProjectStatus[]): FleetInventory {
 }
 
 describe('publish plan', () => {
+	it('preserves each package’s chosen version change in a multi-project plan', () => {
+		const rows = planPublishFromInventory(inventory([project({ id: 'a', commitsSinceNpm: 2 }), project({ id: 'b', commitsSinceNpm: 2 })]), ['a', 'b'], { a: 'minor', b: 'major' });
+		assert.deepEqual(rows.map((row) => row.version), ['1.1.0', '2.0.0']);
+		assert.equal(rows[0]?.steps.find((step) => step.kind === 'bump')?.bumpKind, 'minor');
+	});
 	it('identifies the enrolled package directory and executable entries in a read-only plan', () => {
 		const [row] = planPublishFromInventory(inventory([project({ id: 'cli', absPath: '/work/cli', bin: ['cli'], unpublishedAhead: true, localVersion: '1.0.1' })]), ['cli'], 'patch');
 		assert.deepEqual(row?.package, { directory: '/work/cli', executables: ['cli'] });
