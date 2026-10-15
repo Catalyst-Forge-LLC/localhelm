@@ -6,8 +6,8 @@ Audience: people managing several local projects. Target: a compact control pane
 
 | Packet | State | Dependencies | Acceptance / next action |
 | --- | --- | --- | --- |
-| A — verified npm archives | In progress | Existing named Publish flow | Read release contract; build/pack once; validate and publish identical bytes; test library/CLI/generated packages and failures |
-| B — durable action recovery | Not started | Existing job runner; A for release results | Persist job identities and per-subject results; reload/reconcile without replay; fresh-plan remaining work |
+| A — verified npm archives | Verified | Existing named Publish flow | Root/generated CLI, library, lifecycle, stale source, missing bin, changed archive and fake publisher checks pass; desktop/mobile confirmations checked |
+| B — durable action recovery | In progress | Existing job runner; A for release results | Journal storage and reload semantics implemented; integrating runner and recovery surface |
 | C — shared action language and compact layout | Not started | B recovery entry points | Consistent next-step copy; compact secondary actions; patch/minor/major still available; large/narrow/keyboard checks |
 | D — companion and Activity durability | Not started | Existing plugin APIs; B storage patterns | Race-safe per-plugin reads and board epochs; useful empty/failure states; idempotent queued Activity persistence |
 

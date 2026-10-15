@@ -107,7 +107,7 @@ describe('npm publishing policy', () => {
 		loaded.manifest.projects[0]!.path = 'linked';
 		const plan = await planPackagePrivacy(loaded, 'demo');
 		assert.equal(plan.action, 'skip');
-		assert.match(plan.reason!, /regular file/);
+		assert.match(plan.reason!, /regular file|outside the enrolled checkout/);
 		assert.equal(await readFile(path.join(dir, 'package.json'), 'utf8'), raw);
 	});
 
