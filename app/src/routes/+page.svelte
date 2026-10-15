@@ -5,6 +5,8 @@
 	import FeatureLabelDialog from '$lib/FeatureLabelDialog.svelte';
 	import { featureLabelModel, labelQueuePlace, labelTickSeed, type FeatureLabelModel } from '$lib/featureLabel';
 	import TodayBoard from '$lib/TodayBoard.svelte';
+	import { readProgressResponse } from '$lib/progressResponse';
+	import { StatusReads } from '$lib/statusReads';
 	import BridgeHeader from '$lib/BridgeHeader.svelte';
 	import '$lib/dashboard.css';
 	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
@@ -230,7 +232,8 @@
 	let busy = $state('');
 	let statusNote = $state('');
 	/** Latest fleet read. An older read must not clear a newer progress line. */
-	let statusReads = 0;
+	const statusReads = new StatusReads();
+	let quietReads = 0;
 	let error = $state('');
 	let landPendingIds = $state<string[]>([]);
 	let landPendingReasons = $state<Record<string, string>>({});
@@ -705,44 +708,7 @@
 		} catch (err) {
 			throw new Error(plainFetchError(err));
 		}
-		const kind = res.headers.get('content-type') ?? '';
-		if (!kind.includes('ndjson')) {
-			let data: { error?: string };
-			try {
-				data = (await res.json()) as { error?: string };
-			} catch {
-				throw new Error(
-					res.ok
-						? 'Dashboard returned a non-JSON response.'
-						: `Dashboard request failed (${res.status} ${res.statusText}).`,
-				);
-			}
-			if (!res.ok) throw new Error(data.error ?? res.statusText);
-			return data;
-		}
-		if (!res.body) throw new Error('Dashboard returned an empty progress stream.');
-		const reader = res.body.getReader();
-		const dec = new TextDecoder();
-		let buf = '';
-		let result: unknown;
-		const take = (line: string): void => {
-			const trimmed = line.trim();
-			if (!trimmed) return;
-			const event = JSON.parse(trimmed) as Record<string, unknown>;
-			if (event.type === 'error') throw new Error(String(event.error ?? 'Publish failed.'));
-			if (event.type === 'result') result = event;
-			else onEvent(event);
-		};
-		while (true) {
-			const { done, value } = await reader.read();
-			if (done) break;
-			buf += dec.decode(value, { stream: true });
-			const lines = buf.split('\n');
-			buf = lines.pop() ?? '';
-			for (const line of lines) take(line);
-		}
-		if (buf.trim()) take(buf);
-		return result ?? {};
+		return readProgressResponse(res, onEvent);
 	}
 
 	function formatEntryTime(at: string): string {
@@ -1099,10 +1065,10 @@
 		gitOnly?: boolean;
 		skipCommitCounts?: boolean;
 	} = {}): Promise<void> {
-		const ticket = ++statusReads;
-		try {
 		const ids = opts.ids?.filter(Boolean) ?? [];
 		const scoped = ids.length > 0;
+		const ticket = statusReads.begin(ids);
+		try {
 		const query = new URLSearchParams();
 		query.set('progress', '1');
 		if (opts.fetchRemotes) query.set('fetch', '1');
@@ -1112,7 +1078,7 @@
 		const csv = scoped ? serializeListParam(ids) : null;
 		if (csv) query.set('ids', csv);
 		const data = (await callNdjson(`/api/status?${query}`, { method: 'GET' }, (event) => {
-			if (ticket !== statusReads) return;
+			if (!statusReads.latest(ticket)) return;
 			if (event.type === 'progress' && typeof event.label === 'string' && event.label.trim()) {
 				statusNote = event.label;
 				if (busy && busyIsFleetRead(busy)) busy = event.label;
@@ -1130,9 +1096,21 @@
 			landPendingReasons?: Record<string, string>;
 			landShipFingerprints?: Record<string, string>;
 		};
-		if (ticket !== statusReads) return;
-		if (scoped && inventory && data.inventory) inventory = mergeInventory(inventory, data.inventory, opts.gitOnly === true);
-		else inventory = data.inventory;
+		if (!statusReads.current(ticket)) return;
+		if (data.inventory) {
+			const accepted = data.inventory.projects.filter((row) => statusReads.accepts(ticket, row.id));
+			const base = inventory ?? { ...data.inventory, projects: roster.map(shellProject) };
+			if (scoped) {
+				inventory = mergeInventory(base, { ...data.inventory, projects: accepted }, opts.gitOnly === true);
+			} else {
+				// A full read still owns membership; preserve only rows with a newer scoped read.
+				const kept = base.projects.filter((row) => !statusReads.accepts(ticket, row.id));
+				const projects = data.inventory.projects.map((row) => accepted.find((item) => item.id === row.id) ?? kept.find((item) => item.id === row.id) ?? shellProject({ id: row.id, path: row.path, npm: row.npm.name }));
+				if (accepted.length || statusReads.latest(ticket)) inventory = { ...data.inventory, projects, digest: inventoryDigest(projects) };
+			}
+			if (accepted.length) statusReady = true;
+		} else if (statusReads.latest(ticket)) inventory = null;
+		if (!statusReads.latest(ticket)) return;
 		cwd = data.cwd;
 		host = data.host ?? null;
 		port = data.port;
@@ -1163,7 +1141,9 @@
 		}
 		} finally {
 			// The last progress line ("reading git (n of n)") would stay after the job clears busy.
-			if (ticket === statusReads) statusNote = '';
+			statusReads.finish(ticket);
+			if (!statusReads.pending) statusNote = '';
+			else if (statusReads.latest(ticket)) statusNote = 'reading remaining projects';
 		}
 	}
 
@@ -1188,6 +1168,7 @@
 	}
 
 	async function readQuiet(label: string, fn: () => Promise<void>): Promise<void> {
+		quietReads++;
 		statusNote = label;
 		error = '';
 		try {
@@ -1195,7 +1176,8 @@
 		} catch (err) {
 			error = err instanceof Error ? err.message : String(err);
 		} finally {
-			statusNote = '';
+			quietReads--;
+			if (!quietReads && !statusReads.pending) statusNote = '';
 		}
 	}
 
@@ -1242,6 +1224,7 @@
 
 	async function setDemoBoard(next: boolean): Promise<void> {
 		if (demoBoard === next) return;
+		statusReads.reset();
 		confirmOpen = false;
 		confirmRun = null;
 		confirmAlt = null;
