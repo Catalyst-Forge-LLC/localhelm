@@ -7,8 +7,8 @@ Audience: people managing several local projects. Target: a compact control pane
 | Packet | State | Dependencies | Acceptance / next action |
 | --- | --- | --- | --- |
 | A — verified npm archives | Verified | Existing named Publish flow | Root/generated CLI, library, lifecycle, stale source, missing bin, changed archive and fake publisher checks pass; desktop/mobile confirmations checked |
-| B — durable action recovery | In progress | Existing job runner; A for release results | Journal storage and reload semantics implemented; integrating runner and recovery surface |
-| C — shared action language and compact layout | Not started | B recovery entry points | Consistent next-step copy; compact secondary actions; patch/minor/major still available; large/narrow/keyboard checks |
+| B — durable action recovery | Verified | Existing job runner; A for release results | 12 focused tests pass; rendered Stop/reload/fresh-plan and successful-write/failed-refresh checks pass; mobile result inspected |
+| C — shared action language and compact layout | In progress | B recovery entry points | Compact row control prototype prepared; version controls and narrow layout next |
 | D — companion and Activity durability | Not started | Existing plugin APIs; B storage patterns | Race-safe per-plugin reads and board epochs; useful empty/failure states; idempotent queued Activity persistence |
 
 ## Shared contracts

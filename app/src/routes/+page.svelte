@@ -2,11 +2,13 @@
 	import { onMount, tick } from 'svelte';
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
+	import ActionHistory from '$lib/ActionHistory.svelte';
 	import FeatureLabelDialog from '$lib/FeatureLabelDialog.svelte';
 	import { featureLabelModel, labelQueuePlace, labelTickSeed, type FeatureLabelModel } from '$lib/featureLabel';
 	import TodayBoard from '$lib/TodayBoard.svelte';
 	import { readProgressResponse } from '$lib/progressResponse';
 	import { StatusReads } from '$lib/statusReads';
+	import { JobJournal, jobStorageKey, jobRequest, jobAcknowledgement, unresolvedJob, type DurableJob } from '../../../src/lib/jobJournal.js';
 	import { publishRecoveryHint } from '$lib/actionGuidance';
 	import BridgeHeader from '$lib/BridgeHeader.svelte';
 	import '$lib/dashboard.css';
@@ -164,6 +166,15 @@
 	let confirmOpen = $state(false);
 	let confirmCloseLabel = $state('Close');
 	let activityError = $state('');
+	let jobs = $state<DurableJob[]>([]);
+	let jobsOpen = $state(false);
+	let sessionResultAvailable = $state(false);
+	let jobStorageError = $state('');
+	let journal: JobJournal | null = null;
+	let activeJob: string | null = null;
+	let pendingJob: { title: string; ids: string[]; operation?: import('../../../src/lib/jobJournal.js').JobOperation } | null = null;
+	let confirmRecovery: import('../../../src/lib/jobJournal.js').JobOperation | undefined;
+	const unfinishedJobs = $derived(jobs.filter(unresolvedJob).length);
 	let labelOpen = $state(false);
 	let labelModel = $state<FeatureLabelModel | null>(null);
 	let labelTicked = $state<string[]>([]);
@@ -673,7 +684,52 @@
 		return demoBoard ? { 'x-localhelm-demo': '1' } : {};
 	}
 
-	async function call(url: string, init?: RequestInit): Promise<unknown> {
+	function syncJobs(): void { jobs = journal?.jobs.slice() ?? []; }
+	function restoreJobs(): JobJournal {
+		const workspace = inventory?.workspaceRoot || cwd;
+		if (!workspace) throw new Error('Workspace is still loading. Refresh before starting an action.');
+		const key = jobStorageKey(workspace, demoBoard);
+		if (journal?.key !== key) journal = new JobJournal(localStorage, key);
+		syncJobs(); return journal;
+	}
+	function startConfirmed(fn: ((ids: string[]) => void) | null, included: string[]): void {
+		if (!fn) return;
+		try {
+			if (included.length) { restoreJobs(); pendingJob = { title: confirmTitle, ids: included.slice(), operation: confirmRecovery }; }
+			confirmRun = null; confirmAlt = null; jobStorageError = ''; fn(included);
+		} catch (err) { jobStorageError = `Action history could not be saved. No new action started: ${err instanceof Error ? err.message : String(err)}`; error = jobStorageError; }
+	}
+	async function trackedRequest(url: string, init: RequestInit | undefined, execute: () => Promise<unknown>): Promise<unknown> {
+		let parsed: unknown;
+		try { parsed = typeof init?.body === 'string' ? JSON.parse(init.body) : undefined; } catch { /* server validates malformed payloads */ }
+		const request = jobRequest(url, parsed);
+		if (!request) return execute();
+		if (jobStorageError) throw new Error(jobStorageError);
+		if (url === '/api/cascade') {
+			const body = parsed as Record<string, unknown>;
+			const plan = await rawCall(url, { method: 'POST', body: JSON.stringify({ ...body, apply: false, progress: false }) }) as { rows?: { fromId: string; action: string }[] };
+			request.ids = [...new Set((plan.rows ?? []).filter((row) => row.action !== 'skip').map((row) => row.fromId))];
+			request.operation.publisher = typeof body.id === 'string' ? body.id : undefined;
+		}
+		let receipt: JobJournal;
+		try {
+			receipt = restoreJobs();
+			if (!activeJob) activeJob = receipt.begin(pendingJob?.title ?? (busy || 'Confirmed action'), pendingJob?.ids ?? (request.ids.length ? request.ids : ['workspace']), pendingJob?.operation);
+			receipt.start(activeJob, request.ids.length ? request.ids : ['workspace'], request.operation); syncJobs();
+		} catch (err) { jobStorageError = `Action history could not be saved; write stopped: ${err instanceof Error ? err.message : String(err)}`; throw new Error(jobStorageError); }
+		const id = activeJob; const ids = request.ids.length ? request.ids : ['workspace'];
+		let data: unknown;
+		try { data = await execute(); }
+		catch (err) {
+			try { receipt.settle(id, ids, 'unknown', err instanceof Error ? err.message : String(err)); syncJobs(); } catch { jobStorageError = 'The action result could not be saved. Check current status before another write.'; }
+			throw err;
+		}
+		try { for (const subject of ids) { const ack = jobAcknowledgement(data, subject, request.operation); receipt.settle(id, [subject], ack.state, ack.detail); } syncJobs(); }
+		catch { jobStorageError = 'The server answered, but its action receipt could not be saved. Check current status before another write.'; throw new Error(jobStorageError); }
+		return data;
+	}
+	async function call(url: string, init?: RequestInit): Promise<unknown> { return trackedRequest(url, init, () => rawCall(url, init)); }
+	async function rawCall(url: string, init?: RequestInit): Promise<unknown> {
 		let res: Response;
 		try {
 			res = await fetch(url, {
@@ -702,6 +758,9 @@
 		init: RequestInit,
 		onEvent: (event: Record<string, unknown>) => void,
 	): Promise<unknown> {
+		return trackedRequest(url, init, () => rawCallNdjson(url, init, onEvent));
+	}
+	async function rawCallNdjson(url: string, init: RequestInit, onEvent: (event: Record<string, unknown>) => void): Promise<unknown> {
 		let res: Response;
 		try {
 			res = await fetch(url, {
@@ -761,6 +820,7 @@
 	}
 
 	function beginConfirm(spec: { title: string; hint?: string; itemKeys?: string[] }): void {
+		confirmRecovery = undefined;
 		confirmCloseLabel = 'Close';
 		const keys = spec.itemKeys?.filter(Boolean) ?? [];
 		confirmTitle = spec.title;
@@ -820,6 +880,11 @@
 				error = err instanceof Error ? err.message : String(err);
 			}
 		} finally {
+			if (activeJob && journal) {
+				try { journal.finish(activeJob); syncJobs(); } catch { jobStorageError = 'Action receipt could not be saved. Check status before another write.'; }
+				activeJob = null;
+			}
+			pendingJob = null;
 			busy = '';
 			jobCanStop = false;
 			if (opts?.closeConfirm !== false) {
@@ -1130,6 +1195,7 @@
 		} else if (statusReads.latest(ticket)) inventory = null;
 		if (!statusReads.latest(ticket)) return;
 		cwd = data.cwd;
+		try { restoreJobs(); } catch (err) { jobStorageError = `Action history unavailable: ${err instanceof Error ? err.message : String(err)}`; }
 		host = data.host ?? null;
 		port = data.port;
 		portSource = data.portSource;
@@ -1247,6 +1313,7 @@
 		confirmRun = null;
 		confirmAlt = null;
 		demoBoard = next;
+		journal = null; jobs = []; activeJob = null; pendingJob = null; jobStorageError = ''; jobsOpen = false;
 		try {
 			if (next) sessionStorage.setItem('localhelm.demo', '1');
 			else sessionStorage.removeItem('localhelm.demo');
@@ -1421,6 +1488,7 @@
 	}
 
 	function offerConfirm(spec: {
+		recovery?: import('../../../src/lib/jobJournal.js').JobOperation;
 		title: string;
 		hint: string;
 		items: string[];
@@ -1443,6 +1511,7 @@
 		alt?: (includedIds: string[]) => void;
 		oncancel?: () => void;
 	}): void {
+		confirmRecovery = spec.recovery;
 		confirmTitle = spec.title;
 		confirmHint = spec.hint;
 		confirmItems = spec.items;
@@ -1590,6 +1659,42 @@
 			publishAuthHint = hint;
 		},
 	});
+
+	async function reconcileJob(job: DurableJob): Promise<void> {
+		await run('reading current action status', async () => {
+			await loadStatus({ extras: false, freshNpm: true });
+			if (job.operation?.plugin || job.operation?.route === '/api/land') await loadPluginBoards(job.operation.plugin ?? 'filepress');
+			restoreJobs().reconciled(job.id); syncJobs();
+		}, { closeConfirm: false });
+	}
+	function freshJobPlan(job: DurableJob): void {
+		if (!job.reconciledAt) return;
+		const ids = job.subjects.filter((s) => s.state !== 'succeeded').map((s) => s.id);
+		if (!ids.length) return;
+		jobsOpen = false;
+		const operation = job.operation;
+		if (operation?.route === '/api/plugin' && operation.plugin && operation.action) void startPluginJob(operation.plugin, operation.action, ids, operation.action);
+		else if (operation?.route === '/api/land') startLand(ids);
+		else if (operation?.route === '/api/publish') startPublish(ids);
+		else if (operation?.route === '/api/bump') void startBump(ids);
+		else if (operation?.route === '/api/commit') void startCommit(ids);
+		else if (operation?.route === '/api/push') void startPush(ids);
+		else if (operation?.route === '/api/pull') void startPull(ids);
+		else if (operation?.route === '/api/ship') void startShip(ids);
+		else if (operation?.route === '/api/global') void startGlobal(ids);
+		else if (operation?.route === '/api/cascade' && operation.publisher) void startCascade(operation.publisher);
+		else if (operation?.route === '/api/package-privacy') void startPackagePrivacy(ids[0]);
+		else if (operation?.route === '/api/git-trust') void startGitTrust(ids[0]);
+		else { selectedIds = idsToSelection(ids); setTab(operation?.plugin ?? 'fleet'); error = 'Current status is refreshed. Review the selected subjects and choose an action to open a new plan.'; }
+	}
+	function reviewJob(job: DurableJob): void { try { restoreJobs().reviewed(job.id); syncJobs(); } catch (err) { jobStorageError = String(err); } }
+	function retryJobStorage(): void { try { restoreJobs(); jobStorageError = ''; } catch (err) { jobStorageError = String(err); } }
+	function openSessionResult(): void {
+		jobsOpen = false;
+		const publish = loadPublishBatch(); const land = loadLandBatch();
+		if (publish) offerPublishOutcome(publish.rows, { interrupted: !publish.done, leftover: publish.githubPending, error: publish.error });
+		else if (land) offerLandOutcome(land.rows, { interrupted: !land.done, leftover: land.remaining, error: land.error });
+	}
 
 	function startFeatureLabelQueue(ids: string[]): void {
 		const unique = [...new Set(ids.filter(Boolean))];
@@ -2328,23 +2433,7 @@
 		} catch {
 			/* ignore */
 		}
-		const interrupted = loadPublishBatch();
-		if (interrupted && (interrupted.rows.length || interrupted.githubPending.length)) {
-			offerPublishOutcome(interrupted.rows, {
-				interrupted: !interrupted.done,
-				leftover: interrupted.githubPending,
-				error: interrupted.error,
-			});
-		} else {
-			const landSnap = loadLandBatch();
-			if (landSnap && (landSnap.rows.length || landSnap.remaining.length)) {
-				offerLandOutcome(landSnap.rows, {
-					interrupted: !landSnap.done,
-					leftover: landSnap.remaining,
-					error: landSnap.error,
-				});
-			}
-		}
+		sessionResultAvailable = Boolean(loadPublishBatch() || loadLandBatch());
 		void loadActivity();
 		void loadRoster();
 		void loadPluginBoards();
@@ -2427,6 +2516,9 @@
 			activityBadge={activityUnseen ? 'new' : entries.length || ''}
 		/>
 	</BridgeHeader>
+	{#if unfinishedJobs || jobStorageError}
+		<div class="hint" role="status"><button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => jobsOpen = true}>Action results{unfinishedJobs ? ` (${unfinishedJobs} to review)` : ''}</button> {jobStorageError || 'Refresh current status before repeating an unfinished action.'}</div>
+	{/if}
 
 	<nav class="tabs" aria-label="Dashboard views">
 		<button type="button" class="tab" class:active={tab === 'today'} class:hot={todayCount > 0} onclick={() => setTab('today')}>
@@ -3509,6 +3601,7 @@
 							Clear
 						</button>
 					{/if}
+					<button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => { setActivityOpen(false); jobsOpen = true; }}>Action results</button>
 					<IconButton icon="lucide:x" label="Close activity" onclick={() => setActivityOpen(false)} />
 				</div>
 			</div>
@@ -3772,15 +3865,11 @@
 	bind:extraChecked={confirmExtraOn}
 	onconfirm={(included) => {
 		const fn = confirmRun;
-		confirmRun = null;
-		confirmAlt = null;
-		fn?.(included);
+		startConfirmed(fn, included);
 	}}
 	onalt={(included) => {
 		const fn = confirmAlt;
-		confirmRun = null;
-		confirmAlt = null;
-		fn?.(included);
+		startConfirmed(fn, included);
 	}}
 	oncancel={() => {
 		const fn = confirmOnCancel;
@@ -3800,6 +3889,8 @@
 		<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
 	{/if}
 </ConfirmModal>
+
+<ActionHistory bind:open={jobsOpen} {jobs} busy={Boolean(busy)} error={jobStorageError} onrefresh={(job) => void reconcileJob(job)} onplan={freshJobPlan} onreview={reviewJob} onstorage={retryJobStorage} sessionResult={sessionResultAvailable} onsession={openSessionResult} />
 
 <FeatureLabelDialog
 	bind:open={labelOpen}

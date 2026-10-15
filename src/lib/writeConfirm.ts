@@ -8,6 +8,7 @@ import { GIT_TRUST_HINT } from './gitTrustDisplay.js';
 import type { ReleaseArtifact } from './releaseTypes.js';
 
 export type ConfirmOffer = {
+	recovery?: import('./jobJournal.js').JobOperation;
 	title: string;
 	hint: string;
 	items: string[];

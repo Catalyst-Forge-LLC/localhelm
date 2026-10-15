@@ -361,11 +361,11 @@ export function createFleetWrites(host: DashboardJobHost) {
 		});
 	}
 
-	async function startPull(): Promise<void> {
+	async function startPull(ids?: string[]): Promise<void> {
 		await host.run(
 			'planning pull',
 			async () => {
-				const data = (await host.call('/api/pull', { method: 'POST', body: JSON.stringify({ apply: false }) })) as {
+				const data = (await host.call('/api/pull', { method: 'POST', body: JSON.stringify({ apply: false, ids }) })) as {
 					rows: GitRow[];
 				};
 				const eligible = data.rows.filter((r) => r.action === 'pull');

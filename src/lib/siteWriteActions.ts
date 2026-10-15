@@ -352,6 +352,7 @@ export function createSiteWrites(host: DashboardJobHost) {
 				);
 				const extra = ids.length === 1 ? '' : ` ${work.length} of ${ids.length} need a write.`;
 				host.offerConfirm({
+					recovery: { route: '/api/land' },
 					title: work.length
 						? work.length === 1
 							? `Land ${work[0]?.siteId}?`

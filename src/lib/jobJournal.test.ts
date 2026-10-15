@@ -20,4 +20,9 @@ it('stores only operation identity and distinguishes failed, successful and unce
 	assert.equal(jobAcknowledgement({ rows: [{ id: 'a', action: 'publish', reason: 'published a@1.0.0' }] }, 'a').state, 'succeeded');
 	assert.equal(jobAcknowledgement({ rows: [{ id: 'a', action: 'publish', reason: 'pack: missing executable' }] }, 'a').state, 'failed');
 	assert.equal(jobAcknowledgement({ rows: [] }, 'a').state, 'unknown');
+	assert.equal(jobAcknowledgement({ rows: [], writes: true }, 'a').state, 'unknown');
+	assert.equal(jobAcknowledgement({ rows: [{ id: 'other', ok: true }] }, 'a').state, 'unknown');
+	assert.equal(jobAcknowledgement({ rows: [{ id: 'a', action: 'commit' }], writes: true }, 'a', { route: '/api/commit' }).state, 'succeeded');
+	assert.deepEqual(jobRequest('/api/land', { apply: true, siteIds: ['site'], otp: 'secret' })?.ids, ['site']);
+	assert.equal(jobAcknowledgement({ results: [{ siteId: 'site', ok: false, steps: [{ ok: false, reason: 'ship failed' }] }], writes: true }, 'site').state, 'failed');
 });
