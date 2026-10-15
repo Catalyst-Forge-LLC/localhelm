@@ -6,6 +6,8 @@ import { pinsFromPkg } from './pins.js';
 import { clearGlobalCache, readGlobalVersions } from './globalInstall.js';
 import { collectDeps, pathExists, pkgBinNames, readPkg, rootPkgPath, shipScriptTarget, sitePkgPath, type PkgJson } from './pkg.js';
 import { compareSemver } from './semver.js';
+import { readReleaseTarget } from './releaseTarget.js';
+import type { ReleaseTarget } from './releaseTypes.js';
 import type { FleetDigest, FleetInventory, GitCell, NpmCell, PinEdge, ProjectStatus } from './types.js';
 
 const EMPTY_GIT: GitCell = {
@@ -74,6 +76,8 @@ export function statusPhaseLabel(phase: StatusPhase, done?: number, total?: numb
 }
 
 type Prepared = {
+	release?: ReleaseTarget;
+	releasePkg?: PkgJson;
 	id: string;
 	path: string;
 	absPath: string;
@@ -164,8 +168,11 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			}
 			const rootFile = rootPkgPath(absPath);
 			const rootRead = (await pathExists(rootFile)) ? await readPkg(rootFile) : null;
-			const rootError = rootRead && 'error' in rootRead ? rootRead.error : undefined;
+			let rootError = rootRead && 'error' in rootRead ? rootRead.error : undefined;
 			const rootPkg = rootRead && !('error' in rootRead) ? rootRead : undefined;
+			let release: ReleaseTarget | undefined; let releasePkg = rootPkg;
+			try { const resolved = await readReleaseTarget(absPath); if (resolved) { release = resolved.target; releasePkg = resolved.pkg; } }
+			catch (err) { rootError = `Release configuration: ${(err as Error).message}`; }
 			let sitePkg: PkgJson | undefined;
 			const siteFile = sitePkgPath(absPath);
 			if (await pathExists(siteFile)) {
@@ -177,9 +184,11 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 				path: project.path,
 				absPath,
 				missing: false,
-				privatePkg: !!rootPkg?.private,
-				localVersion: rootPkg?.version ?? null,
-				npmName: project.npm ?? rootPkg?.name,
+				privatePkg: !!releasePkg?.private,
+				localVersion: releasePkg?.version ?? null,
+				npmName: project.npm ?? releasePkg?.name,
+				release,
+				releasePkg,
 				rootPkg,
 				rootError,
 				sitePkg,
@@ -207,7 +216,7 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 	}
 
 	const preferOnline = Boolean(options.refreshNpm || options.fetch);
-	const needsGlobalRead = prepared.some((row) => pkgBinNames(row.rootPkg).length > 0);
+	const needsGlobalRead = prepared.some((row) => pkgBinNames(row.releasePkg).length > 0);
 	if (names.size) report('npm', 0, names.size);
 	else report('git', 0, prepared.length);
 	if (needsGlobalRead) report('globals');
@@ -293,7 +302,8 @@ export async function fleetStatus(loaded: LoadedManifest, options: StatusOptions
 			unpublishedAhead,
 			commitsSinceNpm: null,
 			ship: row.ship,
-			bin: pkgBinNames(row.rootPkg),
+			bin: pkgBinNames(row.releasePkg),
+			release: row.release,
 			global: row.npmName ? { version: globals.get(row.npmName) ?? null } : undefined,
 		};
 		if (row.rootError) status.error = row.rootError;

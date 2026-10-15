@@ -42,8 +42,8 @@ export function publishApplyTitle(rows: ReadonlyArray<{ id: string; reason?: str
 	return `publish --apply — ${ok}, ${failed.length} failed: ${failed.map((row) => row.id).join(', ')}`;
 }
 
-export function publishResultLine(row: { id: string; reason?: string }): string {
-	return `${row.id}  ${row.reason ?? 'no result'}`;
+export function publishResultLine(row: { id: string; reason?: string; artifact?: { files: string[]; sha256: string; bytes: number }; warning?: string }): string {
+	return `${row.id}  ${row.reason ?? 'no result'}${row.artifact ? '\nVerified ' + row.artifact.files.length + ' files · ' + Math.ceil(row.artifact.bytes / 1024) + ' KB · SHA-256 ' + row.artifact.sha256.slice(0, 16) : ''}${row.warning ? '\n' + row.warning : ''}`;
 }
 
 export function orderPublishResults<T extends { reason?: string }>(rows: readonly T[]): T[] {

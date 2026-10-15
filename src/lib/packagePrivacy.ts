@@ -3,6 +3,7 @@ import { lstat, readFile, realpath, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { LoadedManifest } from './manifest.js';
 import { joinRoot, toPosix } from './paths.js';
+import { readReleaseTarget } from './releaseTarget.js';
 
 export type PackagePrivacyPlan = {
 	id: string;
@@ -64,7 +65,7 @@ async function inspectPackage(loaded: LoadedManifest, id: string): Promise<{ pla
 	if (!project) return { plan: { id, action: 'skip', reason: `not enrolled: ${id}` } };
 	try {
 		const directory = await realpath(joinRoot(loaded.workspaceRoot, project.path));
-		const file = path.join(directory, 'package.json');
+		const file = (await readReleaseTarget(directory))?.target.manifest ?? path.join(directory, 'package.json');
 		const stat = await lstat(file);
 		if (!stat.isFile() || stat.isSymbolicLink()) throw new Error('package.json must be a regular file, not a link.');
 		const raw = await readFile(file, 'utf8');

@@ -92,7 +92,9 @@ export function parseRemoteFetchUrls(config: string): { origin?: string; backup?
 		}
 		const url = /^url\s*=\s*(.+)$/.exec(line);
 		if (!url || (section !== 'origin' && section !== 'backup')) continue;
-		const value = url[1]?.trim();
+		const rawValue = url[1]?.trim();
+		const escapes: Record<string, string> = { n: '\n', t: '\t', b: '\b' };
+		const value = rawValue?.replace(/^"(.*)"$/, '$1').replace(/\\([\\"ntb])/g, (_, char: string) => escapes[char] ?? char);
 		if (!value) continue;
 		if (section === 'origin') origin = value;
 		if (section === 'backup') backup = value;

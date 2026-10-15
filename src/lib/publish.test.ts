@@ -115,7 +115,7 @@ describe('publish plan', () => {
 		assert.equal(row?.version, '1.0.1');
 		assert.deepEqual(
 			row?.steps.map((s) => s.kind),
-			['bump', 'commit', 'push', 'publish'],
+			['bump', 'commit', 'pack', 'push', 'publish'],
 		);
 		assert.match(row?.reason ?? '', /npm publish widget@1\.0\.1/);
 	});
@@ -138,7 +138,7 @@ describe('publish plan', () => {
 		assert.equal(row?.version, '1.0.1');
 		assert.deepEqual(
 			row?.steps.map((s) => s.kind),
-			['push', 'publish'],
+			['pack', 'push', 'publish'],
 		);
 	});
 
@@ -157,7 +157,7 @@ describe('publish plan', () => {
 		);
 		assert.deepEqual(
 			row?.steps.map((s) => s.kind),
-			['publish'],
+			['pack', 'publish'],
 		);
 	});
 
@@ -268,13 +268,15 @@ describe('publish apply', () => {
 			'0:bump:done',
 			'1:commit:start',
 			'1:commit:done',
-			'2:push:start',
-			'2:push:done',
-			'3:publish:start',
-			'3:publish:done',
+			'2:pack:start',
+			'2:pack:done',
+			'3:push:start',
+			'3:push:done',
+			'4:publish:start',
+			'4:publish:done',
 		]);
 		assert.equal(calls.length, 1);
-		assert.deepEqual(calls[0], ['publish', '--access', 'public']);
+		assert.deepEqual(calls[0], ['publish', applied.artifact!.archive, '--access', 'public', '--ignore-scripts', '--workspaces=false']);
 		assert.equal(calls[0]?.includes('--force'), false);
 		const pkg = await readFile(path.join(pkgDir, 'package.json'), 'utf8');
 		assert.match(pkg, /"version": "1.0.1"/);

@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublishIds } from '../../../../../src/lib/index.js';
 import type { BumpKind } from '../../../../../src/lib/index.js';
 import { errJson, loadRequired, withLockAt } from '$lib/server/helm';
+import { assertPublishConfirmation } from '../../../../../src/lib/publishConfirmation.js';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
@@ -11,11 +12,13 @@ export const POST: RequestHandler = async ({ request }) => {
 			ids?: string[];
 			kind?: BumpKind;
 			otp?: string;
+			confirmed?: Record<string, string>;
 		};
 		const kind: BumpKind = body.kind === 'minor' || body.kind === 'major' ? body.kind : 'patch';
 		const loaded = await loadRequired();
 		const ids = body.apply ? requirePublishIds(body.ids ?? []) : body.ids?.length ? body.ids : undefined;
 		const planned = await planPublish(loaded, ids, kind);
+		if (body.apply) assertPublishConfirmation(planned, body.confirmed);
 		if (!body.apply) {
 			const npmUser = npmWhoami();
 			return json({

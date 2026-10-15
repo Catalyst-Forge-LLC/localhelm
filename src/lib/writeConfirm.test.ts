@@ -72,8 +72,8 @@ describe('publishItems', () => {
 		const row = { id: 'example', version: '1.0.0', package: { directory: 'C:/work/example with spaces', executables: [] as string[] }, steps: [{ kind: 'publish' as const, name: 'example', version: '1.0.0' }] };
 		const lines = publishItems(row, false);
 		assert.equal(lines.length, 1);
-		assert.match(lines[0]!, /Package: C:\/work\/example with spaces\/package.json/);
-		assert.match(lines[0]!, /README: C:\/work\/example with spaces\/README.md/);
+		assert.match(lines[0]!, /Version source: C:\/work\/example with spaces\/package.json/);
+		assert.match(lines[0]!, /README source: C:\/work\/example with spaces\/README.md/);
 		assert.match(lines[0]!, /Executable entries: none declared/);
 		assert.deepEqual(publishItemKeys(row), ['example:0']);
 		assert.match(publishItems({ ...row, package: { ...row.package, executables: ['example'] } }, false)[0]!, /Executable entries: example/);

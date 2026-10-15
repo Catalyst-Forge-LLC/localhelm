@@ -862,7 +862,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 								: `Publish ${eligible.length} packages?`
 							: 'Nothing to publish',
 					hint: eligible.length
-						? [needsNpm ? host.publishAuthHint() : '', bumpNote, githubNote].filter(Boolean).join(' ')
+						? [needsNpm ? host.publishAuthHint() : '', bumpNote, githubNote, needsNpm ? 'Builds and verifies one archive before pushing or publishing it. Missing executable files or changed release sources stop the release.' : 'The GitHub workflow owns artifact verification.'].filter(Boolean).join(' ')
 						: ids.length === 1
 							? `${ids[0]}: ${data.rows[0]?.reason ?? 'cannot publish'}`
 							: 'No listed package is ready to publish.',
@@ -902,6 +902,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 									apply: true,
 									ids: [id],
 									kind: host.bumpKind()[id] ?? 'patch',
+									confirmed: { [id]: host.lastPublishPlan().find((row) => row.id === id)?.revision },
 									otp,
 								}),
 							},

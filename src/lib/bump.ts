@@ -6,6 +6,7 @@ import type { LoadedManifest } from './manifest.js';
 import { joinRoot } from './paths.js';
 import { pathExists, rootPkgPath } from './pkg.js';
 import { bumpTriple, type BumpKind } from './semver.js';
+import { readReleaseTarget } from './releaseTarget.js';
 
 export type BumpPlan = {
 	id: string;
@@ -29,23 +30,51 @@ function commitIntent(abs: string, pkg: string, to: string): Pick<BumpPlan, 'com
 	return { commit: 'commit', commitMessage: helmBumpMessage(pkg, to) };
 }
 
+/** Preserve formatting and nested metadata; only replace the authoritative top-level version. */
+function versionRange(raw: string): { start: number; end: number; value: string } | undefined {
+	JSON.parse(raw);
+	let depth = 0;
+	let found: { start: number; end: number; value: string } | undefined;
+	for (let i = 0; i < raw.length; i++) {
+		if (raw[i] === '"') {
+			let end = i + 1;
+			for (; end < raw.length; end++) { if (raw[end] === '\\') end++; else if (raw[end] === '"') break; }
+			const colon = /^\s*:\s*/.exec(raw.slice(end + 1));
+			if (depth === 1 && colon && JSON.parse(raw.slice(i, end + 1)) === 'version') {
+				if (found) throw new Error('Duplicate top-level version fields. Resolve them before bumping.');
+				const start = end + 1 + colon[0].length;
+				const literal = /^"(?:[^"\\]|\\.)*"/.exec(raw.slice(start));
+				if (!literal) throw new Error('Version must be a string.');
+				found = { start, end: start + literal[0].length, value: JSON.parse(literal[0]) as string };
+			}
+			i = end;
+		} else if (raw[i] === '{' || raw[i] === '[') depth++;
+		else if (raw[i] === '}' || raw[i] === ']') depth--;
+	}
+	return found;
+}
+
 export async function planBump(loaded: LoadedManifest, id: string, kind: BumpKind): Promise<BumpPlan> {
 	const project = loaded.manifest.projects.find((p) => p.id === id);
 	if (!project) return { id, file: '', from: null, to: null, action: 'skip', reason: `not enrolled: ${id}` };
 	const abs = joinRoot(loaded.workspaceRoot, project.path);
-	const file = rootPkgPath(abs);
+	let file = rootPkgPath(abs);
+	try { file = (await readReleaseTarget(abs))?.target.manifest ?? file; }
+	catch (err) { return { id, file, from: null, to: null, action: 'skip', reason: (err as Error).message }; }
 	if (!(await pathExists(file))) {
 		return { id, file, from: null, to: null, action: 'skip', reason: `no package.json at ${file}` };
 	}
 	const raw = await readFile(file, 'utf8');
-	const match = /"version"\s*:\s*"([^"]*)"/.exec(raw);
-	if (!match) return { id, file, from: null, to: null, action: 'skip', reason: 'no version field' };
+	let range: ReturnType<typeof versionRange>;
+	try { range = versionRange(raw); }
+	catch (err) { return { id, file, from: null, to: null, action: 'skip', reason: (err as Error).message }; }
+	if (!range) return { id, file, from: null, to: null, action: 'skip', reason: 'no version field' };
 	try {
-		const to = bumpTriple(match[1], kind);
+		const to = bumpTriple(range.value, kind);
 		const pkg = project.npm ?? id;
-		return { id, file, from: match[1], to, action: 'bump', repo: abs, ...commitIntent(abs, pkg, to) };
+		return { id, file, from: range.value, to, action: 'bump', repo: abs, ...commitIntent(abs, pkg, to) };
 	} catch (err) {
-		return { id, file, from: match[1], to: null, action: 'skip', reason: err instanceof Error ? err.message : String(err) };
+		return { id, file, from: range.value, to: null, action: 'skip', reason: err instanceof Error ? err.message : String(err) };
 	}
 }
 
@@ -54,7 +83,9 @@ export async function applyBump(plan: BumpPlan): Promise<string[]> {
 		throw new Error(plan.reason ?? `cannot apply bump for ${plan.id}`);
 	}
 	const raw = await readFile(plan.file, 'utf8');
-	const next = raw.replace(/"version"\s*:\s*"([^"]*)"/, `"version": "${plan.to}"`);
+	const range = versionRange(raw);
+	if (range?.value !== plan.from) throw new Error('Version changed after planning. Refresh and open a new Bump plan.');
+	const next = raw.slice(0, range.start) + JSON.stringify(plan.to) + raw.slice(range.end);
 	if (next === raw) throw new Error(`did not replace version in ${plan.file}`);
 	await writeFile(plan.file, next, 'utf8');
 	const files = [plan.file];

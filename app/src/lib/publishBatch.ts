@@ -1,6 +1,9 @@
 const KEY = 'localhelm.publishBatch';
+import type { ReleaseArtifact } from '../../../src/lib/releaseTypes.js';
 
 export type PublishBatchRow = {
+	artifact?: ReleaseArtifact;
+	warning?: string;
 	id: string;
 	action: string;
 	reason?: string;

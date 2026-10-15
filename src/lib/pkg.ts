@@ -6,6 +6,8 @@ export type PkgJson = {
 	name?: string;
 	version?: string;
 	private?: boolean;
+	license?: unknown;
+	files?: string[];
 	bin?: string | Record<string, string>;
 	scripts?: Record<string, string>;
 	dependencies?: Record<string, string>;

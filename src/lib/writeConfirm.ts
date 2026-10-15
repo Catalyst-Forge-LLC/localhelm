@@ -5,6 +5,7 @@ import { globalInstallLine, shipConfirmLine, type GlobalInstallLineRow } from '.
 import { publishNeedsGithub, publishStepLabel } from './publishDisplay.js';
 import type { PublishStep } from './publishTypes.js';
 import { GIT_TRUST_HINT } from './gitTrustDisplay.js';
+import type { ReleaseArtifact } from './releaseTypes.js';
 
 export type ConfirmOffer = {
 	title: string;
@@ -112,6 +113,8 @@ export type CommitPlanRow = {
 };
 
 export type PublishBatchRow = {
+	artifact?: ReleaseArtifact;
+	warning?: string;
 	id: string;
 	action: string;
 	reason?: string;
@@ -195,7 +198,7 @@ export function pushConfirmEntries(rows: PushConfirmRow[]): PushConfirmEntries {
 }
 
 export type PublishConfirmRow = {
-	package?: { directory: string; executables: string[] };
+	package?: { directory: string; executables: string[]; manifest?: string; readme?: string; buildScript?: string };
 	id: string;
 	npm?: string;
 	version: string | null;
@@ -227,7 +230,7 @@ export function publishItems(row: PublishConfirmRow, named: boolean): string[] {
 		let line = `${i + 1}. ${publishStepLabel(step)}`;
 		if (step.kind === 'publish' && row.package) {
 			const directory = row.package.directory.replace(/[\\/]+$/, '');
-			line += `\nPackage: ${directory}/package.json\nREADME: ${directory}/README.md\nExecutable entries: ${row.package.executables.length ? row.package.executables.join(', ') : 'none declared'}`;
+			line += `\nPackage directory: ${directory}\nVersion source: ${row.package.manifest ?? directory + '/package.json'}\nREADME source: ${row.package.readme ?? directory + '/README.md'}\nExecutable entries: ${row.package.executables.length ? row.package.executables.join(', ') : 'none declared (package)'}${row.package.buildScript ? '\nBuild script: ' + row.package.buildScript : ''}`;
 		}
 		return named ? `${row.id}  ${line}` : line;
 	});
@@ -243,6 +246,8 @@ export function slimPublishRows(rows: PublishBatchRow[]): unknown[] {
 		action: row.action,
 		version: row.version,
 		reason: row.reason,
+		...(row.artifact ? { artifact: row.artifact } : {}),
+		...(row.warning ? { warning: row.warning } : {}),
 	}));
 }
 

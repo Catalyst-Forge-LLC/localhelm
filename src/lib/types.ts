@@ -61,6 +61,7 @@ export type NpmCell = {
 };
 
 export type ProjectStatus = {
+	release?: import('./releaseTypes.js').ReleaseTarget;
 	id: string;
 	path: string;
 	absPath: string;
