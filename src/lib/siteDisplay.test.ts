@@ -22,6 +22,7 @@ import {
 describe('siteDisplay', () => {
 	it('replaces pin/locked/update with one engine column', () => {
 		const cols = siteTableColumns('filepress', [
+			{ id: 'engine', label: 'Engine from the plugin' },
 			{ id: 'pin', label: 'pin' },
 			{ id: 'locked', label: 'locked' },
 			{ id: 'update', label: 'update' },

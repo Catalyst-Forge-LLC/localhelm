@@ -12,6 +12,8 @@
 		error,
 		staleCount = 0,
 		statusReady,
+		reviewCount = 0,
+		pluginsReady = true,
 		serveHostPort = '',
 		serveNote = '',
 		npmUser = null,
@@ -40,6 +42,8 @@
 		error: string;
 		staleCount?: number;
 		statusReady: boolean;
+		reviewCount?: number;
+		pluginsReady?: boolean;
 		serveHostPort?: string;
 		serveNote?: string;
 		npmUser?: string | null;
@@ -150,7 +154,14 @@
 					<span class="lamp-dot" aria-hidden="true"></span>
 					<span class="lamp-word">No fleet</span>
 				</button>
-			{:else if statusReady}
+			{:else if statusReady && reviewCount > 0}
+				<button type="button" class="lamp warm" aria-label="Review {reviewCount} items — open Today" onclick={() => onLamp('all')}>
+					<span class="lamp-dot" aria-hidden="true"></span>
+					<span class="lamp-word">Review {reviewCount}</span>
+				</button>
+			{:else if statusReady && error}
+				<button type="button" class="lamp warm" onclick={() => onLamp('all')}><span class="lamp-dot" aria-hidden="true"></span><span class="lamp-word">Review status</span></button>
+			{:else if statusReady && pluginsReady}
 				<button
 					type="button"
 					class="lamp quiet"

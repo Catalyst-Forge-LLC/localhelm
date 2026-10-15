@@ -14,6 +14,7 @@
 		hint?: string;
 		confirmLabel?: string;
 		cancelLabel?: string;
+		closeLabel?: string;
 		variant?: 'write' | 'danger';
 		busy?: boolean;
 		busyLabel?: string;
@@ -59,6 +60,7 @@
 		hint = '',
 		confirmLabel = 'Confirm',
 		cancelLabel = 'Cancel',
+		closeLabel = 'Close',
 		variant = 'write',
 		busy = false,
 		busyLabel = '',
@@ -518,7 +520,7 @@
 				disabled={busy && (!canStop || stopping)}
 				onclick={busy && canStop ? stop : cancel}
 			>
-				{busy && canStop ? (stopping ? 'Stopping…' : 'Stop') : canApply ? cancelLabel : 'Close'}
+				{busy && canStop ? (stopping ? 'Stopping…' : 'Stop') : canApply ? cancelLabel : closeLabel}
 			</button>
 			{#if canApply && altLabel && onalt}
 				<button type="button" class="btn" disabled={busy || !draftsReady} onclick={alt}>{altLabel}</button>

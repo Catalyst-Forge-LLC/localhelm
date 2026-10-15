@@ -68,6 +68,16 @@ describe('pushItems', () => {
 });
 
 describe('publishItems', () => {
+	it('names the actual local package and absence of an executable without adding progress steps', () => {
+		const row = { id: 'example', version: '1.0.0', package: { directory: 'C:/work/example with spaces', executables: [] as string[] }, steps: [{ kind: 'publish' as const, name: 'example', version: '1.0.0' }] };
+		const lines = publishItems(row, false);
+		assert.equal(lines.length, 1);
+		assert.match(lines[0]!, /Package: C:\/work\/example with spaces\/package.json/);
+		assert.match(lines[0]!, /README: C:\/work\/example with spaces\/README.md/);
+		assert.match(lines[0]!, /Executable entries: none declared/);
+		assert.deepEqual(publishItemKeys(row), ['example:0']);
+		assert.match(publishItems({ ...row, package: { ...row.package, executables: ['example'] } }, false)[0]!, /Executable entries: example/);
+	});
 	it('prefixes the fleet id only when several packages are listed', () => {
 		const row = {
 			id: 'helm',

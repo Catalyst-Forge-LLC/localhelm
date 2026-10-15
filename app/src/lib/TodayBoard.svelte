@@ -31,6 +31,7 @@
 		filteredCascadeRows,
 		todayBadges,
 		needActions,
+		rowRecoveryHint,
 		cascadeFor,
 		gitSummary,
 		portLookCards = [],
@@ -76,6 +77,7 @@
 		filteredCascadeRows: CascadeTarget[];
 		todayBadges: (row: Project) => TodayBadge[];
 		needActions: (row: Project) => TodayNeedAction[];
+		rowRecoveryHint: (row: Project) => string;
 		cascadeFor: (id: string) => CascadeTarget | undefined;
 		gitSummary: (row: Project) => string;
 		portLookCards: PortLookGroup[];
@@ -144,9 +146,9 @@
 					{#if !statusReady}
 						Reading fleet…
 					{:else if noFleet}
-						Nothing enrolled yet. Scan the folder that holds your repos, tick the ones you keep, then write.
+						Add your projects to compare local changes with Git and npm.
 					{:else}
-						Fleet writes you can confirm. Looks, below, is Ports facts. Lease claims a missing site slip.
+						Choose a next action or resolve a blocker. Every write opens a plan for review.
 					{/if}
 				</p>
 				{#if !noFleet}
@@ -228,13 +230,13 @@
 					{#if demoBoard}
 						Demo board is quiet. Add or remove here does not touch your main fleet.
 					{:else}
-						All quiet on the fleet. Looks, FilePress, and LocalSlip stay in the other panes.
+						No package or Git actions waiting. Site and port status appear alongside this list.
 					{/if}
 				</p>
 			{:else if filteredEmpty}
 				<p class="dim small">
 					{#if needFilter === 'publish'}
-						Nothing waiting to publish. All still shows dirty trees and Write pins.
+						No releases need attention. All shows other changes and blockers.
 					{:else if needFilter === 'pins'}
 						No pins behind. Cascade from the published package (Write pins), not the consumer. FilePress sites still use Land / Sync engine.
 					{:else}
@@ -284,7 +286,7 @@
 										<Tooltip title={act.title}>
 											<button
 												class="btn btn-sm"
-												class:btn-write={i === 0 && !act.disabled}
+												class:btn-write={i === acts.findIndex((item) => !item.disabled)}
 												disabled={busy || Boolean(act.disabled)}
 												onclick={act.run}
 											>
@@ -293,6 +295,7 @@
 										</Tooltip>
 									{/each}
 								</div>
+								{#if rowRecoveryHint(row)}<p class="dim small" role="note">{rowRecoveryHint(row)}</p>{/if}
 							</div>
 						</li>
 					{/each}
@@ -333,7 +336,7 @@
 				<h2>Looks</h2>
 				<p class="hint">
 					{#if noFleet}
-						Ports facts after you enroll. LocalSlip is optional.
+						Connections between your projects and local services. LocalSlip is optional.
 					{:else if portLookCards.length}
 						{lookFactCount} Ports fact{lookFactCount === 1 ? '' : 's'}
 						{#if lookFactCount !== portLookCards.length}
@@ -341,7 +344,7 @@
 						{/if}
 						— missing recipe, split stack, or enroll vs lease. Add enrolls; Ports does not.
 					{:else}
-						Ports facts (recipe, stack, enroll), not fleet writes.
+						Connections between projects, startup recipes, and port leases.
 					{/if}
 				</p>
 			</div>
@@ -352,6 +355,7 @@
 			{:else if noFleet}
 				<p class="dim small">Looks stays empty until a project is on the fleet.</p>
 			{:else if !portLookCards.length}
+				<p class="dim small">{leaseBoard ? 'No project or service setup items to review.' : 'Connect LocalSlip for startup recipes and port details.'}</p>
 			{:else}
 				<ul class="need-list">
 					{#each portLookCards as look (look.id)}
@@ -403,10 +407,10 @@
 							{#if sitesNeedingLand.some((row) => landPendingIds.includes(row.id))}
 								A failed ship stays here until it succeeds.
 							{:else}
-								Land does Sync, then Push and Ship.
+								Land updates the site engine, pushes changes, and deploys.
 							{/if}
 						{:else if filepressBoard}
-							{filepressBoard.rows.length} sites · none waiting on Land. Sites Land is the rows you check, not this list.
+							{filepressBoard.rows.length} sites · no pending deployment. Open FilePress to manage sites.
 						{:else if !pluginsReady}
 							Reading sites…
 						{:else if noFleet}
@@ -491,7 +495,7 @@
 							{#if portsNeedingYou.length}
 								· {portsNeedingYou.length} down or conflicted
 							{:else}
-								· all listening
+								{#if leaseBoard.rows.length}· all listening{:else}· no leases yet{/if}
 							{/if}
 						{:else if !pluginsReady}
 							Reading ports…

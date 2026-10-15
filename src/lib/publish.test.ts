@@ -42,6 +42,11 @@ function inventory(projects: ProjectStatus[]): FleetInventory {
 }
 
 describe('publish plan', () => {
+	it('identifies the enrolled package directory and executable entries in a read-only plan', () => {
+		const [row] = planPublishFromInventory(inventory([project({ id: 'cli', absPath: '/work/cli', bin: ['cli'], unpublishedAhead: true, localVersion: '1.0.1' })]), ['cli'], 'patch');
+		assert.deepEqual(row?.package, { directory: '/work/cli', executables: ['cli'] });
+		assert.equal(row?.action, 'publish');
+	});
 	it('requires named ids before apply', () => {
 		assert.throws(() => requirePublishIds([]), /name the project id/);
 		assert.deepEqual(requirePublishIds([' ollanet ']), ['ollanet']);

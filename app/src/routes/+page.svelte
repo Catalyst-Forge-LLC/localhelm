@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
-	import { replaceState } from '$app/navigation';
+	import { afterNavigate, replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
 	import FeatureLabelDialog from '$lib/FeatureLabelDialog.svelte';
 	import { featureLabelModel, labelQueuePlace, labelTickSeed, type FeatureLabelModel } from '$lib/featureLabel';
 	import TodayBoard from '$lib/TodayBoard.svelte';
 	import { readProgressResponse } from '$lib/progressResponse';
 	import { StatusReads } from '$lib/statusReads';
+	import { publishRecoveryHint } from '$lib/actionGuidance';
 	import BridgeHeader from '$lib/BridgeHeader.svelte';
 	import '$lib/dashboard.css';
 	import AddProjectsModal from '$lib/AddProjectsModal.svelte';
@@ -161,6 +162,8 @@
 	let npmUser = $state<string | null>(null);
 	let publishAuthHint = $state('');
 	let confirmOpen = $state(false);
+	let confirmCloseLabel = $state('Close');
+	let activityError = $state('');
 	let labelOpen = $state(false);
 	let labelModel = $state<FeatureLabelModel | null>(null);
 	let labelTicked = $state<string[]>([]);
@@ -499,7 +502,7 @@
 
 	function rowHasNeed(row: Project, filter: NeedFilter): boolean {
 		if (filter === 'all') return true;
-		if (filter === 'publish') return canPublish(row) && inShipQueue(row.id);
+		if (filter === 'publish') return (row.unpublishedAhead || canPublish(row)) && inShipQueue(row.id);
 		if (filter === 'pins') return row.cascadeBehind > 0;
 		return canPush(row);
 	}
@@ -739,7 +742,8 @@
 				if (Array.isArray(saved.entries)) entries = saved.entries.map(toLog);
 			})
 			.catch((err) => {
-				error = err instanceof Error ? err.message : String(err);
+				activityError = `Activity could not be saved: ${err instanceof Error ? err.message : String(err)}`;
+				activityUnseen = true;
 			});
 	}
 
@@ -749,6 +753,7 @@
 			async () => {
 				await call('/api/activity', { method: 'DELETE' });
 				entries = [];
+				activityError = '';
 				activityUnseen = false;
 			},
 			{ closeConfirm: false },
@@ -756,6 +761,7 @@
 	}
 
 	function beginConfirm(spec: { title: string; hint?: string; itemKeys?: string[] }): void {
+		confirmCloseLabel = 'Close';
 		const keys = spec.itemKeys?.filter(Boolean) ?? [];
 		confirmTitle = spec.title;
 		confirmHint = spec.hint || planningHint(spec.title);
@@ -816,8 +822,20 @@
 		} finally {
 			busy = '';
 			jobCanStop = false;
-			if (opts?.closeConfirm !== false && !jobStopped) {
-				confirmOpen = false;
+			if (opts?.closeConfirm !== false) {
+				if (confirmOpen && (error || jobStopped)) {
+					const ids = confirmWriteIds.filter((id) => !confirmExcluded.includes(id));
+					const priorCancel = confirmOnCancel;
+					confirmTitle = jobStopped ? 'Action stopped' : 'Action needs attention';
+					confirmHint = 'Review the result, then refresh status before opening a new plan.';
+					confirmCanApply = false;
+					confirmCloseLabel = 'Close and refresh';
+					confirmOnCancel = () => {
+						priorCancel?.();
+						const fleetIds = ids.filter((id) => inventory?.projects.some((row) => row.id === id));
+						void (fleetIds.length ? refreshRows(fleetIds) : refresh());
+					};
+				} else confirmOpen = false;
 				confirmRun = null;
 				confirmAlt = null;
 				confirmAltLabel = '';
@@ -1174,7 +1192,7 @@
 		try {
 			await fn();
 		} catch (err) {
-			error = err instanceof Error ? err.message : String(err);
+			error = `${label}: ${err instanceof Error ? err.message : String(err)}`;
 		} finally {
 			quietReads--;
 			if (!quietReads && !statusReads.pending) statusNote = '';
@@ -1441,6 +1459,7 @@
 				: emptyConfirmPhases(spec.items.length);
 		confirmItemKinds = spec.itemKinds?.length === spec.items.length ? spec.itemKinds.slice() : [];
 		confirmLabel = spec.confirmLabel;
+		confirmCloseLabel = 'Close';
 		confirmVariant = spec.variant ?? 'write';
 		confirmCanApply = spec.canApply;
 		confirmShowOtp = Boolean(spec.showOtp);
@@ -2166,6 +2185,11 @@
 		return needActionTitle('push', row);
 	}
 
+	function rowRecoveryHint(row: Project): string {
+		if (row.unpublishedAhead && inShipQueue(row.id)) return publishRecoveryHint(whyNotPublish(row));
+		return '';
+	}
+
 	function needActions(row: Project): NeedAction[] {
 		if (demoBoard || row.pending) return [];
 		const pins = cascadeFor(row.id)?.writable ?? 0;
@@ -2293,6 +2317,8 @@
 		return bits.filter(Boolean).join('\n\n');
 	}
 
+	afterNavigate(() => { urlSyncReady = true; });
+
 	onMount(() => {
 		const params = new URLSearchParams(window.location.search);
 		restoreUrlState(params);
@@ -2302,7 +2328,6 @@
 		} catch {
 			/* ignore */
 		}
-		urlSyncReady = true;
 		const interrupted = loadPublishBatch();
 		if (interrupted && (interrupted.rows.length || interrupted.githubPending.length)) {
 			offerPublishOutcome(interrupted.rows, {
@@ -2344,6 +2369,8 @@
 		error={error || pluginFaultNote}
 		staleCount={staleRemoteCount}
 		{statusReady}
+		reviewCount={todayCount}
+		{pluginsReady}
 		serveHostPort={serveHeading.hostPort}
 		serveNote={serveHeading.note}
 		{npmUser}
@@ -2449,6 +2476,7 @@
 				{filteredAttentionRows}
 				{filteredCascadeRows}
 				{todayBadges}
+				{rowRecoveryHint}
 				{needActions}
 				{cascadeFor}
 				{gitSummary}
@@ -2486,7 +2514,7 @@
 					<div class="section-head">
 						<div>
 							<h2>Fleet</h2>
-							<p class="hint">Needs you is the write for that row. The refresh icon re-reads that row only. Check rows for bulk refresh, bump, push, publish, or remove. Removing never deletes a folder. Bump writes package.json and commits that file.</p>
+							<p class="hint">Compare local and published versions, check Git state, and choose a next action. Select rows for bulk actions.</p>
 						</div>
 					</div>
 					<div class="panel-tools">
@@ -2611,7 +2639,9 @@
 						</div>
 					</div>
 
-					<div class="table-wrap">
+					<p class="table-scroll-hint">Scroll right for Git status and actions.</p>
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex (The named scroll region needs keyboard focus for horizontal scrolling.) -->
+					<div class="table-wrap" tabindex="0" role="region" aria-label="Fleet projects">
 						<table>
 							<thead>
 								<tr>
@@ -2773,8 +2803,7 @@
 					</div>
 
 					<p class="legend">
-						Check rows for bulk bump, push, publish, ship, install global, or remove. Keep local leaves a row on Fleet for everyday work but drops Publish, Ship, and Land. Each write button plans first, then asks you to confirm. Cancel leaves disk unchanged.
-						Publish bumps if local is already on npm, pushes if needed, then <code>npm publish</code>. Never <code>--force</code>. Never the IngotVault backup remote.
+						Actions open a plan before writing. Publish includes any needed version bump and push; Ship deploys the app or site.
 					</p>
 				</section>
 			</div>
@@ -3484,8 +3513,10 @@
 				</div>
 			</div>
 			{#if entries.length === 0}
+				{#if activityError}<p class="dim small" role="status">{activityError}</p>{/if}
 				<p class="dim small">Nothing yet.</p>
 			{:else}
+				{#if activityError}<p class="dim small" role="status">{activityError}</p>{/if}
 				<div class="drawer-body">
 					<ActivityDayNav days={activityDays} selected={activityDay} onpick={jumpActivityDay} />
 					<ul class="log" bind:this={activityLogEl}>
@@ -3697,6 +3728,7 @@
 </AddProjectsModal>
 
 <ConfirmModal
+	closeLabel={confirmCloseLabel}
 	bind:open={confirmOpen}
 	title={confirmTitle}
 	hint={confirmHint}

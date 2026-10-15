@@ -36,7 +36,7 @@ export async function readProgressResponse(
 	};
 	try {
 		while (true) {
-			let chunk: ReadableStreamReadResult<Uint8Array>;
+			let chunk: Awaited<ReturnType<typeof reader.read>>;
 			try { chunk = await reader.read(); }
 			catch { throw new Error(INCOMPLETE_PROGRESS); }
 			buffer += chunk.done ? decoder.decode() : decoder.decode(chunk.value, { stream: true });

@@ -23,6 +23,8 @@ export type PublishRow = {
 	action: 'publish' | 'skip';
 	reason?: string;
 	steps: PublishStep[];
+	/** The local npm command packs this enrolled directory. GitHub workflows own their own target. */
+	package?: { directory: string; executables: string[] };
 	stdout?: string;
 	stderr?: string;
 };
@@ -149,6 +151,7 @@ function planPublishOne(row: ProjectStatus, kind: BumpKind): PublishRow {
 		version: row.localVersion,
 		action: 'skip',
 		steps: [],
+		package: { directory: row.absPath, executables: row.bin ?? [] },
 	};
 	const blocked = whyNotPublish(row, kind);
 	if (blocked) return { ...base, reason: blocked };

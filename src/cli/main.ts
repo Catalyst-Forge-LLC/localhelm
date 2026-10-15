@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 import { applyBump, planBump } from '../lib/bump.js';
 import { applyCascade, planCascade } from '../lib/cascade.js';
 import { fleetDeps } from '../lib/deps.js';
@@ -212,7 +213,8 @@ async function main(): Promise<void> {
 		return;
 	}
 	if (cmd === '-v' || cmd === '--version') {
-		process.stdout.write('0.0.0\n');
+		const metadata = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8')) as { version: string };
+		process.stdout.write(`${metadata.version}\n`);
 		return;
 	}
 

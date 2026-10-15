@@ -2,6 +2,14 @@
 
 Flat list until Phase 6. Seeded from `docs/PHASE_1_BRIEF.md` §11.
 
+## UXcalibur friction pass
+
+- [x] Broad review and bounded reliability/guidance fixes — [review and evidence](docs/UX_REVIEW_2026-10-14.md)
+- [ ] Generic exact packed-artifact verification before npm publication — review packet A
+- [ ] Reload-durable results and reconciliation for all batch actions — review packet B
+- [ ] Complete shared action language and compact/mobile layout — review packet C
+- [ ] Companion fault/transition coverage and durable activity buffering — review packet D
+
 ## M1 — Read-only fleet
 
 - [x] Manifest `workspaceRoot: "."` + scan folder(s)

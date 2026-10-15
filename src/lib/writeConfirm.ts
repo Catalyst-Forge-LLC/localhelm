@@ -195,6 +195,7 @@ export function pushConfirmEntries(rows: PushConfirmRow[]): PushConfirmEntries {
 }
 
 export type PublishConfirmRow = {
+	package?: { directory: string; executables: string[] };
 	id: string;
 	npm?: string;
 	version: string | null;
@@ -223,7 +224,11 @@ export function globalItems(rows: GlobalInstallLineRow[]): string[] {
 
 export function publishItems(row: PublishConfirmRow, named: boolean): string[] {
 	return row.steps.map((step, i) => {
-		const line = `${i + 1}. ${publishStepLabel(step)}`;
+		let line = `${i + 1}. ${publishStepLabel(step)}`;
+		if (step.kind === 'publish' && row.package) {
+			const directory = row.package.directory.replace(/[\\/]+$/, '');
+			line += `\nPackage: ${directory}/package.json\nREADME: ${directory}/README.md\nExecutable entries: ${row.package.executables.length ? row.package.executables.join(', ') : 'none declared'}`;
+		}
 		return named ? `${row.id}  ${line}` : line;
 	});
 }
