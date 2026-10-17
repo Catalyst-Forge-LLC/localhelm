@@ -3905,6 +3905,12 @@
 	draftingIds={confirmDrafting}
 	draftNoteById={confirmDraftNotes}
 	plannedDraftIds={confirmDraftIds}
+	versionIds={confirmVersionKinds}
+	versionValue={bumpKind}
+	onversion={(id, kind) => {
+		bumpKind = { ...bumpKind, [id]: kind };
+		void startPublish(lastPublishPlan.map((row) => row.id).filter((item) => !confirmExcluded.includes(item)));
+	}}
 	onmessagechange={(id, text) => {
 		confirmMessages = { ...confirmMessages, [id]: text };
 	}}
@@ -3934,18 +3940,6 @@
 		fn?.();
 	}}
 >
-	{#if confirmCanApply && confirmVersionKinds.length}
-		<div class="group-buttons">
-			{#each confirmVersionKinds as id (id)}
-				<label class="dim small">Version change for {id}
-					<select aria-label={`Publish version change for ${id}`} value={bumpKind[id] ?? 'patch'} disabled={Boolean(busy) || confirmExcluded.includes(id)} onchange={(event) => {
-						bumpKind = { ...bumpKind, [id]: event.currentTarget.value as BumpKind };
-						void startPublish(lastPublishPlan.map((row) => row.id).filter((id) => !confirmExcluded.includes(id)));
-					}}><option value="patch">patch</option><option value="minor">minor</option><option value="major">major</option></select>
-				</label>
-			{/each}
-		</div>
-	{/if}
 	{#if confirmShowOtp}
 		<p class="dim small">
 			{#if npmUser}

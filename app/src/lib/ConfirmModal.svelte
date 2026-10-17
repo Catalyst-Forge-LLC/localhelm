@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { untrack, type Snippet } from 'svelte';
 	import { commitDraftProgressHint, commitDraftSubjectIds, commitDraftTimedOut } from './confirmProgress';
 	import { assignStepOwners, buildConfirmRoster, confirmCountText, confirmGroupId, confirmRosterSelected, type ConfirmRosterStep } from './confirmRoster';
 	import Icon from './Icon.svelte';
@@ -37,6 +37,10 @@
 		draftingIds?: string[];
 		draftNoteById?: Record<string, string>;
 		plannedDraftIds?: string[];
+		/** Packages whose publish plan includes a version bump. */
+		versionIds?: string[];
+		versionValue?: Record<string, string>;
+		onversion?: (id: string, kind: 'patch' | 'minor' | 'major') => void;
 		children?: Snippet;
 		onconfirm: (includedIds: string[]) => void;
 		onalt?: (includedIds: string[]) => void;
@@ -80,6 +84,9 @@
 		draftingIds = [],
 		draftNoteById = {},
 		plannedDraftIds = [],
+		versionIds = [],
+		versionValue = {},
+		onversion,
 		children,
 		onconfirm,
 		onalt,
@@ -113,7 +120,9 @@
 	$effect(() => {
 		rosterSig;
 		const seed = seedExcluded;
-		pinned = null;
+		const ids = groups?.map((group) => group.id) ?? [];
+		const keep = untrack(() => pinned);
+		if (!keep || !ids.includes(keep)) pinned = null;
 		excludedIds = seed.slice();
 		filePick = 0;
 	});
@@ -384,6 +393,7 @@
 				{#if selected.steps.some((step) => step.kind === 'commit')}
 					{@render pushLists(selected.steps)}
 				{:else}
+				<div class="publish-col">
 				<ol class="steps" class:tracked={showPhases} bind:this={stepListEl}>
 					{#each selected.steps as step, i (`${selected.id}:${i}:${step.text}`)}
 						{@const link = itemLink(step.text)}
@@ -423,6 +433,24 @@
 						</li>
 					{/each}
 				</ol>
+				{#if onversion && selectedId && versionIds.includes(selectedId)}
+					<label class="version-kind">Version change
+						<select
+							aria-label={`Publish version change for ${selectedId}`}
+							value={versionValue[selectedId] ?? 'patch'}
+							disabled={busy || excludedIds.includes(selectedId)}
+							onchange={(event) => {
+								const kind = event.currentTarget.value;
+								if (kind === 'patch' || kind === 'minor' || kind === 'major') onversion(selectedId, kind);
+							}}
+						>
+							<option value="patch">patch</option>
+							<option value="minor">minor</option>
+							<option value="major">major</option>
+						</select>
+					</label>
+				{/if}
+				</div>
 				{/if}
 			</div>
 		{:else if loneSteps}
@@ -736,6 +764,31 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.split > .publish-col {
+		height: 100%;
+		max-height: 16rem;
+		min-width: 0;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.publish-col ol.steps {
+		flex: 1 1 auto;
+		max-height: none;
+	}
+
+	.version-kind {
+		flex: 0 0 auto;
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		margin: 0.15rem 0 0;
+		color: var(--dim);
+		font-size: 0.75rem;
 	}
 
 	.step-col ol.steps {
