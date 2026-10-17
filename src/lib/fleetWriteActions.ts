@@ -1,5 +1,6 @@
 /** Fleet start/apply pairs. ConfirmModal and loadStatus stay on the page host. */
 
+import { createPagesProjectActions } from './pagesProjectActions.js';
 import { remainingAfter } from './batchApply.js';
 import { bulkProgressLabel } from './bulkProgress.js';
 import { applyConfirmStep, commitDraftProgressHint, markConfirmKey } from './confirmProgress.js';
@@ -42,6 +43,7 @@ import {
 } from './writeConfirm.js';
 
 export function createFleetWrites(host: DashboardJobHost) {
+	const { startPagesProject, offerPagesProject } = createPagesProjectActions(host, startShip);
 	async function startPackagePrivacy(id: string): Promise<void> {
 		if (!host.readyNamed([id]).length) return;
 		const label = packagePrivacyLabel();
@@ -494,6 +496,12 @@ export function createFleetWrites(host: DashboardJobHost) {
 					body: JSON.stringify({ apply: false, ids: onlyIds }),
 				})) as { rows: ScriptShipRow[] };
 				const eligible = data.rows.filter((r) => r.action === 'ship');
+				const missing = eligible.find((r) => r.pages?.action === 'create');
+				if (missing?.pages) {
+					host.note(`Ship needs Pages setup for ${missing.id}, nothing deployed`, data);
+					offerPagesProject(missing.pages, eligible.map((r) => r.id));
+					return;
+				}
 				const named = Boolean(onlyIds?.length);
 				const listed = named ? data.rows : eligible;
 				host.note(`ship plan — ${eligible.length} of ${data.rows.length} have scripts.ship, nothing written`, data);
@@ -1027,6 +1035,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 	}
 
 	return {
+		startPagesProject,
 		startGitTrust,
 		startPackagePrivacy,
 		startBump,

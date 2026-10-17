@@ -144,11 +144,13 @@ export function plainPluginError(raw: string): string {
 	const text = stripAnsi(raw).trim();
 	if (!text) return 'plugin failed';
 
-	const filepress = /filepress:\s+([^\n]+)/i.exec(text);
-	if (filepress?.[1]) return tidyPluginLine(`filepress: ${filepress[1]}`);
-
 	const wrangler = /(?:✘|x)\s*\[ERROR\][^\n]+/i.exec(text);
 	if (wrangler?.[0]) return tidyPluginLine(wrangler[0]);
+
+	const filepress = /filepress:\s+([^\n]+)/i.exec(text);
+	if (filepress?.[1] && !/^(?:wrote|built|generated|copied|serving|listening)\b/i.test(filepress[1])) {
+		return tidyPluginLine(`filepress: ${filepress[1]}`);
+	}
 
 	const specific = SPECIFIC_PLUGIN.exec(text);
 	if (specific?.[0]) return tidyPluginLine(specific[0]);

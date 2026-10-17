@@ -12,6 +12,8 @@ export type ScriptShipRow = {
 	path: string;
 	action: 'ship' | 'skip';
 	reason?: string;
+	ok?: boolean;
+	pages?: import('./pagesProjectTypes.js').PagesProjectPlan;
 	dir?: ShipDir;
 	cwd?: string;
 	stdout?: string;
@@ -120,6 +122,7 @@ export async function applyScriptShip(
 	if (result.ok) {
 		return {
 			...row,
+			ok: true,
 			reason: `shipped (${row.dir ?? 'root'})`,
 			stdout: result.stdout,
 			stderr: result.stderr,
@@ -128,6 +131,7 @@ export async function applyScriptShip(
 	const raw = [result.stderr, result.stdout].filter(Boolean).join('\n');
 	return {
 		...row,
+		ok: false,
 		reason: plainPluginError(raw) || 'pnpm ship failed',
 		stdout: result.stdout,
 		stderr: result.stderr,

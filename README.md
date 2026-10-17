@@ -32,6 +32,8 @@ Open `http://127.0.0.1:4321`. Click **Add projects**, scan that folder (`.` is w
 
 The same actions exist on the CLI if you want them. `scan`, `status`, and `deps` only read. Other commands print a plan; `--apply` writes. `publish`, `push`, `ship`, and `global` need named ids. Never `--force`.
 
+For a new Cloudflare Pages site, dashboard **Ship** can offer **Create Pages project** with the account, project name, and production branch shown for confirmation. Creation is followed by a separate Ship plan. See [Pages setup](docs/PAGES_SETUP.md) for supported scripts and recovery.
+
 Publish builds and verifies an npm archive, then publishes those same bytes. [Release targets](https://github.com/Catalyst-Forge-LLC/localhelm/blob/main/docs/NPM_RELEASES.md) explain generated packages, version and README sources, and recovery from a failed build.
 
 ```bash

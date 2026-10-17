@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isMissingPagesProject } from '../../../src/lib/pagesProjectTypes.js';
 	import { onMount, tick } from 'svelte';
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import ConfirmModal from '$lib/ConfirmModal.svelte';
@@ -971,8 +972,19 @@
 				confirmRun = null;
 				confirmAlt = null;
 				confirmAltLabel = '';
+				const failedIds = confirmWriteIds.filter((id) => !confirmExcluded.includes(id));
+				if (confirmOpen && isMissingPagesProject(error) && failedIds.length === 1) {
+					confirmCanApply = true;
+					confirmLabel = 'Review Pages setup';
+					confirmRun = () => void recoverPagesProject(failedIds[0]);
+				}
 			}
 		}
+	}
+
+	async function recoverPagesProject(id: string): Promise<void> {
+		await run('refreshing before Pages setup', () => loadStatus({ ids: [id], extras: false, gitOnly: true }), { closeConfirm: false });
+		if (!error) await startPagesProject(id);
 	}
 
 	async function eachNamed(verb: string, names: string[], fn: (name: string) => Promise<void>): Promise<void> {
@@ -1618,6 +1630,7 @@
 	}
 
 	const {
+		startPagesProject,
 		startGitTrust,
 		startPackagePrivacy,
 		startBump,
@@ -1746,6 +1759,7 @@
 		else if (operation?.route === '/api/push') void startPush(ids);
 		else if (operation?.route === '/api/pull') void startPull(ids);
 		else if (operation?.route === '/api/ship') void startShip(ids);
+		else if (operation?.route === '/api/pages-project') void startPagesProject(ids[0]);
 		else if (operation?.route === '/api/global') void startGlobal(ids);
 		else if (operation?.route === '/api/cascade' && operation.publisher) void startCascade(operation.publisher);
 		else if (operation?.route === '/api/package-privacy') void startPackagePrivacy(ids[0]);

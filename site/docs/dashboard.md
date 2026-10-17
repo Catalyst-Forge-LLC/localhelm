@@ -38,6 +38,12 @@ Start and stop on Ports ask LocalSlip. Commit, Push, Publish, Ship, Install glob
 
 Publish OTP lives in the confirm modal. Never `--force`.
 
+## New Cloudflare Pages projects
+
+For a Pages deploy script with explicit `--project-name` and `--branch`, **Ship** checks whether the project exists before building. If it is missing, **Create Pages project** shows the Cloudflare account name and ID, project, production branch, and site directory. Cancel creates nothing. Confirm creates the empty project, then **Open Ship plan** leads to a separate deployment confirmation.
+
+A failed Ship that reports a missing Pages project offers **Review Pages setup**. LocalHelm rechecks the target before writing and preserves the failed action in history. Existing projects are reused. Account ambiguity, authentication failures, and custom Wrangler/environment configuration require manual setup; LocalHelm does not guess the target. Demo cannot create projects.
+
 ## npm private packages
 
 In Fleet, the existing **private** text beside a package's version is a link to

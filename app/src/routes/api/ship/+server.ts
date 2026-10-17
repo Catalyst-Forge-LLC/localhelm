@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { applyScriptShip, planScriptShip, requireShipIds } from '../../../../../src/lib/index.js';
+import { shipPagesPreflight } from '../../../../../src/lib/pagesProject.js';
 import { errJson, loadRequired, withLockAt } from '$lib/server/helm';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -17,7 +18,10 @@ export const POST: RequestHandler = async ({ request }) => {
 					}
 					return out;
 				})
-			: planned;
+			: await Promise.all(planned.map(async (row) => ({
+				...row,
+				...(row.action === 'ship' ? { pages: await shipPagesPreflight(loaded, row.id) } : {}),
+			})));
 		return json({ rows, writes: Boolean(body.apply) });
 	} catch (err) {
 		return errJson(err);
