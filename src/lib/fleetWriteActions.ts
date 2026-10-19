@@ -3,7 +3,7 @@
 import { createPagesProjectActions } from './pagesProjectActions.js';
 import { remainingAfter } from './batchApply.js';
 import { bulkProgressLabel } from './bulkProgress.js';
-import { applyConfirmStep, commitDraftProgressHint, markConfirmKey } from './confirmProgress.js';
+import { applyConfirmStep, commitDraftProgressHint, markConfirmKey, markConfirmSubject } from './confirmProgress.js';
 import type { DashboardJobHost } from './dashboardJob.js';
 import type { BumpKind, BumpPlan, GitRow, GlobalInstallRow, PublishRow, ScriptShipRow } from './dashboardTypes.js';
 import { globalDepUpdateCheck } from './fleetWrites.js';
@@ -465,6 +465,8 @@ export function createFleetWrites(host: DashboardJobHost) {
 				if (data.rows.some((row) => row.action === 'push' && row.reason === 'pushed')) {
 					host.patchWrite({ id, gitAhead: 0 });
 				}
+				const failedRow = data.rows.find((row) => row.action === 'push' && row.reason !== 'pushed');
+				if (failedRow) throw new Error(`${failedRow.id}: ${failedRow.reason ?? 'push failed'}`);
 			});
 			const eligible = rows.filter((r) => r.action === 'push');
 			const failed = eligible.filter((r) => r.reason !== 'pushed');
@@ -944,9 +946,7 @@ export function createFleetWrites(host: DashboardJobHost) {
 						const reason = err instanceof Error ? err.message : String(err);
 						rows.push({ id, path: '', action: 'publish', version: null, steps: [], reason });
 						host.setError(reason);
-						if (host.confirmItemKeys().includes(id)) {
-							host.setConfirmPhases(markConfirmKey(host.confirmItemKeys(), host.confirmPhases(), id, 'fail'));
-						}
+						host.setConfirmPhases(markConfirmSubject(host.confirmItemKeys(), host.confirmPhases(), id, 'fail'));
 					}
 					persistPublishBatch(ids, rows, { error: host.error() || undefined });
 				});

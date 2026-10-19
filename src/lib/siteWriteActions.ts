@@ -2,7 +2,7 @@
 
 import { remainingAfter } from './batchApply.js';
 import { bulkProgressLabel } from './bulkProgress.js';
-import { applyConfirmStep } from './confirmProgress.js';
+import { applyConfirmStep, markConfirmSubject } from './confirmProgress.js';
 import type { DashboardJobHost } from './dashboardJob.js';
 import {
 	landApplyTitle,
@@ -423,12 +423,16 @@ export function createSiteWrites(host: DashboardJobHost) {
 									: `land --apply ${siteId} — stopped: ${data.result.stoppedAt ?? failed[0]?.label ?? 'failed'}`,
 								data,
 							);
-							if (!row.ok) host.setError(row.reason ?? 'land failed');
+							if (!row.ok) {
+								host.setError(row.reason ?? 'land failed');
+								host.setConfirmPhases(markConfirmSubject(host.confirmItemKeys(), host.confirmPhases(), siteId, 'fail'));
+							}
 						} catch (err) {
 							if (isJobCancelled(err)) throw err;
 							const reason = err instanceof Error ? err.message : String(err);
 							rows.push({ id: siteId, ok: false, reason });
 							host.setError(reason);
+							host.setConfirmPhases(markConfirmSubject(host.confirmItemKeys(), host.confirmPhases(), siteId, 'fail'));
 							host.note(`land --apply ${siteId} — stopped: ${reason}`, { error: reason });
 						}
 						persistLandBatch(ids, rows, { error: host.error() || undefined });

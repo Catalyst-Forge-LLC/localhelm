@@ -53,6 +53,8 @@
 		extraLabel?: string;
 		extraHint?: string;
 		extraChecked?: boolean;
+		/** Apply is running, so the board behind the dialog stays usable. */
+		dock?: boolean;
 		/** Multi-id apply is running; Stop finishes the current item and skips the rest. */
 		canStop?: boolean;
 		stopping?: boolean;
@@ -99,6 +101,7 @@
 		extraLabel = '',
 		extraHint = '',
 		extraChecked = $bindable(false),
+		dock = false,
 		canStop = false,
 		stopping = false,
 	}: Props = $props();
@@ -251,11 +254,32 @@
 	}
 
 	let dialogEl = $state<HTMLDialogElement | null>(null);
+	let suppressClose = false;
+
+	function presentDialog(wantOpen: boolean, wantDock: boolean): void {
+		if (!dialogEl) return;
+		if (!wantOpen) {
+			if (dialogEl.open) dialogEl.close();
+			return;
+		}
+		const modal = dialogEl.matches(':modal');
+		if (wantDock && modal) {
+			suppressClose = true;
+			dialogEl.close();
+			suppressClose = false;
+		} else if (!wantDock && dialogEl.open && !modal) {
+			suppressClose = true;
+			dialogEl.close();
+			suppressClose = false;
+		}
+		if (!dialogEl.open) {
+			if (wantDock) dialogEl.show();
+			else dialogEl.showModal();
+		}
+	}
 
 	$effect(() => {
-		if (!dialogEl) return;
-		if (open && !dialogEl.open) dialogEl.showModal();
-		else if (!open && dialogEl.open) dialogEl.close();
+		presentDialog(open, dock);
 	});
 
 	function cancel(): void {
@@ -310,12 +334,17 @@
 <dialog
 	bind:this={dialogEl}
 	class="confirm"
+	class:dock
 	class:wide={Boolean(groups) || Boolean(preview)}
 	aria-labelledby="confirm-title"
+	oncancel={(event) => {
+		if (busy || dock) event.preventDefault();
+	}}
 	onclose={() => {
-		if (!open) return;
+		if (suppressClose || !open) return;
 		if (busy) {
-			dialogEl?.showModal();
+			if (dock) dialogEl?.show();
+			else dialogEl?.showModal();
 			if (canStop && !stopping) onstop?.();
 			return;
 		}
@@ -644,6 +673,24 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	.confirm.dock[open] {
+		position: fixed;
+		inset: auto 1rem 1rem auto;
+		align-items: stretch;
+		justify-content: flex-end;
+		width: min(32rem, calc(100vw - 2rem));
+		max-height: min(46dvh, 24rem);
+		margin: 0;
+		padding: 0;
+		border: none;
+		background: transparent;
+	}
+
+	.confirm.dock .panel {
+		width: 100%;
+		max-height: min(46dvh, 24rem);
 	}
 
 	.panel {

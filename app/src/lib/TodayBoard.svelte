@@ -17,6 +17,7 @@
 
 	let {
 		busy,
+		queueMode = false,
 		statusReady,
 		pluginsReady,
 		needFilter = $bindable(),
@@ -63,6 +64,8 @@
 		onOpenAdd,
 	}: {
 		busy: boolean;
+		/** A batch is running, so Commit, Push, Publish, and Land add to the queue. */
+		queueMode?: boolean;
 		statusReady: boolean;
 		pluginsReady: boolean;
 		needFilter: NeedFilter;
@@ -189,26 +192,26 @@
 				<div class="group-buttons">
 					<CompactActions>
 						{#if needCommitIds.length}
-							<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
-								<button class="btn btn-write" disabled={busy} onclick={() => onCommit(needCommitIds)}>
+							<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push. While a batch is running, this adds these repos to the queue.">
+								<button class="btn btn-write" disabled={queueMode ? false : busy} onclick={() => onCommit(needCommitIds)}>
 									<Icon icon="lucide:git-commit-horizontal" />
-									Commit dirty{needCommitIds.length ? ` (${needCommitIds.length})` : ''}
+									{queueMode ? 'Queue commit' : 'Commit dirty'}{needCommitIds.length ? ` (${needCommitIds.length})` : ''}
 								</button>
 							</Tooltip>
 						{/if}
 						{#if needPublishIds.length}
-							<Tooltip title="Shows bump (when needed), push, and npm publish. Confirm in the modal.">
-								<button class="btn btn-write" disabled={busy} onclick={() => onPublish(needPublishIds)}>
+							<Tooltip title="Shows bump (when needed), push, and npm publish. Confirm in the modal. While a batch is running, this adds these repos to the queue.">
+								<button class="btn btn-write" disabled={queueMode ? false : busy} onclick={() => onPublish(needPublishIds)}>
 									<Icon icon="lucide:package-up" />
-									Publish{needPublishIds.length ? ` (${needPublishIds.length})` : ''}
+									{queueMode ? 'Queue publish' : 'Publish'}{needPublishIds.length ? ` (${needPublishIds.length})` : ''}
 								</button>
 							</Tooltip>
 						{/if}
 						{#if needPushIds.length}
-							<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local.">
-								<button class="btn btn-write" disabled={busy} onclick={() => onPush(needPushIds)}>
+							<Tooltip title="Shows which repos are ahead of origin. Confirm in the modal. Never --force. Uncommitted files stay local. While a batch is running, this adds these repos to the queue.">
+								<button class="btn btn-write" disabled={queueMode ? false : busy} onclick={() => onPush(needPushIds)}>
 									<Icon icon="lucide:upload" />
-									Push{needPushIds.length ? ` (${needPushIds.length})` : ''}
+									{queueMode ? 'Queue push' : 'Push'}{needPushIds.length ? ` (${needPushIds.length})` : ''}
 								</button>
 							</Tooltip>
 						{/if}
@@ -426,10 +429,10 @@
 				<div class="group-buttons">
 					<CompactActions>
 						{#if filepressLandIds.length}
-							<Tooltip title="Plans Land for sites whose engine is behind or whose tree changed since last Land. Confirm in the modal.">
-								<button class="btn btn-write btn-sm" disabled={busy} onclick={() => onLand(filepressLandIds)}>
+							<Tooltip title="Plans Land for sites whose engine is behind or whose tree changed since last Land. Confirm in the modal. While a batch is running, this adds these sites to the queue.">
+								<button class="btn btn-write btn-sm" disabled={queueMode ? false : busy} onclick={() => onLand(filepressLandIds)}>
 									<Icon icon="lucide:plane-landing" />
-									Land{filepressLandIds.length > 1 ? ` ${filepressLandIds.length}` : ''}
+									{queueMode ? 'Queue land' : 'Land'}{filepressLandIds.length > 1 ? ` ${filepressLandIds.length}` : ''}
 								</button>
 							</Tooltip>
 						{/if}
@@ -463,10 +466,10 @@
 								</div>
 								<div class="need-tools">
 									<div class="need-actions">
-										<Tooltip title="Plans Sync → Push → Ship for this site. Confirm in the modal.">
-											<button class="btn btn-sm btn-write" disabled={busy} onclick={() => onLand([site.id])}>
+										<Tooltip title="Plans Sync → Push → Ship for this site. Confirm in the modal. While a batch is running, this adds the site to the queue.">
+											<button class="btn btn-sm btn-write" disabled={queueMode ? false : busy} onclick={() => onLand([site.id])}>
 												<Icon icon="lucide:plane-landing" />
-												Land
+												{queueMode ? 'Queue land' : 'Land'}
 											</button>
 										</Tooltip>
 									</div>

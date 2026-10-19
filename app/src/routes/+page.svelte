@@ -1,4 +1,13 @@
 <script lang="ts">
+	import {
+		enqueue,
+		failedConfirmSubjects,
+		holdLine,
+		intentLabel,
+		takeNext,
+		type ActionIntent,
+		type QueueKind,
+	} from '../../../src/lib/actionQueue.js';
 	import { isMissingPagesProject } from '../../../src/lib/pagesProjectTypes.js';
 	import { onMount, tick } from 'svelte';
 	import { afterNavigate, replaceState } from '$app/navigation';
@@ -261,6 +270,12 @@
 		}
 	});
 	let busy = $state('');
+	let runDepth = 0;
+	let queueSeq = 0;
+	let queueAdvancing = false;
+	let actionQueue = $state<ActionIntent[]>([]);
+	let queueBlocked = $state<string[]>([]);
+	let queueHold = $state('');
 	let statusNote = $state('');
 	/** Latest fleet read. An older read must not clear a newer progress line. */
 	const statusReads = new StatusReads();
@@ -926,6 +941,7 @@
 		fn: () => Promise<void>,
 		opts?: { closeConfirm?: boolean; openConfirm?: boolean | { title?: string; hint?: string; itemKeys?: string[] } },
 	): Promise<void> {
+		runDepth += 1;
 		if (opts?.openConfirm) {
 			const spec = opts.openConfirm === true ? {} : opts.openConfirm;
 			beginConfirm({
@@ -955,8 +971,12 @@
 			pendingJob = null;
 			busy = '';
 			jobCanStop = false;
+			runDepth = Math.max(0, runDepth - 1);
+			const failedNow = failedConfirmSubjects(confirmItemKeys, confirmPhases);
+			if (failedNow.length) queueBlocked = [...new Set([...queueBlocked, ...failedNow])];
+			const continueQueue = !jobStopped && actionQueue.length > 0 && !isMissingPagesProject(error);
 			if (opts?.closeConfirm !== false) {
-				if (confirmOpen && (error || jobStopped)) {
+				if (confirmOpen && (error || jobStopped) && !continueQueue) {
 					const ids = confirmWriteIds.filter((id) => !confirmExcluded.includes(id));
 					const priorCancel = confirmOnCancel;
 					confirmTitle = jobStopped ? 'Action stopped' : 'Action needs attention';
@@ -978,6 +998,9 @@
 					confirmLabel = 'Review Pages setup';
 					confirmRun = () => void recoverPagesProject(failedIds[0]);
 				}
+			}
+			if (runDepth === 0 && !queueAdvancing && !confirmOpen && !jobStopped && actionQueue.length) {
+				void advanceActionQueue();
 			}
 		}
 	}
@@ -1736,6 +1759,82 @@
 			publishAuthHint = hint;
 		},
 	});
+
+	const applying = $derived(
+		Boolean(busy) && confirmOpen && confirmPhases.some((phase) => phase !== 'pending'),
+	);
+	const writesLocked = $derived(demoBoard || (Boolean(busy) && !applying));
+
+	function queueWrite(kind: QueueKind, ids: string[], start: () => void): void {
+		if (demoBoard) return;
+		const unique = [...new Set(ids.filter(Boolean))];
+		if (!unique.length) return;
+		if (applying) {
+			actionQueue = enqueue(actionQueue, { id: `q${++queueSeq}`, kind, ids: unique });
+			return;
+		}
+		if (busy || confirmOpen) return;
+		start();
+	}
+
+	function dismissQueued(id: string): void {
+		actionQueue = actionQueue.filter((item) => item.id !== id);
+		if (!actionQueue.length) {
+			queueBlocked = [];
+			queueHold = '';
+		}
+	}
+
+	async function dispatchQueued(intent: ActionIntent): Promise<void> {
+		const ids = intent.ids;
+		switch (intent.kind) {
+			case 'commit':
+				await startCommit(ids);
+				return;
+			case 'bump':
+				await startBump(ids);
+				return;
+			case 'push':
+				await startPush(ids);
+				return;
+			case 'publish':
+				await startPublish(ids);
+				return;
+			case 'ship':
+				await startShip(ids);
+				return;
+			case 'land':
+				await startLand(ids);
+				return;
+		}
+	}
+
+	async function advanceActionQueue(): Promise<void> {
+		if (queueAdvancing || confirmOpen || jobStopped) return;
+		queueAdvancing = true;
+		try {
+			while (actionQueue.length && !confirmOpen && !jobStopped) {
+				const taken = takeNext(actionQueue, new Set(queueBlocked));
+				actionQueue = taken.queue;
+				const held = holdLine(taken.skipped);
+				if (held) queueHold = held;
+				if (!actionQueue.length && !held) {
+					queueBlocked = [];
+					queueHold = '';
+				}
+				if (!taken.next) break;
+				await dispatchQueued(taken.next);
+				if (confirmOpen || error) break;
+			}
+		} finally {
+			queueAdvancing = false;
+		}
+	}
+
+	function planQueuedNext(): void {
+		jobStopped = false;
+		void advanceActionQueue();
+	}
 
 	async function reconcileJob(job: DurableJob): Promise<void> {
 		await run('reading current action status', async () => {
@@ -2644,6 +2743,7 @@
 			<TodayBoard
 				bind:needFilter
 				busy={Boolean(busy)}
+				queueMode={applying}
 				{statusReady}
 				{pluginsReady}
 				{needFilterCounts}
@@ -2675,11 +2775,11 @@
 				{portFamilyCards}
 				{portsNeedingYou}
 				onRefreshRow={(id) => void refreshRows([id])}
-				onCommit={(ids) => void startCommit(ids)}
-				onPublish={startPublish}
-				onPush={(ids) => void startPush(ids)}
+				onCommit={(ids) => queueWrite('commit', ids, () => void startCommit(ids))}
+				onPublish={(ids) => queueWrite('publish', ids, () => void startPublish(ids))}
+				onPush={(ids) => queueWrite('push', ids, () => void startPush(ids))}
 				onCascade={(id) => void startCascade(id)}
-				onLand={startLand}
+				onLand={(ids) => queueWrite('land', ids, () => void startLand(ids))}
 				onSyncEngine={(plugin, ids) => void startPluginJob(plugin, 'sync', ids, 'Sync engine')}
 				onSetTab={setTab}
 				onOpenCross={openCross}
@@ -2705,7 +2805,7 @@
 								groups={selectionGroups}
 								checkedIds={matchingGroupIds(checkedIds, fleetRowIds)}
 								presentIds={fleetRowIds}
-								busy={Boolean(busy)}
+								busy={writesLocked}
 								onapply={applyFleetGroup}
 								onsave={(name) => saveSelectionGroup(name, matchingGroupIds(checkedIds, fleetRowIds))}
 								ondelete={deleteSelectionGroup}
@@ -2728,42 +2828,42 @@
 						<div class="tool-band">
 							{#snippet fleetWrites()}
 								{#if checkedCommitIds.length}
-									<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push.">
-										<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => void startCommit(checkedIds)}>
+									<Tooltip title="Reads dirty files, asks Ollama for a message, then you confirm. git add + git commit. No push. While a batch is running, this adds the checked repos to the queue.">
+										<button class="btn btn-write" disabled={writesLocked} onclick={() => queueWrite('commit', checkedIds, () => void startCommit(checkedIds))}>
 											<Icon icon="lucide:git-commit-horizontal" />
-											Commit ({checkedCommitIds.length})
+											{applying ? 'Queue commit' : 'Commit'} ({checkedCommitIds.length})
 										</button>
 									</Tooltip>
 								{/if}
 								{#if checkedIds.length}
-									<Tooltip title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish.">
-										<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => startBump(checkedIds)}>
+									<Tooltip title="Shows the next version, then writes package.json and commits that file. No tag, no push, no publish. While a batch is running, this adds the checked repos to the queue.">
+										<button class="btn btn-write" disabled={writesLocked} onclick={() => queueWrite('bump', checkedIds, () => void startBump(checkedIds))}>
 											<Icon icon="lucide:chevrons-up" />
-											Bump ({checkedIds.length})
+											{applying ? 'Queue bump' : 'Bump'} ({checkedIds.length})
 										</button>
 									</Tooltip>
 								{/if}
 								{#if checkedPushIds.length}
-									<Tooltip title="Shows which checked repos would push to origin. The count is how many are ahead, not how many are checked. Confirm in the modal. Never --force.">
-										<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => startPush(checkedIds)}>
+									<Tooltip title="Shows which checked repos would push to origin. The count is how many are ahead, not how many are checked. Confirm in the modal. Never --force. While a batch is running, this adds the checked repos to the queue.">
+										<button class="btn btn-write" disabled={writesLocked} onclick={() => queueWrite('push', checkedIds, () => void startPush(checkedIds))}>
 											<Icon icon="lucide:upload" />
-											Push ({checkedPushIds.length})
+											{applying ? 'Queue push' : 'Push'} ({checkedPushIds.length})
 										</button>
 									</Tooltip>
 								{/if}
 								{#if checkedPublishIds.length}
-									<Tooltip title="Shows bump, push, and npm publish for the checked public packages. Confirm in the modal.">
-										<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => startPublish(checkedPublishIds)}>
+									<Tooltip title="Shows bump, push, and npm publish for the checked public packages. Confirm in the modal. While a batch is running, this adds the checked repos to the queue.">
+										<button class="btn btn-write" disabled={writesLocked} onclick={() => queueWrite('publish', checkedPublishIds, () => void startPublish(checkedPublishIds))}>
 											<Icon icon="lucide:package-up" />
-											Publish ({checkedPublishIds.length})
+											{applying ? 'Queue publish' : 'Publish'} ({checkedPublishIds.length})
 										</button>
 									</Tooltip>
 								{/if}
 								{#if checkedShipIds.length}
-									<Tooltip title="Runs pnpm ship for checked repos that have the script (wrangler / Pages). Confirm in the modal. Not FilePress Land.">
-										<button class="btn btn-write" disabled={Boolean(busy) || demoBoard} onclick={() => void startShip(checkedShipIds)}>
+									<Tooltip title="Runs pnpm ship for checked repos that have the script (wrangler / Pages). Confirm in the modal. Not FilePress Land. While a batch is running, this adds the checked repos to the queue.">
+										<button class="btn btn-write" disabled={writesLocked} onclick={() => queueWrite('ship', checkedShipIds, () => void startShip(checkedShipIds))}>
 											<Icon icon="lucide:ship" />
-											Ship ({checkedShipIds.length})
+											{applying ? 'Queue ship' : 'Ship'} ({checkedShipIds.length})
 										</button>
 									</Tooltip>
 								{/if}
@@ -2987,7 +3087,7 @@
 								groups={selectionGroups}
 								checkedIds={board.rows.filter((row) => selectedSites[row.id]).map((row) => row.id)}
 								presentIds={board.rows.map((row) => row.id)}
-								busy={Boolean(busy)}
+								busy={writesLocked}
 								onapply={(ids) => applySiteGroup(board.rows, ids)}
 								onsave={(name) =>
 									saveSelectionGroup(
@@ -3021,10 +3121,10 @@
 										.filter((row) => selectedSites[row.id] && siteNeedsEngineSync(row.cells))
 										.map((row) => row.id)}
 									{#if landIds.length}
-										<Tooltip title="Plans Sync → Push → Ship for the checked sites. This count is the checkboxes, not Today’s waiting list. Confirm in the modal.">
-											<button class="btn btn-write" disabled={Boolean(busy)} onclick={() => startLand(landIds)}>
+										<Tooltip title="Plans Sync → Push → Ship for the checked sites. This count is the checkboxes, not Today’s waiting list. Confirm in the modal. While a batch is running, this adds the checked sites to the queue.">
+											<button class="btn btn-write" disabled={Boolean(busy) && !applying} onclick={() => queueWrite('land', landIds, () => void startLand(landIds))}>
 												<Icon icon="lucide:plane-landing" />
-												Land checked ({landIds.length})
+												{applying ? 'Queue land' : 'Land checked'} ({landIds.length})
 											</button>
 										</Tooltip>
 									{/if}
@@ -3899,6 +3999,7 @@
 	confirmLabel={confirmLabel}
 	variant={confirmVariant}
 	busy={Boolean(busy)}
+	dock={applying}
 	busyLabel={jobCancel && busy ? `Stopping after this one… ${busy}` : busy}
 	canApply={confirmCanApply}
 	canStop={jobCanStop}
@@ -3952,6 +4053,7 @@
 		const fn = confirmOnCancel;
 		confirmOnCancel = null;
 		fn?.();
+		if (!jobStopped && actionQueue.length) void advanceActionQueue();
 	}}
 >
 	{#if confirmShowOtp}
@@ -3966,6 +4068,22 @@
 		<input id="publish-otp" bind:value={publishOtp} autocomplete="one-time-code" spellcheck="false" placeholder="optional" />
 	{/if}
 </ConfirmModal>
+
+{#if actionQueue.length || queueHold}
+	<div class="action-queue" role="status">
+		<p class="action-queue-title">Next</p>
+		{#if queueHold}<p class="action-queue-hold">{queueHold}</p>{/if}
+		{#each actionQueue as item (item.id)}
+			<span class="chip">
+				{intentLabel(item)}
+				<button type="button" class="queue-remove" aria-label={`Remove ${intentLabel(item)}`} onclick={() => dismissQueued(item.id)}>×</button>
+			</span>
+		{/each}
+		{#if actionQueue.length && !busy && !confirmOpen}
+			<button type="button" class="btn btn-sm" onclick={planQueuedNext}>Plan next</button>
+		{/if}
+	</div>
+{/if}
 
 <ActionHistory bind:open={jobsOpen} {jobs} busy={Boolean(busy)} error={jobStorageError} onrefresh={(job) => void reconcileJob(job)} onplan={freshJobPlan} onreview={reviewJob} onstorage={retryJobStorage} sessionResult={sessionResultAvailable} onsession={openSessionResult} />
 
