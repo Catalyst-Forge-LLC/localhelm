@@ -263,14 +263,11 @@
 			return;
 		}
 		const modal = dialogEl.matches(':modal');
-		if (wantDock && modal) {
+		const retarget = (wantDock && modal) || (!wantDock && dialogEl.open && !modal);
+		if (retarget) {
+			// close() fires `close` on a later task. Leave this set until that event, or the batch is stopped.
 			suppressClose = true;
 			dialogEl.close();
-			suppressClose = false;
-		} else if (!wantDock && dialogEl.open && !modal) {
-			suppressClose = true;
-			dialogEl.close();
-			suppressClose = false;
 		}
 		if (!dialogEl.open) {
 			if (wantDock) dialogEl.show();
@@ -341,7 +338,11 @@
 		if (busy || dock) event.preventDefault();
 	}}
 	onclose={() => {
-		if (suppressClose || !open) return;
+		if (suppressClose) {
+			suppressClose = false;
+			return;
+		}
+		if (!open) return;
 		if (busy) {
 			if (dock) dialogEl?.show();
 			else dialogEl?.showModal();
