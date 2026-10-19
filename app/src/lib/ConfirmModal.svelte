@@ -678,20 +678,80 @@
 
 	.confirm.dock[open] {
 		position: fixed;
-		inset: auto 1rem 1rem auto;
+		inset: auto 0.75rem 0.75rem auto;
 		align-items: stretch;
 		justify-content: flex-end;
-		width: min(32rem, calc(100vw - 2rem));
-		max-height: min(46dvh, 24rem);
+		width: min(46rem, calc(100vw - 1.5rem));
+		height: min(68dvh, 38rem);
+		max-height: min(68dvh, 38rem);
 		margin: 0;
 		padding: 0;
 		border: none;
 		background: transparent;
+		overflow: hidden;
 	}
 
 	.confirm.dock .panel {
 		width: 100%;
-		max-height: min(46dvh, 24rem);
+		height: 100%;
+		max-height: none;
+	}
+
+	.confirm.dock .body {
+		overflow: hidden;
+		padding: 0.7rem 0.85rem 0.7rem;
+	}
+
+	.confirm.dock .hint {
+		display: none;
+	}
+
+	.confirm.dock h2 {
+		font-size: 0.95rem;
+	}
+
+	.confirm.dock .working {
+		gap: 0.25rem;
+		margin-top: 0.35rem;
+	}
+
+	.confirm.dock .split,
+	.confirm.dock .push-pane {
+		flex: 1 1 auto;
+		min-height: 0;
+		max-height: none;
+		margin-top: 0.4rem;
+		overflow: hidden;
+	}
+
+	.confirm.dock .split {
+		grid-template-rows: minmax(0, 1fr);
+	}
+
+	.confirm.dock .split > .roster,
+	.confirm.dock .split > .step-col,
+	.confirm.dock .split > .publish-col,
+	.confirm.dock .split > ol.steps {
+		align-self: stretch;
+		height: auto;
+		max-height: none;
+		min-height: 0;
+	}
+
+	.confirm.dock .step-col ol.steps {
+		flex: 1 1 0;
+		max-height: none;
+		min-height: 0;
+	}
+
+	.confirm.dock .diff {
+		flex: 0 1 7rem;
+		min-height: 0;
+		max-height: 7rem;
+	}
+
+	.confirm.dock .actions {
+		margin-top: 0.5rem;
 	}
 
 	.panel {
