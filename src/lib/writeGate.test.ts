@@ -85,6 +85,18 @@ describe('plainPluginError', () => {
 		assert.equal(plainPluginError(raw), 'filepress: Genie leaked into the static build (dev-only).');
 	});
 
+	it('does not treat a shelf version warning as a FilePress failure', () => {
+		const raw = [
+			'warn  FilePress: directory says v0.1.50, npm getfilepress is 0.1.51',
+			'check-facts: 28 tools agree with their records (1 warning(s)).',
+			'error Production migrations are pending: 0002.sql. Run pnpm db:migrate:production, then retry Ship.',
+		].join('\n');
+		assert.equal(
+			plainPluginError(raw),
+			'error Production migrations are pending: 0002.sql. Run pnpm db:migrate:production, then retry Ship.',
+		);
+	});
+
 	it('keeps a ship script sentence instead of the pnpm command echo', () => {
 		const raw = [
 			'Stop the Catalyst Forge dev server on port 6173 before building; it shares .svelte-kit with Ship. Then run this command again.',
