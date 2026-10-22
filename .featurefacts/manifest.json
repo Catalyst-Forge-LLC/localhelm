@@ -1,9 +1,9 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-979bd8343df0",
+  "scan_id": "scan-ade1c93d1706",
   "tool": "featurefacts",
   "tool_version": "0.2.6",
-  "generated_at": "2026-10-22T03:15:39.136Z",
+  "generated_at": "2026-10-21T23:44:30.473-04:00",
   "root": ".",
   "status": "complete",
   "scope": {
@@ -4757,7 +4757,7 @@
     },
     {
       "id": "typescript-node-surface",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "kind": "surface",
       "state": "completed",
       "eligible_files": [
@@ -5355,9 +5355,9 @@
   "fingerprints": {
     "source": "9621da4b213c84d62cf61e698d55f48185a7d7dba67b020bd00a27835d077761",
     "config": "e86aac91018044abf39784d68e698da5a774b319a14feb497036d1ed5d5abf40",
-    "adapters": "9a62745dc3fd15d7c60f9f44d5f62ca8329b8c59dbe3360efbdd40c289da135e",
+    "adapters": "61f890ea77d8a825fa0992ca875025aceb7ced0af5aa4563bb34ced176a6e35c",
     "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
-    "registry": "9386694e4ff9014b89d7a23eb06dfc8b5f44dba2e3f9e0260a598894f80bb039",
+    "registry": "06d1c99d36f81b9c2e3aabd7f7f8ab923f81a464c94df2e33a5deec488782e8e",
     "projection": "430e104a42b2a3ee563284a667022152493035bda576619219df756eb66b3ff4"
   },
   "artifacts": [
@@ -5367,35 +5367,35 @@
     },
     {
       "path": ".featurefacts/docs-index.json",
-      "sha256": "45a324fbe514f66080029995910ccbb7d1e1f7a5fe7ab571440a53fe12bcfd62"
+      "sha256": "0d53e3df32ea1b7a1ef0ea24b0e4b1a856a47b40a578211476303167d578a08c"
     },
     {
       "path": ".featurefacts/features.json",
-      "sha256": "4e0e98e12a77a6de8d78562219ca264259f6de27e3c7df4f312bbfd76bda5693"
+      "sha256": "22f230690be1f3f8a179253f46b145a86846d2922f169ff9b0f3d6896ec0ffd5"
     },
     {
       "path": ".featurefacts/FEATURES.md",
-      "sha256": "ab8963aa6efa08cfb3a002b1118fecb91f4824ebbdd9bf2f0967f300b0596f5e"
+      "sha256": "bb4941762548e7f6c92ae44a08b4ec67f59124a30b8b1d39f88b9a2cd3fc6a3f"
     },
     {
       "path": ".featurefacts/features.yaml",
-      "sha256": "d2906c5939dacc3d913a9ca9dc5172a2acaf82d8a909d6c9a4b117904565f50d"
+      "sha256": "9b9fdd221d938f3c1313d1d6f1ee64516dd315dbc81908f49c7d9d6eb81dcf20"
     },
     {
       "path": ".featurefacts/gaps.yaml",
-      "sha256": "0d049da6c589ff3d40b9515755af1e17b647592e8b07922d8defd030d4f5b699"
+      "sha256": "77bfd9dc61870edb6cef8b2ac8faa6f0fa627f230c00e3c1d929efc53f7c50d8"
     },
     {
       "path": ".featurefacts/surfaces.json",
-      "sha256": "8a3099f7b2303ab5a8c45076a4153566a48c28b8324ec8b15c7401b447cb6074"
+      "sha256": "b7cd81a1d53a5e0abb465049a9c7ca9aa019dc49699d08600fe6c26c132c3367"
     },
     {
       "path": ".featurefacts/test-index.json",
-      "sha256": "9ffb319c1a1e177b46e7fe67a42e9ccb0e21dee0d0ec70811bd858d5f27379e1"
+      "sha256": "5accaa98a0207966fffd3d5f6ba39d8be61f55675201a1971b29dee3db76866d"
     },
     {
       "path": "FEATURE_FACTS.md",
-      "sha256": "a6b8cb0706bd3f45c3009b93af1c2df74c1017303427aea9833425e917fa4982"
+      "sha256": "e5aec699e764e107153519199140248a784dfd289df3b3684f5fd475602ee952"
     }
   ],
   "diagnostics": []

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-979bd8343df0",
+  "scan_id": "scan-ade1c93d1706",
   "product": {
     "name": "LocalHelm",
     "type": "typescript-node",
@@ -65,7 +65,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -87,7 +87,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -187,7 +187,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -209,7 +209,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -290,7 +290,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -312,7 +312,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -399,7 +399,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -421,7 +421,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -528,7 +528,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -550,7 +550,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -628,7 +628,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -650,7 +650,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -763,7 +763,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -785,7 +785,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -863,7 +863,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -885,7 +885,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -958,7 +958,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -980,7 +980,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -1062,7 +1062,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1084,7 +1084,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -1162,7 +1162,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1184,7 +1184,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -1262,7 +1262,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1284,7 +1284,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -1391,7 +1391,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1413,7 +1413,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -1486,7 +1486,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1508,7 +1508,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -1611,7 +1611,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1633,7 +1633,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -1744,7 +1744,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1766,7 +1766,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -1852,7 +1852,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -1874,7 +1874,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -1985,7 +1985,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2007,7 +2007,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -2090,7 +2090,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2112,7 +2112,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -2201,7 +2201,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2223,7 +2223,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -2342,7 +2342,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2364,7 +2364,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -2488,7 +2488,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2510,7 +2510,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -2588,7 +2588,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2610,7 +2610,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -2686,7 +2686,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2705,7 +2705,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -2776,7 +2776,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2795,7 +2795,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -2895,7 +2895,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -2914,7 +2914,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -2985,7 +2985,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -3004,7 +3004,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -3080,7 +3080,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -3099,7 +3099,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -3170,7 +3170,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -3189,7 +3189,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -3260,7 +3260,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -3279,7 +3279,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -3350,7 +3350,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -3369,7 +3369,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -3440,7 +3440,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -3459,7 +3459,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -3535,7 +3535,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -3554,7 +3554,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
@@ -3626,7 +3626,7 @@
       },
       "observation": {
         "state": "current",
-        "last_seen_scan_id": "scan-979bd8343df0",
+        "last_seen_scan_id": "scan-ade1c93d1706",
         "reason": "Current source evidence is available."
       },
       "evidence": [
@@ -3645,7 +3645,7 @@
           },
           "provenance": {
             "adapter_id": "typescript-node-surface",
-            "adapter_version": "0.2.2",
+            "adapter_version": "0.2.3",
             "origin": "deterministic",
             "method": "surface-cluster"
           }
