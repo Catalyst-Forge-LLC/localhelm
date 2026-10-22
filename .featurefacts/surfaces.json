@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-64b8d2101308",
+  "scan_id": "scan-979bd8343df0",
   "surfaces": [
     {
       "id": "cmd-archive",
@@ -9,14 +9,14 @@
       "title": "archive",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 872,
-        "end_line": 872,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 877,
+        "end_line": 877,
         "symbol": "archive"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -29,14 +29,14 @@
       "title": "auth",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 548,
-        "end_line": 548,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 553,
+        "end_line": 553,
         "symbol": "auth"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -49,14 +49,14 @@
       "title": "brief",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 862,
-        "end_line": 862,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 867,
+        "end_line": 867,
         "symbol": "brief"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -69,14 +69,14 @@
       "title": "bump",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 325,
-        "end_line": 325,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 330,
+        "end_line": 330,
         "symbol": "bump"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -89,14 +89,14 @@
       "title": "cascade",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 636,
-        "end_line": 636,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 641,
+        "end_line": 641,
         "symbol": "cascade"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -109,14 +109,14 @@
       "title": "commit",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 361,
-        "end_line": 361,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 366,
+        "end_line": 366,
         "symbol": "commit"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -129,14 +129,14 @@
       "title": "deps",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 301,
-        "end_line": 301,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 306,
+        "end_line": 306,
         "symbol": "deps"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -149,14 +149,14 @@
       "title": "enroll",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 232,
-        "end_line": 232,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 237,
+        "end_line": 237,
         "symbol": "enroll"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -169,14 +169,14 @@
       "title": "export",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 501,
-        "end_line": 501,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 506,
+        "end_line": 506,
         "symbol": "export"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -189,14 +189,14 @@
       "title": "fetch",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 420,
-        "end_line": 420,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 425,
+        "end_line": 425,
         "symbol": "fetch"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -209,14 +209,14 @@
       "title": "global",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 805,
-        "end_line": 805,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 810,
+        "end_line": 810,
         "symbol": "global"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -229,14 +229,14 @@
       "title": "land",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 683,
-        "end_line": 683,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 688,
+        "end_line": 688,
         "symbol": "land"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -249,12 +249,12 @@
       "title": "localhelm",
       "locator": {
         "path": "package.json",
-        "content_sha256": "339c43283559a371d448e64991410002d31e651bd3b4b43e2ab93606b8455197",
+        "content_sha256": "8719c620c0973f3400a08254f86d4e27df1363c1552a10a4fb0dbb5db93bb5e9",
         "symbol": "bin.localhelm"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "package-json-bin"
       },
@@ -267,14 +267,14 @@
       "title": "plugin",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 932,
-        "end_line": 932,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 937,
+        "end_line": 937,
         "symbol": "plugin"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -287,14 +287,14 @@
       "title": "plugins",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 911,
-        "end_line": 911,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 916,
+        "end_line": 916,
         "symbol": "plugins"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -307,14 +307,14 @@
       "title": "publish",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 577,
-        "end_line": 577,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 582,
+        "end_line": 582,
         "symbol": "publish"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -327,14 +327,14 @@
       "title": "pull",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 437,
-        "end_line": 437,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 442,
+        "end_line": 442,
         "symbol": "pull"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -347,14 +347,14 @@
       "title": "push",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 460,
-        "end_line": 460,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 465,
+        "end_line": 465,
         "symbol": "push"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -367,14 +367,14 @@
       "title": "ready",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 525,
-        "end_line": 525,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 530,
+        "end_line": 530,
         "symbol": "ready"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -387,14 +387,14 @@
       "title": "scan",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 219,
-        "end_line": 219,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 224,
+        "end_line": 224,
         "symbol": "scan"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -407,14 +407,14 @@
       "title": "serve",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 990,
-        "end_line": 990,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 995,
+        "end_line": 995,
         "symbol": "serve"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -427,14 +427,14 @@
       "title": "ship",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 752,
-        "end_line": 752,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 757,
+        "end_line": 757,
         "symbol": "ship"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -447,14 +447,14 @@
       "title": "status",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 285,
-        "end_line": 285,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 290,
+        "end_line": 290,
         "symbol": "status"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -467,14 +467,14 @@
       "title": "unenroll",
       "locator": {
         "path": "src/cli/main.ts",
-        "content_sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "start_line": 263,
-        "end_line": 263,
+        "content_sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "start_line": 268,
+        "end_line": 268,
         "symbol": "unenroll"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "argv-command"
       },
@@ -522,6 +522,40 @@
       "locator": {
         "path": "docs/GENESIS.md",
         "content_sha256": "eb54b37f7e07e603ed0642943eac7ba26afd4c3fc069c0363e5062e25a497f2e"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-npm-releases",
+      "kind": "document",
+      "ref": "docs/NPM_RELEASES.md",
+      "title": "docs/NPM_RELEASES.md",
+      "locator": {
+        "path": "docs/NPM_RELEASES.md",
+        "content_sha256": "0fc108e71c04dddea1f1ae2968f0e8a8b3ee5934f39579bc80f9b75e0b77e76f"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-pages-setup",
+      "kind": "document",
+      "ref": "docs/PAGES_SETUP.md",
+      "title": "docs/PAGES_SETUP.md",
+      "locator": {
+        "path": "docs/PAGES_SETUP.md",
+        "content_sha256": "e117cec5288166be8e85985893f61213298cb2f091e78206c502d99abc655f6b"
       },
       "provenance": {
         "adapter_id": "markdown-document",
@@ -583,13 +617,47 @@
       "state": "current"
     },
     {
+      "id": "doc-docs-specs-ux-friction-packets",
+      "kind": "document",
+      "ref": "docs/specs/ux-friction-packets.md",
+      "title": "docs/specs/ux-friction-packets.md",
+      "locator": {
+        "path": "docs/specs/ux-friction-packets.md",
+        "content_sha256": "60b052abfaf2cd36396e4ac7f2632e0ccbcc83a6d953eb98a77acf7c08c7ca30"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "doc-docs-ux-review-2026-10-14",
+      "kind": "document",
+      "ref": "docs/UX_REVIEW_2026-10-14.md",
+      "title": "docs/UX_REVIEW_2026-10-14.md",
+      "locator": {
+        "path": "docs/UX_REVIEW_2026-10-14.md",
+        "content_sha256": "0b9b109caa2b6635e650a5e5f0c67e848daf158c60b522f7d5b8eb0b13a43fa8"
+      },
+      "provenance": {
+        "adapter_id": "markdown-document",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "document-file"
+      },
+      "state": "current"
+    },
+    {
       "id": "doc-readme",
       "kind": "document",
       "ref": "README.md",
       "title": "README.md",
       "locator": {
         "path": "README.md",
-        "content_sha256": "e69606ff503d0c379759ed162a1f304db8f40d8a61beb92a7ea045bb1220f603"
+        "content_sha256": "283b4f31015e8f7eba86cc1ca1a1ff70e7ace88b52eea423cada0f29a42c7b23"
       },
       "provenance": {
         "adapter_id": "markdown-document",
@@ -606,11 +674,11 @@
       "title": "Activity",
       "locator": {
         "path": "app/src/routes/api/activity/+server.ts",
-        "content_sha256": "c39d98d07ccc9b11bc14f667e872778efe30fba30800e74902510a1f80813661"
+        "content_sha256": "bfc4e3b085a54d0b0f34c9c3c1a1702e170b035fdb576237d1f914958254490e"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -627,7 +695,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -644,7 +712,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -661,7 +729,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -674,11 +742,11 @@
       "title": "Commit",
       "locator": {
         "path": "app/src/routes/api/commit/+server.ts",
-        "content_sha256": "4acaa8b13ec64e1eeae45ec39c91a73ae134e0f7ac0ff7d4bd8eb7380b7f3a18"
+        "content_sha256": "140d7fad0924428fcee94310a47df4b3ec3a3435d89e0d1cc00131e861583621"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -695,7 +763,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -712,7 +780,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -729,7 +797,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -746,7 +814,24 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-git-trust",
+      "kind": "route",
+      "ref": "/api/git-trust",
+      "title": "Git Trust",
+      "locator": {
+        "path": "app/src/routes/api/git-trust/+server.ts",
+        "content_sha256": "0cdef6a9d710c9f660c97b721a47a0a175ac1500e3303c9b0151b7013152d76c"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -763,7 +848,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -780,7 +865,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -797,7 +882,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -814,7 +899,41 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-package-privacy",
+      "kind": "route",
+      "ref": "/api/package-privacy",
+      "title": "Package Privacy",
+      "locator": {
+        "path": "app/src/routes/api/package-privacy/+server.ts",
+        "content_sha256": "06ab85b9389fb89c8c71902e5b12692a10978ad0c8cc81226791489baef47c8c"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.2",
+        "origin": "deterministic",
+        "method": "framework-route-file"
+      },
+      "state": "current"
+    },
+    {
+      "id": "route-api-pages-project",
+      "kind": "route",
+      "ref": "/api/pages-project",
+      "title": "Pages Project",
+      "locator": {
+        "path": "app/src/routes/api/pages-project/+server.ts",
+        "content_sha256": "8235a7b1cdcd72fbeec6683e91a6686e00b17f606bf78e1f3474ec6af7ed48ae"
+      },
+      "provenance": {
+        "adapter_id": "typescript-node-surface",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -831,7 +950,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -848,7 +967,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -861,11 +980,11 @@
       "title": "Publish",
       "locator": {
         "path": "app/src/routes/api/publish/+server.ts",
-        "content_sha256": "ba03ef93e04355435da77857bbb0ecb89f1d5a0aa10c8b6fc36fe9d51ddeb214"
+        "content_sha256": "f2a206cc89ad5fa9ea1d83ec9b1fb8b7fae8d9137bca080b56adc8919f07cb93"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -882,7 +1001,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -899,7 +1018,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -916,7 +1035,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -933,7 +1052,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -950,7 +1069,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -963,11 +1082,11 @@
       "title": "Ship",
       "locator": {
         "path": "app/src/routes/api/ship/+server.ts",
-        "content_sha256": "8475bcae75e8af9a05cd2032ce27ecb7827b2141013f53e906077030a7436258"
+        "content_sha256": "51061dfa902738157a1d85a369fab02e409583e3d868dcdd7db38cdaf618bd22"
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -984,7 +1103,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -1001,7 +1120,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -1018,7 +1137,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -1035,7 +1154,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -1052,7 +1171,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -1069,7 +1188,7 @@
       },
       "provenance": {
         "adapter_id": "typescript-node-surface",
-        "adapter_version": "0.2.1",
+        "adapter_version": "0.2.2",
         "origin": "deterministic",
         "method": "framework-route-file"
       },
@@ -1093,13 +1212,30 @@
       "state": "current"
     },
     {
+      "id": "test-src-lib-actionqueue-test",
+      "kind": "test",
+      "ref": "src/lib/actionQueue.test.ts",
+      "title": "src/lib/actionQueue.test.ts",
+      "locator": {
+        "path": "src/lib/actionQueue.test.ts",
+        "content_sha256": "56dc8c234f3cb8a2911a519183e15c78a95d573d5753e07d419fbfbb3b45145a"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
       "id": "test-src-lib-activity-test",
       "kind": "test",
       "ref": "src/lib/activity.test.ts",
       "title": "src/lib/activity.test.ts",
       "locator": {
         "path": "src/lib/activity.test.ts",
-        "content_sha256": "134f8a846bb3fb4d328b5ff050ea8458d1ec7ec5778e0465e250fcfd7ed0dc1c"
+        "content_sha256": "fdd1aa58eb4ad5b6536d6aeb69432aa9760fc93315c2f938d35d6a102b1914ea"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -1134,6 +1270,23 @@
       "locator": {
         "path": "src/lib/activityLinks.test.ts",
         "content_sha256": "eb8203ed2fd664a0d78aa95d307b5e2f045c812f1c84f51fd5361306b942474d"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-activityqueue-test",
+      "kind": "test",
+      "ref": "src/lib/activityQueue.test.ts",
+      "title": "src/lib/activityQueue.test.ts",
+      "locator": {
+        "path": "src/lib/activityQueue.test.ts",
+        "content_sha256": "92cb7e55ba12004041a9e39822b4f52aa407175278ae456160fbe4544f9c9a31"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -1246,13 +1399,30 @@
       "state": "current"
     },
     {
+      "id": "test-src-lib-cliversion-test",
+      "kind": "test",
+      "ref": "src/lib/cliVersion.test.ts",
+      "title": "src/lib/cliVersion.test.ts",
+      "locator": {
+        "path": "src/lib/cliVersion.test.ts",
+        "content_sha256": "922f8f06ec96f1a0a96ee95f15aa8fb0f7ccb011792842c43e79c27f7e2aad85"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
       "id": "test-src-lib-confirmprogress-test",
       "kind": "test",
       "ref": "src/lib/confirmProgress.test.ts",
       "title": "src/lib/confirmProgress.test.ts",
       "locator": {
         "path": "src/lib/confirmProgress.test.ts",
-        "content_sha256": "e7731aac0a266f7fecc31ac1e222b2726b613aa28e2b95ef4f2c18289b70f62c"
+        "content_sha256": "6f24a009ef317d6741d777119efa9b9f13a6ba56d522ba49354a151126512084"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -1354,7 +1524,7 @@
       "title": "src/lib/dirtCommit.test.ts",
       "locator": {
         "path": "src/lib/dirtCommit.test.ts",
-        "content_sha256": "aa9521d64044dea60f669896b7288fee0a021d6cdc35e62af4860369bb4a27a1"
+        "content_sha256": "acd487a0b703729e6085b474d1f7a29712134b9c625c616f6a40e25185b4c6d6"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -1473,7 +1643,7 @@
       "title": "src/lib/fleetDisplay.test.ts",
       "locator": {
         "path": "src/lib/fleetDisplay.test.ts",
-        "content_sha256": "60bea2e4749c31c54e6eb1f1a8e1a127475ae988c2a3f95fb51ce08630d47f12"
+        "content_sha256": "84e8d8202c4a601be9725e5b7a5005c17867fe04b254a94fc2a07f0dc530ec0b"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -1525,6 +1695,57 @@
       "locator": {
         "path": "src/lib/githubPublish.test.ts",
         "content_sha256": "f0c34b9a392ac8117dfe9bbca9df4a4d2e9d37319b3f131aec541a20a0758a32"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-gitremoteescapes-test",
+      "kind": "test",
+      "ref": "src/lib/gitRemoteEscapes.test.ts",
+      "title": "src/lib/gitRemoteEscapes.test.ts",
+      "locator": {
+        "path": "src/lib/gitRemoteEscapes.test.ts",
+        "content_sha256": "99c6aeec44c913462f7a9369aa8f1e05ea06a8f49c32fb85dd1af77186286167"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-gittrust-test",
+      "kind": "test",
+      "ref": "src/lib/gitTrust.test.ts",
+      "title": "src/lib/gitTrust.test.ts",
+      "locator": {
+        "path": "src/lib/gitTrust.test.ts",
+        "content_sha256": "d751a53642e66c0eccbd3c734e08494f5874c5b2a8f5e44681a2a69808c5057a"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-gittrustactions-test",
+      "kind": "test",
+      "ref": "src/lib/gitTrustActions.test.ts",
+      "title": "src/lib/gitTrustActions.test.ts",
+      "locator": {
+        "path": "src/lib/gitTrustActions.test.ts",
+        "content_sha256": "dfa3a08be469fd695017b8a9ceb4647ff25dcccd098ff688f5ee2c004f2ed946"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -1593,6 +1814,23 @@
       "locator": {
         "path": "src/lib/jobCancel.test.ts",
         "content_sha256": "63118951cae6fb4e590e64afd00197e27a5a2a7a72005e99b65fe775504abc70"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-jobjournal-test",
+      "kind": "test",
+      "ref": "src/lib/jobJournal.test.ts",
+      "title": "src/lib/jobJournal.test.ts",
+      "locator": {
+        "path": "src/lib/jobJournal.test.ts",
+        "content_sha256": "b8eec75d9b6fe0e40c7a84d144f0fc551a3b57d764f3922cdf606c4776a9220c"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -1773,6 +2011,74 @@
       "state": "current"
     },
     {
+      "id": "test-src-lib-packageprivacy-test",
+      "kind": "test",
+      "ref": "src/lib/packagePrivacy.test.ts",
+      "title": "src/lib/packagePrivacy.test.ts",
+      "locator": {
+        "path": "src/lib/packagePrivacy.test.ts",
+        "content_sha256": "927eb62ee528ce95733b44a01d9d57cf9284b53e1029289366a294ab5e21e33c"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-packageprivacyactions-test",
+      "kind": "test",
+      "ref": "src/lib/packagePrivacyActions.test.ts",
+      "title": "src/lib/packagePrivacyActions.test.ts",
+      "locator": {
+        "path": "src/lib/packagePrivacyActions.test.ts",
+        "content_sha256": "75d88dfbee8e674868977444207c548413ad503264374ecdae4a541495d7c13d"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-pagesproject-test",
+      "kind": "test",
+      "ref": "src/lib/pagesProject.test.ts",
+      "title": "src/lib/pagesProject.test.ts",
+      "locator": {
+        "path": "src/lib/pagesProject.test.ts",
+        "content_sha256": "6c424b567b142726a624f50fbbf10f6731ae0b2aa9ba496279e56e2bb89a4c03"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-pagesprojectactions-test",
+      "kind": "test",
+      "ref": "src/lib/pagesProjectActions.test.ts",
+      "title": "src/lib/pagesProjectActions.test.ts",
+      "locator": {
+        "path": "src/lib/pagesProjectActions.test.ts",
+        "content_sha256": "89bb107944481b0fc73b5685a3aa75f05034099e77d2a41d0f561b6c79175d0b"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
       "id": "test-src-lib-paths-test",
       "kind": "test",
       "ref": "src/lib/paths.test.ts",
@@ -1830,7 +2136,24 @@
       "title": "src/lib/pluginPrefs.test.ts",
       "locator": {
         "path": "src/lib/pluginPrefs.test.ts",
-        "content_sha256": "5077aaf3dc5edc0028b1d4a356ba8bc121c7ac3a1ea9395fe08bed63507968f9"
+        "content_sha256": "1aea6e8914ee7330d90b96cec8cf1cad697384e49a12567a972438552a27f624"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-pluginreads-test",
+      "kind": "test",
+      "ref": "src/lib/pluginReads.test.ts",
+      "title": "src/lib/pluginReads.test.ts",
+      "locator": {
+        "path": "src/lib/pluginReads.test.ts",
+        "content_sha256": "bf880685e928069880f7dc34cc6d632ba3e073c097fe1d98ddbe3e25482fe6a9"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -1875,13 +2198,30 @@
       "state": "current"
     },
     {
+      "id": "test-src-lib-progressresponse-test",
+      "kind": "test",
+      "ref": "src/lib/progressResponse.test.ts",
+      "title": "src/lib/progressResponse.test.ts",
+      "locator": {
+        "path": "src/lib/progressResponse.test.ts",
+        "content_sha256": "c5b17571ddd5fe1c43d8e5958eb670517e04d7433b4c854e600b88dbdae2c0fb"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
       "id": "test-src-lib-publish-test",
       "kind": "test",
       "ref": "src/lib/publish.test.ts",
       "title": "src/lib/publish.test.ts",
       "locator": {
         "path": "src/lib/publish.test.ts",
-        "content_sha256": "dc11f6aa98b6e850a453490aa97f1b9f1cf0a0784bd6ae0d28155cef5d3e54da"
+        "content_sha256": "f4e37d382ffe55f0113426329d7346af673787e5799d2762c8c92276e76b810b"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -1899,6 +2239,57 @@
       "locator": {
         "path": "src/lib/publishBatch.test.ts",
         "content_sha256": "5b90ae673bf03db45c0aa80784da4baf728aed98ca1f95519242edabef251c5a"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-publishconfirmation-test",
+      "kind": "test",
+      "ref": "src/lib/publishConfirmation.test.ts",
+      "title": "src/lib/publishConfirmation.test.ts",
+      "locator": {
+        "path": "src/lib/publishConfirmation.test.ts",
+        "content_sha256": "55d5bef45694698aee51717f74a08bac39e64e63789af47bfb201d1b744746cd"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-releaseprepare-test",
+      "kind": "test",
+      "ref": "src/lib/releasePrepare.test.ts",
+      "title": "src/lib/releasePrepare.test.ts",
+      "locator": {
+        "path": "src/lib/releasePrepare.test.ts",
+        "content_sha256": "d16386a759d640ef94ccf846485aeb5b8f8d92a7458ce47c1a86c143d6cbaf75"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
+      "id": "test-src-lib-releasetarget-test",
+      "kind": "test",
+      "ref": "src/lib/releaseTarget.test.ts",
+      "title": "src/lib/releaseTarget.test.ts",
+      "locator": {
+        "path": "src/lib/releaseTarget.test.ts",
+        "content_sha256": "34f4061db4c035efcd30cc00261cc495f37d9db5a6fe271fbdd98fd2562d082f"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -2017,7 +2408,7 @@
       "title": "src/lib/siteDisplay.test.ts",
       "locator": {
         "path": "src/lib/siteDisplay.test.ts",
-        "content_sha256": "875766885f2cc3042f494f28646045a5618226888b15a295bf411b450789f1f0"
+        "content_sha256": "08a781f97a9366ea90bd251bd5c4160fa739f0305dfe9e1bb32b71afd143fca6"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -2062,6 +2453,23 @@
       "state": "current"
     },
     {
+      "id": "test-src-lib-statusreads-test",
+      "kind": "test",
+      "ref": "src/lib/statusReads.test.ts",
+      "title": "src/lib/statusReads.test.ts",
+      "locator": {
+        "path": "src/lib/statusReads.test.ts",
+        "content_sha256": "964b56fdba23d215e7c67bcefab454384494f6b495c7b2c643c3063229f52a94"
+      },
+      "provenance": {
+        "adapter_id": "typescript-test",
+        "adapter_version": "0.2.0",
+        "origin": "deterministic",
+        "method": "test-filename"
+      },
+      "state": "current"
+    },
+    {
       "id": "test-src-lib-visitortiles-test",
       "kind": "test",
       "ref": "src/lib/visitorTiles.test.ts",
@@ -2085,7 +2493,7 @@
       "title": "src/lib/writeConfirm.test.ts",
       "locator": {
         "path": "src/lib/writeConfirm.test.ts",
-        "content_sha256": "708ef8cec9d8c89642dbd3863b4cdbe254542e439351f2631b328c15a35ccd86"
+        "content_sha256": "bc432a1d25421c6168c0d3faea5ecbddb07b57bb3a9241bec9b6cac3e55977d3"
       },
       "provenance": {
         "adapter_id": "typescript-test",
@@ -2102,7 +2510,7 @@
       "title": "src/lib/writeGate.test.ts",
       "locator": {
         "path": "src/lib/writeGate.test.ts",
-        "content_sha256": "8449e514cae2ac65825c8634f04448ba066bc8a64ced8a93e78eb274cc21e095"
+        "content_sha256": "53f0db99f6a790eac5a116738c1cc20ca65f8cd43fd6103e13b3b785f239204d"
       },
       "provenance": {
         "adapter_id": "typescript-test",

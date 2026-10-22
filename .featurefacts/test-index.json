@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-64b8d2101308",
+  "scan_id": "scan-979bd8343df0",
   "kind": "tests",
   "assessments": [
     {
@@ -371,6 +371,18 @@
       }
     },
     {
+      "feature_id": "route-git-trust",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
       "feature_id": "route-groups",
       "assessment": {
         "state": "partial",
@@ -401,6 +413,30 @@
     },
     {
       "feature_id": "route-local-only",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "route-package-privacy",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "typescript-test"
+        ],
+        "links": [],
+        "reason": "No explicit test association. A similar test filename is only a proposal."
+      }
+    },
+    {
+      "feature_id": "route-pages-project",
       "assessment": {
         "state": "unassessed",
         "result": "unknown",

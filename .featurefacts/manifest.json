@@ -1,9 +1,9 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-64b8d2101308",
+  "scan_id": "scan-979bd8343df0",
   "tool": "featurefacts",
-  "tool_version": "0.2.0",
-  "generated_at": "2026-10-04T22:56:52.819Z",
+  "tool_version": "0.2.6",
+  "generated_at": "2026-10-22T03:15:39.136Z",
   "root": ".",
   "status": "complete",
   "scope": {
@@ -92,30 +92,21 @@
       },
       {
         "path": "app/package.json",
-        "sha256": "15860d1dbe06b9b3e0bea851a4198c1d2a92a3562727eefb1e395e2c3e0bca91",
-        "bytes": 913,
+        "sha256": "a17f0d846a420ade6ba35bbbe05271e57c6567d8fb81755fb3a45bf6d224d3b6",
+        "bytes": 960,
         "eligible_adapter_ids": [
-          "typescript-tree"
+          "typescript-tree",
+          "typescript-node-surface"
         ],
         "inspected_by": [
-          "typescript-tree"
+          "typescript-tree",
+          "typescript-node-surface"
         ]
       },
       {
         "path": "app/pnpm-lock.yaml",
         "sha256": "eab7d1c6c323eb4ff9dddcd0993028013b08a552f369eec15e415091d80fa162",
         "bytes": 53654,
-        "eligible_adapter_ids": [
-          "typescript-tree"
-        ],
-        "inspected_by": [
-          "typescript-tree"
-        ]
-      },
-      {
-        "path": "app/pnpm-workspace.yaml",
-        "sha256": "27b336209bd8b917cefb2a3f8c97fb893829ce96cd2ec58ddc952a26080b0672",
-        "bytes": 35,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
@@ -171,6 +162,30 @@
         "inspected_by": [
           "typescript-tree",
           "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/actionGuidance.ts",
+        "sha256": "046723059da74e5fdd7d4e0eff2ef9bf2abf5a4f319046e952cfcddb2d8ba93c",
+        "bytes": 105,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/lib/ActionHistory.svelte",
+        "sha256": "cb7a65e4d92112bc4a4e8f441d71f14b92dceda164ce84d41ed92634c9d48c47",
+        "bytes": 3780,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
         ]
       },
       {
@@ -249,8 +264,8 @@
       },
       {
         "path": "app/src/lib/BridgeHeader.svelte",
-        "sha256": "17b16acb88b918e290f390a18a057172b6ede4dfdbaaa5837789c1eff57652e9",
-        "bytes": 7555,
+        "sha256": "c8fc2560a7c053f9021d1975838e263572837f506c1864df82c2f987b04cac35",
+        "bytes": 8176,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
@@ -296,9 +311,20 @@
         ]
       },
       {
+        "path": "app/src/lib/CompactActions.svelte",
+        "sha256": "0f6fb00509042128ab4cf48bf534db6f4514a144ef2ba400a32880b1974a5ef3",
+        "bytes": 539,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
         "path": "app/src/lib/ConfirmModal.svelte",
-        "sha256": "e503f5c7d15a41ba59c1328beff379c835e8576522f3dcc6028c014393b53a8d",
-        "bytes": 27073,
+        "sha256": "8c1f26141255f05ff05cbdcfa9984eefad153c81ae424b145ac9923f48527360",
+        "bytes": 31368,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
@@ -308,8 +334,8 @@
       },
       {
         "path": "app/src/lib/confirmProgress.ts",
-        "sha256": "df275fb989aebba3fdf98159d1df61085cd40e8f81d28040bbbc4015e6a8e5b5",
-        "bytes": 407,
+        "sha256": "43762a0ab525b76df91c15c05dc3557b8f41e06e7766a2ddcf49e84a97dec5b2",
+        "bytes": 429,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -358,8 +384,8 @@
       },
       {
         "path": "app/src/lib/dashboard.css",
-        "sha256": "7952ef628f1287aa7c8f5e61c2083356c75deda678eac861e2ba1125b0b8bb9c",
-        "bytes": 31093,
+        "sha256": "3971f2c769ed226074be6a1e6c63fa1258dfdcdbf41bff860d141a63c5098269",
+        "bytes": 33468,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
@@ -457,6 +483,17 @@
         ]
       },
       {
+        "path": "app/src/lib/FleetActions.svelte",
+        "sha256": "22919248680e063fb97de42be9a273a7451b9a0e73094004e2514df19e9f5998",
+        "bytes": 2108,
+        "eligible_adapter_ids": [
+          "typescript-tree"
+        ],
+        "inspected_by": [
+          "typescript-tree"
+        ]
+      },
+      {
         "path": "app/src/lib/fleetDisplay.ts",
         "sha256": "ac8570272e3c54d336f94db18cb8cf4c7735b52b71588b3e277ba47b6d938b0a",
         "bytes": 321,
@@ -508,8 +545,8 @@
       },
       {
         "path": "app/src/lib/HelmMenu.svelte",
-        "sha256": "3303608de71740a8ef1abc9944c0d31570d3cc5624ef694649c5be90381d01b3",
-        "bytes": 11002,
+        "sha256": "4be0e5c1e3a9cfe979b543987bc1187118cedff26edeeb90770116fd302c9f1f",
+        "bytes": 11596,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
@@ -693,13 +730,26 @@
       },
       {
         "path": "app/src/lib/OverflowMenu.svelte",
-        "sha256": "b9010f0481b32b5bc02a7e5fd81cd7009311670a98cb2ea40e816b780ea14b56",
-        "bytes": 2205,
+        "sha256": "63a23da01e1750f94713f9a751b9ef95c3e64b5c276e3fd50592953ae070297e",
+        "bytes": 2670,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
         "inspected_by": [
           "typescript-tree"
+        ]
+      },
+      {
+        "path": "app/src/lib/placeMenu.ts",
+        "sha256": "183efd41fd744ee4b12bcb1b9fce1b6c98ff80eab9954734b8ceb3c489effa38",
+        "bytes": 1981,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
         ]
       },
       {
@@ -753,9 +803,22 @@
         ]
       },
       {
+        "path": "app/src/lib/progressResponse.ts",
+        "sha256": "000ad42d8b6b00a5a2966a4dbb40734af42c5380fcfbd10e66cab8c829785608",
+        "bytes": 77,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "app/src/lib/publishBatch.ts",
-        "sha256": "ecfe0051495e5af60ce5bca9861261041095b98c9f735f5d83b4f7ace037fc4d",
-        "bytes": 1005,
+        "sha256": "296155b4774981c405b1310b144310979607600852e3d3343a9c009b17b15331",
+        "bytes": 1126,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -780,8 +843,8 @@
       },
       {
         "path": "app/src/lib/SelectionGroups.svelte",
-        "sha256": "7d96c7a5f14cef80df3e0f338e80b9c858c8956464f22a4287e59d8235bb005d",
-        "bytes": 4768,
+        "sha256": "0e07974c50b0ee6fc5dcd394bf0c92d25b853cc7f826436ec6314e220fb9b22d",
+        "bytes": 5055,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
@@ -829,9 +892,22 @@
         ]
       },
       {
+        "path": "app/src/lib/statusReads.ts",
+        "sha256": "f3c519248b6e966585b830525aed85e20f7b0ae304412e4f4ba5438eed1b86a0",
+        "bytes": 63,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "app/src/lib/TodayBoard.svelte",
-        "sha256": "49db00d26e407a794724663082c24e8779dbf6968be85ffcdf4741ec5d6aa883",
-        "bytes": 19192,
+        "sha256": "1308f762f11a6f9e0144f1f7d6e9162a9b9fc95bd6f68cb2d9da78c5e0c7b476",
+        "bytes": 20653,
         "eligible_adapter_ids": [
           "typescript-tree"
         ],
@@ -856,12 +932,10 @@
         "bytes": 775,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -915,8 +989,8 @@
       },
       {
         "path": "app/src/lib/writeGate.ts",
-        "sha256": "3f352470b832caff6757bb60244f309f731f59964c8146702443401c05e39f09",
-        "bytes": 810,
+        "sha256": "f723ceb5eab34641bfcb1295cd5934262cb544df9ddb28b2ef3fd197d43eefc3",
+        "bytes": 866,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -952,19 +1026,21 @@
       },
       {
         "path": "app/src/routes/+page.svelte",
-        "sha256": "83a7bdbcfc3c1e7b4a2b9b3fa6682af7519758df52f31d9d6266cfacec298a3b",
-        "bytes": 143387,
+        "sha256": "956718a78d427a359513169686f4fd65e07354dba9ee8a9d954c90654b0e506d",
+        "bytes": 167504,
         "eligible_adapter_ids": [
-          "typescript-tree"
+          "typescript-tree",
+          "typescript-node-surface"
         ],
         "inspected_by": [
-          "typescript-tree"
+          "typescript-tree",
+          "typescript-node-surface"
         ]
       },
       {
         "path": "app/src/routes/api/activity/+server.ts",
-        "sha256": "c39d98d07ccc9b11bc14f667e872778efe30fba30800e74902510a1f80813661",
-        "bytes": 1310,
+        "sha256": "bfc4e3b085a54d0b0f34c9c3c1a1702e170b035fdb576237d1f914958254490e",
+        "bytes": 1708,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1015,8 +1091,8 @@
       },
       {
         "path": "app/src/routes/api/commit/+server.ts",
-        "sha256": "4acaa8b13ec64e1eeae45ec39c91a73ae134e0f7ac0ff7d4bd8eb7380b7f3a18",
-        "bytes": 1488,
+        "sha256": "140d7fad0924428fcee94310a47df4b3ec3a3435d89e0d1cc00131e861583621",
+        "bytes": 1545,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1079,6 +1155,19 @@
         ]
       },
       {
+        "path": "app/src/routes/api/git-trust/+server.ts",
+        "sha256": "0cdef6a9d710c9f660c97b721a47a0a175ac1500e3303c9b0151b7013152d76c",
+        "bytes": 1085,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "app/src/routes/api/global/+server.ts",
         "sha256": "e8f2a80f34f0810f9aa8c6974a6de042470684e0152e2edb1eede5030e272f60",
         "bytes": 1090,
@@ -1131,6 +1220,32 @@
         ]
       },
       {
+        "path": "app/src/routes/api/package-privacy/+server.ts",
+        "sha256": "06ab85b9389fb89c8c71902e5b12692a10978ad0c8cc81226791489baef47c8c",
+        "bytes": 1356,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "app/src/routes/api/pages-project/+server.ts",
+        "sha256": "8235a7b1cdcd72fbeec6683e91a6686e00b17f606bf78e1f3474ec6af7ed48ae",
+        "bytes": 1112,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "app/src/routes/api/plugin/+server.ts",
         "sha256": "d7f63a3e1683ac3a3b49feacdacda5676bbfca5ef59ebb8ec185234690bf1539",
         "bytes": 2355,
@@ -1158,8 +1273,8 @@
       },
       {
         "path": "app/src/routes/api/publish/+server.ts",
-        "sha256": "ba03ef93e04355435da77857bbb0ecb89f1d5a0aa10c8b6fc36fe9d51ddeb214",
-        "bytes": 2022,
+        "sha256": "f2a206cc89ad5fa9ea1d83ec9b1fb8b7fae8d9137bca080b56adc8919f07cb93",
+        "bytes": 2503,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1236,8 +1351,8 @@
       },
       {
         "path": "app/src/routes/api/ship/+server.ts",
-        "sha256": "8475bcae75e8af9a05cd2032ce27ecb7827b2141013f53e906077030a7436258",
-        "bytes": 949,
+        "sha256": "51061dfa902738157a1d85a369fab02e409583e3d868dcdd7db38cdaf618bd22",
+        "bytes": 1177,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1304,10 +1419,12 @@
         "sha256": "c1819c297c3aa608135b629a9a06a30956572fa4ff6ffc1bf5ca224ca1540c22",
         "bytes": 263,
         "eligible_adapter_ids": [
-          "typescript-tree"
+          "typescript-tree",
+          "typescript-node-surface"
         ],
         "inspected_by": [
-          "typescript-tree"
+          "typescript-tree",
+          "typescript-node-surface"
         ]
       },
       {
@@ -1339,10 +1456,12 @@
         "sha256": "f11ce11099e83f10507adb5a20dd5c12fc5a284a8e9177f768e1e1ad88a809a2",
         "bytes": 88,
         "eligible_adapter_ids": [
-          "typescript-tree"
+          "typescript-tree",
+          "typescript-node-surface"
         ],
         "inspected_by": [
-          "typescript-tree"
+          "typescript-tree",
+          "typescript-node-surface"
         ]
       },
       {
@@ -1420,6 +1539,32 @@
         ]
       },
       {
+        "path": "docs/NPM_RELEASES.md",
+        "sha256": "0fc108e71c04dddea1f1ae2968f0e8a8b3ee5934f39579bc80f9b75e0b77e76f",
+        "bytes": 3203,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/PAGES_SETUP.md",
+        "sha256": "e117cec5288166be8e85985893f61213298cb2f091e78206c502d99abc655f6b",
+        "bytes": 3066,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
         "path": "docs/PHASE_1_BRIEF.md",
         "sha256": "abd619d1a12bc5bf8d8a142efcecb466c2c50b48a0c54da0efb515f7c5fb6bf6",
         "bytes": 13818,
@@ -1459,8 +1604,34 @@
         ]
       },
       {
+        "path": "docs/specs/ux-friction-packets.md",
+        "sha256": "60b052abfaf2cd36396e4ac7f2632e0ccbcc83a6d953eb98a77acf7c08c7ca30",
+        "bytes": 10321,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
+        "path": "docs/UX_REVIEW_2026-10-14.md",
+        "sha256": "0b9b109caa2b6635e650a5e5f0c67e848daf158c60b522f7d5b8eb0b13a43fa8",
+        "bytes": 14024,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "markdown-document"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "markdown-document"
+        ]
+      },
+      {
         "path": "package.json",
-        "sha256": "339c43283559a371d448e64991410002d31e651bd3b4b43e2ab93606b8455197",
+        "sha256": "8719c620c0973f3400a08254f86d4e27df1363c1552a10a4fb0dbb5db93bb5e9",
         "bytes": 1727,
         "eligible_adapter_ids": [
           "typescript-tree",
@@ -1473,8 +1644,8 @@
       },
       {
         "path": "README.md",
-        "sha256": "e69606ff503d0c379759ed162a1f304db8f40d8a61beb92a7ea045bb1220f603",
-        "bytes": 4001,
+        "sha256": "283b4f31015e8f7eba86cc1ca1a1ff70e7ace88b52eea423cada0f29a42c7b23",
+        "bytes": 4554,
         "eligible_adapter_ids": [
           "typescript-tree",
           "markdown-document"
@@ -1486,8 +1657,47 @@
       },
       {
         "path": "src/cli/main.ts",
-        "sha256": "ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b",
-        "bytes": 37471,
+        "sha256": "21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7",
+        "bytes": 37818,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/actionGuidance.ts",
+        "sha256": "f8813b9438511c29e9d2f7e43a8304150613cc228e13788ad835fcc432e1f463",
+        "bytes": 2312,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/actionQueue.test.ts",
+        "sha256": "56dc8c234f3cb8a2911a519183e15c78a95d573d5753e07d419fbfbb3b45145a",
+        "bytes": 2238,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/actionQueue.ts",
+        "sha256": "f44edcf53450bd33f334fb2505d6cea06cb38e826669f58b9d98caa25e5158a9",
+        "bytes": 2829,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1499,23 +1709,21 @@
       },
       {
         "path": "src/lib/activity.test.ts",
-        "sha256": "134f8a846bb3fb4d328b5ff050ea8458d1ec7ec5778e0465e250fcfd7ed0dc1c",
-        "bytes": 2060,
+        "sha256": "fdd1aa58eb4ad5b6536d6aeb69432aa9760fc93315c2f938d35d6a102b1914ea",
+        "bytes": 3864,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/activity.ts",
-        "sha256": "c1e3e08a524f613425ce73a5b3ddacf518a1352617c5c67eb743fd91d821b55e",
-        "bytes": 3052,
+        "sha256": "b2822ab3f77aa8dcd4f107b680d83fd783af04415c6e904642c5c48a442c56d8",
+        "bytes": 6583,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1531,12 +1739,10 @@
         "bytes": 2070,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1559,12 +1765,10 @@
         "bytes": 799,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1582,17 +1786,41 @@
         ]
       },
       {
+        "path": "src/lib/activityQueue.test.ts",
+        "sha256": "92cb7e55ba12004041a9e39822b4f52aa407175278ae456160fbe4544f9c9a31",
+        "bytes": 2210,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/activityQueue.ts",
+        "sha256": "82e785b3e23cca0ff10395a6c3541522af633229cfcadf8142dddceca144e97d",
+        "bytes": 3414,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "src/lib/archive.test.ts",
         "sha256": "8de9a51e434e5eb0ddb2e0cc90b16de2d43a676d8a0a054f84b5bb88f25ab774",
         "bytes": 2220,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1628,12 +1856,10 @@
         "bytes": 1513,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1656,12 +1882,10 @@
         "bytes": 1311,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1697,12 +1921,10 @@
         "bytes": 624,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1725,19 +1947,17 @@
         "bytes": 6787,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/bump.ts",
-        "sha256": "4bb0e3377e81d62e68022ca8384cedbe9932552a6f147323e0ae7c9f06194deb",
-        "bytes": 3524,
+        "sha256": "e8721e66cdaf844647a3b974a99367d686bea94a6023120c5f654b5cfcda56ba",
+        "bytes": 5234,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1753,12 +1973,10 @@
         "bytes": 8130,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1776,6 +1994,19 @@
         ]
       },
       {
+        "path": "src/lib/cliVersion.test.ts",
+        "sha256": "922f8f06ec96f1a0a96ee95f15aa8fb0f7ccb011792842c43e79c27f7e2aad85",
+        "bytes": 721,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
         "path": "src/lib/commit.ts",
         "sha256": "dc20dbaf66c428c611ee92e6c4eb9ce57aa20e33294d8715a03e8d726ef9e4ff",
         "bytes": 1772,
@@ -1790,23 +2021,21 @@
       },
       {
         "path": "src/lib/confirmProgress.test.ts",
-        "sha256": "e7731aac0a266f7fecc31ac1e222b2726b613aa28e2b95ef4f2c18289b70f62c",
-        "bytes": 4122,
+        "sha256": "6f24a009ef317d6741d777119efa9b9f13a6ba56d522ba49354a151126512084",
+        "bytes": 4395,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/confirmProgress.ts",
-        "sha256": "7f233a21a2dd8067925aaa33089f1ada7fcfa301995694b7742d3e7caf29a8de",
-        "bytes": 4918,
+        "sha256": "9b9a1415d81e67c0b3e2389e314e73efdb9f11bc0e5529416795cb7c3fdf4d5a",
+        "bytes": 5135,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1822,12 +2051,10 @@
         "bytes": 3285,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1850,12 +2077,10 @@
         "bytes": 552,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1878,12 +2103,10 @@
         "bytes": 1594,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1902,8 +2125,8 @@
       },
       {
         "path": "src/lib/dashboardJob.ts",
-        "sha256": "e2447a6b58d5d45925219a9700a3c281cfcb12d0564edc4fff169a30b37b5ebf",
-        "bytes": 3038,
+        "sha256": "a56bc78c3fa18128f8a673bf6da470c60458f1797b36c2cabd0a76c6a94eb64e",
+        "bytes": 3105,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1919,12 +2142,10 @@
         "bytes": 2228,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -1943,8 +2164,8 @@
       },
       {
         "path": "src/lib/dashboardTypes.ts",
-        "sha256": "08fc99127bbe2f81f2f8b36ad7702121f9765f0db6eda3713879be4453a23c1c",
-        "bytes": 1203,
+        "sha256": "913694185bfa986b374da3b5652ed0740fdace56066f3e48dc7a2b962f11d160",
+        "bytes": 1216,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -1973,12 +2194,10 @@
         "bytes": 4161,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2010,23 +2229,21 @@
       },
       {
         "path": "src/lib/dirtCommit.test.ts",
-        "sha256": "aa9521d64044dea60f669896b7288fee0a021d6cdc35e62af4860369bb4a27a1",
-        "bytes": 11436,
+        "sha256": "acd487a0b703729e6085b474d1f7a29712134b9c625c616f6a40e25185b4c6d6",
+        "bytes": 13349,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/dirtCommit.ts",
-        "sha256": "4e9e387bce743b73e33730ca2480e543445874009578bc7ac7384259899857c8",
-        "bytes": 16892,
+        "sha256": "7f1d0bbf645f08701157da27e5303910125a7323e746045c62f79c2e2d4b0d48",
+        "bytes": 17279,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2068,12 +2285,10 @@
         "bytes": 1694,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2096,12 +2311,10 @@
         "bytes": 1634,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2124,12 +2337,10 @@
         "bytes": 2965,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2152,12 +2363,10 @@
         "bytes": 1919,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2180,12 +2389,10 @@
         "bytes": 495,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2208,12 +2415,10 @@
         "bytes": 834,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2232,23 +2437,21 @@
       },
       {
         "path": "src/lib/fleetDisplay.test.ts",
-        "sha256": "60bea2e4749c31c54e6eb1f1a8e1a127475ae988c2a3f95fb51ce08630d47f12",
-        "bytes": 4203,
+        "sha256": "84e8d8202c4a601be9725e5b7a5005c17867fe04b254a94fc2a07f0dc530ec0b",
+        "bytes": 4722,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/fleetDisplay.ts",
-        "sha256": "4d8772f2a8f1768fb475a63fbcbded2b6dbdd1b839946af76e053a522f27858e",
-        "bytes": 4641,
+        "sha256": "28b9c373117612b6f8e8fb9b23066328d44b21fb39aac0faabe6d7b4a114dba3",
+        "bytes": 4823,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2260,8 +2463,8 @@
       },
       {
         "path": "src/lib/fleetWriteActions.ts",
-        "sha256": "b4d922483bb46878985f5129d5f1a2a7d96ca060edc7017c778810d95684ea2d",
-        "bytes": 38153,
+        "sha256": "3c6db26c90d40deb4f3dc91a7883f28b33c24a9c657ddefb8e2281865cb9b02c",
+        "bytes": 43455,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2273,8 +2476,8 @@
       },
       {
         "path": "src/lib/fleetWrites.ts",
-        "sha256": "3ade21be05c1ff3300acc897ceded24e458a4eb7943d338ddb53eaf96a4ebe33",
-        "bytes": 11615,
+        "sha256": "31e35d538f6f785feadcc824380769e6d33736a21d15aa738d6f410bab6c8ad9",
+        "bytes": 11975,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2290,12 +2493,10 @@
         "bytes": 806,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2318,19 +2519,17 @@
         "bytes": 8721,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/git.ts",
-        "sha256": "988152508473778e9ec7b20f184c3aa5e9cdaf99c647a751219c42f81a883782",
-        "bytes": 19462,
+        "sha256": "5e37f9f77a12f98267656365e8ab48c54a2db36597f926a5cac3702813d34fe9",
+        "bytes": 19662,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2346,12 +2545,10 @@
         "bytes": 2094,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2369,17 +2566,80 @@
         ]
       },
       {
+        "path": "src/lib/gitRemoteEscapes.test.ts",
+        "sha256": "99c6aeec44c913462f7a9369aa8f1e05ea06a8f49c32fb85dd1af77186286167",
+        "bytes": 635,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/gitTrust.test.ts",
+        "sha256": "d751a53642e66c0eccbd3c734e08494f5874c5b2a8f5e44681a2a69808c5057a",
+        "bytes": 6374,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/gitTrust.ts",
+        "sha256": "dd353015d526d177977e515b55f7429bcb6138ea9b2a7dacfec3b401a376421d",
+        "bytes": 3073,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/gitTrustActions.test.ts",
+        "sha256": "dfa3a08be469fd695017b8a9ceb4647ff25dcccd098ff688f5ee2c004f2ed946",
+        "bytes": 2624,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/gitTrustDisplay.ts",
+        "sha256": "04312d44e4779793301cda52838f77670c3483a983558c73b542b9114d4c44fe",
+        "bytes": 810,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "src/lib/globalInstall.test.ts",
         "sha256": "247386be87740831c3c279a09c47552f017b1ba7ba26b083935227801e57edff",
         "bytes": 5761,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2402,12 +2662,10 @@
         "bytes": 2955,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2452,8 +2710,8 @@
       },
       {
         "path": "src/lib/index.ts",
-        "sha256": "aade66178ae0ecb8aa050261f5f34d7d3371c7d1a21329802124b8e78f4acd34",
-        "bytes": 10727,
+        "sha256": "b82090649c2ec88f1d2022e4430a9913e1d4f64f73690904d7b7b4d6899b715e",
+        "bytes": 11031,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2469,12 +2727,10 @@
         "bytes": 2624,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2497,12 +2753,10 @@
         "bytes": 737,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2520,17 +2774,41 @@
         ]
       },
       {
+        "path": "src/lib/jobJournal.test.ts",
+        "sha256": "b8eec75d9b6fe0e40c7a84d144f0fc551a3b57d764f3922cdf606c4776a9220c",
+        "bytes": 3102,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/jobJournal.ts",
+        "sha256": "54db42c83cab1d201f88f59282f837934e3a6c2b7ff75d8563510972efdffb3b",
+        "bytes": 7558,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "src/lib/land.test.ts",
         "sha256": "a3008bbc4d0926473a554fc3ab210f914cfb2b04aa6523c475b34de1d05ff11c",
         "bytes": 6457,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2553,12 +2831,10 @@
         "bytes": 1659,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2581,12 +2857,10 @@
         "bytes": 1533,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2609,12 +2883,10 @@
         "bytes": 1585,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2650,12 +2922,10 @@
         "bytes": 2318,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2678,12 +2948,10 @@
         "bytes": 4823,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2706,12 +2974,10 @@
         "bytes": 2374,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2734,12 +3000,10 @@
         "bytes": 4278,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2762,12 +3026,10 @@
         "bytes": 6496,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2785,17 +3047,28 @@
         ]
       },
       {
+        "path": "src/lib/npmCommand.ts",
+        "sha256": "2bd6cf22538e242f2a780f293cea24202d69373171e052531793858830ca8a39",
+        "bytes": 1362,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "src/lib/npmPage.test.ts",
         "sha256": "00d039d455c865a7a8d8fa95f244bf131e13f5e91f0b8cf3cd23bf966991f7c0",
         "bytes": 805,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2813,17 +3086,132 @@
         ]
       },
       {
+        "path": "src/lib/packagePrivacy.test.ts",
+        "sha256": "927eb62ee528ce95733b44a01d9d57cf9284b53e1029289366a294ab5e21e33c",
+        "bytes": 6170,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/packagePrivacy.ts",
+        "sha256": "bf07d1c9d7a8d185652663a5369030579ba4eeb95384f8c761beddf3b34d09a9",
+        "bytes": 4739,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/packagePrivacyActions.test.ts",
+        "sha256": "75d88dfbee8e674868977444207c548413ad503264374ecdae4a541495d7c13d",
+        "bytes": 1999,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/packagePrivacyDisplay.ts",
+        "sha256": "11dc4d861fd8b7ebe976ea71e091dab40c9ca7695f9cfa70b58cea7b271f2888",
+        "bytes": 506,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/pagesProject.test.ts",
+        "sha256": "6c424b567b142726a624f50fbbf10f6731ae0b2aa9ba496279e56e2bb89a4c03",
+        "bytes": 11735,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/pagesProject.ts",
+        "sha256": "1dfb20b6d879256fc30468b36caba388bae9d7727d9b679ba6d81d9d03d3a680",
+        "bytes": 12247,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/pagesProjectActions.test.ts",
+        "sha256": "89bb107944481b0fc73b5685a3aa75f05034099e77d2a41d0f561b6c79175d0b",
+        "bytes": 3075,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/pagesProjectActions.ts",
+        "sha256": "cc8234216543999f524ed4e272bf32f27ef6d9c2abe422aa2b745c5c5b7103a7",
+        "bytes": 3092,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/pagesProjectTypes.ts",
+        "sha256": "fb3184b13ee6df8475fc57af280d2027fdb734fc617dc1bce532c3f0c626bebb",
+        "bytes": 656,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "src/lib/paths.test.ts",
         "sha256": "8ebbcc9eac6b3c39d0f9c92d588ed3b330428c8245c19c2dd84c49c85c6968d7",
         "bytes": 1215,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2846,12 +3234,10 @@
         "bytes": 799,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -2883,8 +3269,8 @@
       },
       {
         "path": "src/lib/pkg.ts",
-        "sha256": "a5baed205827ba3e30475788b373b651952555631674102df91ac600c768915b",
-        "bytes": 2899,
+        "sha256": "ffcf4dbad6c41984686e763a4f67be268af769688d2aaa4b554a888019ef0d26",
+        "bytes": 2940,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2896,8 +3282,8 @@
       },
       {
         "path": "src/lib/plainError.ts",
-        "sha256": "c70e9d7a1634c9d55d84abb9dad92540bf4a9524d7c8098fd923c9d0ca4e5a43",
-        "bytes": 8291,
+        "sha256": "5acea9c927a3ec7d2fe53984c938dc275b769caea6cae4e40b91fb38e82652e8",
+        "bytes": 8383,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2913,19 +3299,17 @@
         "bytes": 9645,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/plugin.ts",
-        "sha256": "5c53083a43ef9bb4fcedca84d82c8866fe1fd1e3f75b589ab6ecbf40b35238b3",
-        "bytes": 6327,
+        "sha256": "7dbf5ca785314df0232e35290bd38b9cb0377883397d9a9d80fb65e54e5e2260",
+        "bytes": 6628,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2950,23 +3334,47 @@
       },
       {
         "path": "src/lib/pluginPrefs.test.ts",
-        "sha256": "5077aaf3dc5edc0028b1d4a356ba8bc121c7ac3a1ea9395fe08bed63507968f9",
-        "bytes": 1162,
+        "sha256": "1aea6e8914ee7330d90b96cec8cf1cad697384e49a12567a972438552a27f624",
+        "bytes": 2027,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/pluginPrefs.ts",
-        "sha256": "d2d5ff59c625f4c4e03206bc3605d44649cbf4931f55b625e6cc07c0a34b310a",
-        "bytes": 2157,
+        "sha256": "0e97ce134200ed42fb41d249c205816abe050ee140403f0f9bc74d9411222b5f",
+        "bytes": 3123,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/pluginReads.test.ts",
+        "sha256": "bf880685e928069880f7dc34cc6d632ba3e073c097fe1d98ddbe3e25482fe6a9",
+        "bytes": 2022,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/pluginReads.ts",
+        "sha256": "8f04aa81166546fa84bd32953d7897d3c2a65ea495ac5a4072f9af20d16a8f71",
+        "bytes": 3938,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -2982,12 +3390,10 @@
         "bytes": 1755,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -3010,12 +3416,10 @@
         "bytes": 2274,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -3033,24 +3437,48 @@
         ]
       },
       {
-        "path": "src/lib/publish.test.ts",
-        "sha256": "dc11f6aa98b6e850a453490aa97f1b9f1cf0a0784bd6ae0d28155cef5d3e54da",
-        "bytes": 13729,
+        "path": "src/lib/progressResponse.test.ts",
+        "sha256": "c5b17571ddd5fe1c43d8e5958eb670517e04d7433b4c854e600b88dbdae2c0fb",
+        "bytes": 2574,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/progressResponse.ts",
+        "sha256": "72dcc9a5db9d4c297914c8dbdfc761cf10f71bdafd99dc4c2390541e3f6555ef",
+        "bytes": 2442,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/publish.test.ts",
+        "sha256": "f4e37d382ffe55f0113426329d7346af673787e5799d2762c8c92276e76b810b",
+        "bytes": 14699,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/publish.ts",
-        "sha256": "5e13d6157816efca1dfdf0310608d08170cd07f901c5a39c005457a6a652131b",
-        "bytes": 10420,
+        "sha256": "8d52b0fe9ff651e9d10721e73eff976f7138ccccafc2b90bb82f0147cd5e5893",
+        "bytes": 14050,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3066,19 +3494,43 @@
         "bytes": 395,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
+        "path": "src/lib/publishConfirmation.test.ts",
+        "sha256": "55d5bef45694698aee51717f74a08bac39e64e63789af47bfb201d1b744746cd",
+        "bytes": 729,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/publishConfirmation.ts",
+        "sha256": "7f7c30ffd989a33430d4d1e635c43941096d9e74aceaf8847951388faab74157",
+        "bytes": 466,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "src/lib/publishDisplay.ts",
-        "sha256": "fa1edebcad832064ec0bbf11edf2092a04d129fe023d117a10ace4ff97a6016f",
-        "bytes": 781,
+        "sha256": "4d68e527a9a3fb310dc32db6b232276fa844f2d35fd5516060aa025b3ed8fa43",
+        "bytes": 871,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3090,8 +3542,8 @@
       },
       {
         "path": "src/lib/publishResults.ts",
-        "sha256": "fbabf674131cd8cfd12fdaad84c6900a20b6135ada1c437671c597f050593ae5",
-        "bytes": 4058,
+        "sha256": "32710e25266dff8f46a988d971e6be1a9367e0098c38be3416b5ba821bd9eb24",
+        "bytes": 4352,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3103,8 +3555,8 @@
       },
       {
         "path": "src/lib/publishTypes.ts",
-        "sha256": "c1d22dc6a265cd8bbd87e6e6effde6d12c87acf65a6f9d65e44294f5904bba22",
-        "bytes": 368,
+        "sha256": "e2387de559c6094b2c4651b6e521cc1cd759c03d4e77c1b38416c4fd462ff567",
+        "bytes": 419,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3128,17 +3580,93 @@
         ]
       },
       {
+        "path": "src/lib/releaseArchive.ts",
+        "sha256": "535efe1657181c21630c2468debb63546d2a5bc5dd29d6c7602881d7d066281b",
+        "bytes": 5777,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/releasePrepare.test.ts",
+        "sha256": "d16386a759d640ef94ccf846485aeb5b8f8d92a7458ce47c1a86c143d6cbaf75",
+        "bytes": 9052,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/releasePrepare.ts",
+        "sha256": "b0441fb7af998c5a3c30a420620b91efdccff18609fecff4795d01ac7028dcba",
+        "bytes": 5418,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/releaseTarget.test.ts",
+        "sha256": "34f4061db4c035efcd30cc00261cc495f37d9db5a6fe271fbdd98fd2562d082f",
+        "bytes": 3559,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/releaseTarget.ts",
+        "sha256": "a7c77aa8b513e7b9e24693daed219aa9a1c200741ab6d63b15112e76520e90d4",
+        "bytes": 5928,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/releaseTypes.ts",
+        "sha256": "bd9015c6ad4460bda6ac7bac4e2102f94252a902737128095a3d7d1c4f31d21e",
+        "bytes": 483,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
         "path": "src/lib/roster.test.ts",
         "sha256": "fb0f885e34d9b78fcb4e22a10eb56b805090abca3ff40d083e088951168569a4",
         "bytes": 511,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -3161,12 +3689,10 @@
         "bytes": 922,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -3202,19 +3728,17 @@
         "bytes": 4512,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/scriptShip.ts",
-        "sha256": "b903e90a36a5d70f9ac4054588bd58459770e88ac2449021243f06ed833a1b46",
-        "bytes": 4420,
+        "sha256": "34ec77927a0c9b51264cbd0c59de3a13bb974f180d36134bdad18200182a9897",
+        "bytes": 4521,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3230,12 +3754,10 @@
         "bytes": 929,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -3258,12 +3780,10 @@
         "bytes": 2135,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -3286,12 +3806,10 @@
         "bytes": 2529,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -3310,23 +3828,21 @@
       },
       {
         "path": "src/lib/siteDisplay.test.ts",
-        "sha256": "875766885f2cc3042f494f28646045a5618226888b15a295bf411b450789f1f0",
-        "bytes": 6403,
+        "sha256": "08a781f97a9366ea90bd251bd5c4160fa739f0305dfe9e1bb32b71afd143fca6",
+        "bytes": 6457,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/siteDisplay.ts",
-        "sha256": "3e343ac645c28173df98657250561c008304d2df7a7f6cf2ba012a243c402d78",
-        "bytes": 7566,
+        "sha256": "a1571ab0849f6229c8e223dbbe37f399858f2514d5e9d59799568722087bab0d",
+        "bytes": 7576,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3338,8 +3854,8 @@
       },
       {
         "path": "src/lib/siteWriteActions.ts",
-        "sha256": "a9815358a0121c68549d03f178d8eb05a704e31b7d7acecbbddc608fc1c40ffc",
-        "bytes": 16759,
+        "sha256": "2fc64ecd0832c32edba3e1208a67cf9fd82ed6322f5e26cad0ca2a183c22d076",
+        "bytes": 17062,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3355,12 +3871,10 @@
         "bytes": 1454,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -3396,19 +3910,43 @@
         "bytes": 6487,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/status.ts",
-        "sha256": "f6d5ea28ba858330a795277a9e7d58e87e30b3bcc47d6ec9fc39a46af2d8d803",
-        "bytes": 11583,
+        "sha256": "e9740359f5b9b0cffe32337c10c0b52dc9153d8a84fda9c8f95197198a7bd52f",
+        "bytes": 12107,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-node-surface"
+        ]
+      },
+      {
+        "path": "src/lib/statusReads.test.ts",
+        "sha256": "964b56fdba23d215e7c67bcefab454384494f6b495c7b2c643c3063229f52a94",
+        "bytes": 1554,
+        "eligible_adapter_ids": [
+          "typescript-tree",
+          "typescript-test"
+        ],
+        "inspected_by": [
+          "typescript-tree",
+          "typescript-test"
+        ]
+      },
+      {
+        "path": "src/lib/statusReads.ts",
+        "sha256": "ab83f169b824e0efcebc655089229e1e6e5d92baa6ba4445c95ed2000ee23800",
+        "bytes": 1299,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3420,8 +3958,8 @@
       },
       {
         "path": "src/lib/types.ts",
-        "sha256": "56a32297a60ded5ce991e83b61b6c7d1bf93b77bad791f50f7a0fc50ec0d7ca8",
-        "bytes": 2744,
+        "sha256": "d80dc713002d516bf3d6f1dba96c1486aa1c7ebfabbbf8d1d2a84d869f5b8030",
+        "bytes": 2799,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3450,12 +3988,10 @@
         "bytes": 1852,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
@@ -3487,23 +4023,21 @@
       },
       {
         "path": "src/lib/writeConfirm.test.ts",
-        "sha256": "708ef8cec9d8c89642dbd3863b4cdbe254542e439351f2631b328c15a35ccd86",
-        "bytes": 6529,
+        "sha256": "bc432a1d25421c6168c0d3faea5ecbddb07b57bb3a9241bec9b6cac3e55977d3",
+        "bytes": 7359,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/writeConfirm.ts",
-        "sha256": "b5029a6ee0792ded220f303a2e49a0b7a6a1be232bba6572fee53d2ddc9a8975",
-        "bytes": 13771,
+        "sha256": "bd248ee265fc16a3b874e2f106b727f1d6ca6decc4d0356a910f6c3d3405e02c",
+        "bytes": 14831,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3515,23 +4049,21 @@
       },
       {
         "path": "src/lib/writeGate.test.ts",
-        "sha256": "8449e514cae2ac65825c8634f04448ba066bc8a64ced8a93e78eb274cc21e095",
-        "bytes": 16603,
+        "sha256": "53f0db99f6a790eac5a116738c1cc20ca65f8cd43fd6103e13b3b785f239204d",
+        "bytes": 18188,
         "eligible_adapter_ids": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ],
         "inspected_by": [
           "typescript-tree",
-          "typescript-node-surface",
           "typescript-test"
         ]
       },
       {
         "path": "src/lib/writeGate.ts",
-        "sha256": "e772beeee4e79559efdb6146288c44abb6f103cd3f8e0df438b62e1ab587cc20",
-        "bytes": 1176,
+        "sha256": "4d0f920db2e90f5dde32f3ae8ccf48fffda5668ee6a0f5c042266afb7c178419",
+        "bytes": 1268,
         "eligible_adapter_ids": [
           "typescript-tree",
           "typescript-node-surface"
@@ -3594,11 +4126,12 @@
         "app/.vscode/settings.json",
         "app/package.json",
         "app/pnpm-lock.yaml",
-        "app/pnpm-workspace.yaml",
         "app/README.md",
         "app/src/app.d.ts",
         "app/src/app.html",
         "app/src/hooks.server.ts",
+        "app/src/lib/actionGuidance.ts",
+        "app/src/lib/ActionHistory.svelte",
         "app/src/lib/ActivityDayNav.svelte",
         "app/src/lib/activityDays.ts",
         "app/src/lib/activityLinks.ts",
@@ -3609,6 +4142,7 @@
         "app/src/lib/briefFormat.ts",
         "app/src/lib/bulkProgress.ts",
         "app/src/lib/CellWait.svelte",
+        "app/src/lib/CompactActions.svelte",
         "app/src/lib/ConfirmModal.svelte",
         "app/src/lib/confirmProgress.ts",
         "app/src/lib/confirmRoster.ts",
@@ -3622,6 +4156,7 @@
         "app/src/lib/featureLabel.ts",
         "app/src/lib/FeatureLabelDialog.svelte",
         "app/src/lib/fetchError.ts",
+        "app/src/lib/FleetActions.svelte",
         "app/src/lib/fleetDisplay.ts",
         "app/src/lib/formatTime.ts",
         "app/src/lib/groupSelect.ts",
@@ -3642,16 +4177,19 @@
         "app/src/lib/looks.ts",
         "app/src/lib/npmPage.ts",
         "app/src/lib/OverflowMenu.svelte",
+        "app/src/lib/placeMenu.ts",
         "app/src/lib/pluginPlan.ts",
         "app/src/lib/portDisplay.ts",
         "app/src/lib/PortFilterBar.svelte",
         "app/src/lib/portFilters.ts",
+        "app/src/lib/progressResponse.ts",
         "app/src/lib/publishBatch.ts",
         "app/src/lib/scanPaths.ts",
         "app/src/lib/SelectionGroups.svelte",
         "app/src/lib/server/helm.ts",
         "app/src/lib/server/visitorPage.ts",
         "app/src/lib/siteDisplay.ts",
+        "app/src/lib/statusReads.ts",
         "app/src/lib/TodayBoard.svelte",
         "app/src/lib/Tooltip.svelte",
         "app/src/lib/urlListParam.test.ts",
@@ -3672,10 +4210,13 @@
         "app/src/routes/api/enroll/+server.ts",
         "app/src/routes/api/export/+server.ts",
         "app/src/routes/api/fetch/+server.ts",
+        "app/src/routes/api/git-trust/+server.ts",
         "app/src/routes/api/global/+server.ts",
         "app/src/routes/api/groups/+server.ts",
         "app/src/routes/api/land/+server.ts",
         "app/src/routes/api/local-only/+server.ts",
+        "app/src/routes/api/package-privacy/+server.ts",
+        "app/src/routes/api/pages-project/+server.ts",
         "app/src/routes/api/plugin/+server.ts",
         "app/src/routes/api/plugins/+server.ts",
         "app/src/routes/api/publish/+server.ts",
@@ -3699,18 +4240,27 @@
         "app/vite.config.ts",
         "bin/localhelm.mjs",
         "docs/GENESIS.md",
+        "docs/NPM_RELEASES.md",
+        "docs/PAGES_SETUP.md",
         "docs/PHASE_1_BRIEF.md",
         "docs/specs/bridge-header.md",
         "docs/specs/cheap-surfaces.md",
+        "docs/specs/ux-friction-packets.md",
+        "docs/UX_REVIEW_2026-10-14.md",
         "package.json",
         "README.md",
         "src/cli/main.ts",
+        "src/lib/actionGuidance.ts",
+        "src/lib/actionQueue.test.ts",
+        "src/lib/actionQueue.ts",
         "src/lib/activity.test.ts",
         "src/lib/activity.ts",
         "src/lib/activityDays.test.ts",
         "src/lib/activityDays.ts",
         "src/lib/activityLinks.test.ts",
         "src/lib/activityLinks.ts",
+        "src/lib/activityQueue.test.ts",
+        "src/lib/activityQueue.ts",
         "src/lib/archive.test.ts",
         "src/lib/archive.ts",
         "src/lib/archiveVis.ts",
@@ -3725,6 +4275,7 @@
         "src/lib/bump.ts",
         "src/lib/cascade.test.ts",
         "src/lib/cascade.ts",
+        "src/lib/cliVersion.test.ts",
         "src/lib/commit.ts",
         "src/lib/confirmProgress.test.ts",
         "src/lib/confirmProgress.ts",
@@ -3768,6 +4319,11 @@
         "src/lib/git.ts",
         "src/lib/githubPublish.test.ts",
         "src/lib/githubPublish.ts",
+        "src/lib/gitRemoteEscapes.test.ts",
+        "src/lib/gitTrust.test.ts",
+        "src/lib/gitTrust.ts",
+        "src/lib/gitTrustActions.test.ts",
+        "src/lib/gitTrustDisplay.ts",
         "src/lib/globalInstall.test.ts",
         "src/lib/globalInstall.ts",
         "src/lib/groups.test.ts",
@@ -3779,6 +4335,8 @@
         "src/lib/inventoryPatch.ts",
         "src/lib/jobCancel.test.ts",
         "src/lib/jobCancel.ts",
+        "src/lib/jobJournal.test.ts",
+        "src/lib/jobJournal.ts",
         "src/lib/land.test.ts",
         "src/lib/land.ts",
         "src/lib/landDisplay.test.ts",
@@ -3798,8 +4356,18 @@
         "src/lib/manifest.ts",
         "src/lib/npm.test.ts",
         "src/lib/npm.ts",
+        "src/lib/npmCommand.ts",
         "src/lib/npmPage.test.ts",
         "src/lib/npmPage.ts",
+        "src/lib/packagePrivacy.test.ts",
+        "src/lib/packagePrivacy.ts",
+        "src/lib/packagePrivacyActions.test.ts",
+        "src/lib/packagePrivacyDisplay.ts",
+        "src/lib/pagesProject.test.ts",
+        "src/lib/pagesProject.ts",
+        "src/lib/pagesProjectActions.test.ts",
+        "src/lib/pagesProjectActions.ts",
+        "src/lib/pagesProjectTypes.ts",
         "src/lib/paths.test.ts",
         "src/lib/paths.ts",
         "src/lib/pins.test.ts",
@@ -3812,17 +4380,29 @@
         "src/lib/pluginPlan.ts",
         "src/lib/pluginPrefs.test.ts",
         "src/lib/pluginPrefs.ts",
+        "src/lib/pluginReads.test.ts",
+        "src/lib/pluginReads.ts",
         "src/lib/portDisplay.test.ts",
         "src/lib/portDisplay.ts",
         "src/lib/portFilters.test.ts",
         "src/lib/portFilters.ts",
+        "src/lib/progressResponse.test.ts",
+        "src/lib/progressResponse.ts",
         "src/lib/publish.test.ts",
         "src/lib/publish.ts",
         "src/lib/publishBatch.test.ts",
+        "src/lib/publishConfirmation.test.ts",
+        "src/lib/publishConfirmation.ts",
         "src/lib/publishDisplay.ts",
         "src/lib/publishResults.ts",
         "src/lib/publishTypes.ts",
         "src/lib/ready.ts",
+        "src/lib/releaseArchive.ts",
+        "src/lib/releasePrepare.test.ts",
+        "src/lib/releasePrepare.ts",
+        "src/lib/releaseTarget.test.ts",
+        "src/lib/releaseTarget.ts",
+        "src/lib/releaseTypes.ts",
         "src/lib/roster.test.ts",
         "src/lib/roster.ts",
         "src/lib/scan.test.ts",
@@ -3844,6 +4424,8 @@
         "src/lib/slipDoorPage.ts",
         "src/lib/status.test.ts",
         "src/lib/status.ts",
+        "src/lib/statusReads.test.ts",
+        "src/lib/statusReads.ts",
         "src/lib/types.ts",
         "src/lib/visitorMachine.ts",
         "src/lib/visitorTiles.test.ts",
@@ -3861,11 +4443,12 @@
         "app/.vscode/settings.json",
         "app/package.json",
         "app/pnpm-lock.yaml",
-        "app/pnpm-workspace.yaml",
         "app/README.md",
         "app/src/app.d.ts",
         "app/src/app.html",
         "app/src/hooks.server.ts",
+        "app/src/lib/actionGuidance.ts",
+        "app/src/lib/ActionHistory.svelte",
         "app/src/lib/ActivityDayNav.svelte",
         "app/src/lib/activityDays.ts",
         "app/src/lib/activityLinks.ts",
@@ -3876,6 +4459,7 @@
         "app/src/lib/briefFormat.ts",
         "app/src/lib/bulkProgress.ts",
         "app/src/lib/CellWait.svelte",
+        "app/src/lib/CompactActions.svelte",
         "app/src/lib/ConfirmModal.svelte",
         "app/src/lib/confirmProgress.ts",
         "app/src/lib/confirmRoster.ts",
@@ -3889,6 +4473,7 @@
         "app/src/lib/featureLabel.ts",
         "app/src/lib/FeatureLabelDialog.svelte",
         "app/src/lib/fetchError.ts",
+        "app/src/lib/FleetActions.svelte",
         "app/src/lib/fleetDisplay.ts",
         "app/src/lib/formatTime.ts",
         "app/src/lib/groupSelect.ts",
@@ -3909,16 +4494,19 @@
         "app/src/lib/looks.ts",
         "app/src/lib/npmPage.ts",
         "app/src/lib/OverflowMenu.svelte",
+        "app/src/lib/placeMenu.ts",
         "app/src/lib/pluginPlan.ts",
         "app/src/lib/portDisplay.ts",
         "app/src/lib/PortFilterBar.svelte",
         "app/src/lib/portFilters.ts",
+        "app/src/lib/progressResponse.ts",
         "app/src/lib/publishBatch.ts",
         "app/src/lib/scanPaths.ts",
         "app/src/lib/SelectionGroups.svelte",
         "app/src/lib/server/helm.ts",
         "app/src/lib/server/visitorPage.ts",
         "app/src/lib/siteDisplay.ts",
+        "app/src/lib/statusReads.ts",
         "app/src/lib/TodayBoard.svelte",
         "app/src/lib/Tooltip.svelte",
         "app/src/lib/urlListParam.test.ts",
@@ -3939,10 +4527,13 @@
         "app/src/routes/api/enroll/+server.ts",
         "app/src/routes/api/export/+server.ts",
         "app/src/routes/api/fetch/+server.ts",
+        "app/src/routes/api/git-trust/+server.ts",
         "app/src/routes/api/global/+server.ts",
         "app/src/routes/api/groups/+server.ts",
         "app/src/routes/api/land/+server.ts",
         "app/src/routes/api/local-only/+server.ts",
+        "app/src/routes/api/package-privacy/+server.ts",
+        "app/src/routes/api/pages-project/+server.ts",
         "app/src/routes/api/plugin/+server.ts",
         "app/src/routes/api/plugins/+server.ts",
         "app/src/routes/api/publish/+server.ts",
@@ -3966,18 +4557,27 @@
         "app/vite.config.ts",
         "bin/localhelm.mjs",
         "docs/GENESIS.md",
+        "docs/NPM_RELEASES.md",
+        "docs/PAGES_SETUP.md",
         "docs/PHASE_1_BRIEF.md",
         "docs/specs/bridge-header.md",
         "docs/specs/cheap-surfaces.md",
+        "docs/specs/ux-friction-packets.md",
+        "docs/UX_REVIEW_2026-10-14.md",
         "package.json",
         "README.md",
         "src/cli/main.ts",
+        "src/lib/actionGuidance.ts",
+        "src/lib/actionQueue.test.ts",
+        "src/lib/actionQueue.ts",
         "src/lib/activity.test.ts",
         "src/lib/activity.ts",
         "src/lib/activityDays.test.ts",
         "src/lib/activityDays.ts",
         "src/lib/activityLinks.test.ts",
         "src/lib/activityLinks.ts",
+        "src/lib/activityQueue.test.ts",
+        "src/lib/activityQueue.ts",
         "src/lib/archive.test.ts",
         "src/lib/archive.ts",
         "src/lib/archiveVis.ts",
@@ -3992,6 +4592,7 @@
         "src/lib/bump.ts",
         "src/lib/cascade.test.ts",
         "src/lib/cascade.ts",
+        "src/lib/cliVersion.test.ts",
         "src/lib/commit.ts",
         "src/lib/confirmProgress.test.ts",
         "src/lib/confirmProgress.ts",
@@ -4035,6 +4636,11 @@
         "src/lib/git.ts",
         "src/lib/githubPublish.test.ts",
         "src/lib/githubPublish.ts",
+        "src/lib/gitRemoteEscapes.test.ts",
+        "src/lib/gitTrust.test.ts",
+        "src/lib/gitTrust.ts",
+        "src/lib/gitTrustActions.test.ts",
+        "src/lib/gitTrustDisplay.ts",
         "src/lib/globalInstall.test.ts",
         "src/lib/globalInstall.ts",
         "src/lib/groups.test.ts",
@@ -4046,6 +4652,8 @@
         "src/lib/inventoryPatch.ts",
         "src/lib/jobCancel.test.ts",
         "src/lib/jobCancel.ts",
+        "src/lib/jobJournal.test.ts",
+        "src/lib/jobJournal.ts",
         "src/lib/land.test.ts",
         "src/lib/land.ts",
         "src/lib/landDisplay.test.ts",
@@ -4065,8 +4673,18 @@
         "src/lib/manifest.ts",
         "src/lib/npm.test.ts",
         "src/lib/npm.ts",
+        "src/lib/npmCommand.ts",
         "src/lib/npmPage.test.ts",
         "src/lib/npmPage.ts",
+        "src/lib/packagePrivacy.test.ts",
+        "src/lib/packagePrivacy.ts",
+        "src/lib/packagePrivacyActions.test.ts",
+        "src/lib/packagePrivacyDisplay.ts",
+        "src/lib/pagesProject.test.ts",
+        "src/lib/pagesProject.ts",
+        "src/lib/pagesProjectActions.test.ts",
+        "src/lib/pagesProjectActions.ts",
+        "src/lib/pagesProjectTypes.ts",
         "src/lib/paths.test.ts",
         "src/lib/paths.ts",
         "src/lib/pins.test.ts",
@@ -4079,17 +4697,29 @@
         "src/lib/pluginPlan.ts",
         "src/lib/pluginPrefs.test.ts",
         "src/lib/pluginPrefs.ts",
+        "src/lib/pluginReads.test.ts",
+        "src/lib/pluginReads.ts",
         "src/lib/portDisplay.test.ts",
         "src/lib/portDisplay.ts",
         "src/lib/portFilters.test.ts",
         "src/lib/portFilters.ts",
+        "src/lib/progressResponse.test.ts",
+        "src/lib/progressResponse.ts",
         "src/lib/publish.test.ts",
         "src/lib/publish.ts",
         "src/lib/publishBatch.test.ts",
+        "src/lib/publishConfirmation.test.ts",
+        "src/lib/publishConfirmation.ts",
         "src/lib/publishDisplay.ts",
         "src/lib/publishResults.ts",
         "src/lib/publishTypes.ts",
         "src/lib/ready.ts",
+        "src/lib/releaseArchive.ts",
+        "src/lib/releasePrepare.test.ts",
+        "src/lib/releasePrepare.ts",
+        "src/lib/releaseTarget.test.ts",
+        "src/lib/releaseTarget.ts",
+        "src/lib/releaseTypes.ts",
         "src/lib/roster.test.ts",
         "src/lib/roster.ts",
         "src/lib/scan.test.ts",
@@ -4111,6 +4741,8 @@
         "src/lib/slipDoorPage.ts",
         "src/lib/status.test.ts",
         "src/lib/status.ts",
+        "src/lib/statusReads.test.ts",
+        "src/lib/statusReads.ts",
         "src/lib/types.ts",
         "src/lib/visitorMachine.ts",
         "src/lib/visitorTiles.test.ts",
@@ -4125,12 +4757,14 @@
     },
     {
       "id": "typescript-node-surface",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "kind": "surface",
       "state": "completed",
       "eligible_files": [
+        "app/package.json",
         "app/src/app.d.ts",
         "app/src/hooks.server.ts",
+        "app/src/lib/actionGuidance.ts",
         "app/src/lib/activityDays.ts",
         "app/src/lib/activityLinks.ts",
         "app/src/lib/archiveVis.ts",
@@ -4159,19 +4793,22 @@
         "app/src/lib/localOnlyVis.ts",
         "app/src/lib/looks.ts",
         "app/src/lib/npmPage.ts",
+        "app/src/lib/placeMenu.ts",
         "app/src/lib/pluginPlan.ts",
         "app/src/lib/portDisplay.ts",
         "app/src/lib/portFilters.ts",
+        "app/src/lib/progressResponse.ts",
         "app/src/lib/publishBatch.ts",
         "app/src/lib/scanPaths.ts",
         "app/src/lib/server/helm.ts",
         "app/src/lib/server/visitorPage.ts",
         "app/src/lib/siteDisplay.ts",
-        "app/src/lib/urlListParam.test.ts",
+        "app/src/lib/statusReads.ts",
         "app/src/lib/urlListParam.ts",
         "app/src/lib/writeConfirm.ts",
         "app/src/lib/writeGate.ts",
         "app/src/routes/+page.server.ts",
+        "app/src/routes/+page.svelte",
         "app/src/routes/api/activity/+server.ts",
         "app/src/routes/api/archive/+server.ts",
         "app/src/routes/api/bump/+server.ts",
@@ -4181,10 +4818,13 @@
         "app/src/routes/api/enroll/+server.ts",
         "app/src/routes/api/export/+server.ts",
         "app/src/routes/api/fetch/+server.ts",
+        "app/src/routes/api/git-trust/+server.ts",
         "app/src/routes/api/global/+server.ts",
         "app/src/routes/api/groups/+server.ts",
         "app/src/routes/api/land/+server.ts",
         "app/src/routes/api/local-only/+server.ts",
+        "app/src/routes/api/package-privacy/+server.ts",
+        "app/src/routes/api/pages-project/+server.ts",
         "app/src/routes/api/plugin/+server.ts",
         "app/src/routes/api/plugins/+server.ts",
         "app/src/routes/api/publish/+server.ts",
@@ -4198,163 +4838,127 @@
         "app/src/routes/api/unenroll/+server.ts",
         "app/src/routes/api/visitor/+server.ts",
         "app/src/routes/deck/+page.server.ts",
+        "app/src/routes/deck/+page.svelte",
         "app/src/routes/visitor/+page.server.ts",
+        "app/src/routes/visitor/+page.svelte",
         "app/vite.config.ts",
         "bin/localhelm.mjs",
         "package.json",
         "src/cli/main.ts",
-        "src/lib/activity.test.ts",
+        "src/lib/actionGuidance.ts",
+        "src/lib/actionQueue.ts",
         "src/lib/activity.ts",
-        "src/lib/activityDays.test.ts",
         "src/lib/activityDays.ts",
-        "src/lib/activityLinks.test.ts",
         "src/lib/activityLinks.ts",
-        "src/lib/archive.test.ts",
+        "src/lib/activityQueue.ts",
         "src/lib/archive.ts",
         "src/lib/archiveVis.ts",
-        "src/lib/batchApply.test.ts",
         "src/lib/batchApply.ts",
-        "src/lib/brief.test.ts",
         "src/lib/brief.ts",
         "src/lib/briefFormat.ts",
-        "src/lib/bulkProgress.test.ts",
         "src/lib/bulkProgress.ts",
-        "src/lib/bump.test.ts",
         "src/lib/bump.ts",
-        "src/lib/cascade.test.ts",
         "src/lib/cascade.ts",
         "src/lib/commit.ts",
-        "src/lib/confirmProgress.test.ts",
         "src/lib/confirmProgress.ts",
-        "src/lib/confirmRoster.test.ts",
         "src/lib/confirmRoster.ts",
-        "src/lib/crosswalk.test.ts",
         "src/lib/crosswalk.ts",
-        "src/lib/dashboardBundle.test.ts",
         "src/lib/dashboardBundle.ts",
         "src/lib/dashboardJob.ts",
-        "src/lib/dashboardTabs.test.ts",
         "src/lib/dashboardTabs.ts",
         "src/lib/dashboardTypes.ts",
         "src/lib/dashboardWrites.ts",
-        "src/lib/demoMode.test.ts",
         "src/lib/demoMode.ts",
         "src/lib/deps.ts",
-        "src/lib/dirtCommit.test.ts",
         "src/lib/dirtCommit.ts",
         "src/lib/enroll.ts",
         "src/lib/export.ts",
-        "src/lib/factsVersion.test.ts",
         "src/lib/factsVersion.ts",
-        "src/lib/family.test.ts",
         "src/lib/family.ts",
-        "src/lib/featureLabel.test.ts",
         "src/lib/featureLabel.ts",
-        "src/lib/featureReview.test.ts",
         "src/lib/featureReview.ts",
-        "src/lib/fetchError.test.ts",
         "src/lib/fetchError.ts",
-        "src/lib/filepressFromFleet.test.ts",
         "src/lib/filepressFromFleet.ts",
-        "src/lib/fleetDisplay.test.ts",
         "src/lib/fleetDisplay.ts",
         "src/lib/fleetWriteActions.ts",
         "src/lib/fleetWrites.ts",
-        "src/lib/formatTime.test.ts",
         "src/lib/formatTime.ts",
-        "src/lib/git.test.ts",
         "src/lib/git.ts",
-        "src/lib/githubPublish.test.ts",
         "src/lib/githubPublish.ts",
-        "src/lib/globalInstall.test.ts",
+        "src/lib/gitTrust.ts",
+        "src/lib/gitTrustDisplay.ts",
         "src/lib/globalInstall.ts",
-        "src/lib/groups.test.ts",
         "src/lib/groups.ts",
         "src/lib/groupSelect.ts",
         "src/lib/ignorefile.ts",
         "src/lib/index.ts",
-        "src/lib/inventoryPatch.test.ts",
         "src/lib/inventoryPatch.ts",
-        "src/lib/jobCancel.test.ts",
         "src/lib/jobCancel.ts",
-        "src/lib/land.test.ts",
+        "src/lib/jobJournal.ts",
         "src/lib/land.ts",
-        "src/lib/landDisplay.test.ts",
         "src/lib/landDisplay.ts",
-        "src/lib/landShips.test.ts",
         "src/lib/landShips.ts",
-        "src/lib/localOnly.test.ts",
         "src/lib/localOnly.ts",
         "src/lib/localOnlyVis.ts",
-        "src/lib/lock.test.ts",
         "src/lib/lock.ts",
-        "src/lib/looks.test.ts",
         "src/lib/looks.ts",
-        "src/lib/loopback.test.ts",
         "src/lib/loopback.ts",
-        "src/lib/manifest.test.ts",
         "src/lib/manifest.ts",
-        "src/lib/npm.test.ts",
         "src/lib/npm.ts",
-        "src/lib/npmPage.test.ts",
+        "src/lib/npmCommand.ts",
         "src/lib/npmPage.ts",
-        "src/lib/paths.test.ts",
+        "src/lib/packagePrivacy.ts",
+        "src/lib/packagePrivacyDisplay.ts",
+        "src/lib/pagesProject.ts",
+        "src/lib/pagesProjectActions.ts",
+        "src/lib/pagesProjectTypes.ts",
         "src/lib/paths.ts",
-        "src/lib/pins.test.ts",
         "src/lib/pins.ts",
         "src/lib/pinwrite.ts",
         "src/lib/pkg.ts",
         "src/lib/plainError.ts",
-        "src/lib/plugin.test.ts",
         "src/lib/plugin.ts",
         "src/lib/pluginPlan.ts",
-        "src/lib/pluginPrefs.test.ts",
         "src/lib/pluginPrefs.ts",
-        "src/lib/portDisplay.test.ts",
+        "src/lib/pluginReads.ts",
         "src/lib/portDisplay.ts",
-        "src/lib/portFilters.test.ts",
         "src/lib/portFilters.ts",
-        "src/lib/publish.test.ts",
+        "src/lib/progressResponse.ts",
         "src/lib/publish.ts",
-        "src/lib/publishBatch.test.ts",
+        "src/lib/publishConfirmation.ts",
         "src/lib/publishDisplay.ts",
         "src/lib/publishResults.ts",
         "src/lib/publishTypes.ts",
         "src/lib/ready.ts",
-        "src/lib/roster.test.ts",
+        "src/lib/releaseArchive.ts",
+        "src/lib/releasePrepare.ts",
+        "src/lib/releaseTarget.ts",
+        "src/lib/releaseTypes.ts",
         "src/lib/roster.ts",
-        "src/lib/scan.test.ts",
         "src/lib/scan.ts",
         "src/lib/scanPaths.ts",
-        "src/lib/scriptShip.test.ts",
         "src/lib/scriptShip.ts",
-        "src/lib/semver.test.ts",
         "src/lib/semver.ts",
-        "src/lib/serve.test.ts",
         "src/lib/serve.ts",
-        "src/lib/servePort.test.ts",
         "src/lib/servePort.ts",
-        "src/lib/siteDisplay.test.ts",
         "src/lib/siteDisplay.ts",
         "src/lib/siteWriteActions.ts",
-        "src/lib/slipDoor.test.ts",
         "src/lib/slipDoor.ts",
         "src/lib/slipDoorPage.ts",
-        "src/lib/status.test.ts",
         "src/lib/status.ts",
+        "src/lib/statusReads.ts",
         "src/lib/types.ts",
         "src/lib/visitorMachine.ts",
-        "src/lib/visitorTiles.test.ts",
         "src/lib/visitorTiles.ts",
         "src/lib/workspace.ts",
-        "src/lib/writeConfirm.test.ts",
         "src/lib/writeConfirm.ts",
-        "src/lib/writeGate.test.ts",
         "src/lib/writeGate.ts"
       ],
       "inspected_files": [
+        "app/package.json",
         "app/src/app.d.ts",
         "app/src/hooks.server.ts",
+        "app/src/lib/actionGuidance.ts",
         "app/src/lib/activityDays.ts",
         "app/src/lib/activityLinks.ts",
         "app/src/lib/archiveVis.ts",
@@ -4383,19 +4987,22 @@
         "app/src/lib/localOnlyVis.ts",
         "app/src/lib/looks.ts",
         "app/src/lib/npmPage.ts",
+        "app/src/lib/placeMenu.ts",
         "app/src/lib/pluginPlan.ts",
         "app/src/lib/portDisplay.ts",
         "app/src/lib/portFilters.ts",
+        "app/src/lib/progressResponse.ts",
         "app/src/lib/publishBatch.ts",
         "app/src/lib/scanPaths.ts",
         "app/src/lib/server/helm.ts",
         "app/src/lib/server/visitorPage.ts",
         "app/src/lib/siteDisplay.ts",
-        "app/src/lib/urlListParam.test.ts",
+        "app/src/lib/statusReads.ts",
         "app/src/lib/urlListParam.ts",
         "app/src/lib/writeConfirm.ts",
         "app/src/lib/writeGate.ts",
         "app/src/routes/+page.server.ts",
+        "app/src/routes/+page.svelte",
         "app/src/routes/api/activity/+server.ts",
         "app/src/routes/api/archive/+server.ts",
         "app/src/routes/api/bump/+server.ts",
@@ -4405,10 +5012,13 @@
         "app/src/routes/api/enroll/+server.ts",
         "app/src/routes/api/export/+server.ts",
         "app/src/routes/api/fetch/+server.ts",
+        "app/src/routes/api/git-trust/+server.ts",
         "app/src/routes/api/global/+server.ts",
         "app/src/routes/api/groups/+server.ts",
         "app/src/routes/api/land/+server.ts",
         "app/src/routes/api/local-only/+server.ts",
+        "app/src/routes/api/package-privacy/+server.ts",
+        "app/src/routes/api/pages-project/+server.ts",
         "app/src/routes/api/plugin/+server.ts",
         "app/src/routes/api/plugins/+server.ts",
         "app/src/routes/api/publish/+server.ts",
@@ -4422,158 +5032,120 @@
         "app/src/routes/api/unenroll/+server.ts",
         "app/src/routes/api/visitor/+server.ts",
         "app/src/routes/deck/+page.server.ts",
+        "app/src/routes/deck/+page.svelte",
         "app/src/routes/visitor/+page.server.ts",
+        "app/src/routes/visitor/+page.svelte",
         "app/vite.config.ts",
         "bin/localhelm.mjs",
         "package.json",
         "src/cli/main.ts",
-        "src/lib/activity.test.ts",
+        "src/lib/actionGuidance.ts",
+        "src/lib/actionQueue.ts",
         "src/lib/activity.ts",
-        "src/lib/activityDays.test.ts",
         "src/lib/activityDays.ts",
-        "src/lib/activityLinks.test.ts",
         "src/lib/activityLinks.ts",
-        "src/lib/archive.test.ts",
+        "src/lib/activityQueue.ts",
         "src/lib/archive.ts",
         "src/lib/archiveVis.ts",
-        "src/lib/batchApply.test.ts",
         "src/lib/batchApply.ts",
-        "src/lib/brief.test.ts",
         "src/lib/brief.ts",
         "src/lib/briefFormat.ts",
-        "src/lib/bulkProgress.test.ts",
         "src/lib/bulkProgress.ts",
-        "src/lib/bump.test.ts",
         "src/lib/bump.ts",
-        "src/lib/cascade.test.ts",
         "src/lib/cascade.ts",
         "src/lib/commit.ts",
-        "src/lib/confirmProgress.test.ts",
         "src/lib/confirmProgress.ts",
-        "src/lib/confirmRoster.test.ts",
         "src/lib/confirmRoster.ts",
-        "src/lib/crosswalk.test.ts",
         "src/lib/crosswalk.ts",
-        "src/lib/dashboardBundle.test.ts",
         "src/lib/dashboardBundle.ts",
         "src/lib/dashboardJob.ts",
-        "src/lib/dashboardTabs.test.ts",
         "src/lib/dashboardTabs.ts",
         "src/lib/dashboardTypes.ts",
         "src/lib/dashboardWrites.ts",
-        "src/lib/demoMode.test.ts",
         "src/lib/demoMode.ts",
         "src/lib/deps.ts",
-        "src/lib/dirtCommit.test.ts",
         "src/lib/dirtCommit.ts",
         "src/lib/enroll.ts",
         "src/lib/export.ts",
-        "src/lib/factsVersion.test.ts",
         "src/lib/factsVersion.ts",
-        "src/lib/family.test.ts",
         "src/lib/family.ts",
-        "src/lib/featureLabel.test.ts",
         "src/lib/featureLabel.ts",
-        "src/lib/featureReview.test.ts",
         "src/lib/featureReview.ts",
-        "src/lib/fetchError.test.ts",
         "src/lib/fetchError.ts",
-        "src/lib/filepressFromFleet.test.ts",
         "src/lib/filepressFromFleet.ts",
-        "src/lib/fleetDisplay.test.ts",
         "src/lib/fleetDisplay.ts",
         "src/lib/fleetWriteActions.ts",
         "src/lib/fleetWrites.ts",
-        "src/lib/formatTime.test.ts",
         "src/lib/formatTime.ts",
-        "src/lib/git.test.ts",
         "src/lib/git.ts",
-        "src/lib/githubPublish.test.ts",
         "src/lib/githubPublish.ts",
-        "src/lib/globalInstall.test.ts",
+        "src/lib/gitTrust.ts",
+        "src/lib/gitTrustDisplay.ts",
         "src/lib/globalInstall.ts",
-        "src/lib/groups.test.ts",
         "src/lib/groups.ts",
         "src/lib/groupSelect.ts",
         "src/lib/ignorefile.ts",
         "src/lib/index.ts",
-        "src/lib/inventoryPatch.test.ts",
         "src/lib/inventoryPatch.ts",
-        "src/lib/jobCancel.test.ts",
         "src/lib/jobCancel.ts",
-        "src/lib/land.test.ts",
+        "src/lib/jobJournal.ts",
         "src/lib/land.ts",
-        "src/lib/landDisplay.test.ts",
         "src/lib/landDisplay.ts",
-        "src/lib/landShips.test.ts",
         "src/lib/landShips.ts",
-        "src/lib/localOnly.test.ts",
         "src/lib/localOnly.ts",
         "src/lib/localOnlyVis.ts",
-        "src/lib/lock.test.ts",
         "src/lib/lock.ts",
-        "src/lib/looks.test.ts",
         "src/lib/looks.ts",
-        "src/lib/loopback.test.ts",
         "src/lib/loopback.ts",
-        "src/lib/manifest.test.ts",
         "src/lib/manifest.ts",
-        "src/lib/npm.test.ts",
         "src/lib/npm.ts",
-        "src/lib/npmPage.test.ts",
+        "src/lib/npmCommand.ts",
         "src/lib/npmPage.ts",
-        "src/lib/paths.test.ts",
+        "src/lib/packagePrivacy.ts",
+        "src/lib/packagePrivacyDisplay.ts",
+        "src/lib/pagesProject.ts",
+        "src/lib/pagesProjectActions.ts",
+        "src/lib/pagesProjectTypes.ts",
         "src/lib/paths.ts",
-        "src/lib/pins.test.ts",
         "src/lib/pins.ts",
         "src/lib/pinwrite.ts",
         "src/lib/pkg.ts",
         "src/lib/plainError.ts",
-        "src/lib/plugin.test.ts",
         "src/lib/plugin.ts",
         "src/lib/pluginPlan.ts",
-        "src/lib/pluginPrefs.test.ts",
         "src/lib/pluginPrefs.ts",
-        "src/lib/portDisplay.test.ts",
+        "src/lib/pluginReads.ts",
         "src/lib/portDisplay.ts",
-        "src/lib/portFilters.test.ts",
         "src/lib/portFilters.ts",
-        "src/lib/publish.test.ts",
+        "src/lib/progressResponse.ts",
         "src/lib/publish.ts",
-        "src/lib/publishBatch.test.ts",
+        "src/lib/publishConfirmation.ts",
         "src/lib/publishDisplay.ts",
         "src/lib/publishResults.ts",
         "src/lib/publishTypes.ts",
         "src/lib/ready.ts",
-        "src/lib/roster.test.ts",
+        "src/lib/releaseArchive.ts",
+        "src/lib/releasePrepare.ts",
+        "src/lib/releaseTarget.ts",
+        "src/lib/releaseTypes.ts",
         "src/lib/roster.ts",
-        "src/lib/scan.test.ts",
         "src/lib/scan.ts",
         "src/lib/scanPaths.ts",
-        "src/lib/scriptShip.test.ts",
         "src/lib/scriptShip.ts",
-        "src/lib/semver.test.ts",
         "src/lib/semver.ts",
-        "src/lib/serve.test.ts",
         "src/lib/serve.ts",
-        "src/lib/servePort.test.ts",
         "src/lib/servePort.ts",
-        "src/lib/siteDisplay.test.ts",
         "src/lib/siteDisplay.ts",
         "src/lib/siteWriteActions.ts",
-        "src/lib/slipDoor.test.ts",
         "src/lib/slipDoor.ts",
         "src/lib/slipDoorPage.ts",
-        "src/lib/status.test.ts",
         "src/lib/status.ts",
+        "src/lib/statusReads.ts",
         "src/lib/types.ts",
         "src/lib/visitorMachine.ts",
-        "src/lib/visitorTiles.test.ts",
         "src/lib/visitorTiles.ts",
         "src/lib/workspace.ts",
-        "src/lib/writeConfirm.test.ts",
         "src/lib/writeConfirm.ts",
-        "src/lib/writeGate.test.ts",
         "src/lib/writeGate.ts"
       ],
       "diagnostics": []
@@ -4587,18 +5159,26 @@
         "app/README.md",
         "app/static/robots.txt",
         "docs/GENESIS.md",
+        "docs/NPM_RELEASES.md",
+        "docs/PAGES_SETUP.md",
         "docs/PHASE_1_BRIEF.md",
         "docs/specs/bridge-header.md",
         "docs/specs/cheap-surfaces.md",
+        "docs/specs/ux-friction-packets.md",
+        "docs/UX_REVIEW_2026-10-14.md",
         "README.md"
       ],
       "inspected_files": [
         "app/README.md",
         "app/static/robots.txt",
         "docs/GENESIS.md",
+        "docs/NPM_RELEASES.md",
+        "docs/PAGES_SETUP.md",
         "docs/PHASE_1_BRIEF.md",
         "docs/specs/bridge-header.md",
         "docs/specs/cheap-surfaces.md",
+        "docs/specs/ux-friction-packets.md",
+        "docs/UX_REVIEW_2026-10-14.md",
         "README.md"
       ],
       "diagnostics": []
@@ -4610,15 +5190,18 @@
       "state": "completed",
       "eligible_files": [
         "app/src/lib/urlListParam.test.ts",
+        "src/lib/actionQueue.test.ts",
         "src/lib/activity.test.ts",
         "src/lib/activityDays.test.ts",
         "src/lib/activityLinks.test.ts",
+        "src/lib/activityQueue.test.ts",
         "src/lib/archive.test.ts",
         "src/lib/batchApply.test.ts",
         "src/lib/brief.test.ts",
         "src/lib/bulkProgress.test.ts",
         "src/lib/bump.test.ts",
         "src/lib/cascade.test.ts",
+        "src/lib/cliVersion.test.ts",
         "src/lib/confirmProgress.test.ts",
         "src/lib/confirmRoster.test.ts",
         "src/lib/crosswalk.test.ts",
@@ -4636,10 +5219,14 @@
         "src/lib/formatTime.test.ts",
         "src/lib/git.test.ts",
         "src/lib/githubPublish.test.ts",
+        "src/lib/gitRemoteEscapes.test.ts",
+        "src/lib/gitTrust.test.ts",
+        "src/lib/gitTrustActions.test.ts",
         "src/lib/globalInstall.test.ts",
         "src/lib/groups.test.ts",
         "src/lib/inventoryPatch.test.ts",
         "src/lib/jobCancel.test.ts",
+        "src/lib/jobJournal.test.ts",
         "src/lib/land.test.ts",
         "src/lib/landDisplay.test.ts",
         "src/lib/landShips.test.ts",
@@ -4650,14 +5237,23 @@
         "src/lib/manifest.test.ts",
         "src/lib/npm.test.ts",
         "src/lib/npmPage.test.ts",
+        "src/lib/packagePrivacy.test.ts",
+        "src/lib/packagePrivacyActions.test.ts",
+        "src/lib/pagesProject.test.ts",
+        "src/lib/pagesProjectActions.test.ts",
         "src/lib/paths.test.ts",
         "src/lib/pins.test.ts",
         "src/lib/plugin.test.ts",
         "src/lib/pluginPrefs.test.ts",
+        "src/lib/pluginReads.test.ts",
         "src/lib/portDisplay.test.ts",
         "src/lib/portFilters.test.ts",
+        "src/lib/progressResponse.test.ts",
         "src/lib/publish.test.ts",
         "src/lib/publishBatch.test.ts",
+        "src/lib/publishConfirmation.test.ts",
+        "src/lib/releasePrepare.test.ts",
+        "src/lib/releaseTarget.test.ts",
         "src/lib/roster.test.ts",
         "src/lib/scan.test.ts",
         "src/lib/scriptShip.test.ts",
@@ -4667,21 +5263,25 @@
         "src/lib/siteDisplay.test.ts",
         "src/lib/slipDoor.test.ts",
         "src/lib/status.test.ts",
+        "src/lib/statusReads.test.ts",
         "src/lib/visitorTiles.test.ts",
         "src/lib/writeConfirm.test.ts",
         "src/lib/writeGate.test.ts"
       ],
       "inspected_files": [
         "app/src/lib/urlListParam.test.ts",
+        "src/lib/actionQueue.test.ts",
         "src/lib/activity.test.ts",
         "src/lib/activityDays.test.ts",
         "src/lib/activityLinks.test.ts",
+        "src/lib/activityQueue.test.ts",
         "src/lib/archive.test.ts",
         "src/lib/batchApply.test.ts",
         "src/lib/brief.test.ts",
         "src/lib/bulkProgress.test.ts",
         "src/lib/bump.test.ts",
         "src/lib/cascade.test.ts",
+        "src/lib/cliVersion.test.ts",
         "src/lib/confirmProgress.test.ts",
         "src/lib/confirmRoster.test.ts",
         "src/lib/crosswalk.test.ts",
@@ -4699,10 +5299,14 @@
         "src/lib/formatTime.test.ts",
         "src/lib/git.test.ts",
         "src/lib/githubPublish.test.ts",
+        "src/lib/gitRemoteEscapes.test.ts",
+        "src/lib/gitTrust.test.ts",
+        "src/lib/gitTrustActions.test.ts",
         "src/lib/globalInstall.test.ts",
         "src/lib/groups.test.ts",
         "src/lib/inventoryPatch.test.ts",
         "src/lib/jobCancel.test.ts",
+        "src/lib/jobJournal.test.ts",
         "src/lib/land.test.ts",
         "src/lib/landDisplay.test.ts",
         "src/lib/landShips.test.ts",
@@ -4713,14 +5317,23 @@
         "src/lib/manifest.test.ts",
         "src/lib/npm.test.ts",
         "src/lib/npmPage.test.ts",
+        "src/lib/packagePrivacy.test.ts",
+        "src/lib/packagePrivacyActions.test.ts",
+        "src/lib/pagesProject.test.ts",
+        "src/lib/pagesProjectActions.test.ts",
         "src/lib/paths.test.ts",
         "src/lib/pins.test.ts",
         "src/lib/plugin.test.ts",
         "src/lib/pluginPrefs.test.ts",
+        "src/lib/pluginReads.test.ts",
         "src/lib/portDisplay.test.ts",
         "src/lib/portFilters.test.ts",
+        "src/lib/progressResponse.test.ts",
         "src/lib/publish.test.ts",
         "src/lib/publishBatch.test.ts",
+        "src/lib/publishConfirmation.test.ts",
+        "src/lib/releasePrepare.test.ts",
+        "src/lib/releaseTarget.test.ts",
         "src/lib/roster.test.ts",
         "src/lib/scan.test.ts",
         "src/lib/scriptShip.test.ts",
@@ -4730,6 +5343,7 @@
         "src/lib/siteDisplay.test.ts",
         "src/lib/slipDoor.test.ts",
         "src/lib/status.test.ts",
+        "src/lib/statusReads.test.ts",
         "src/lib/visitorTiles.test.ts",
         "src/lib/writeConfirm.test.ts",
         "src/lib/writeGate.test.ts"
@@ -4739,11 +5353,11 @@
   ],
   "rules_version": "featurefacts-core@0.2.0",
   "fingerprints": {
-    "source": "c05aa0e0706f284c8d27b9d15b06ed5980080ed625685b928f1a00113449d8f8",
+    "source": "9621da4b213c84d62cf61e698d55f48185a7d7dba67b020bd00a27835d077761",
     "config": "e86aac91018044abf39784d68e698da5a774b319a14feb497036d1ed5d5abf40",
-    "adapters": "4abbb8741b08bcd3aa308ef9c93d4a55fd7feb6d4a98f89297831ab85b15b1eb",
+    "adapters": "9a62745dc3fd15d7c60f9f44d5f62ca8329b8c59dbe3360efbdd40c289da135e",
     "rules": "c7f728a22bf07a27d20f2b0ba60c59d2528cf27f6b218a22272fcbbe465f8971",
-    "registry": "1bbdc16d28a91116580c94e0ab52bc9b16c7a2a52a4e64ed16f4dfe30fe44f81",
+    "registry": "9386694e4ff9014b89d7a23eb06dfc8b5f44dba2e3f9e0260a598894f80bb039",
     "projection": "430e104a42b2a3ee563284a667022152493035bda576619219df756eb66b3ff4"
   },
   "artifacts": [
@@ -4753,31 +5367,31 @@
     },
     {
       "path": ".featurefacts/docs-index.json",
-      "sha256": "10968d8296adaadfe9d267cd212f01c3a539a4c55b638686718156d9b58fc9cf"
+      "sha256": "45a324fbe514f66080029995910ccbb7d1e1f7a5fe7ab571440a53fe12bcfd62"
     },
     {
       "path": ".featurefacts/features.json",
-      "sha256": "3662c5ceb1c784cdafbe2437f3f2d1c68286e311706687a61980d71bf707e340"
+      "sha256": "4e0e98e12a77a6de8d78562219ca264259f6de27e3c7df4f312bbfd76bda5693"
     },
     {
       "path": ".featurefacts/FEATURES.md",
-      "sha256": "418b3f16ccfe05ab24e0c9426cc7f7e969f84e2151417cfa1c4effad0461ac75"
+      "sha256": "ab8963aa6efa08cfb3a002b1118fecb91f4824ebbdd9bf2f0967f300b0596f5e"
     },
     {
       "path": ".featurefacts/features.yaml",
-      "sha256": "c8034eba1c63362df49f80898a99a7ba790f06e95d67c01d2a32b0b17b33573c"
+      "sha256": "d2906c5939dacc3d913a9ca9dc5172a2acaf82d8a909d6c9a4b117904565f50d"
     },
     {
       "path": ".featurefacts/gaps.yaml",
-      "sha256": "888a9f865335d1bbdc5e59b1a2f3c35df8426c49a42cf7a45eb8da71d25bf147"
+      "sha256": "0d049da6c589ff3d40b9515755af1e17b647592e8b07922d8defd030d4f5b699"
     },
     {
       "path": ".featurefacts/surfaces.json",
-      "sha256": "110c973c74ffd14deb7b59f693d1601f3280a9739b81d76dd09e481347973f8e"
+      "sha256": "8a3099f7b2303ab5a8c45076a4153566a48c28b8324ec8b15c7401b447cb6074"
     },
     {
       "path": ".featurefacts/test-index.json",
-      "sha256": "4647d183098b8718908c8a2fd091dbd64d793880b710778e24b5114e128353c2"
+      "sha256": "9ffb319c1a1e177b46e7fe67a42e9ccb0e21dee0d0ec70811bd858d5f27379e1"
     },
     {
       "path": "FEATURE_FACTS.md",

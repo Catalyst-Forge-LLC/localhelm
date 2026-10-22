@@ -1,6 +1,6 @@
 # Feature register: LocalHelm
 
-Scan `scan-64b8d2101308`. Candidates are not confirmed capabilities.
+Scan `scan-979bd8343df0`. Candidates are not confirmed capabilities.
 
 | ID | Name | Recognition | Lifecycle | Availability | Docs | Tests | Observation |
 |---|---|---|---|---|---|---|---|
@@ -30,9 +30,12 @@ Scan `scan-64b8d2101308`. Candidates are not confirmed capabilities.
 | `route-activity` | Activity | candidate | unknown | unknown | unknown | linked-evidence | current |
 | `route-deck` | Deck | confirmed | implemented | unknown | unknown | unknown | current |
 | `route-demo` | Demo | candidate | unknown | unknown | unknown | unknown | current |
+| `route-git-trust` | Git Trust | candidate | unknown | unknown | unknown | unknown | current |
 | `route-groups` | Groups | candidate | unknown | unknown | unknown | linked-evidence | current |
 | `route-home` | Home | candidate | unknown | unknown | unknown | unknown | current |
 | `route-local-only` | Local Only | candidate | unknown | unknown | unknown | unknown | current |
+| `route-package-privacy` | Package Privacy | candidate | unknown | unknown | unknown | unknown | current |
+| `route-pages-project` | Pages Project | candidate | unknown | unknown | unknown | unknown | current |
 | `route-roster` | Roster | candidate | unknown | unknown | unknown | linked-evidence | current |
 | `route-visitor` | Visitor | candidate | unknown | unknown | unknown | unknown | current |
 

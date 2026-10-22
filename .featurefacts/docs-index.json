@@ -1,6 +1,6 @@
 {
   "schemaVersion": "0.2.0",
-  "scan_id": "scan-64b8d2101308",
+  "scan_id": "scan-979bd8343df0",
   "kind": "docs",
   "assessments": [
     {
@@ -240,6 +240,10 @@
             "association": "static-reference"
           },
           {
+            "surface_id": "doc-docs-pages-setup",
+            "association": "static-reference"
+          },
+          {
             "surface_id": "doc-docs-phase-1-brief",
             "association": "static-reference"
           },
@@ -378,6 +382,10 @@
             "association": "static-reference"
           },
           {
+            "surface_id": "doc-docs-pages-setup",
+            "association": "static-reference"
+          },
+          {
             "surface_id": "doc-docs-phase-1-brief",
             "association": "static-reference"
           },
@@ -472,6 +480,18 @@
       }
     },
     {
+      "feature_id": "route-git-trust",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      }
+    },
+    {
       "feature_id": "route-groups",
       "assessment": {
         "state": "unassessed",
@@ -497,6 +517,30 @@
     },
     {
       "feature_id": "route-local-only",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      }
+    },
+    {
+      "feature_id": "route-package-privacy",
+      "assessment": {
+        "state": "unassessed",
+        "result": "unknown",
+        "adapter_ids": [
+          "markdown-document"
+        ],
+        "links": [],
+        "reason": "No explicit documentation association. Filename resemblance is not an accepted link."
+      }
+    },
+    {
+      "feature_id": "route-pages-project",
       "assessment": {
         "state": "unassessed",
         "result": "unknown",

@@ -1,5 +1,5 @@
 schemaVersion: 0.2.0
-scan_id: scan-64b8d2101308
+scan_id: scan-979bd8343df0
 product:
   name: LocalHelm
   type: typescript-node
@@ -49,7 +49,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-archive-capability
@@ -61,13 +61,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 872
-          end_line: 872
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 877
+          end_line: 877
           symbol: archive
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
       - id: cmd-archive-recognition
@@ -143,7 +143,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-auth-capability
@@ -155,13 +155,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 548
-          end_line: 548
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 553
+          end_line: 553
           symbol: auth
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -220,7 +220,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-brief-capability
@@ -232,13 +232,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 862
-          end_line: 862
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 867
+          end_line: 867
           symbol: brief
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -300,7 +300,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-bump-capability
@@ -312,13 +312,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 325
-          end_line: 325
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 330
+          end_line: 330
           symbol: bump
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
       - id: cmd-bump-recognition
@@ -397,7 +397,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-cascade-capability
@@ -409,13 +409,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 636
-          end_line: 636
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 641
+          end_line: 641
           symbol: cascade
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -473,7 +473,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-commit-capability
@@ -485,13 +485,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 361
-          end_line: 361
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 366
+          end_line: 366
           symbol: commit
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
       - id: cmd-commit-recognition
@@ -573,7 +573,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-deps-capability
@@ -585,13 +585,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 301
-          end_line: 301
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 306
+          end_line: 306
           symbol: deps
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -649,7 +649,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-enroll-capability
@@ -661,13 +661,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 232
-          end_line: 232
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 237
+          end_line: 237
           symbol: enroll
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -723,7 +723,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-export-capability
@@ -735,13 +735,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 501
-          end_line: 501
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 506
+          end_line: 506
           symbol: export
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -801,7 +801,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-fetch-capability
@@ -813,13 +813,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 420
-          end_line: 420
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 425
+          end_line: 425
           symbol: fetch
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -877,7 +877,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-global-capability
@@ -889,13 +889,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 805
-          end_line: 805
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 810
+          end_line: 810
           symbol: global
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -953,7 +953,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-land-capability
@@ -965,13 +965,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 683
-          end_line: 683
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 688
+          end_line: 688
           symbol: land
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
       - id: cmd-land-recognition
@@ -1050,7 +1050,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-plugin-capability
@@ -1062,13 +1062,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 932
-          end_line: 932
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 937
+          end_line: 937
           symbol: plugin
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -1124,7 +1124,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-plugins-capability
@@ -1136,13 +1136,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 911
-          end_line: 911
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 916
+          end_line: 916
           symbol: plugins
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -1192,6 +1192,8 @@ features:
           association: static-reference
         - surface_id: doc-docs-genesis
           association: static-reference
+        - surface_id: doc-docs-pages-setup
+          association: static-reference
         - surface_id: doc-docs-phase-1-brief
           association: static-reference
         - surface_id: doc-docs-specs-bridge-header
@@ -1210,7 +1212,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-publish-capability
@@ -1222,13 +1224,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 577
-          end_line: 577
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 582
+          end_line: 582
           symbol: publish
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
       - id: cmd-publish-recognition
@@ -1309,7 +1311,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-pull-capability
@@ -1321,13 +1323,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 437
-          end_line: 437
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 442
+          end_line: 442
           symbol: pull
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -1389,7 +1391,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-push-capability
@@ -1401,13 +1403,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 460
-          end_line: 460
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 465
+          end_line: 465
           symbol: push
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
       - id: cmd-push-recognition
@@ -1488,7 +1490,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-ready-capability
@@ -1500,13 +1502,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 525
-          end_line: 525
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 530
+          end_line: 530
           symbol: ready
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -1566,7 +1568,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-scan-capability
@@ -1578,13 +1580,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 219
-          end_line: 219
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 224
+          end_line: 224
           symbol: scan
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -1647,7 +1649,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-serve-capability
@@ -1659,13 +1661,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 990
-          end_line: 990
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 995
+          end_line: 995
           symbol: serve
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
       - id: cmd-serve-recognition
@@ -1734,6 +1736,8 @@ features:
       links:
         - surface_id: doc-docs-genesis
           association: static-reference
+        - surface_id: doc-docs-pages-setup
+          association: static-reference
         - surface_id: doc-docs-phase-1-brief
           association: static-reference
         - surface_id: doc-readme
@@ -1748,7 +1752,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-ship-capability
@@ -1760,13 +1764,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 752
-          end_line: 752
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 757
+          end_line: 757
           symbol: ship
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
       - id: cmd-ship-recognition
@@ -1853,7 +1857,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-status-capability
@@ -1865,13 +1869,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 285
-          end_line: 285
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 290
+          end_line: 290
           symbol: status
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -1929,7 +1933,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: cmd-unenroll-capability
@@ -1941,13 +1945,13 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: src/cli/main.ts
-          content_sha256: ec8e18e981a3e3b8b68d73c082be27f79e8f2217c70ff4cfe79c711d1afa206b
-          start_line: 263
-          end_line: 263
+          content_sha256: 21fe830c17bb3e7bedd2d9f934b1305d0d7f9a59b9ca9984d419340d31ff63b7
+          start_line: 268
+          end_line: 268
           symbol: unenroll
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -2004,7 +2008,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: route-activity-capability
@@ -2016,10 +2020,10 @@ features:
           claim: Static extraction found implementation surfaces. This is not confirmation.
         locator:
           path: app/src/routes/api/activity/+server.ts
-          content_sha256: c39d98d07ccc9b11bc14f667e872778efe30fba30800e74902510a1f80813661
+          content_sha256: bfc4e3b085a54d0b0f34c9c3c1a1702e170b035fdb576237d1f914958254490e
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -2074,7 +2078,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: route-deck-capability
@@ -2089,7 +2093,7 @@ features:
           content_sha256: f842225cfeba4752ef162f8db635b78d729ace7b4013a4a189a2713a1bdfca7f
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
       - id: route-deck-recognition
@@ -2165,7 +2169,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: route-demo-capability
@@ -2180,7 +2184,7 @@ features:
           content_sha256: 202ac25745a555974f16eca9f8c1a4640da4020bacc01606b2ca19e077a9b624
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -2194,6 +2198,76 @@ features:
     id: route-demo
     name: Demo
     description: "Observed implementation surfaces: route-api-demo. Candidate only until a maintainer confirms the product meaning."
+  - type: surface-cluster
+    recognition: candidate
+    lifecycle: unknown
+    availability:
+      state: unknown
+      conditions: []
+      reason: Availability is a declaration. Source presence is not a deployment check.
+    maturity: unknown
+    audiences:
+      state: unknown
+      values: []
+      reason: Audience was not declared.
+    discovery:
+      state: unassessed
+      surfaces: []
+      adapter_ids: []
+      reason: Discovery surfaces were not assessed beyond extracted entry points.
+    intent: unknown
+    publication:
+      scope: internal
+      reason: Internal is the conservative default. Public permission requires an attributed declaration.
+    entry_points:
+      - route-api-git-trust
+    implements: []
+    dependencies: []
+    docs:
+      state: unassessed
+      result: unknown
+      adapter_ids:
+        - markdown-document
+      links: []
+      reason: No explicit documentation association. Filename resemblance is not an accepted link.
+    tests:
+      state: unassessed
+      result: unknown
+      adapter_ids:
+        - typescript-test
+      links: []
+      reason: No explicit test association. A similar test filename is only a proposal.
+    observation:
+      state: current
+      last_seen_scan_id: scan-979bd8343df0
+      reason: Current source evidence is available.
+    evidence:
+      - id: route-git-trust-capability
+        kind: observed
+        state: current
+        assertion:
+          field: capability
+          value: "Observed implementation surfaces: route-api-git-trust. Candidate only until a maintainer confirms the product meaning."
+          claim: Static extraction found implementation surfaces. This is not confirmation.
+        locator:
+          path: app/src/routes/api/git-trust/+server.ts
+          content_sha256: 0cdef6a9d710c9f660c97b721a47a0a175ac1500e3303c9b0151b7013152d76c
+        provenance:
+          adapter_id: typescript-node-surface
+          adapter_version: 0.2.2
+          origin: deterministic
+          method: surface-cluster
+    editorial:
+      locked: []
+      aliases: []
+      notes: ""
+    uncertainty_reasons:
+      lifecycle: Source presence does not establish release status.
+      maturity: No attributed maturity declaration.
+      intent: Discovery intent was not declared.
+    id: route-git-trust
+    name: Git Trust
+    description: "Observed implementation surfaces: route-api-git-trust. Candidate only until a maintainer confirms the product meaning."
   - type: surface-cluster
     recognition: candidate
     lifecycle: unknown
@@ -2237,7 +2311,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: route-groups-capability
@@ -2252,7 +2326,7 @@ features:
           content_sha256: fc6a9b5ff203290c38566a2dc3c43a0b3ef2d325d824611bdbd8a1c130c3c823
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -2307,7 +2381,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: route-home-capability
@@ -2322,7 +2396,7 @@ features:
           content_sha256: ca0d3a37cd187227f9b98b20f501e82cab270243cf983677aca4d9719b539e17
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -2377,7 +2451,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: route-local-only-capability
@@ -2392,7 +2466,7 @@ features:
           content_sha256: e0f3b1bc559785c3b4c042352d15eb45e1d14952ab51ec67c0ec181404318a71
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -2406,6 +2480,146 @@ features:
     id: route-local-only
     name: Local Only
     description: "Observed implementation surfaces: route-api-local-only. Candidate only until a maintainer confirms the product meaning."
+  - type: surface-cluster
+    recognition: candidate
+    lifecycle: unknown
+    availability:
+      state: unknown
+      conditions: []
+      reason: Availability is a declaration. Source presence is not a deployment check.
+    maturity: unknown
+    audiences:
+      state: unknown
+      values: []
+      reason: Audience was not declared.
+    discovery:
+      state: unassessed
+      surfaces: []
+      adapter_ids: []
+      reason: Discovery surfaces were not assessed beyond extracted entry points.
+    intent: unknown
+    publication:
+      scope: internal
+      reason: Internal is the conservative default. Public permission requires an attributed declaration.
+    entry_points:
+      - route-api-package-privacy
+    implements: []
+    dependencies: []
+    docs:
+      state: unassessed
+      result: unknown
+      adapter_ids:
+        - markdown-document
+      links: []
+      reason: No explicit documentation association. Filename resemblance is not an accepted link.
+    tests:
+      state: unassessed
+      result: unknown
+      adapter_ids:
+        - typescript-test
+      links: []
+      reason: No explicit test association. A similar test filename is only a proposal.
+    observation:
+      state: current
+      last_seen_scan_id: scan-979bd8343df0
+      reason: Current source evidence is available.
+    evidence:
+      - id: route-package-privacy-capability
+        kind: observed
+        state: current
+        assertion:
+          field: capability
+          value: "Observed implementation surfaces: route-api-package-privacy. Candidate only until a maintainer confirms the product meaning."
+          claim: Static extraction found implementation surfaces. This is not confirmation.
+        locator:
+          path: app/src/routes/api/package-privacy/+server.ts
+          content_sha256: 06ab85b9389fb89c8c71902e5b12692a10978ad0c8cc81226791489baef47c8c
+        provenance:
+          adapter_id: typescript-node-surface
+          adapter_version: 0.2.2
+          origin: deterministic
+          method: surface-cluster
+    editorial:
+      locked: []
+      aliases: []
+      notes: ""
+    uncertainty_reasons:
+      lifecycle: Source presence does not establish release status.
+      maturity: No attributed maturity declaration.
+      intent: Discovery intent was not declared.
+    id: route-package-privacy
+    name: Package Privacy
+    description: "Observed implementation surfaces: route-api-package-privacy. Candidate only until a maintainer confirms the product meaning."
+  - type: surface-cluster
+    recognition: candidate
+    lifecycle: unknown
+    availability:
+      state: unknown
+      conditions: []
+      reason: Availability is a declaration. Source presence is not a deployment check.
+    maturity: unknown
+    audiences:
+      state: unknown
+      values: []
+      reason: Audience was not declared.
+    discovery:
+      state: unassessed
+      surfaces: []
+      adapter_ids: []
+      reason: Discovery surfaces were not assessed beyond extracted entry points.
+    intent: unknown
+    publication:
+      scope: internal
+      reason: Internal is the conservative default. Public permission requires an attributed declaration.
+    entry_points:
+      - route-api-pages-project
+    implements: []
+    dependencies: []
+    docs:
+      state: unassessed
+      result: unknown
+      adapter_ids:
+        - markdown-document
+      links: []
+      reason: No explicit documentation association. Filename resemblance is not an accepted link.
+    tests:
+      state: unassessed
+      result: unknown
+      adapter_ids:
+        - typescript-test
+      links: []
+      reason: No explicit test association. A similar test filename is only a proposal.
+    observation:
+      state: current
+      last_seen_scan_id: scan-979bd8343df0
+      reason: Current source evidence is available.
+    evidence:
+      - id: route-pages-project-capability
+        kind: observed
+        state: current
+        assertion:
+          field: capability
+          value: "Observed implementation surfaces: route-api-pages-project. Candidate only until a maintainer confirms the product meaning."
+          claim: Static extraction found implementation surfaces. This is not confirmation.
+        locator:
+          path: app/src/routes/api/pages-project/+server.ts
+          content_sha256: 8235a7b1cdcd72fbeec6683e91a6686e00b17f606bf78e1f3474ec6af7ed48ae
+        provenance:
+          adapter_id: typescript-node-surface
+          adapter_version: 0.2.2
+          origin: deterministic
+          method: surface-cluster
+    editorial:
+      locked: []
+      aliases: []
+      notes: ""
+    uncertainty_reasons:
+      lifecycle: Source presence does not establish release status.
+      maturity: No attributed maturity declaration.
+      intent: Discovery intent was not declared.
+    id: route-pages-project
+    name: Pages Project
+    description: "Observed implementation surfaces: route-api-pages-project. Candidate only until a maintainer confirms the product meaning."
   - type: surface-cluster
     recognition: candidate
     lifecycle: unknown
@@ -2449,7 +2663,7 @@ features:
       reason: A test file is named for this capability. Tests were not executed, and a matching filename is not an accepted link.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: route-roster-capability
@@ -2464,7 +2678,7 @@ features:
           content_sha256: 1c07a9f90e3e3f12b774bad1b19fd3b4ffb7126291b53bb48e89d704adefbda4
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
@@ -2520,7 +2734,7 @@ features:
       reason: No explicit test association. A similar test filename is only a proposal.
     observation:
       state: current
-      last_seen_scan_id: scan-64b8d2101308
+      last_seen_scan_id: scan-979bd8343df0
       reason: Current source evidence is available.
     evidence:
       - id: route-visitor-capability
@@ -2535,7 +2749,7 @@ features:
           content_sha256: 595e386c74349d42acd2d44cbd00081b87ba21297d5ce670a50b65ec6a680ab3
         provenance:
           adapter_id: typescript-node-surface
-          adapter_version: 0.2.1
+          adapter_version: 0.2.2
           origin: deterministic
           method: surface-cluster
     editorial:
