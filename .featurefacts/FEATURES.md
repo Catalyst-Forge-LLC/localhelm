@@ -1,6 +1,6 @@
 # Feature register: LocalHelm
 
-Scan `scan-38290a8487d9`. Candidates are not confirmed capabilities.
+Scan `scan-31db9a7fca0c`. Candidates are not confirmed capabilities.
 
 | ID | Name | Recognition | Lifecycle | Availability | Docs | Tests | Observation |
 |---|---|---|---|---|---|---|---|
