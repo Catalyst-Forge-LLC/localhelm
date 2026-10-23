@@ -572,7 +572,7 @@
 	.chip {
 		border: 1px solid var(--steel);
 		background: var(--well);
-		border-radius: var(--plate-radius-sm);
+		border-radius: var(--keel-radius-sm);
 		padding: 0.12rem 0.6rem;
 		font-size: 0.72rem;
 		line-height: 1.35;
@@ -617,7 +617,7 @@
 		font-size: 0.65rem;
 		border: 1px solid var(--steel);
 		background: var(--well);
-		border-radius: var(--plate-radius-sm);
+		border-radius: var(--keel-radius-sm);
 		padding: 0 0.35rem;
 		color: var(--cyan);
 	}
@@ -1261,7 +1261,7 @@
 		padding: 0.28rem 0.62rem;
 		font-size: 0.8rem;
 		line-height: 1.2;
-		border-radius: var(--plate-radius);
+		border-radius: var(--keel-radius);
 	}
 
 	.plugin-board {
@@ -1656,7 +1656,7 @@
 		margin-left: 0.35rem;
 		padding: 0.05rem 0.4rem;
 		border: 1px solid var(--steel);
-		border-radius: var(--plate-radius-sm);
+		border-radius: var(--keel-radius-sm);
 		background: var(--well);
 		color: var(--dim);
 		font: inherit;
