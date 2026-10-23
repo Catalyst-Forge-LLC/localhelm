@@ -71,6 +71,7 @@ export {
 export type { ConfirmRosterGroup, ConfirmRosterStep } from './confirmRoster.js';
 export {
 	applyLand,
+	applyLandBatch,
 	companionIdForSite,
 	LAND_ENGINE_ID,
 	LAND_PLUGIN_ID,
@@ -96,6 +97,14 @@ export {
 } from './landDisplay.js';
 export type { LandBatchRow } from './landDisplay.js';
 export type { LandApplyResult, LandPlan, LandRole, LandStep, LandStepKind } from './land.js';
+export {
+	beginLandStopScope,
+	clearLandStop,
+	finishLandStopScope,
+	landStopRequested,
+	landStopWanted,
+	requestLandStop,
+} from './landStop.js';
 export {
 	landShipsPath,
 	markLandShipFailed,

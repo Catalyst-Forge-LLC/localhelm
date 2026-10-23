@@ -46,6 +46,16 @@ describe('confirmProgress', () => {
 		assert.deepEqual(phases, ['done', 'fail', 'pending']);
 	});
 
+	it('keeps other running land sites current', () => {
+		const keys = ['aibreze:0', 'localslip:0'];
+		let phases = emptyConfirmPhases(2);
+		phases = applyConfirmStep(keys, phases, { id: 'aibreze', index: 0, status: 'start' }, true);
+		phases = applyConfirmStep(keys, phases, { id: 'localslip', index: 0, status: 'start' }, true);
+		assert.deepEqual(phases, ['current', 'current']);
+		phases = applyConfirmStep(keys, phases, { id: 'aibreze', index: 0, status: 'done' }, true);
+		assert.deepEqual(phases, ['done', 'current']);
+	});
+
 	it('recognizes an Ollama timeout note', () => {
 		assert.equal(commitDraftTimedOut('Prompt timed out after 60s. Retry waits 3 minutes.'), true);
 		assert.equal(commitDraftTimedOut('Ollama (gemma4:12b) drafted this. Edit if you want.'), false);

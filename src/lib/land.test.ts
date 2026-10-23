@@ -8,10 +8,12 @@ import {
 	requireLandSiteIds,
 	LAND_ENGINE_ID,
 	LAND_PLAN_NOTE,
+	applyLandPlans,
 	landRequestSiteIds,
 	landStepsFromPluginRow,
+	type LandPlan,
 } from './land.js';
-import { landConfirmItems } from './landDisplay.js';
+import { landBusyLabel, landConfirmItems } from './landDisplay.js';
 import { shipUnchanged } from './landShips.js';
 import type { ProjectStatus } from './types.js';
 
@@ -188,6 +190,115 @@ describe('landPluginApplyOk', () => {
 		assert.equal(failed.ok, false);
 		assert.equal(failed.reason, 'filepress: Genie leaked into the static build (dev-only).');
 		assert.ok(failed.reason.length < 80);
+	});
+});
+
+function landPlan(siteId: string, actions: Array<'sync' | 'push' | 'ship'>): LandPlan {
+	return {
+		siteId,
+		engineId: 'filepress',
+		companionId: null,
+		steps: actions.map((action) => ({
+			kind: action === 'push' ? 'site-push' : action,
+			role: 'site',
+			target: siteId,
+			label: action,
+			pluginAction: action,
+			shipFingerprint: action === 'ship' ? `fp-${siteId}` : undefined,
+		})),
+		needsPublish: false,
+		needsOtp: false,
+		note: '',
+	};
+}
+
+describe('applyLandPlans', () => {
+	it('ships three sites in one apply, then the remainder', async () => {
+		const calls: string[] = [];
+		const batch = await applyLandPlans(
+			['a', 'b', 'c', 'd'].map((id) => landPlan(id, ['ship'])),
+			async (_action, ids) => {
+				calls.push(ids.join(','));
+				return { results: ids.map((id) => ({ id, ok: true })) };
+			},
+			{ shipWidth: 3 },
+		);
+		assert.deepEqual(calls, ['a,b,c', 'd']);
+		assert.equal(batch.stopped, false);
+		assert.deepEqual(
+			batch.results.map((row) => row.siteId),
+			['a', 'b', 'c', 'd'],
+		);
+	});
+
+	it('keeps a site out of ship after sync fails', async () => {
+		const calls: string[] = [];
+		const ships: string[] = [];
+		const batch = await applyLandPlans(
+			[landPlan('bad', ['sync', 'ship']), landPlan('good', ['ship'])],
+			async (action, ids) => {
+				calls.push(`${action}:${ids.join(',')}`);
+				return {
+					results: ids.map((id) => ({
+						id,
+						ok: !(action === 'sync' && id === 'bad'),
+						detail: 'sync failed',
+					})),
+				};
+			},
+			{
+				onShip: async (id, _step, ok) => {
+					ships.push(`${id}:${ok}`);
+				},
+			},
+		);
+		assert.deepEqual(calls, ['sync:bad', 'ship:good']);
+		assert.deepEqual(ships, ['good:true']);
+		assert.equal(batch.results.find((row) => row.siteId === 'bad')?.ok, false);
+	});
+
+	it('stops before the next group and omits sites the bridge never started', async () => {
+		let stop = false;
+		const calls: string[] = [];
+		const batch = await applyLandPlans(
+			['a', 'b', 'c', 'd'].map((id) => landPlan(id, ['ship'])),
+			async (_action, ids) => {
+				calls.push(ids.join(','));
+				stop = true;
+				return { results: ids.map((id) => ({ id, ok: true })) };
+			},
+			{ shipWidth: 2, shouldStop: () => stop },
+		);
+		assert.deepEqual(calls, ['a,b']);
+		assert.equal(batch.stopped, true);
+		assert.deepEqual(
+			batch.results.map((row) => row.siteId),
+			['a', 'b'],
+		);
+	});
+
+	it('keeps each failed ship reason with its own site', async () => {
+		const batch = await applyLandPlans(
+			[landPlan('uxcalibur', ['ship']), landPlan('localslip', ['ship'])],
+			async () => ({
+				results: [
+					{ id: 'uxcalibur', ok: false, detail: 'AssertionError [ERR_ASSERTION]: getfilepress pin' },
+					{ id: 'localslip', ok: true },
+				],
+			}),
+		);
+		assert.match(batch.results.find((row) => row.siteId === 'uxcalibur')?.steps[0]?.reason ?? '', /getfilepress pin/);
+		assert.equal(batch.results.find((row) => row.siteId === 'localslip')?.ok, true);
+	});
+});
+
+describe('landBusyLabel', () => {
+	it('counts finished and running sites', () => {
+		assert.equal(landBusyLabel(['only'], ['only:0'], ['current']), 'landing only');
+		assert.equal(
+			landBusyLabel(['a', 'b', 'c'], ['a:0', 'b:0', 'c:0'], ['done', 'current', 'current']),
+			'landing 3 of 3 · b, c',
+		);
 	});
 });
 

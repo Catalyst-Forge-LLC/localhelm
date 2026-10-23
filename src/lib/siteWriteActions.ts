@@ -6,6 +6,7 @@ import { applyConfirmStep, markConfirmSubject } from './confirmProgress.js';
 import type { DashboardJobHost } from './dashboardJob.js';
 import {
 	landApplyTitle,
+	landBusyLabel,
 	landConfirmItems,
 	landResultHint,
 	landResultLine,
@@ -15,7 +16,7 @@ import {
 	orderLandResults,
 	type LandBatchRow,
 } from './landDisplay.js';
-import { isJobCancelled } from './jobCancel.js';
+import { isJobCancelled, JobCancelledError } from './jobCancel.js';
 import { formatPluginPlanLines, pluginPlanLineKeys, pluginPlanWriteIds } from './pluginPlan.js';
 import { landPluginApplyOk } from './writeGate.js';
 import { checkResultFollowUp, checkResultLines, planOpts, pluginJobHint } from './writeConfirm.js';
@@ -383,62 +384,86 @@ export function createSiteWrites(host: DashboardJobHost) {
 		await host.run(
 			bulkProgressLabel('landing', 1, ids.length, ids[0]),
 			async () => {
+				if (ids.length >= 2) host.allowStop(true);
 				const otp = host.publishOtp().trim() ? host.publishOtp().trim() : undefined;
+				const watch = setInterval(() => {
+					if (!host.cancelRequested()) return;
+					void host.call('/api/land', { method: 'POST', body: JSON.stringify({ stop: true }) }).catch(() => {});
+				}, 400);
 				try {
-					await host.eachNamed('landing', ids, async (siteId) => {
-						try {
-							const data = (await host.callNdjson(
-								'/api/land',
-								{
-									method: 'POST',
-									body: JSON.stringify({ apply: true, siteId, otp }),
-								},
-								(event) => {
-									if (event.type !== 'step') return;
-									host.setConfirmPhases(
-										applyConfirmStep(host.confirmItemKeys(), host.confirmPhases(), {
-											id: String(event.id ?? siteId),
-											index: Number(event.index),
+					const data = (await host.callNdjson(
+						'/api/land',
+						{
+							method: 'POST',
+							body: JSON.stringify({ apply: true, siteIds: ids, otp }),
+						},
+						(event) => {
+							if (event.type !== 'step') return;
+							const id = String(event.id ?? '');
+							const index = Number(event.index);
+							if (!id) return;
+							if (index < 0 && event.status === 'done') {
+								host.setConfirmPhases(markConfirmSubject(host.confirmItemKeys(), host.confirmPhases(), id, 'done'));
+							} else {
+								host.setConfirmPhases(
+									applyConfirmStep(
+										host.confirmItemKeys(),
+										host.confirmPhases(),
+										{
+											id,
+											index,
 											status: event.status === 'fail' || event.status === 'done' ? event.status : 'start',
-										}),
-									);
-									if (event.status === 'fail' && event.reason) {
-										host.setError(String(event.reason));
-									}
-								},
-							)) as {
-								result: {
-									ok: boolean;
-									stoppedAt?: string;
-									steps: { ok: boolean; label: string; reason: string }[];
-								};
-							};
-							const row = landRowFromApply(siteId, data.result);
-							rows.push(row);
-							const ok = data.result.steps.filter((s) => s.ok).length;
-							const failed = data.result.steps.filter((s) => !s.ok);
-							host.note(
-								data.result.ok
-									? `land --apply ${siteId} — ${ok} step(s) ok`
-									: `land --apply ${siteId} — stopped: ${data.result.stoppedAt ?? failed[0]?.label ?? 'failed'}`,
-								data,
-							);
-							if (!row.ok) {
-								host.setError(row.reason ?? 'land failed');
-								host.setConfirmPhases(markConfirmSubject(host.confirmItemKeys(), host.confirmPhases(), siteId, 'fail'));
+										},
+										true,
+									),
+								);
 							}
-						} catch (err) {
-							if (isJobCancelled(err)) throw err;
-							const reason = err instanceof Error ? err.message : String(err);
-							rows.push({ id: siteId, ok: false, reason });
-							host.setError(reason);
-							host.setConfirmPhases(markConfirmSubject(host.confirmItemKeys(), host.confirmPhases(), siteId, 'fail'));
-							host.note(`land --apply ${siteId} — stopped: ${reason}`, { error: reason });
+							if (event.status === 'fail' && event.reason) host.setError(String(event.reason));
+							host.setBusy(landBusyLabel(ids, host.confirmItemKeys(), host.confirmPhases()));
+						},
+					)) as {
+						results?: Array<{
+							siteId: string;
+							ok: boolean;
+							stoppedAt?: string;
+							steps: { ok: boolean; label: string; reason: string }[];
+						}>;
+						result?: {
+							siteId: string;
+							ok: boolean;
+							stoppedAt?: string;
+							steps: { ok: boolean; label: string; reason: string }[];
+						};
+						stopped?: boolean;
+					};
+					const results = Array.isArray(data.results) ? data.results : data.result ? [data.result] : [];
+					for (const result of results) {
+						const row = landRowFromApply(result.siteId, result);
+						rows.push(row);
+						const ok = result.steps.filter((step) => step.ok).length;
+						host.note(
+							result.ok
+								? `land --apply ${result.siteId} — ${ok} step(s) ok`
+								: `land --apply ${result.siteId} — stopped: ${result.stoppedAt ?? row.reason ?? 'failed'}`,
+							result,
+						);
+						if (!row.ok) {
+							host.setError(row.reason ?? 'land failed');
+							host.setConfirmPhases(
+								markConfirmSubject(host.confirmItemKeys(), host.confirmPhases(), result.siteId, 'fail'),
+							);
 						}
-						persistLandBatch(ids, rows, { error: host.error() || undefined });
-					});
+					}
 					host.note(landApplyTitle(rows), { rows });
+					persistLandBatch(ids, rows, { error: host.error() || undefined });
+					if (data.stopped || host.cancelRequested()) throw new JobCancelledError(rows.length, ids.length);
+				} catch (err) {
+					if (isJobCancelled(err) || host.cancelRequested()) throw new JobCancelledError(rows.length, ids.length);
+					const reason = err instanceof Error ? err.message : String(err);
+					host.setError(reason);
+					host.note(`land --apply — stopped: ${reason}`, { error: reason });
 				} finally {
+					clearInterval(watch);
 					host.setPublishOtp('');
 					host.setBusy(boardRefreshLabel('filepress'));
 					await host.loadPluginBoards('filepress');

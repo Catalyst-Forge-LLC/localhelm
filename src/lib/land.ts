@@ -3,6 +3,7 @@ import type { LoadedManifest } from './manifest.js';
 import { loadPlugins, requirePlugin } from './plugin.js';
 import type { PublishRow } from './publish.js';
 import type { ProjectStatus } from './types.js';
+import { landPluginApplyReport } from './plainError.js';
 import { landPluginApplyOk, whyNotPublish } from './writeGate.js';
 import { markLandShipFailed, readLandShips, recordLandShip, shipUnchanged } from './landShips.js';
 
@@ -204,59 +205,149 @@ export type LandStepEvent = {
 	reason?: string;
 };
 
+/** Sites handed to one FilePress bridge process. Ship runs this many `pnpm ship`s together. */
+export const LAND_BATCH_WIDTH = 3;
+
+const LAND_WAVES = ['sync', 'push', 'ship'] as const;
+type LandWave = (typeof LAND_WAVES)[number];
+
+function landChunks<T>(items: readonly T[], size: number): T[][] {
+	const width = Math.max(1, size);
+	const out: T[][] = [];
+	for (let i = 0; i < items.length; i += width) out.push(items.slice(i, i + width));
+	return out;
+}
+
+export type LandApplyHooks = {
+	shipWidth?: number;
+	shouldStop?: () => boolean;
+	onStep?: (event: LandStepEvent) => void;
+	onIdle?: (siteId: string) => void;
+	onShip?: (siteId: string, step: LandStep, ok: boolean, reason: string) => Promise<void>;
+};
+
+/**
+ * One plugin apply per group. Sync, then push, then ship. A failed site is left out of later waves.
+ * Stop before the next group. Sites the bridge never started are omitted when the run stopped.
+ */
+export async function applyLandPlans(
+	plans: readonly LandPlan[],
+	apply: (action: LandWave, ids: string[]) => Promise<unknown>,
+	hooks: LandApplyHooks = {},
+): Promise<{ results: LandApplyResult[]; stopped: boolean }> {
+	const width = hooks.shipWidth ?? LAND_BATCH_WIDTH;
+	const byId = new Map(plans.map((plan) => [plan.siteId, { siteId: plan.siteId, ok: true, steps: [] } as LandApplyResult]));
+	const failed = new Set<string>();
+	let stopped = false;
+	for (const plan of plans) {
+		if (!plan.steps.length) hooks.onIdle?.(plan.siteId);
+	}
+
+	for (const wave of LAND_WAVES) {
+		const ready = plans.filter(
+			(plan) => !failed.has(plan.siteId) && plan.steps.some((step) => step.pluginAction === wave),
+		);
+		for (const group of landChunks(ready, width)) {
+			if (hooks.shouldStop?.()) {
+				stopped = true;
+				break;
+			}
+			for (const plan of group) {
+				const index = plan.steps.findIndex((step) => step.pluginAction === wave);
+				hooks.onStep?.({ id: plan.siteId, index, status: 'start' });
+			}
+			let report;
+			try {
+				report = landPluginApplyReport(await apply(wave, group.map((plan) => plan.siteId)));
+			} catch (err) {
+				const reason = err instanceof Error ? err.message : String(err);
+				report = landPluginApplyReport({
+					results: group.map((plan) => ({ id: plan.siteId, ok: false, detail: reason })),
+				});
+			}
+			for (const plan of group) {
+				const index = plan.steps.findIndex((step) => step.pluginAction === wave);
+				const step = plan.steps[index];
+				const row = report.sites.get(plan.siteId);
+				if (!step || !row) continue;
+				const out = byId.get(plan.siteId)!;
+				out.steps.push({ ...step, ok: row.ok, reason: row.reason });
+				hooks.onStep?.({
+					id: plan.siteId,
+					index,
+					status: row.ok ? 'done' : 'fail',
+					reason: row.ok ? undefined : row.reason,
+				});
+				if (!row.ok) {
+					out.ok = false;
+					out.stoppedAt = step.label;
+					failed.add(plan.siteId);
+				}
+				if (wave === 'ship') await hooks.onShip?.(plan.siteId, step, row.ok, row.reason);
+			}
+			if (report.stopped || hooks.shouldStop?.()) {
+				stopped = true;
+				break;
+			}
+		}
+		if (stopped) break;
+	}
+
+	const results: LandApplyResult[] = [];
+	for (const plan of plans) {
+		const out = byId.get(plan.siteId)!;
+		if (!out.ok || plan.steps.length === 0 || out.steps.length >= plan.steps.length) {
+			results.push(out);
+			continue;
+		}
+		if (!stopped) {
+			out.ok = false;
+			out.stoppedAt = 'incomplete';
+			results.push(out);
+		}
+	}
+	return { results, stopped };
+}
+
+export async function applyLandBatch(
+	loaded: LoadedManifest,
+	plans: readonly LandPlan[],
+	opts: {
+		otp?: string;
+		onStep?: (event: LandStepEvent) => void;
+		onIdle?: (siteId: string) => void;
+		shouldStop?: () => boolean;
+	} = {},
+): Promise<{ results: LandApplyResult[]; stopped: boolean }> {
+	const plug = requirePlugin(await loadPlugins(loaded), LAND_PLUGIN_ID);
+	return applyLandPlans(
+			plans,
+			async (action, ids) => {
+				if (!plug.plugin.apply) throw new Error('plugin has no apply');
+				return plug.plugin.apply(action, ids);
+			},
+			{
+				shouldStop: opts.shouldStop,
+				onStep: opts.onStep,
+				onIdle: opts.onIdle,
+				onShip: async (siteId, step, ok, reason) => {
+					if (ok) {
+						if (step.shipFingerprint) await recordLandShip(loaded.workspaceRoot, siteId, step.shipFingerprint);
+						return;
+					}
+					await markLandShipFailed(loaded.workspaceRoot, siteId, step.shipFingerprint ?? '', reason);
+				},
+			},
+		);
+}
+
 export async function applyLand(
 	loaded: LoadedManifest,
 	plan: LandPlan,
 	opts: { otp?: string; onStep?: (event: LandStepEvent) => void } = {},
 ): Promise<LandApplyResult> {
-	const plug = requirePlugin(await loadPlugins(loaded), LAND_PLUGIN_ID);
-	const out: LandApplyResult = { siteId: plan.siteId, ok: true, steps: [] };
-
-	for (let index = 0; index < plan.steps.length; index++) {
-		const step = plan.steps[index]!;
-		opts.onStep?.({ id: plan.siteId, index, status: 'start' });
-		if (step.pluginAction) {
-			if (!plug.plugin.apply) {
-				out.steps.push({ ...step, ok: false, reason: 'plugin has no apply' });
-				out.ok = false;
-				out.stoppedAt = step.label;
-				opts.onStep?.({ id: plan.siteId, index, status: 'fail', reason: 'plugin has no apply' });
-				return out;
-			}
-			const result = await plug.plugin.apply(step.pluginAction, [plan.siteId]);
-			const check = landPluginApplyOk(result);
-			out.steps.push({ ...step, ok: check.ok, reason: check.reason });
-			opts.onStep?.({
-				id: plan.siteId,
-				index,
-				status: check.ok ? 'done' : 'fail',
-				reason: check.ok ? undefined : check.reason,
-			});
-			if (!check.ok) {
-				out.ok = false;
-				out.stoppedAt = step.label;
-				if (step.pluginAction === 'ship') {
-					await markLandShipFailed(
-						loaded.workspaceRoot,
-						plan.siteId,
-						step.shipFingerprint ?? '',
-						check.reason,
-					);
-				}
-				return out;
-			}
-			if (step.pluginAction === 'ship' && step.shipFingerprint) {
-				await recordLandShip(loaded.workspaceRoot, plan.siteId, step.shipFingerprint);
-			}
-			continue;
-		}
-		out.steps.push({ ...step, ok: false, reason: 'unknown step' });
-		out.ok = false;
-		out.stoppedAt = step.label;
-		opts.onStep?.({ id: plan.siteId, index, status: 'fail', reason: 'unknown step' });
-		return out;
-	}
-	return out;
+	const batch = await applyLandBatch(loaded, [plan], opts);
+	return batch.results[0] ?? { siteId: plan.siteId, ok: false, steps: [], stoppedAt: 'missing' };
 }
 
 /** Test helper: does this inventory row look like a Land publish need? */

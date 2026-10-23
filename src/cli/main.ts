@@ -17,7 +17,8 @@ import { applyPublish, npmWhoami, planPublish, publishAuthHintFor, requirePublis
 import { publishApplyHadFailure } from '../lib/writeGate.js';
 import { archiveIds, planArchive, readArchive, restoreIds } from '../lib/archive.js';
 import { buildBrief } from '../lib/brief.js';
-import { applyLand, planLandMany, requireLandSiteIds } from '../lib/land.js';
+import { applyLandBatch, planLandMany, requireLandSiteIds } from '../lib/land.js';
+import { clearLandStop } from '../lib/landStop.js';
 import { applyScriptShip, isShippedReason, planScriptShip, requireShipIds } from '../lib/scriptShip.js';
 import { applyGlobalInstall, isInstalledGlobalReason, planGlobalInstall, requireGlobalIds } from '../lib/globalInstall.js';
 import { acquireJobLock } from '../lib/lock.js';
@@ -726,16 +727,10 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 		}
 		const lock = await acquireJobLock(loaded.workspaceRoot);
 		try {
-			const results = [];
-			for (const plan of plans) {
-				if (!plan.steps.length) {
-					results.push({ siteId: plan.siteId, ok: true, steps: [] });
-					continue;
-				}
-				const result = await applyLand(loaded, plan, { otp });
-				results.push(result);
-			}
-			if (json) printJson({ plans, results, writes: true });
+			await clearLandStop(loaded.workspaceRoot);
+			const batch = await applyLandBatch(loaded, plans, { otp });
+			const results = batch.results;
+			if (json) printJson({ plans, results, stopped: batch.stopped, writes: true });
 			else {
 				const lines: string[] = [];
 				for (const result of results) {
@@ -745,6 +740,7 @@ LocalHelm never stores the token. After that, publish should not open a browser.
 					}
 					if (result.stoppedAt) lines.push(`stopped\t${result.stoppedAt}`);
 				}
+				if (batch.stopped) lines.push('Stopped. The rest were not started.');
 				process.stdout.write(`${lines.join('\n')}\n`);
 				if (results.some((result) => !result.ok)) process.exitCode = 1;
 			}

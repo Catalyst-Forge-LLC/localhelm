@@ -68,6 +68,9 @@ export type DashboardJobHost = {
 	error(): string;
 	setError(message: string): void;
 	jobStopped(): boolean;
+	/** True after Stop, while the current group is still finishing. */
+	cancelRequested(): boolean;
+	allowStop(on: boolean): void;
 	lastPublishPlan(): PublishRow[];
 	setLastPublishPlan(rows: PublishRow[]): void;
 	inventory(): Inventory | null;

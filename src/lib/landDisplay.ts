@@ -1,3 +1,5 @@
+import { confirmGroupId } from './confirmRoster.js';
+
 export type LandBatchRow = {
 	id: string;
 	ok: boolean;
@@ -81,6 +83,25 @@ export function landResultHint(rows: readonly LandBatchRow[]): string {
 
 export function landResultPhase(row: LandBatchRow): 'done' | 'fail' {
 	return row.ok ? 'done' : 'fail';
+}
+
+/** Header while several sites in the current group are running. */
+export function landBusyLabel(ids: readonly string[], keys: readonly string[], phases: readonly string[]): string {
+	if (ids.length <= 1) return `landing ${ids[0] ?? ''}`.trim();
+	const finished = new Set<string>();
+	const running: string[] = [];
+	for (const id of ids) {
+		const rows = keys
+			.map((key, index) => ({ key, phase: phases[index] ?? 'pending' }))
+			.filter((row) => row.key === id || confirmGroupId(row.key) === id);
+		if (!rows.length) continue;
+		if (rows.some((row) => row.phase === 'current')) running.push(id);
+		else if (rows.every((row) => row.phase === 'done' || row.phase === 'fail')) finished.add(id);
+	}
+	const reached = Math.min(ids.length, Math.max(1, finished.size + running.length));
+	const names = running.slice(0, 3).join(', ');
+	const head = `landing ${reached} of ${ids.length}`;
+	return names ? `${head} · ${names}` : head;
 }
 
 export function landBatchSnap(

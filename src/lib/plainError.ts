@@ -172,6 +172,37 @@ export function plainPluginError(raw: string): string {
 	return tidyPluginLine(hit);
 }
 
+export type LandPluginSiteResult = { ok: boolean; reason: string };
+
+/** Per-site rows from one FilePress bridge apply. A stopped bridge may omit sites it never started. */
+export function landPluginApplyReport(result: unknown): {
+	sites: Map<string, LandPluginSiteResult>;
+	stopped: boolean;
+} {
+	const sites = new Map<string, LandPluginSiteResult>();
+	if (!result || typeof result !== 'object') return { sites, stopped: false };
+	const body = result as {
+		results?: Array<{ id?: string; ok?: boolean; detail?: string }>;
+		rows?: Array<{ id?: string; ok?: boolean; detail?: string }>;
+		log?: string[];
+		stopped?: boolean;
+	};
+	const list = Array.isArray(body.results) ? body.results : Array.isArray(body.rows) ? body.rows : [];
+	const log = Array.isArray(body.log) ? body.log.map((line) => String(line)) : [];
+	for (const row of list) {
+		const id = typeof row.id === 'string' ? row.id : '';
+		if (!id) continue;
+		if (row.ok !== false) {
+			sites.set(id, { ok: true, reason: 'done' });
+			continue;
+		}
+		const detail = typeof row.detail === 'string' ? row.detail : '';
+		const mine = log.filter((line) => line.startsWith(`${id} `) || line.startsWith(`${id}:`)).join('\n');
+		sites.set(id, { ok: false, reason: plainPluginError(detail || mine || log.join('\n')) });
+	}
+	return { sites, stopped: body.stopped === true };
+}
+
 /** FilePress bridge returns `{ results: [{ ok }] }`. Safe for the Svelte bundle. */
 export function landPluginApplyOk(result: unknown): { ok: boolean; reason: string } {
 	if (!result || typeof result !== 'object') return { ok: true, reason: 'done' };

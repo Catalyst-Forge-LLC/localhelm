@@ -1741,6 +1741,10 @@
 			error = message;
 		},
 		jobStopped: () => jobStopped,
+		cancelRequested: () => jobCancel,
+		allowStop: (on) => {
+			jobCanStop = on;
+		},
 		lastPublishPlan: () => lastPublishPlan,
 		setLastPublishPlan: (rows) => {
 			lastPublishPlan = rows;
@@ -4000,7 +4004,7 @@
 	variant={confirmVariant}
 	busy={Boolean(busy)}
 	dock={applying}
-	busyLabel={jobCancel && busy ? `Stopping after this one… ${busy}` : busy}
+	busyLabel={jobCancel && busy ? `Stopping after the ones already running… ${busy}` : busy}
 	canApply={confirmCanApply}
 	canStop={jobCanStop}
 	stopping={jobCancel}
