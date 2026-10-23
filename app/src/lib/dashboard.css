@@ -1797,6 +1797,20 @@
 		color: var(--dim);
 	}
 
+	.action-queue::after {
+		content: "Opens its own confirm when the batch finishes. It does not join the window that is running.";
+		flex-basis: 100%;
+		max-width: 26rem;
+		color: var(--dim);
+		font-size: 0.75rem;
+		line-height: 1.35;
+	}
+
+	.action-queue .chip {
+		cursor: default;
+		color: #ececef;
+	}
+
 	.queue-remove {
 		margin-left: 0.35rem;
 		border: 0;
