@@ -1399,7 +1399,7 @@
 	.badge,
 	.pin {
 		border: 1px solid var(--steel);
-		border-radius: var(--plate-radius-sm);
+		border-radius: var(--keel-radius-sm);
 		padding: 0.05rem 0.35rem;
 		font-size: 0.7rem;
 		white-space: nowrap;

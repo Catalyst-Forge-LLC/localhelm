@@ -117,6 +117,7 @@
 	let folded = $state(false);
 	let stepMark = $state(0);
 	let stepTick = $state(0);
+	let spans = $state<Record<string, { started: number; finished?: number }>>({});
 	let pinned = $state<string | null>(null);
 	let filePick = $state(0);
 	let rosterEl = $state<HTMLElement | null>(null);
@@ -134,6 +135,7 @@
 		if (!keep || !ids.includes(keep)) pinned = null;
 		excludedIds = seed.slice();
 		filePick = 0;
+		spans = {};
 	});
 
 	function rosterName(id: string): string {
@@ -228,6 +230,57 @@
 	}
 
 	const stepAge = $derived(dock && stepMark ? formatStepAge(stepTick - stepMark) : '');
+
+	const runWatch = $derived(
+		[
+			...(groups?.map((group) => `g\t${group.id}\t${group.phase}`) ?? []),
+			...(groups?.flatMap((group) => group.steps.map((step, index) => `s\t${group.id}:${index}\t${step.phase}`)) ??
+				[]),
+			...(!groups ? items.map((_, index) => `s\t${index}\t${itemPhases[index] ?? 'pending'}`) : []),
+		].join('\n'),
+	);
+
+	$effect(() => {
+		const sig = runWatch;
+		if (!sig) return;
+		const now = Date.now();
+		const prev = untrack(() => spans);
+		const next = { ...prev };
+		let changed = false;
+		for (const line of sig.split('\n')) {
+			const [kind, id, phase] = line.split('\t');
+			if (!kind || !id || !phase) continue;
+			const key = `${kind}:${id}`;
+			const row = next[key];
+			if (phase === 'current' && !row) {
+				next[key] = { started: now };
+				changed = true;
+			} else if ((phase === 'done' || phase === 'fail') && row && row.finished == null) {
+				next[key] = { ...row, finished: now };
+				changed = true;
+			}
+		}
+		if (changed) spans = next;
+	});
+
+	function formatDuration(ms: number): string {
+		const seconds = Math.max(0, Math.floor(ms / 1000));
+		const minutes = Math.floor(seconds / 60);
+		const rest = seconds % 60;
+		if (minutes < 1) return `${seconds}s`;
+		const hours = Math.floor(minutes / 60);
+		if (hours < 1) return `${minutes}m ${String(rest).padStart(2, '0')}s`;
+		return `${hours}h ${minutes % 60}m`;
+	}
+
+	function rowTime(key: string, phase: string): string {
+		const span = spans[`g:${key}`] ?? spans[`s:${key}`];
+		if (!span?.started) return '';
+		const end = span.finished ?? (phase === 'current' ? stepTick || span.started : 0);
+		if (!end) return '';
+		if (phase === 'current' && end - span.started < 5000) return '';
+		return formatDuration(end - span.started);
+	}
 
 	const fileKeys = $derived(
 		groups && selected
@@ -479,6 +532,9 @@
 									{/if}
 								</span>
 								<span class="name">{rosterName(group.id)}</span>
+								{#if rowTime(group.id, group.phase)}
+									<span class="count">{rowTime(group.id, group.phase)}</span>
+								{/if}
 								{#if group.phase === 'current'}
 									<span class="now">now</span>
 								{/if}
@@ -529,6 +585,9 @@
 										{step.text}
 									{/if}
 								</span>
+							{/if}
+							{#if rowTime(`${selected.id}:${i}`, step.phase)}
+								<span class="count">{rowTime(`${selected.id}:${i}`, step.phase)}</span>
 							{/if}
 						</li>
 					{/each}
@@ -1244,6 +1303,10 @@
 
 	.roster-row.current .now {
 		color: var(--gold-soft);
+	}
+
+	li .count {
+		margin-left: auto;
 	}
 
 	li {
