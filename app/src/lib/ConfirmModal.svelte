@@ -724,6 +724,16 @@
 		overflow: hidden;
 	}
 
+	.confirm.dock .push-pane {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.confirm.dock .push-pane > .step-col {
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
 	.confirm.dock .split {
 		grid-template-rows: minmax(0, 1fr);
 	}
@@ -739,15 +749,21 @@
 	}
 
 	.confirm.dock .step-col ol.steps {
-		flex: 1 1 0;
+		flex: 1 1 auto;
+		min-height: 4.75rem;
 		max-height: none;
-		min-height: 0;
+	}
+
+	.confirm.dock .file-pick {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	.confirm.dock .diff {
-		flex: 0 1 7rem;
-		min-height: 0;
-		max-height: 7rem;
+		flex: 1 1 12rem;
+		min-height: 9rem;
+		max-height: none;
 	}
 
 	.confirm.dock .actions {
