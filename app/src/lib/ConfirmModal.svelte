@@ -115,6 +115,8 @@
 	);
 
 	let folded = $state(false);
+	let stepMark = $state(0);
+	let stepTick = $state(0);
 	let pinned = $state<string | null>(null);
 	let filePick = $state(0);
 	let rosterEl = $state<HTMLElement | null>(null);
@@ -196,6 +198,36 @@
 	$effect(() => {
 		if (!open || !dock) folded = false;
 	});
+
+	const stepWatch = $derived.by(() => {
+		const current = itemPhases.findIndex((phase) => phase === 'current');
+		return `${busyLabel}\0${current}\0${current >= 0 ? (items[current] ?? '') : ''}`;
+	});
+
+	$effect(() => {
+		stepWatch;
+		stepMark = Date.now();
+		stepTick = stepMark;
+	});
+
+	$effect(() => {
+		if (!dock) return;
+		const timer = setInterval(() => {
+			stepTick = Date.now();
+		}, 1000);
+		return () => clearInterval(timer);
+	});
+
+	function formatStepAge(ms: number): string {
+		const seconds = Math.floor(ms / 1000);
+		if (seconds < 5) return '';
+		const minutes = Math.floor(seconds / 60);
+		const rest = seconds % 60;
+		if (minutes < 1) return `${seconds}s on this step`;
+		return `${minutes}m ${String(rest).padStart(2, '0')}s on this step`;
+	}
+
+	const stepAge = $derived(dock && stepMark ? formatStepAge(stepTick - stepMark) : '');
 
 	const fileKeys = $derived(
 		groups && selected
@@ -279,21 +311,23 @@
 	let suppressClose = false;
 
 	function presentDialog(wantOpen: boolean, wantDock: boolean): void {
-		if (!dialogEl) return;
+		const dialog = dialogEl;
+		if (!dialog) return;
 		if (!wantOpen) {
-			if (dialogEl.open) dialogEl.close();
+			if (dialog.open) dialog.close();
 			return;
 		}
-		const modal = dialogEl.matches(':modal');
-		const retarget = (wantDock && modal) || (!wantDock && dialogEl.open && !modal);
-		if (retarget) {
-			// close() fires `close` on a later task. Leave this set until that event, or the batch is stopped.
+		const modal = dialog.matches(':modal');
+		// close() finishes on a later turn. Opening again in this turn leaves the
+		// dialog modal, and the board behind it ignores Queue ship and the rest.
+		if (dialog.open && modal === wantDock) {
 			suppressClose = true;
-			dialogEl.close();
+			dialog.close();
+			return;
 		}
-		if (!dialogEl.open) {
-			if (wantDock) dialogEl.show();
-			else dialogEl.showModal();
+		if (!dialog.open) {
+			if (wantDock) dialog.show();
+			else dialog.showModal();
 		}
 	}
 
@@ -363,6 +397,10 @@
 	onclose={() => {
 		if (suppressClose) {
 			suppressClose = false;
+			if (open) {
+				if (dock) dialogEl?.show();
+				else dialogEl?.showModal();
+			}
 			return;
 		}
 		if (!open) return;
@@ -385,7 +423,7 @@
 	<div class="panel hud-frame">
 	<div class="body">
 		<div class="title-row">
-			<h2 id="confirm-title">{dock && folded ? foldedLine : displayTitle}</h2>
+			<h2 id="confirm-title">{dock && folded ? `${foldedLine}${stepAge ? ` · ${stepAge}` : ''}` : displayTitle}</h2>
 			{#if dock}
 				<button type="button" class="btn fold" aria-expanded={!folded} onclick={() => (folded = !folded)}>
 					<Icon icon={folded ? 'lucide:chevron-up' : 'lucide:chevron-down'} />
@@ -399,7 +437,7 @@
 		{/if}
 		{#if busy && busyLabel}
 			<div class="working" class:solo={!items.length} role="status" aria-live="polite">
-				<span class="working-copy">{busyLabel}</span>
+				<span class="working-copy">{busyLabel}{stepAge ? ` · ${stepAge}` : ''}</span>
 				<KnightRiderBar />
 			</div>
 		{/if}
