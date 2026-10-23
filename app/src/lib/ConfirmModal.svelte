@@ -682,8 +682,8 @@
 		align-items: stretch;
 		justify-content: flex-end;
 		width: min(46rem, calc(100vw - 1.5rem));
-		height: min(68dvh, 38rem);
-		max-height: min(68dvh, 38rem);
+		height: auto;
+		max-height: min(78dvh, 42rem);
 		margin: 0;
 		padding: 0;
 		border: none;
@@ -693,12 +693,12 @@
 
 	.confirm.dock .panel {
 		width: 100%;
-		height: 100%;
-		max-height: none;
+		height: auto;
+		max-height: min(78dvh, 42rem);
 	}
 
 	.confirm.dock .body {
-		overflow: hidden;
+		overflow: auto;
 		padding: 0.7rem 0.85rem 0.7rem;
 	}
 
@@ -717,11 +717,15 @@
 
 	.confirm.dock .split,
 	.confirm.dock .push-pane {
-		flex: 1 1 auto;
+		flex: 0 1 auto;
 		min-height: 0;
 		max-height: none;
 		margin-top: 0.4rem;
-		overflow: hidden;
+		overflow: visible;
+	}
+
+	.confirm.dock ul {
+		max-height: none;
 	}
 
 	.confirm.dock .push-pane {
@@ -748,10 +752,20 @@
 		min-height: 0;
 	}
 
+	.confirm.dock .roster {
+		max-height: min(16rem, 34dvh);
+	}
+
 	.confirm.dock .step-col ol.steps {
-		flex: 1 1 auto;
-		min-height: 4.75rem;
-		max-height: none;
+		flex: 0 1 auto;
+		min-height: 0;
+		max-height: 7.5rem;
+	}
+
+	.confirm.dock .publish-col ol.steps {
+		flex: 0 1 auto;
+		min-height: 0;
+		max-height: min(18rem, 40dvh);
 	}
 
 	.confirm.dock .file-pick {
@@ -761,13 +775,17 @@
 	}
 
 	.confirm.dock .diff {
-		flex: 1 1 12rem;
-		min-height: 9rem;
-		max-height: none;
+		flex: 0 1 auto;
+		min-height: 0;
+		max-height: 14rem;
 	}
 
 	.confirm.dock .actions {
-		margin-top: 0.5rem;
+		position: sticky;
+		bottom: 0;
+		margin-top: 0.65rem;
+		padding-top: 0.45rem;
+		background: var(--hull);
 	}
 
 	.panel {
