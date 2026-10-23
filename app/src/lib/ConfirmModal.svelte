@@ -122,9 +122,12 @@
 	const rosterSig = $derived(`${items.join('\n')}\0${itemKeys.join('\n')}`);
 
 	$effect(() => {
+		// Phases tick on every step. Reading `groups` here reset a skipped box
+		// back to checked while the run continued without that package.
 		rosterSig;
 		const seed = seedExcluded;
-		const ids = groups?.map((group) => group.id) ?? [];
+		const resolved = itemKeys.length === items.length ? itemKeys : items.map((_, index) => String(index));
+		const ids = [...new Set(resolved.map((key) => confirmGroupId(key)))];
 		const keep = untrack(() => pinned);
 		if (!keep || !ids.includes(keep)) pinned = null;
 		excludedIds = seed.slice();
