@@ -6,6 +6,7 @@ export {
 	confirmHasSubject,
 	confirmSubjectFailed,
 	emptyConfirmPhases,
+	dockProgressLabel,
 	markConfirmKey,
 	markConfirmSubject,
 } from '../../../src/lib/confirmProgress.js';

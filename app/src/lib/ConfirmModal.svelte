@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { untrack, type Snippet } from 'svelte';
-	import { commitDraftProgressHint, commitDraftSubjectIds, commitDraftTimedOut } from './confirmProgress';
+	import { commitDraftProgressHint, commitDraftSubjectIds, commitDraftTimedOut, dockProgressLabel } from './confirmProgress';
 	import { assignStepOwners, buildConfirmRoster, confirmCountText, confirmGroupId, confirmRosterSelected, type ConfirmRosterStep } from './confirmRoster';
 	import Icon from './Icon.svelte';
 	import { findNpmPackageLink } from './npmPage';
@@ -114,6 +114,7 @@
 			null,
 	);
 
+	let folded = $state(false);
 	let pinned = $state<string | null>(null);
 	let filePick = $state(0);
 	let rosterEl = $state<HTMLElement | null>(null);
@@ -175,6 +176,24 @@
 			})),
 		);
 	});
+	const currentSubjectName = $derived.by(() => {
+		const current = groups?.find((group) => group.phase === 'current');
+		return current ? rosterName(current.id) : '';
+	});
+	const foldedLine = $derived(
+		dockProgressLabel({
+			busyLabel,
+			title: displayTitle,
+			subjects: groups?.map((group) => group.phase),
+			subjectName: currentSubjectName,
+			steps: groups || loneSteps ? undefined : itemPhases,
+		}),
+	);
+
+	$effect(() => {
+		if (!open || !dock) folded = false;
+	});
+
 	const fileKeys = $derived(
 		groups && selected
 			? selected.steps.map((_, i) => `${selected.id}:${i}`)
@@ -332,6 +351,7 @@
 	bind:this={dialogEl}
 	class="confirm"
 	class:dock
+	class:folded={dock && folded}
 	class:wide={Boolean(groups) || Boolean(preview)}
 	aria-labelledby="confirm-title"
 	oncancel={(event) => {
@@ -361,7 +381,16 @@
 >
 	<div class="panel hud-frame">
 	<div class="body">
-		<h2 id="confirm-title">{displayTitle}</h2>
+		<div class="title-row">
+			<h2 id="confirm-title">{dock && folded ? foldedLine : displayTitle}</h2>
+			{#if dock}
+				<button type="button" class="btn fold" aria-expanded={!folded} onclick={() => (folded = !folded)}>
+					<Icon icon={folded ? 'lucide:chevron-up' : 'lucide:chevron-down'} />
+					{folded ? 'Expand' : 'Collapse'}
+				</button>
+			{/if}
+		</div>
+		{#if !(dock && folded)}
 		{#if displayHint}
 			<p class="hint">{displayHint}</p>
 		{/if}
@@ -596,6 +625,18 @@
 				</button>
 			{/if}
 		</div>
+		{:else}
+			<div class="working" role="status" aria-live="polite">
+				<KnightRiderBar />
+			</div>
+			{#if canStop}
+				<div class="actions">
+					<button type="button" class="btn" disabled={stopping} onclick={stop}>
+						{stopping ? 'Stopping…' : 'Stop'}
+					</button>
+				</div>
+			{/if}
+		{/if}
 	</div>
 	</div>
 </dialog>
@@ -786,6 +827,47 @@
 		margin-top: 0.65rem;
 		padding-top: 0.45rem;
 		background: var(--hull);
+	}
+
+	.confirm.dock.folded[open] {
+		width: min(28rem, calc(100vw - 1.5rem));
+	}
+
+	.confirm.dock.folded h2 {
+		font-size: 0.84rem;
+		line-height: 1.35;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.confirm.dock.folded .working {
+		margin-top: 0.45rem;
+	}
+
+	.confirm.dock.folded .actions {
+		margin-top: 0.45rem;
+	}
+
+	.title-row {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 0.6rem;
+	}
+
+	.title-row h2 {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.fold {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.28rem;
+		flex: 0 0 auto;
+		padding: 0.2rem 0.5rem;
+		font-size: 0.75rem;
 	}
 
 	.panel {

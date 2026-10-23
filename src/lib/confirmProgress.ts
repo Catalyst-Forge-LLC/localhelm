@@ -140,6 +140,40 @@ export function commitDraftProgressHint(opts: {
 	return notes[ids[0] ?? ''] ?? 'Edit the message, then confirm.';
 }
 
+/**
+ * One line for a collapsed running window.
+ * A busy label that already says "4 of 20" is kept. Otherwise the count comes
+ * from roster subjects, or from one package's steps.
+ */
+export function dockProgressLabel(opts: {
+	busyLabel?: string;
+	title?: string;
+	subjects?: readonly ConfirmPhase[];
+	subjectName?: string;
+	steps?: readonly ConfirmPhase[];
+}): string {
+	const busy = opts.busyLabel?.replace(/\s+/g, ' ').trim() ?? '';
+	if (/\d+\s+of\s+\d+/.test(busy)) return busy;
+	const title = (opts.title ?? '').replace(/\?$/, '').trim();
+	const base = busy || title || 'Working';
+	const subjects = opts.subjects ?? [];
+	const phases = subjects.length >= 2 ? subjects : (opts.steps ?? []);
+	const count = phaseCount(phases);
+	if (!count) return base;
+	const name = subjects.length >= 2 ? (opts.subjectName?.trim() ?? '') : '';
+	if (name && !base.toLowerCase().includes(name.toLowerCase())) return `${base} · ${count} · ${name}`;
+	return `${base} · ${count}`;
+}
+
+function phaseCount(phases: readonly ConfirmPhase[]): string {
+	const total = phases.length;
+	if (total < 2) return '';
+	const current = phases.indexOf('current');
+	const finished = phases.filter((phase) => phase === 'done' || phase === 'fail').length;
+	const n = current >= 0 ? current + 1 : Math.min(total, finished < total ? finished + 1 : finished);
+	return `${n} of ${total}`;
+}
+
 export function applyConfirmStep(
 	keys: string[],
 	phases: ConfirmPhase[],

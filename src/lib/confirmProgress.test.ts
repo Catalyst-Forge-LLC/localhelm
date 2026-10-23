@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import {
 	applyConfirmStep,
 	commitDraftProgressHint,
+	dockProgressLabel,
 	commitDraftTimedOut,
 	confirmHasSubject,
 	emptyConfirmPhases,
@@ -109,6 +110,37 @@ describe('confirmProgress', () => {
 				notes: { coldeye: 'Ollama (gemma4:12b on localhost) drafted this. Edit if you want.' },
 			}),
 			'Ollama drafted 1 of 8. Edit if you want.',
+		);
+	});
+
+	it('collapses a running window to a count', () => {
+		assert.equal(
+			dockProgressLabel({ busyLabel: 'pushing 4 of 20 · craftassay' }),
+			'pushing 4 of 20 · craftassay',
+		);
+		assert.equal(
+			dockProgressLabel({
+				busyLabel: 'publishing filepress',
+				steps: ['done', 'done', 'current', 'pending', 'pending'],
+			}),
+			'publishing filepress · 3 of 5',
+		);
+		assert.equal(
+			dockProgressLabel({
+				busyLabel: 'publishing',
+				subjects: ['done', 'current', 'pending'],
+				subjectName: 'craftassay',
+			}),
+			'publishing · 2 of 3 · craftassay',
+		);
+		assert.equal(dockProgressLabel({ busyLabel: 'publishing filepress', steps: ['current'] }), 'publishing filepress');
+		assert.equal(
+			dockProgressLabel({ busyLabel: 'publishing filepress', steps: ['pending', 'pending'] }),
+			'publishing filepress · 1 of 2',
+		);
+		assert.equal(
+			dockProgressLabel({ title: 'Push filepress to origin?', steps: ['done', 'done', 'done'] }),
+			'Push filepress to origin · 3 of 3',
 		);
 	});
 });
