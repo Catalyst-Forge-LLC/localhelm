@@ -13,7 +13,7 @@ visibility: internal
 relations: []
 claims: []
 data:
-  purpose: Control panel for local development. The local fleet is the apps and
+  purpose: Local command center for your projects. The local fleet is the apps and
     sites you keep, plus the ports they listen on. Generic JSON export; no
     shop-specific shelf.
   boundaries: Imported from workflow tracking. Boundaries were not examined.

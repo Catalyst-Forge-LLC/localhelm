@@ -14,9 +14,9 @@ data:
   status: accepted
   authority: user
   choice: Headline is “Run, commit, and ship every project from one board.” The
-    slogan stays “Control panel for local development.” Copy leads with running
-    apps locally and treats publish and deploy as the step for projects that are
-    ready.
+    slogan is “Local command center for your projects,” which fits the helm
+    concept. Copy leads with running apps locally. npm publish and site deploys
+    are supported for projects that go out, not implied for every project.
   rationale: The operator said “See which projects need your attention” describes
     only the read side. LocalHelm also runs dev servers, commits, pushes, bumps,
     publishes to npm, updates dependents, and deploys sites in batches. Many
@@ -28,6 +28,10 @@ data:
     - “Steer every repo from one wheel.”
 ---
 
-Applies to the site hero and meta, README lead, package description, and the
+Replaces the slogan in decision-6440d8938e87 (“Control panel for local
+development”). Its point still holds: the board includes local-only tools that
+never publish.
+
+Applies to the site hero and meta, CLI usage line, docs introduction, about page, README lead, package description, and the
 Catalyst Forge shelf entry. Copy checks keep facts and links, not the headline
 wording.

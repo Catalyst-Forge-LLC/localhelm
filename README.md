@@ -4,9 +4,9 @@
 
 # LocalHelm
 
-**Control panel for local development.** Run, commit, and ship every project from one board.
+**Local command center for your projects.** Run, commit, and ship every project from one board.
 
-Pick the repos you keep, including ones that only ever run on this machine. Start and stop their dev servers, see which have uncommitted work, unpushed commits, unpublished versions, or dependents pinned to an old release, and act from the same place: commit, push, bump versions, publish to npm, update dependents, and deploy sites. Work across many repos in one batch. Every write opens a plan first and waits for you to confirm.
+Pick the repos you keep, including ones that only ever run on this machine. Start and stop their dev servers, see which have uncommitted work or unpushed commits, and commit and push from the same place. For projects that go out, LocalHelm also bumps versions, publishes packages to npm, updates the projects that depend on them, and deploys sites. Work across many repos in one batch. Every write opens a plan first and waits for you to confirm.
 
 The controls depend on where you open it:
 

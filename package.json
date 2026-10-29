@@ -3,7 +3,7 @@
   "version": "0.1.43",
   "private": false,
   "type": "module",
-  "description": "Control panel for local development. Run, commit, and ship the apps and sites you keep from one board: dev servers, commits, pushes, npm publishes, dependent updates, and site deploys.",
+  "description": "Local command center for your projects. Run dev servers, commit, and push from one board; for projects that go out, publish packages to npm, update dependents, and deploy sites.",
   "license": "Apache-2.0",
   "author": "Catalyst Forge, LLC",
   "bin": {

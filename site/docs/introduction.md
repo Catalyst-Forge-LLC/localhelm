@@ -2,7 +2,7 @@
 title: Introduction
 ---
 
-**LocalHelm** is the control panel for local development. The local fleet is the apps and sites you keep, including tools that never publish. Ports sit on the same board when [LocalSlip](https://localslip.dev) is present.
+**LocalHelm** is the local command center for your projects. The local fleet is the apps and sites you keep, including tools that never publish. Ports sit on the same board when [LocalSlip](https://localslip.dev) is present.
 
 You have a folder of repos. `git status` in one of them answers that repo. Serve the board, Add projects, and read status with only LocalHelm installed.
 
