@@ -1,6 +1,6 @@
 {
   "name": "localhelm",
-  "version": "0.1.46",
+  "version": "0.1.47",
   "private": false,
   "type": "module",
   "description": "Local command center for your projects. Run dev servers, commit, and push from one board; for projects that go out, publish packages to npm, update dependents, and deploy sites.",
