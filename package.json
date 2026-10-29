@@ -3,7 +3,7 @@
   "version": "0.1.43",
   "private": false,
   "type": "module",
-  "description": "Control panel for local development. The local fleet is the apps and sites you keep, plus the ports they listen on.",
+  "description": "Control panel for local development. Run, commit, and ship the apps and sites you keep from one board: dev servers, commits, pushes, npm publishes, dependent updates, and site deploys.",
   "license": "Apache-2.0",
   "author": "Catalyst Forge, LLC",
   "bin": {

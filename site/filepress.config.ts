@@ -2,11 +2,11 @@ import { defineFilepressConfig } from 'getfilepress';
 
 export default defineFilepressConfig({
 	title: 'LocalHelm',
-	description: "When your work spans several repositories, LocalHelm brings uncommitted work, releases, and dependency updates onto one board. Review a proposed action, then confirm it on the computer hosting your projects.",
+	description: "Run, commit, and ship every project from one board. Start and stop local apps, commit and push, publish to npm, update dependents, and deploy sites. Every write shows its plan first and runs after you confirm.",
 	url: 'https://localhelm.dev',
 	author: 'Catalyst Forge, LLC',
 	tagline: 'Smooth sailing with local dev.',
-	lede: "Local project dashboard and command-line tool",
+	lede: "Control panel for local development",
 	logo: '/logo.png',
 	ogImage: '/logo.png',
 	homePage: 'home',

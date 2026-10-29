@@ -205,6 +205,7 @@ Hero: scan folder(s) → check/confirm enroll (`--apply`) → status / deps / JS
 - Visitor tiles at `/visitor`; serve binds all interfaces; Vite `allowedHosts: true` for `*.ts.net`.
 - `pnpm ship` failed on `404 /favicon.png (linked from /)`. Added `site/static/favicon.png` (64×64 from the helm logo). FilePress engine will ignore a missing favicon after the next publish; this site still ships the PNG.
 - Site masthead is black with light type so the black-backed helm mark sits flush (`site/theme.css`). Page body stays parchment.
+- Public headline is **Run, commit, and ship every project from one board.** (`decision-headline-run-commit-ship-20261028`). Lead with running apps locally; publish and deploy are for projects that are ready. Do not go back to “See which projects need your attention.”
 - Public slogan is **Control panel for local development** (d62). The local fleet is the apps and sites you keep, plus ports. Do not say “fleet” alone on the brochure. Public copy links [LocalSlip](https://localslip.dev).
 - npm README logo must be an unpkg URL (`https://unpkg.com/localhelm/site/static/logo.png`). The GitHub repo is private, so a relative or raw.githubusercontent.com src 404s on npmjs. Do not put the AppFacts viewer hash under a Nutrition label heading — npm strips the link and leaves an empty heading. AppFacts stays on the site footer.
 
