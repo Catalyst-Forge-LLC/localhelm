@@ -726,38 +726,42 @@
 	}
 	function startConfirmed(fn: ((ids: string[]) => void) | null, included: string[]): void {
 		if (!fn) return;
-		try {
-			if (included.length) { restoreJobs(); pendingJob = { title: confirmTitle, ids: included.slice(), operation: confirmRecovery }; }
-			confirmRun = null; confirmAlt = null; jobStorageError = ''; fn(included);
-		} catch (err) { jobStorageError = `Action history could not be saved. No new action started: ${err instanceof Error ? err.message : String(err)}`; error = jobStorageError; }
+		if (included.length) pendingJob = { title: confirmTitle, ids: included.slice(), operation: confirmRecovery };
+		confirmRun = null; confirmAlt = null; jobStorageError = ''; fn(included);
+	}
+	/** Action results are a record. A result that cannot be saved is reported and never stops the action. */
+	function resultNotSaved(err: unknown): void {
+		jobStorageError = `Action results are not being saved in this browser (${err instanceof Error ? err.message : String(err)}). Actions still run.`;
 	}
 	async function trackedRequest(url: string, init: RequestInit | undefined, execute: () => Promise<unknown>): Promise<unknown> {
 		let parsed: unknown;
 		try { parsed = typeof init?.body === 'string' ? JSON.parse(init.body) : undefined; } catch { /* server validates malformed payloads */ }
 		const request = jobRequest(url, parsed);
 		if (!request) return execute();
-		if (jobStorageError) throw new Error(jobStorageError);
 		if (url === '/api/cascade') {
 			const body = parsed as Record<string, unknown>;
 			const plan = await rawCall(url, { method: 'POST', body: JSON.stringify({ ...body, apply: false, progress: false }) }) as { rows?: { fromId: string; action: string }[] };
 			request.ids = [...new Set((plan.rows ?? []).filter((row) => row.action !== 'skip').map((row) => row.fromId))];
 			request.operation.publisher = typeof body.id === 'string' ? body.id : undefined;
 		}
-		let receipt: JobJournal;
+		const ids = request.ids.length ? request.ids : ['workspace'];
+		let receipt: JobJournal | null = null; let id: string | null = null;
 		try {
 			receipt = restoreJobs();
-			if (!activeJob) activeJob = receipt.begin(pendingJob?.title ?? (busy || 'Confirmed action'), pendingJob?.ids ?? (request.ids.length ? request.ids : ['workspace']), pendingJob?.operation);
-			receipt.start(activeJob, request.ids.length ? request.ids : ['workspace'], request.operation); syncJobs();
-		} catch (err) { jobStorageError = `Action history could not be saved; write stopped: ${err instanceof Error ? err.message : String(err)}`; throw new Error(jobStorageError); }
-		const id = activeJob; const ids = request.ids.length ? request.ids : ['workspace'];
+			if (!activeJob) activeJob = receipt.begin(pendingJob?.title ?? (busy || 'Confirmed action'), pendingJob?.ids ?? ids, pendingJob?.operation);
+			id = activeJob;
+			receipt.start(id, ids, request.operation); syncJobs();
+		} catch (err) { receipt = null; resultNotSaved(err); }
 		let data: unknown;
 		try { data = await execute(); }
 		catch (err) {
-			try { receipt.settle(id, ids, 'unknown', err instanceof Error ? err.message : String(err)); syncJobs(); } catch { jobStorageError = 'The action result could not be saved. Check current status before another write.'; }
+			if (receipt && id) { try { receipt.settle(id, ids, 'unknown', err instanceof Error ? err.message : String(err)); syncJobs(); } catch (saveErr) { resultNotSaved(saveErr); } }
 			throw err;
 		}
-		try { for (const subject of ids) { const ack = jobAcknowledgement(data, subject, request.operation); receipt.settle(id, [subject], ack.state, ack.detail); } syncJobs(); }
-		catch { jobStorageError = 'The server answered, but its action receipt could not be saved. Check current status before another write.'; throw new Error(jobStorageError); }
+		if (receipt && id) {
+			try { for (const subject of ids) { const ack = jobAcknowledgement(data, subject, request.operation); receipt.settle(id, [subject], ack.state, ack.detail); } syncJobs(); }
+			catch (saveErr) { resultNotSaved(saveErr); }
+		}
 		return data;
 	}
 	async function call(url: string, init?: RequestInit): Promise<unknown> { return trackedRequest(url, init, () => rawCall(url, init)); }
@@ -965,7 +969,7 @@
 			}
 		} finally {
 			if (activeJob && journal) {
-				try { journal.finish(activeJob); syncJobs(); } catch { jobStorageError = 'Action receipt could not be saved. Check status before another write.'; }
+				try { journal.finish(activeJob); syncJobs(); } catch (saveErr) { resultNotSaved(saveErr); }
 				activeJob = null;
 			}
 			pendingJob = null;
@@ -1870,6 +1874,7 @@
 		else { selectedIds = idsToSelection(ids); setTab(operation?.plugin ?? 'fleet'); error = 'Current status is refreshed. Review the selected subjects and choose an action to open a new plan.'; }
 	}
 	function reviewJob(job: DurableJob): void { try { restoreJobs().reviewed(job.id); syncJobs(); } catch (err) { jobStorageError = String(err); } }
+	function reviewAllJobs(): void { try { restoreJobs().reviewedAll(); syncJobs(); } catch (err) { jobStorageError = String(err); } }
 	function retryJobStorage(): void { try { restoreJobs(); jobStorageError = ''; } catch (err) { jobStorageError = String(err); } }
 	function openSessionResult(): void {
 		jobsOpen = false;
@@ -2703,7 +2708,7 @@
 		/>
 	</BridgeHeader>
 	{#if unfinishedJobs || jobStorageError}
-		<div class="hint" role="status"><button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => jobsOpen = true}>Action results{unfinishedJobs ? ` (${unfinishedJobs} to review)` : ''}</button> {jobStorageError || 'Refresh current status before repeating an unfinished action.'}</div>
+		<div class="hint" role="status"><button class="btn btn-sm" disabled={Boolean(busy)} onclick={() => jobsOpen = true}>Action results{unfinishedJobs ? ` (${unfinishedJobs} not finished)` : ''}</button> {jobStorageError || 'These failed, were stopped, or lost their connection. Looking at them is optional; new actions do not wait.'}</div>
 	{/if}
 
 	<nav class="tabs" aria-label="Dashboard views">
@@ -4089,7 +4094,7 @@
 	</div>
 {/if}
 
-<ActionHistory bind:open={jobsOpen} {jobs} busy={Boolean(busy)} error={jobStorageError} onrefresh={(job) => void reconcileJob(job)} onplan={freshJobPlan} onreview={reviewJob} onstorage={retryJobStorage} sessionResult={sessionResultAvailable} onsession={openSessionResult} />
+<ActionHistory bind:open={jobsOpen} {jobs} busy={Boolean(busy)} error={jobStorageError} onrefresh={(job) => void reconcileJob(job)} onplan={freshJobPlan} onreview={reviewJob} onreviewall={reviewAllJobs} onstorage={retryJobStorage} sessionResult={sessionResultAvailable} onsession={openSessionResult} />
 
 <FeatureLabelDialog
 	bind:open={labelOpen}

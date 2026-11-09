@@ -1,4 +1,7 @@
-/** Durable browser receipts. Store identities/results, never credentials or write payloads. */
+/**
+ * Browser record of confirmed actions. Store identities/results, never credentials or write payloads.
+ * It is a record to look at, not a gate: nothing here may stop a new action from starting.
+ */
 export type JobState = 'pending' | 'running' | 'succeeded' | 'failed' | 'unknown';
 export type JobSubject = { id: string; state: JobState; detail?: string };
 export type JobOperation = { route: string; plugin?: string; action?: string; publisher?: string };
@@ -7,6 +10,8 @@ export type JournalStorage = Pick<Storage, 'getItem' | 'setItem'>;
 export function jobStorageKey(workspace: string, demo: boolean): string { return `localhelm.jobs.v1:${encodeURIComponent(workspace)}:${demo ? 'demo' : 'main'}`; }
 const states = new Set<JobState>(['pending', 'running', 'succeeded', 'failed', 'unknown']);
 export function unresolvedJob(job: DurableJob): boolean { return !job.reviewedAt && job.subjects.some((subject) => subject.state !== 'succeeded'); }
+/** Newest results kept. Older ones drop off on their own. */
+export const JOB_HISTORY_KEEP = 50;
 
 export class JobJournal {
 	jobs: DurableJob[] = [];
@@ -15,7 +20,7 @@ export class JobJournal {
 		if (!raw) return;
 		const parsed = JSON.parse(raw) as { version?: unknown; jobs?: DurableJob[] };
 		if (parsed.version !== 1 || !Array.isArray(parsed.jobs) || parsed.jobs.some((job) => !job || typeof job.id !== 'string' || typeof job.title !== 'string' || typeof job.startedAt !== 'string' || typeof job.updatedAt !== 'string' || !Array.isArray(job.subjects) || job.subjects.some((s) => !s || typeof s.id !== 'string' || !states.has(s.state)))) throw new Error('Saved action history is unreadable. Preserve it before clearing browser storage.');
-		this.jobs = parsed.jobs.map((job) => ({ ...job, subjects: job.subjects.map((s) => s.state === 'running' ? { ...s, state: 'unknown', detail: 'Connection ended before acknowledgement. Refresh status before opening a new plan.' } : s) }));
+		this.jobs = parsed.jobs.slice(0, JOB_HISTORY_KEEP).map((job) => ({ ...job, subjects: job.subjects.map((s) => s.state === 'running' ? { ...s, state: 'unknown', detail: 'Connection ended before acknowledgement. Refresh status before opening a new plan.' } : s) }));
 		this.persist();
 	}
 	private persist(): void { this.storage.setItem(this.key, JSON.stringify({ version: 1, jobs: this.jobs })); }
@@ -26,10 +31,9 @@ export class JobJournal {
 		return this.jobs.find((job) => job.id === id)!;
 	}
 	begin(title: string, ids: string[], operation?: JobOperation): string {
-		if (this.jobs.filter(unresolvedJob).length >= 50) throw new Error('Review the 50 unfinished actions before starting another.');
 		const at = new Date().toISOString(); const id = globalThis.crypto.randomUUID();
 		const previous = this.jobs;
-		this.jobs = [{ id, title, startedAt: at, updatedAt: at, operation, subjects: [...new Set(ids)].map((id) => ({ id, state: 'pending' as const })) }, ...this.jobs.filter((job, index) => unresolvedJob(job) || index < 30)];
+		this.jobs = [{ id, title, startedAt: at, updatedAt: at, operation, subjects: [...new Set(ids)].map((id) => ({ id, state: 'pending' as const })) }, ...this.jobs].slice(0, JOB_HISTORY_KEEP);
 		try { this.persist(); } catch (err) { this.jobs = previous; throw err; }
 		return id;
 	}
@@ -43,7 +47,13 @@ export class JobJournal {
 		this.update(id, (job) => ({ ...job, subjects: job.subjects.map((s) => s.state === 'running' ? { ...s, state: 'unknown', detail: 'No final acknowledgement. Refresh status before a new plan.' } : s) }));
 	}
 	reconciled(id: string): void { this.update(id, (job) => ({ ...job, reconciledAt: new Date().toISOString() })); }
-	reviewed(id: string): void { this.update(id, (job) => { if (!job.reconciledAt) throw new Error('Refresh status before marking this result reviewed.'); return { ...job, reviewedAt: new Date().toISOString() }; }); }
+	reviewed(id: string): void { this.update(id, (job) => ({ ...job, reviewedAt: new Date().toISOString() })); }
+	/** Dismiss every result that is still listed as not finished. The entries stay in the record. */
+	reviewedAll(): void {
+		const at = new Date().toISOString(); const previous = this.jobs;
+		this.jobs = this.jobs.map((job) => unresolvedJob(job) && !job.subjects.some((s) => s.state === 'running') ? { ...job, reviewedAt: at, updatedAt: at } : job);
+		try { this.persist(); } catch (err) { this.jobs = previous; throw err; }
+	}
 }
 
 export function jobRequest(url: string, body: unknown): { ids: string[]; operation: JobOperation } | null {
@@ -62,7 +72,8 @@ export function jobAcknowledgement(data: unknown, id: string, operation?: JobOpe
 	const root = data as Record<string, unknown>;
 	if (operation?.route === '/api/cascade' && Array.isArray(root.rows)) {
 		const pins = (root.rows as Record<string, unknown>[]).filter((row) => row.fromId === id);
-		if (!pins.length) return { state: 'unknown', detail: 'No dependent result. Refresh status.' };
+		// `workspace` stands in when the plan named no dependent to write. Nothing ran, so nothing is in doubt.
+		if (!pins.length) return id === 'workspace' ? { state: 'succeeded', detail: 'No dependents needed an update.' } : { state: 'unknown', detail: 'No dependent result. Refresh status.' };
 		const failed = pins.find((row) => row.action === 'skip' || /lockfile:|commit:|did not resolve|failed/i.test(String(row.reason ?? '')));
 		if (failed) return { state: 'failed', detail: String(failed.reason ?? 'Dependent was skipped.') };
 		return pins.every((row) => row.writes === true || String(row.reason ?? '').startsWith('already resolves')) ? { state: 'succeeded', detail: 'Dependent version pins acknowledged.' } : { state: 'unknown', detail: 'Review dependent files and lockfile status.' };

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import AddProjectsModal from './AddProjectsModal.svelte';
-	import type { DurableJob } from '../../../src/lib/jobJournal.js';
+	import { JOB_HISTORY_KEEP, unresolvedJob, type DurableJob } from '../../../src/lib/jobJournal.js';
 
 	function jobTally(job: DurableJob): string {
 		const counts = new Map<string, number>();
@@ -19,15 +19,17 @@
 			})
 			.join(' · ');
 	}
-	let { open = $bindable(false), jobs, busy, error = '', onrefresh, onplan, onreview, onstorage, sessionResult = false, onsession }: {
+	let { open = $bindable(false), jobs, busy, error = '', onrefresh, onplan, onreview, onreviewall, onstorage, sessionResult = false, onsession }: {
 		open: boolean; jobs: DurableJob[]; busy: boolean; error?: string;
 		onrefresh: (job: DurableJob) => void; onplan: (job: DurableJob) => void;
-		onreview: (job: DurableJob) => void; onstorage: () => void;
+		onreview: (job: DurableJob) => void; onreviewall: () => void; onstorage: () => void;
 		sessionResult?: boolean; onsession?: () => void;
 	} = $props();
+	const openCount = $derived(jobs.filter(unresolvedJob).length);
 </script>
-<AddProjectsModal bind:open {busy} title="Action results" titleId="action-history-title" hint="Results stay in this browser for this workspace and board. Unknown means the connection ended before acknowledgement; the action may have completed. Refresh current status before opening a new plan.">
+<AddProjectsModal bind:open {busy} title="Action results" titleId="action-history-title" hint={`A record of confirmed actions, kept in this browser for this workspace and board. The newest ${JOB_HISTORY_KEEP} stay; older ones drop off. Looking at them is optional and never holds up a new action. Unknown means the connection ended before the result arrived; the action may have completed.`}>
 	{#if error}<p role="alert">{error}</p><button class="btn" onclick={onstorage} disabled={busy}>Retry saving history</button>{/if}
+	{#if openCount >= 2}<div class="group-buttons"><button class="btn btn-sm" disabled={busy} onclick={onreviewall}>Mark all {openCount} reviewed</button></div>{/if}
 	{#if !jobs.length}<p class="dim">No saved actions for this board yet.</p>{/if}
 	{#if sessionResult}<p class="dim small">A prior session also has a Publish or Land result. Older session records may not identify the board.</p><button class="btn btn-sm" disabled={busy} onclick={onsession}>Review prior session result</button>{/if}
 	{#each jobs as job (job.id)}
@@ -36,8 +38,8 @@
 			<div class="group-buttons">
 				<button class="btn btn-sm" disabled={busy} onclick={() => onrefresh(job)}>Refresh current status</button>
 				{#if job.subjects.some((s) => s.state !== 'succeeded') && !job.reviewedAt}
-					<button class="btn btn-sm" disabled={busy || !job.reconciledAt} onclick={() => onplan(job)}>Open a fresh plan</button>
-					<button class="btn btn-sm" disabled={busy || !job.reconciledAt} onclick={() => onreview(job)}>Mark reviewed</button>
+					<button class="btn btn-sm" disabled={busy || !job.reconciledAt} title={job.reconciledAt ? undefined : 'Refresh current status first, so the plan starts from what is true now.'} onclick={() => onplan(job)}>Open a fresh plan</button>
+					<button class="btn btn-sm" disabled={busy} onclick={() => onreview(job)}>Mark reviewed</button>
 				{/if}
 			</div>
 			{#if job.reconciledAt}<p class="dim small">Status read at {new Date(job.reconciledAt).toLocaleTimeString()}. Review the board; this does not prove an unknown action failed.</p>{/if}
