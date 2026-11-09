@@ -67,6 +67,6 @@
   },
   "dependencies": {
     "ignore": "^7.0.6",
-    "ollanet": "^0.6.8"
+    "ollanet": "^0.7.6"
   }
 }
